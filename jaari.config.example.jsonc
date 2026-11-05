@@ -1,0 +1,57 @@
+{
+  "owner": { "timezone": "America/New_York", "quietHours": ["22:00", "08:00"] },
+
+  "persona": { "curiosity": 2, "proactivity": 1 },
+
+  "memory": {
+    "repo": "~/.jaari/memory",
+    "canonicalizeEveryHours": 6,
+    "auditDailyAt": "07:00"
+  },
+
+  "llm": {
+    "providers": {
+      "local":      { "api": "openai-completions", "baseUrl": "http://localhost:11434/v1" },
+      "anthropic":  { "apiKey": "secretRef:llm.anthropic" },
+      "openrouter": { "apiKey": "secretRef:llm.openrouter" }
+    },
+    "tiers": {
+      "small":  ["local/<small-model>", "openrouter/<cheap-model>"],
+      "medium": ["local/<mid-model>", "anthropic/<mid-model>"],
+      "large":  ["anthropic/<frontier-model>", "openrouter/<frontier-model>"]
+    },
+    "roles": {
+      "main": "large", "child": "medium", "canonicalize": "medium",
+      "curiosity": "small", "classify": "small", "summarize": "small", "title": "small",
+      "reader": "small", "vision": { "capability": "image" }
+    },
+    "privacy": { "localOnly": ["canonicalize", "curiosity"] },
+    "budget": { "monthlyUsd": 30, "perRoleUsd": { "child": 10 }, "onExceeded": "downgrade" },
+    "escalation": { "allowRequest": ["child"], "maxPerDay": 20 }
+  },
+
+  "web": {
+    "search": {
+      "chain": ["searxng", "brave"],
+      "providers": {
+        "searxng": { "url": "http://localhost:8888" },
+        "brave":   { "apiKey": "secretRef:web.brave" },
+        "tavily":  { "apiKey": "secretRef:web.tavily", "enabled": false },
+        "exa":     { "apiKey": "secretRef:web.exa", "enabled": false }
+      },
+      "localOnlyRoles": ["curiosity", "canonicalize"]
+    },
+    "fetch": {
+      "ladder": ["http-readability", "lightpanda", "chromium-local", "jina"],
+      "firecrawlCompatible": { "url": "http://localhost:3002", "enabled": false },
+      "escalateOn": ["403", "429", "challenge-page", "text<500", "js-required"]
+    },
+    "browser": {
+      "driver": "playwright-mcp",
+      "host": "local-chromium",
+      "remote": { "cdpUrl": "secretRef:browser.cdp", "enabled": false },
+      "disabledTools": ["browser_run_code_unsafe"]
+    },
+    "budget": { "monthlyUsd": 10, "onExceeded": "local-only" }
+  }
+}
