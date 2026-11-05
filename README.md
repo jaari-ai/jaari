@@ -38,7 +38,6 @@ background, gets to know you at a pace you set, and never takes an external acti
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Dev setup, `refs/`, commands |
 | [docs/00-research.md](docs/00-research.md), [docs/01-merge-plan.md](docs/01-merge-plan.md) | Background research and the original merge reasoning (historical) |
 | [docs/learning/](docs/learning/README.md) | Learning log, one file per topic studied |
-| [docs/archive/](docs/archive/README.md) | Superseded v1 docs, kept for history |
 
 ## Repository layout
 
@@ -92,4 +91,5 @@ Background on Instinct AI and Meta's Muse is in [docs/00-research.md](docs/00-re
 
 ## License
 
-Not chosen yet. The leaning is MIT (OQ-22); there is no `LICENSE` file yet.
+MIT; see [LICENSE](LICENSE) and [ADR-014](docs/adr/014-license-mit.md). Third-party
+notices for reused code are in [NOTICE](NOTICE).

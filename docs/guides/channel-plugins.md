@@ -2,7 +2,8 @@
 
 # Writing a channel plugin
 
-A channel plugin is an npm package that exports a `ChannelAdapter` (see ../archive/ARCHITECTURE-v1.md §5).
+A channel plugin is an npm package that exports a `ChannelAdapter` (full contract, host rules, and identity binding in
+[../ARCHITECTURE.md](../ARCHITECTURE.md#channels)).
 
 ## Minimal skeleton
 
@@ -32,9 +33,11 @@ export const adapter: ChannelAdapter = {
 ~~~
 
 ## Rules
-- Never import `@jaari/memory`, `@jaari/policy`, `@jaari/llm`, `@jaari/persona`, or any tool package.
+- Never import `@jaari/memory`, `@jaari/gate`, `@jaari/llm`, `@jaari/persona`, or any tool package.
 - Report the raw `senderHandle`; do not decide who the owner is.
-- Make `send()` idempotent; the outbox will retry.
+- Make `send()` idempotent on `idempotencyKey`; the outbox retries. Return `ambiguous`
+  when you can't tell whether a message went out.
+- Use only `ctx.secrets.get` for credentials, and never log them.
 - Pass the shared contract tests: `pnpm test --filter @jaari/channels -- --adapter ./dist`.
 
 ## Registering

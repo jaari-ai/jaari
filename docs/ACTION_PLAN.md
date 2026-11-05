@@ -24,3 +24,5 @@
 | [010](adr/010-identity-and-publishing.md) | Project identity and trusted publishing | Accepted |
 | [011](adr/011-llm-routing.md) | LLM routing: owner policy, role-based tiers, request-only escalation | Proposed |
 | [012](adr/012-web-and-browser.md) | Web search, fetch, and browser as separate pluggable tools | Proposed |
+| [013](adr/013-vault-providers.md) | Pluggable vault providers: Bitwarden first, 1Password second | Proposed |
+| [014](adr/014-license-mit.md) | License: MIT | Accepted |

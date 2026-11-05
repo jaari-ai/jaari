@@ -25,17 +25,133 @@
 | `@jaari/memory` | Git-backed memory repo, write path, canonicalize, daily audit, gap queue |
 | `@jaari/persona` | Curiosity/Proactivity dials, monitor, quiet hours, notification ledger |
 | `@jaari/gate` | Action digests, approvals, `audit.jsonl` |
-| `@jaari/secrets` | `secretRef` storage and resolution for executors only |
+| `@jaari/secrets` | `secretRef` resolution for executors only, through pluggable vault providers (Bitwarden, 1Password; ADR-013) |
 | `@jaari/http` | Egress policy: blocks private ranges and cloud metadata, per-capability allowlists |
 | `@jaari/web` | `web.search`, `web.fetch`, fetch escalation ladder (ADR-012) |
 | `@jaari/computer` | Browser/desktop control via Playwright MCP or Stagehand, local profile or remote CDP, takeover (ADR-005, ADR-012) |
-| `@jaari/channels` | `ChannelAdapter` contract and adapters |
+| `@jaari/channels` | `ChannelAdapter` contract, ingress (principal resolution), delivery outbox, built-in adapters |
 | `@jaari/integrations` | GitHub, npm, PyPI, email |
 | `apps/daemon` | Long-running process: scheduler, channels, jobs |
 | `apps/cli` | `jaari init`, `jaari llm eval`, `jaari llm usage`, admin commands |
 
+## Channels
+Every way of talking to Jaari (CLI, web panel, messengers, email) is a plugin behind one
+`ChannelAdapter` contract in `@jaari/channels`. A plugin only moves messages; the host
+side of `@jaari/channels` (ingress and the delivery outbox, run by `apps/daemon`) owns
+everything else. Plugin authors: see [guides/channel-plugins.md](guides/channel-plugins.md).
+
+### Contract
+A channel is an npm package (or local path) exporting an adapter. The daemon loads it by
+name from config: `"channels": ["@jaari/channel-web", "./plugins/example"]`.
+
+~~~ts
+export interface ChannelManifest {
+  id: string;                        // "telegram"
+  version: string;
+  capabilities: {
+    text: true;
+    media?: boolean; reactions?: boolean; typing?: boolean;
+    groups?: boolean; readReceipts?: boolean; edits?: boolean;
+  };
+  identity: "carrier" | "account" | "device" | "none";  // see Identity binding
+  maxMessageChars: number;           // delivery splits long replies to fit
+}
+
+export interface Attachment {
+  kind: "image" | "audio" | "video" | "file";
+  mimeType: string; name?: string; bytes: number;
+  ref: string;                       // host-side storage handle, never inline data
+}
+
+export interface InboundMessage {
+  channel: string; conversationId: string; messageId: string;
+  senderHandle: string;              // raw transport identity (phone, user id, email)
+  isGroup: boolean; participants?: string[];
+  text?: string; attachments?: Attachment[];
+  sentAt: string; receivedAt: string; // ISO 8601
+}
+
+export interface OutboundMessage {
+  channel: string; conversationId: string;
+  text?: string; attachments?: Attachment[];
+  idempotencyKey: string;            // from the outbox; the adapter must dedupe on it
+  replyTo?: string;
+}
+
+export type DeliveryReceipt =
+  | { status: "confirmed"; providerMessageId: string }
+  | { status: "failed"; retryable: boolean; error: string }
+  | { status: "ambiguous"; error: string };  // outbox reconciles before any retry
+
+export interface ChannelHealth { ok: boolean; detail?: string }
+
+export interface ChannelContext {
+  emit(msg: InboundMessage): Promise<void>;   // hand a message to ingress
+  secrets: { get(ref: string): Promise<string> };  // this plugin's own secretRefs only
+  log: { info(msg: string): void; warn(msg: string): void; error(msg: string): void };
+  signal: AbortSignal;               // aborted on stop()
+}
+
+export interface ChannelAdapter {
+  manifest: ChannelManifest;
+  start(ctx: ChannelContext): Promise<void>;
+  stop(): Promise<void>;
+  send(msg: OutboundMessage): Promise<DeliveryReceipt>;
+  cursor(): Promise<string>;         // opaque position for replay protection
+  health(): Promise<ChannelHealth>;
+}
+~~~
+
+### Rules the host enforces, not the plugin
+- The plugin never sees memory, tools, the gate, persona, or the LLM. `ctx.secrets.get`
+  resolves only the `secretRef`s declared for that plugin (ADR-007, ADR-013); values are
+  never logged.
+- Every inbound message goes through principal resolution in the host before ingress.
+  The plugin reports the raw `senderHandle` and never decides who the owner is.
+- Only the delivery outbox calls `send()`; nothing else imports an adapter. Proactive
+  messages reach the outbox only through the persona monitor and notification ledger.
+- `send()` must be idempotent on `idempotencyKey`. An `ambiguous` receipt is never
+  blindly retried.
+- Cursor fingerprint: on first start, anchor at the current position and replay nothing.
+  If the bound identity changes, reset and replay nothing. (An early openinstinct build
+  texted 21 stale failures to its owner; this rule prevents that.)
+- Untrusted message content (anything not an owner turn) is read by the `reader` role
+  first, like web pages and documents.
+
+### Identity binding
+The manifest's `identity` says what the transport can prove. Proposed design, pending
+OQ-02 (owner authentication, pairing, revocation):
+
+| `identity` | Transport proves | Can produce owner turns? | Pairing |
+|---|---|---|---|
+| `carrier` | A phone number (iMessage, WhatsApp, Signal, SMS) | Yes, if the number matches `owner.phones` | Number in config |
+| `account` | A platform account (Telegram user id, Discord id) | Yes, after a one-time pairing code issued from the CLI | `jaari channels pair <id>` |
+| `device` | A device key (web panel, WebCrypto P-256) | Yes, per enrolled device | QR / device enrolment |
+| `none` | Nothing (email: `From` is forgeable) | **No.** Mail from the owner's address is untrusted content, never authority | n/a |
+
+Unknown senders get nothing. In group threads each participant gets their own transcript,
+owner turns run at the lowest trust level present, and a bare "yes" in a group never
+settles an approval (approvals bind to a digest, ADR-006).
+
+### Candidate plugins
+Which ones ship in v1 is OQ-01; the CLI channel ships in Phase 0.
+
+| Plugin | Backend (OSS first) | Identity | Notes |
+|---|---|---|---|
+| CLI (in `apps/cli`) | Local socket to the daemon | `device` | Phase 0; development and admin |
+| `@jaari/channel-web` | Built-in WebSocket + local panel | `device` | Always-available fallback and approvals UI |
+| `@jaari/channel-telegram` | Bot API via grammY | `account` | Easiest real messenger; bots can't message unknown users first |
+| `@jaari/channel-signal` | signal-cli (JSON-RPC), separate process | `carrier` | |
+| `@jaari/channel-whatsapp` | Baileys (unofficial, ban risk) or Meta Cloud API (needs a Business account) | `carrier` | One plugin with a `mode` setting; document the ban risk |
+| `@jaari/channel-imessage` | BlueBubbles (needs a Mac) or local `chat.db` reader + AppleScript sender with a dedicated Apple ID | `carrier` | The openinstinct path |
+| `@jaari/channel-email` | IMAP/SMTP | `none` | Inbound email is data, never authority |
+| Discord, Matrix, Slack | Community plugins | `account` | Not planned by core; the contract lets anyone add them |
+
+Hosted bridges (Inkbox, Sendblue, Linq) can exist as third-party plugins; none is a core
+dependency.
+
 ## Trust boundaries
-- Owner ↔ channels: authenticated owner only (see OQ-02).
+- Owner ↔ channels: authenticated owner only (see [Channels](#channels) and OQ-02).
 - Model ↔ tools: every tool maps to a capability; effectful capabilities go through the gate.
 - Tools ↔ internet: all egress through `@jaari/http` or the container egress proxy.
 - Untrusted content ↔ main session: `reader` summary only, never raw instructions.

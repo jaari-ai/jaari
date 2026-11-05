@@ -29,7 +29,6 @@ the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
 | OQ-10 | Deployment | Home server, VPS, or laptop; Compose layout; remote access via Tailscale/WireGuard; config and memory format migrations | 7 | Home server + Tailscale, no public ports |
 | OQ-11 | Kill switch | Global pause, loop step limits, max concurrent children, spend-spike alerts | 3 | All four, enforced in code |
 | OQ-12 | Observability | Tracing per turn/tool/child (OpenTelemetry?), admin page for jobs, approvals, usage, errors | 7 | OTel + small local admin page |
-| OQ-29 | Vault provider | Which password manager backs `@jaari/secrets` for logins, API keys, and payment cards? Plug-and-play provider interface; candidates 1Password, Bitwarden (official self-hosted / Bitwarden Lite), Vaultwarden. Bootstrap secret ("secret zero") storage; can card data ever reach an executor, or only virtual cards / tokenized payment (OQ-19)? | 3 | Provider interface with Bitwarden first (self-hosted, `bw serve` on localhost; also covers Vaultwarden) and 1Password second (SDK + service account); bootstrap credential in the OS keychain; card fields never resolvable by default |
 | OQ-13 | Notification delivery | Proactive messages via channel or push (ntfy, Pushover); urgent vs digest routing | 2 | Channel first, ntfy optional |
 
 ## C. Tools and plugins
@@ -49,10 +48,10 @@ the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
 |---|---|---|---|---|
 | OQ-20 | Behaviour evals | Fixtures for staying quiet, asking before acting, persona adherence; session replay | 8 | Record/replay harness in Phase 2, fixtures grow over time |
 | OQ-21 | Prompt versioning | Version system prompts and persona files; trace and roll back changes | 2 | Prompts as files in repo, version in every log line |
-| OQ-22 | Project process | Confirm license (MIT?), SECURITY.md and disclosure contact, release/versioning policy, contribution rules | 0 | MIT, security@jaari.org, changesets |
+| OQ-22 | Project process | SECURITY.md and disclosure contact, release/versioning policy, contribution rules (DCO or CLA?). License decided: MIT (ADR-014) | 0 | security@jaari.org, changesets, DCO sign-off |
 | OQ-23 | Multiple users | Strictly single owner, or household members with limited access? | 0 | Single owner; keep user id in data model |
 
-## E. Carried over from ADR-011 and ADR-012
+## E. Carried over from ADR-011 to ADR-013
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
@@ -61,9 +60,10 @@ the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
 | OQ-26 | Canonicalize privacy | Should canonicalize be local-only by default? | 1 | Yes, if a capable local model exists |
 | OQ-27 | Browser driver | Playwright MCP or Stagehand? | 6 | Undecided |
 | OQ-28 | Lightpanda | Is Lightpanda worth running, or is http + Chromium enough? | 4 | Decide from fetch-ladder usage logs |
+| OQ-29 | Vault verification | Confirm against vendor docs before Phase 3: does Bitwarden Lite need a paid licence for anything ADR-013 uses (Secrets Manager is optional)? Exact 1Password SDK and service-account setup for a personal account? | 3 | Bitwarden password-manager API via `bw serve` is enough; Secrets Manager not required |
 
 ## Resolved
 
 | ID | Decision | ADR |
 |---|---|---|
-| (none yet) | | |
+| OQ-22 (license part) | MIT | [ADR-014](adr/014-license-mit.md) |

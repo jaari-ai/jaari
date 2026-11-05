@@ -10,8 +10,10 @@ exist yet.
   install, build, test, or run write-type git commands there.
 - Never copy code from `refs/openinstinct`; treat it as a behavioral spec (ADR-009).
 - Never copy code from `refs/gajae-way` (AGPL-3.0); study its design only.
-- Generated files (`docs/**`, `README.md`, `AGENTS.md`, `CLAUDE.md`) are never edited by
-  hand: edit `scripts/make_docs.py`, then run it.
+- When you copy code from `refs/pi` or `refs/open-instinct` (MIT), add an entry to
+  `NOTICE` (in the script) with the source path and pinned commit (ADR-014).
+- Generated files (`docs/**`, `README.md`, `AGENTS.md`, `CLAUDE.md`, `LICENSE`, `NOTICE`)
+  are never edited by hand: edit `scripts/make_docs.py`, then run it.
 - Never put secrets in code, tests, fixtures, prompts, or logs; use `secretRef:` handles.
 - Never run `git clean -fdx` at the repo root (it deletes the git-excluded `refs/`).
 
@@ -27,7 +29,7 @@ exist yet.
 |---|---|---|
 | `scripts/make_docs.py` | Single source of truth for docs, ADRs (`ADRS`), open questions (`OPEN_QUESTIONS`), agent files, base config | Yes |
 | `scripts/refs.sh` | Manages `refs/` (sync to pinned commits, lock, status, `refs/INDEX.md`) | Yes |
-| `docs/` | Generated docs. `docs/adr/` is the authoritative ADR set. `docs/archive/` is superseded v1 material (its `decisions/` numbering differs; never cite it as current) | Via the script |
+| `docs/` | Generated docs. `docs/adr/` is the authoritative ADR set. | Via the script |
 | `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon`, `cli`); not created yet | Yes |
 | Root config | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.claude/settings.json` | Scaffold-once: edit the script and run with `--force`, or edit directly and mirror the change in the script |
 | `jaari.config.example.jsonc` | Example owner config (`owner`, `persona`, `memory`, `llm`, `web`) | Via the script |
