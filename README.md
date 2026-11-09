@@ -32,10 +32,11 @@ background, gets to know you at a pace you set, and never takes an external acti
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Principles, packages, trust boundaries |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phases 0 to 8 and the open questions blocking each |
 | [docs/ACTION_PLAN.md](docs/ACTION_PLAN.md) | Next steps |
-| [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Undecided design questions (OQ-01 to OQ-29) with current leanings |
+| [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Undecided design questions (OQ-01 to OQ-49) with current leanings |
 | [docs/adr/](docs/adr/README.md) | Architecture decision records (the authoritative ADR numbering) |
 | [docs/MEMORY.md](docs/MEMORY.md), [PERSONA.md](docs/PERSONA.md), [SECURITY_MODEL.md](docs/SECURITY_MODEL.md), [LLM.md](docs/LLM.md), [WEB.md](docs/WEB.md), [INTEGRATIONS.md](docs/INTEGRATIONS.md) | Subsystem designs |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Dev setup, `refs/`, commands |
+| [docs/guides/](docs/guides/channel-plugins.md) | [Writing a channel plugin](docs/guides/channel-plugins.md); [securing the npm and PyPI namespaces](docs/guides/namespaces.md) |
 | [docs/00-research.md](docs/00-research.md), [docs/01-merge-plan.md](docs/01-merge-plan.md) | Background research and the original merge reasoning (historical) |
 | [docs/learning/](docs/learning/README.md) | Learning log, one file per topic studied |
 

@@ -16,6 +16,15 @@
 10. `refs/` is reference only; openinstinct is a spec, never a code source (ADR-009).
 11. Model proposes, policy disposes, for model choice too (ADR-011).
 12. Cheapest capable option first: small model before large, http before browser.
+13. One brain, many hands: a single daemon decides; nodes on the owner's devices execute
+    (ADR-015, proposed).
+
+## Non-goals for v1
+- Agent-to-agent networking (tiers, grants, A2A envelopes from the merge plan): reconsidered
+  after Phase 8, behind the same gate.
+- Payments: OQ-19 says no payments in v1; Link one-time cards and the Visa/Mastercard agent
+  directories are the rail to evaluate when that changes.
+- Multiple owners: OQ-23; the data model keeps a user id, the product serves one owner.
 
 ## Packages
 | Package | Responsibility |
@@ -33,6 +42,7 @@
 | `@jaari/integrations` | GitHub, npm, PyPI, email |
 | `apps/daemon` | Long-running process: scheduler, channels, jobs |
 | `apps/cli` | `jaari init`, `jaari llm eval`, `jaari llm usage`, admin commands |
+| `apps/node` | Thin executor on an owner device: enrols as a `device`, advertises capabilities, runs gate-approved actions, hosts takeover and live view (ADR-015, proposed) |
 
 ## Channels
 Every way of talking to Jaari (CLI, web panel, messengers, email) is a plugin behind one

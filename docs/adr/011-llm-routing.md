@@ -6,7 +6,7 @@
 - **Date:** 2026-11-05
 
 ## Decision
-`@jaari/llm` groups models into small/medium/large tiers with fallback chains; each role (main, child, canonicalize, curiosity, classify, summarize, reader, vision) maps to a tier. Code escalates on measurable signals; children may request escalation via a policy-checked tool; the main session is pinned to one model. Owner policy sets budgets and local-only roles. Models qualify for tiers via `jaari llm eval`.
+`@jaari/llm` groups models into small/medium/large tiers with fallback chains; each role (main, child, canonicalize, curiosity, classify, summarize, reader, vision) maps to a tier. Code escalates on measurable signals; children may request escalation via a policy-checked tool; the main session is pinned to one model. Owner policy sets budgets and local-only roles. Models qualify for tiers via `jaari llm eval`. A provider refusal (`stop_reason: refusal` with its category) is an escalation signal like any other: code moves to the next model in the chain, except for categories that mean the task itself is off limits (impersonation, CAPTCHA solving), which end the attempt and go to the owner as a takeover or a plain report, never to another model.
 
 ## Alternatives rejected
 Model self-selects per message (unauditable); trained router in v1 (trained on chat, not agentic tool use); one model for everything (expensive or weak); per-turn switching of the main session (cache loss, persona drift).

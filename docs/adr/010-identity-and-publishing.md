@@ -6,7 +6,7 @@
 - **Date:** 2026-11-05
 
 ## Decision
-GitHub org `jaari-ai` (repo `jaari-ai/jaari`), domain `jaari.org`. npm and PyPI names are claimed and published only through GitHub Actions trusted publishing (OIDC). No long-lived registry tokens.
+GitHub org `jaari-ai` (repo `jaari-ai/jaari`), domain `jaari.org`. The npm org `jaari` (scope `@jaari`), npm `jaari`, and PyPI `jaari` are held by project accounts with hardware-key 2FA and published only through GitHub Actions trusted publishing (OIDC) from a protected release environment. No long-lived registry tokens. Checklist: `docs/guides/namespaces.md`.
 
 ## Alternatives rejected
 Personal-account repo; token-based publishing.
