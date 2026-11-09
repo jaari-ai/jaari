@@ -1,0 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "jaari"
+version = "0.0.0"
+description = "Jaari: a self-hosted personal AI agent. Early development; see the repository."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://jaari.org"
+Source = "https://github.com/jaari-ai/jaari"

@@ -2,7 +2,7 @@
 
 # Jaari: Open questions
 
-Last updated: 2026-11-05. Open: **29**.
+Last updated: 2026-11-09. Open: **49**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
@@ -58,9 +58,39 @@ the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
 | OQ-24 | Local model | Which local model passes the canonicalize fixtures on the owner's hardware? | 1 | Measure with jaari llm eval |
 | OQ-25 | LLM budget | Default monthly LLM budget? | 3 | $30/month placeholder |
 | OQ-26 | Canonicalize privacy | Should canonicalize be local-only by default? | 1 | Yes, if a capable local model exists |
-| OQ-27 | Browser driver | Playwright MCP or Stagehand? | 6 | Undecided |
+| OQ-27 | Browser tool surface | Provider-neutral `browser.*` / `computer.*` members run by Jaari's own driver (Playwright/CDP, Stagehand), or the vendor-native toolsets (Anthropic `browser_toolset_20260801` / `computer_toolset_20260801`, Gemini `computer_use`) mapped per routed model? `pi-ai` has no toolset support today, and a native toolset reaches the gate only through the driver's `confirm` hook. Driver hygiene against automation markers (Patchright-level) is part of this; full anti-detect browsers are not (see learning/08). Background: [learning/07-computer.md](learning/07-computer.md) | 6 | Neutral surface shaped like the Anthropic member set; native toolsets as an `@jaari/llm` mapping where the routed model supports them |
 | OQ-28 | Lightpanda | Is Lightpanda worth running, or is http + Chromium enough? | 4 | Decide from fetch-ladder usage logs |
 | OQ-29 | Vault verification | Confirm against vendor docs before Phase 3: does Bitwarden Lite need a paid licence for anything ADR-013 uses (Secrets Manager is optional)? Exact 1Password SDK and service-account setup for a personal account? | 3 | Bitwarden password-manager API via `bw serve` is enough; Secrets Manager not required |
+
+## F. Carried over from the computer-use research (learning/07-computer.md, 08-egress-identity-and-takeover.md)
+
+| ID | Topic | Question | Blocks phase | Leaning |
+|---|---|---|---|---|
+| OQ-30 | Consequential browser actions | A purchase, a sent message, or accepted terms arrives as an ordinary `left_click` / `type`; Anthropic's own `confirm` hook "can't pick them out by name". How does the gate recognise them: deterministic page heuristics, a reader-role check of the page state, or approval on every click within flagged origins? | 6 | Deterministic heuristics (submit controls, payment and consent URL patterns) escalate to a reader-role check; never an LLM alone (principle 9) |
+| OQ-31 | Screenshots as untrusted content | Do screenshots and accessibility trees fall under the reader-role rule (principle 8)? A reader pass per screenshot is too slow for a click loop, and vendor prompt-injection classifiers run only on native toolsets. | 6 | Gate + egress allowlist + classifier where available; log every action with its screenshot (OQ-12) |
+| OQ-32 | Egress identity off the home network | When the daemon or a Docker/Firecracker backend runs on a VPS, which IP does the browser use: the owner's home connection via a Tailscale/WireGuard exit node, the owner's own 4G/5G dongle, or a commercial residential proxy? Background: [learning/08-egress-identity-and-takeover.md](learning/08-egress-identity-and-takeover.md) | 7 | Home exit node by default; commercial residential proxies, if ever, only for anonymous `web.fetch` and behind a provider interface with a sourcing check; never for `browser.*` on the owner's accounts (impossible-travel flags) |
+| OQ-33 | Signed-agent identity | Should `@jaari/http` and the browser sign requests per Web Bot Auth (RFC 9421, `Signature-Agent`, JWKS at `/.well-known/http-message-signatures-directory`)? Cloudflare's Signed Agents registry is per operator via the dashboard; it is unknown whether an individual self-hoster can register. | 4 | Implement signing with a per-install Ed25519 key; registration decided when the registry policy is known |
+| OQ-34 | Takeover transport | How does the owner see and touch the agent's browser from a phone within seconds: CDP screencast in the web panel, noVNC over loopback, or a hosted live view? Takeover states, timeouts, and the rule that screenshots stop while the owner holds the session. | 6 | CDP screencast in `@jaari/channel-web` over Tailscale; a "Take over" link pushed through the active channel; states pending/active/completed/timeout/cancelled |
+
+## G. From the 2026 gap review (2026-11-09)
+
+| ID | Topic | Question | Blocks phase | Leaning |
+|---|---|---|---|---|
+| OQ-35 | Install, update, migrate | One-command install (Compose, brew, single binary), `jaari doctor`, an update channel, and versioned config and memory schemas with migrations run at start. Nothing is specified today. | 0 | Compose + a single `jaari` binary; schema version in config and in the memory repo; migrations idempotent and run on daemon start |
+| OQ-36 | Laptop as host | Sleep and wake, network changes, battery, and the macOS permission matrix per capability (Automation, Accessibility, Screen Recording, Full Disk Access). Meta publishes none of this for Muse. | 6 | Published permission matrix in the node guide; jobs missed in sleep run once on wake, capped |
+| OQ-37 | Multi-device state | With ADR-015, which host is authoritative for the memory repo and SQLite state, how nodes and daemon reconnect, and how a daemon move (laptop to server) works. | 7 | Exactly one daemon; memory via its git remote; nodes hold no state; `jaari migrate-host` exports and imports |
+| OQ-38 | Degraded mode | Behaviour when the API tier is unreachable, the budget is spent, or a node is offline: what queues, what runs locally, what the owner is told. | 3 | Effectful work queues with expiry; local-only roles keep running; one notice per outage |
+| OQ-39 | Skills and procedural memory | Skills as versioned Markdown playbooks (OpenClaw `SKILL.md`, open-instinct `skills/`, Anthropic Agent Skills): where they live, how they are installed, who approves them, how a skill becomes memory. | 2 | Playbooks in the memory repo under `ops/rules`, project `skills/` for built-ins; installing a third-party skill is a gated action; the reader role screens skill text |
+| OQ-40 | Learning from outcomes | Failure receipts, `reflections → rules` promotion (gajae-way), router tuning from the outcome log. Today only the notification ledger learns. | 8 | Receipts write to `reflections`; the daily audit proposes promotions the owner confirms |
+| OQ-41 | OAuth broker | Connected apps (Google, Microsoft, Slack) need tokens the model never sees: storage, refresh, scope-to-capability mapping, revocation, admin consent. | 5 | Tokens in the vault (ADR-013), resolved per call like `secretRef`; one scope set per capability; revoke from CLI and panel |
+| OQ-42 | The agent's own mailbox and number | A mailbox for one-time codes, receipts, and confirmations (Grok Bot, Instinct), and later a phone number (Instinct phones businesses). Inbound mail stays data (reader role). | 5 | Mailbox on the owner's domain, IMAP, read by the reader role; telephony after voice (OQ-16) |
+| OQ-43 | Owner routines | "Every morning summarise X", "watch this price": routines as owner-visible objects (cron, watcher, webhook) with pause, history, and budgets; all output through the persona monitor. | 1 | Routines are rows the owner can list and pause; built on the scheduler (OQ-05); children do the work |
+| OQ-44 | Persistent session and context | One main session reopened over its transcript across restarts, steering, segment flushing, daemon-managed compaction, a stable prompt prefix for caching, and how 2026 API features (server compaction, threads) are used. | 0 | openinstinct's session semantics on Pi; compaction at ~50% of the window; stable prefix first |
+| OQ-45 | Multimodal memory | Photos, receipts, and screenshots as memory, and what the audit does with them. | later | Undecided |
+| OQ-46 | Owner panel | `channel-web` as a PWA: approval cards showing the digest, live view (OQ-34), a memory browser and editor, audit viewer, budgets, kill switch (OQ-11), push (OQ-13). | 2 | One PWA over Tailscale; memory editing commits like any other write |
+| OQ-47 | Shadow mode | Observe-and-propose only for the first weeks: drafts instead of sends, plans instead of actions; the owner lifts it per capability. | 3 | On by default for 14 days; per-capability lift recorded in `audit.jsonl` |
+| OQ-48 | Threat model | An enumerated `THREAT_MODEL.md`: injection via pages and screenshots, malicious MCP server or skill, compromised node, stolen phone, malicious channel plugin, poisoned memory. | 3 | Write it before Phase 3 code; one mitigation column per threat |
+| OQ-49 | Onboarding conversation | The first conversation and first week: profile bootstrap, what is asked and what is inferred, when dials are explained. | 2 | An onboarding skill; ask only what the next task needs |
 
 ## Resolved
 

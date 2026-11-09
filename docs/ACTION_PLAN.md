@@ -8,6 +8,7 @@
 3. Build `@jaari/llm` on `@earendil-works/pi-ai` with the tier/role config.
 4. Define `ChannelAdapter` and ship the CLI channel.
 5. Then move to memory retrieval (OQ-03, OQ-04) and the scheduler (OQ-05).
+6. Decide ADR-015 (daemon and nodes) before the `apps/*` layout is fixed in code; it adds `apps/node`.
 
 ## ADRs
 | ADR | Title | Status |
@@ -26,3 +27,4 @@
 | [012](adr/012-web-and-browser.md) | Web search, fetch, and browser as separate pluggable tools | Proposed |
 | [013](adr/013-vault-providers.md) | Pluggable vault providers: Bitwarden first, 1Password second | Proposed |
 | [014](adr/014-license-mit.md) | License: MIT | Accepted |
+| [015](adr/015-control-plane-and-nodes.md) | One daemon decides, nodes on owner devices execute | Proposed |

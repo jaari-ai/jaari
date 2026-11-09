@@ -33,6 +33,7 @@ exist yet.
 | `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon`, `cli`); not created yet | Yes |
 | Root config | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.claude/settings.json` | Scaffold-once: edit the script and run with `--force`, or edit directly and mirror the change in the script |
 | `jaari.config.example.jsonc` | Example owner config (`owner`, `persona`, `memory`, `llm`, `web`) | Via the script |
+| `.github/workflows/release.yml` | Tag-triggered release workflow, actions pinned to commit SHAs (`RELEASE_WORKFLOW`) | Via the script |
 | `refs/` | Read-only reference repos, local only (`.git/info/exclude`) | Never |
 
 ## Docs workflow
