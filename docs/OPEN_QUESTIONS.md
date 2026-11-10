@@ -53,7 +53,7 @@ the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-24 | Local model | Which local model passes the canonicalize fixtures on the owner's hardware? | 1 | Measure with jaari llm eval |
+| OQ-24 | Local model per target | Size classes per deployment target are set in [LLM.md](LLM.md#local-models-per-target). Open: which concrete open-weight model passes the `jaari llm eval` fixtures (tool calls, JSON validity, canonicalize golden set, injection resistance) for the small and medium tiers on each target, and which to suggest at `jaari init`. | 1 | Measure with `jaari llm eval` per target; ship a suggested-models list that is data, refreshed as models change, never hard-coded |
 | OQ-25 | LLM budget | Default monthly LLM budget? | 3 | $30/month placeholder |
 | OQ-26 | Canonicalize privacy | Should canonicalize be local-only by default? | 1 | Yes, if a capable local model exists |
 | OQ-27 | Browser tool surface | Provider-neutral `browser.*` / `computer.*` members run by Jaari's own driver (Playwright/CDP, Stagehand), or the vendor-native toolsets (Anthropic `browser_toolset_20260801` / `computer_toolset_20260801`, Gemini `computer_use`) mapped per routed model? `pi-ai` has no toolset support today, and a native toolset reaches the gate only through the driver's `confirm` hook. Driver hygiene against automation markers (Patchright-level) is part of this; full anti-detect browsers are not (see learning/08). Background: [learning/07-computer.md](learning/07-computer.md) | 6 | Neutral surface shaped like the Anthropic member set; native toolsets as an `@jaari/llm` mapping where the routed model supports them |
