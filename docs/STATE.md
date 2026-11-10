@@ -23,10 +23,12 @@ home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 - Plan: soft phases, corrected blockers, deferred scope (ADR-020).
 
 ## Research and process
-- Instinct, Muse, Grok Bot, ChatGPT Work, and the open-source clones: [00-research.md](00-research.md).
+- Instinct, Pally, Muse, Grok Bot, ChatGPT Work, and the open-source clones: [00-research.md](00-research.md).
 - Learning notes: [07 computer use](learning/07-computer.md), [08 egress and takeover](learning/08-egress-identity-and-takeover.md), [09 OpenMausBot](learning/09-openmausbot.md),
   [10 open questions review](learning/10-open-questions-review.md) (a proposed recommendation
-  per open question from the references; not yet accepted).
+  per open question from the references; not yet accepted),
+  [11 Pally](learning/11-pally.md) (second commercial reference; borrow list and alternatives,
+  not yet accepted).
 - Docs conflict audit (2026-11-10): ten conflicts recorded, accepted, and folded into ADR-017
   to ADR-020; the docs were realigned to them.
 - Docs are hand-maintained Markdown (conventions in DEVELOPMENT.md); `scripts/merge_docs.py`
