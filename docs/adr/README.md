@@ -34,3 +34,4 @@
 | [030](030-overlay-network-and-sizing.md) | Bring your own overlay network; security does not depend on it; reference sizing | Accepted |
 | [031](031-kill-switch-and-runaway-limits.md) | Pause, emergency stop, and runaway limits, enforced in code and configurable | Accepted |
 | [032](032-observability.md) | Observability: three records, opt-in traces, `jaari doctor` | Accepted |
+| [033](033-notification-delivery-and-digests.md) | Notification delivery: the active channel is the push; owner-defined digests; learned urgency | Accepted |
