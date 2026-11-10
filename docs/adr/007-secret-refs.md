@@ -3,6 +3,7 @@
 # ADR-007: Secrets are referenced, never shown to the model
 
 - **Status:** Accepted
+- **Extended by:** [ADR-016](016-openmausbot-hardening.md)
 - **Date:** 2026-11-05
 
 ## Decision

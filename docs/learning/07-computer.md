@@ -64,7 +64,10 @@ contract as Muse's secure storage and Grok's Secure Form. `@jaari/http` plus the
 Muse's audit trail of planned actions matches the digest-bound approval of ADR-006.
 
 **Where Jaari differs.**
-- Cloud VM is optional (Docker/Firecracker backends), not the default. Muse, Grok Bot, and
+- The cloud VM is not where the owner's identity lives. ADR-015 and ADR-017 let the daemon run
+  on a VPS, but the placement rule keeps a browser signed in to the owner's accounts on home
+  hardware, an owner node, or behind an owner exit node; the host's own browser serves
+  anonymous work. Muse, Grok Bot, and
   Instinct all default to the cloud because they serve many users; a single-owner agent
   does not need the isolation and loses the owner's browser state.
 - No vendor lock on the model. Every product above is tied to its vendor's model; Jaari

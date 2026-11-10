@@ -3,8 +3,9 @@
 # 01 — Merge plan: open-instinct × openinstinct
 
 > Captured 2026-10-29. Historical reasoning; the authoritative package layout now lives in
-> ARCHITECTURE.md (channels became a plugin system, hosting became local-first, persona
-> and curiosity were added).
+> ARCHITECTURE.md (channels became a plugin system; hosting became one self-hosted daemon on a
+> VPS, remote server, home hardware, or laptop, ADR-015 and ADR-017; persona and curiosity were
+> added). The 7-tier matrix, peers, payments, and voice below are deferred (ADR-020).
 
 Short version: the two projects are complementary rather than overlapping.
 **open-instinct** is strong on *who may do what* (multi-principal trust, grants, payments,

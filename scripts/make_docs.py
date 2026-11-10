@@ -118,9 +118,9 @@ ADRS: dict[str, tuple[str, str, str, str]] = {
     ),
     "011-llm-routing": (
         "LLM routing: owner policy, role-based tiers, request-only escalation",
-        "Proposed",
+        "Accepted",
         "`@jaari/llm` groups models into small/medium/large tiers with fallback chains; each "
-        "role (main, child, canonicalize, curiosity, classify, summarize, reader, vision) maps "
+        "role (main, child, canonicalize, curiosity, classify, summarize, title, reader, vision) maps "
         "to a tier. Code escalates on measurable signals; children may request escalation via "
         "a policy-checked tool; the main session is pinned to one model. Owner policy sets "
         "budgets and local-only roles. Models qualify for tiers via `jaari llm eval`. "
@@ -134,7 +134,7 @@ ADRS: dict[str, tuple[str, str, str, str]] = {
     ),
     "012-web-and-browser": (
         "Web search, fetch, and browser as separate pluggable tools",
-        "Proposed",
+        "Accepted",
         "`@jaari/web` provides `web.search` (SearXNG default, Brave fallback, Tavily/Exa "
         "plugins) and `web.fetch` (http+readability → Lightpanda → Chromium → hosted reader; "
         "Firecrawl-compatible API as the scraper contract). Interaction stays in "
@@ -292,6 +292,119 @@ ADRS: dict[str, tuple[str, str, str, str]] = {
         "are accepted; this ADR records the additions so the owner can accept or reject "
         "them as a set).",
     ),
+    "017-self-hosted-anywhere": (
+        "Self-hosted anywhere: VPS, remote server, or home hardware; placement rule and egress pool",
+        "Accepted",
+        "**Goal.** Jaari is the self-hosted counterpart of the commercial personal agents "
+        "(Instinct, Muse, Grok Bot, ChatGPT Work): always reachable, works while the owner's "
+        "phone is off, drives a browser, and asks before acting. The owner runs it on hardware "
+        "they control. **Three supported targets, one daemon, one codebase** (ADR-015): "
+        "(1) a VPS or remote server; (2) home hardware (mini PC, NAS, Raspberry Pi-class box, "
+        "an always-on desktop); (3) a laptop (supported, but work pauses while it sleeps). The "
+        "target is configuration (`jaari init` asks), never a different build. \"Local-first\" "
+        "is retired as a slogan; the principle is *self-hosted, owner-controlled data*. "
+        "**Placement rule.** A capability that acts as the owner's logged-in identity (a "
+        "browser signed in to the owner's accounts, desktop control) runs where the owner's "
+        "network identity is: on home hardware, on an owner device installed as a node, or on "
+        "any host through an owner exit node. A browser on a datacenter host does anonymous "
+        "work (`web.fetch` escalation, research, accounts the agent owns). This keeps ADR-005's "
+        "intent (the owner's cookies and residential IP, no CAPTCHA wall) while allowing a VPS "
+        "daemon. **Egress pool.** `@jaari/http` and the browser's SOCKS5 listener (ADR-016) pick "
+        "an egress provider per session by policy. Providers, in order of trust: "
+        "(a) `owner-exit`: a Tailscale, Headscale, or WireGuard exit node on hardware the owner "
+        "controls (home box, laptop, Pi); (b) `direct`: the host's own address; (c) `mobile`: "
+        "the owner's 4G/5G dongle on a Pi; (d) `residential-proxy`: a commercial provider, "
+        "behind a provider interface with a documented sourcing check. **Rotation.** Rotation "
+        "is for anonymous traffic only, and the pool may mix owner exit nodes with residential "
+        "proxies. Traffic on the owner's accounts is pinned: one account, one stable owner exit "
+        "node (or direct from home hardware), with failover only to another owner node and a "
+        "notice, never to a rotating or datacenter address (impossible-travel flags). If no "
+        "owner exit is up, an owner-account session refuses and tells the owner; it never "
+        "falls back silently. A VPS browser may send only an owner-set list of home sites "
+        "through an owner node and everything else direct (OQ-32). Tailscale is the default "
+        "overlay for node links, the owner panel, and exit nodes; Headscale and plain "
+        "WireGuard are documented alternatives; no public ports. Stealth browsers, solver "
+        "farms, and hosted agent browsers stay out of the default path.",
+        "VPS as the only target (a datacenter browser meets the CAPTCHA and 2FA walls "
+        "documented in learning/08); home hardware as the only target (not everyone has an "
+        "always-on box or a stable uplink); rotating residential proxies for the owner's own "
+        "accounts (fraud flags); a project-run cloud VM per owner (not self-hosted); one build "
+        "per target.",
+    ),
+    "018-capability-vocabulary-and-phase-0-floor": (
+        "Capability vocabulary, `@jaari/capabilities`, and the Phase 0 safety floor",
+        "Accepted",
+        "**1. One vocabulary.** The capability table in SECURITY_MODEL.md is the only list of "
+        "names the model can ask for: `web.search`, `web.fetch`, `browser.read`, `browser.act`, "
+        "`browser.submit`, `computer.use`, `shell`, `files.read`, `files.write`, `email.read`, "
+        "`email.send`, `repo.write`, `publish`, `pay`, and `llm.escalate`. Each has a class: "
+        "read, gated (effectful), or takeover. `pay` is reserved: no executor exists in v1 "
+        "(OQ-19). A capability manifest's `provides` lists only these names. Host kind "
+        "(`daemon` or `node`) and provider (`local-profile`, `remote-cdp`, `macos`, `xvfb`) "
+        "are manifest fields, never part of a name. ADR-015's examples map as: `browser.local` "
+        "is `browser.*` with provider `local-profile` on a node; `browser.remote` is "
+        "`browser.*` with provider `remote-cdp`; `desktop.macos` is `computer.use` with "
+        "provider `macos`; `files` is `files.read` and `files.write`. **2. Package.** "
+        "`@jaari/capabilities` owns the manifest schema, the loader, and the daemon-node "
+        "contract; `apps/node` is a host for it. Schema details, signing, and sidecars stay "
+        "OQ-50. **3. Gate from day one.** `@jaari/gate` exposes its dispatch entry point in "
+        "Phase 0 as a deny-all stub: every gated capability refuses, read-class ones run. "
+        "No executor can be written around the gate, and Phase 3 replaces the stub with "
+        "digests, approvals, and the audit chain. Third-party skills install disabled until "
+        "the `reader` role exists. **4. Secrets from day one.** Phase 0 ships the `secretRef` "
+        "resolver and an `os-keychain` provider (ADR-013 keeps secret zero there anyway). "
+        "Bitwarden and 1Password land with the vault work. `env` and `file` providers are for "
+        "development; `jaari doctor` warns when one is in use. Plaintext keys in config are "
+        "never an interim. **5. Approval card.** The short code the owner types or taps is "
+        "only a lookup of the digest; there is no amount or parameter tolerance (a different "
+        "action is a different digest and needs a new approval). Default expiry is 15 "
+        "minutes, overridable per capability, with 5 minutes the default for `email.send` and "
+        "`publish`. Expiry and the short code extend ADR-006.",
+        "Per-host capability names (`browser.local` as a gate class: the policy would depend on "
+        "where code runs); a gate that arrives in Phase 3 with executors written before it; "
+        "plaintext keys in config until the vault exists; an approval tolerance (\"within "
+        "5%\"), which is a second, weaker binding.",
+    ),
+    "019-model-pinning-and-local-only-defaults": (
+        "Main session pin with outage failover; local-only canonicalize decided at init",
+        "Accepted",
+        "**1. Pin.** The main session stays on one model: no routine, cost-driven, or "
+        "quality-driven switching. **2. Failover.** On a provider outage the main role may "
+        "move down its fallback chain at a turn boundary, only when protocol state shows the "
+        "provider never accepted the turn (ADR-016), only to a model with the same tools, "
+        "with one notice to the owner. The new model stays pinned until restart or until the "
+        "owner reverts it. **3. Local-only defaults.** `canonicalize` and `curiosity` default "
+        "to local-only only if `jaari llm eval` qualifies a local model at `jaari init`. "
+        "Otherwise `init` asks the owner to install a local model or allow an API tier for "
+        "those roles, and canonicalize does not run until they choose. Local-only roles that "
+        "are configured keep failing closed with one notice (ADR-011). **4. Status.** "
+        "ADR-011 and ADR-012 are Accepted with these amendments; ADR-013 stays Proposed until "
+        "OQ-29 is verified.",
+        "A hard pin that stops the agent in an outage; free switching per turn (cache loss, "
+        "persona drift); silently running canonicalize on an API tier; silently not running "
+        "it.",
+    ),
+    "020-soft-phases-and-v1-scope": (
+        "Roadmap phases are a soft plan; scope deferred from the merge plan",
+        "Accepted",
+        "**1. Soft phases.** Phases in ROADMAP.md are an ordering guide, not gates. An item "
+        "may start in any phase once its listed needs (open questions, ADRs, earlier items) "
+        "are met, and a phase is not \"closed\" while its items are unfinished. \"Needs\" "
+        "means *needed before this item ships*, not before the phase may start. Status is "
+        "tracked per item in STATE.md. **2. Blocker phases corrected.** OQ-32 (egress) is "
+        "needed with the browser, so it moves from Phase 7 to Phase 6; the sleep and wake part "
+        "of OQ-36 moves to Phase 0 because a laptop is a supported target; OQ-10 keeps only "
+        "the overlay and sizing parts (Phase 7) and the Compose layout moves under OQ-35 "
+        "(Phase 0); OQ-20 is needed in Phase 2 for the replay harness, with fixtures growing "
+        "after. **3. Scope.** Trust tiers (the 7-tier matrix), the peer envelope and agent "
+        "network, payments, and voice from the open-instinct merge plan are deferred with the "
+        "v1 non-goals; they stay in the merge plan as history. ADR-009's \"policy and network "
+        "shell\" is read as capability tagging, principal resolution, and grants (OQ-51), plus "
+        "the hosting shell of ADR-017. The README lineage table says the same.",
+        "Hard phase gates (a small project stalls on an unrelated open question); no phases at "
+        "all (nothing says what to build first); carrying the 7-tier matrix into the first "
+        "phases (multi-principal machinery for a single owner).",
+    ),
 }
 
 
@@ -299,23 +412,69 @@ ADRS: dict[str, tuple[str, str, str, str]] = {
 ADR_DATES: dict[str, str] = {
     "015-control-plane-and-nodes": "2026-11-09",
     "016-openmausbot-hardening": "2026-11-10",
+    "017-self-hosted-anywhere": "2026-11-10",
+    "018-capability-vocabulary-and-phase-0-floor": "2026-11-10",
+    "019-model-pinning-and-local-only-defaults": "2026-11-10",
+    "020-soft-phases-and-v1-scope": "2026-11-10",
+}
+
+
+# Later ADRs that extend or amend an earlier one without rewriting it: id -> note.
+ADR_EXTENDED_BY: dict[str, str] = {
+    "005-computer-use-local-profile": "[ADR-015](015-control-plane-and-nodes.md), [ADR-016](016-openmausbot-hardening.md), [ADR-017](017-self-hosted-anywhere.md)",
+    "006-approval-gate": "[ADR-016](016-openmausbot-hardening.md), [ADR-018](018-capability-vocabulary-and-phase-0-floor.md)",
+    "007-secret-refs": "[ADR-016](016-openmausbot-hardening.md)",
+    "009-merge-strategy": "[ADR-020](020-soft-phases-and-v1-scope.md)",
+    "011-llm-routing": "[ADR-019](019-model-pinning-and-local-only-defaults.md)",
+    "012-web-and-browser": "[ADR-016](016-openmausbot-hardening.md), [ADR-017](017-self-hosted-anywhere.md), [ADR-019](019-model-pinning-and-local-only-defaults.md)",
+    "013-vault-providers": "[ADR-018](018-capability-vocabulary-and-phase-0-floor.md)",
+    "014-license-mit": "[ADR-016](016-openmausbot-hardening.md) (Apache-2.0 reuse from `refs/openmausbot`: header kept, `NOTICE` entry, never `enterprise/`)",
+    "015-control-plane-and-nodes": "[ADR-017](017-self-hosted-anywhere.md), [ADR-018](018-capability-vocabulary-and-phase-0-floor.md)",
+}
+
+# What a later ADR changes in an earlier one: id -> [(ADR, change)]. Rendered as "Amendments".
+ADR_AMENDMENTS: dict[str, list[tuple[str, str]]] = {
+    "005-computer-use-local-profile": [("ADR-017", "\"Local\" means the owner's network identity, not necessarily the daemon's machine: the profile runs on home hardware, an owner node, or through an owner exit node. A datacenter browser does anonymous work only.")],
+    "006-approval-gate": [("ADR-018", "Approvals expire after 15 minutes by default (5 for `email.send` and `publish`); the short code is only a lookup of the digest; no amount tolerance.")],
+    "009-merge-strategy": [("ADR-020", "\"Policy and network shell\" means capability tagging, principal resolution, grants, and the hosting shell. Trust tiers, peers, payments, and voice are deferred.")],
+    "011-llm-routing": [("ADR-019", "\"Pinned\" allows outage failover at a turn boundary with one notice; local-only defaults for canonicalize and curiosity are decided at `jaari init` by `jaari llm eval`.")],
+    "012-web-and-browser": [("ADR-017", "The \"local profile\" default is placed by the placement rule and reaches the network through the egress pool; the SOCKS5 gate of ADR-016 is the only route out.")],
+    "013-vault-providers": [("ADR-018", "Phase 0 ships the resolver and an `os-keychain` provider; `env` and `file` stay development-only with a `jaari doctor` warning.")],
+    "015-control-plane-and-nodes": [("ADR-018", "Capability names in the examples follow the single vocabulary: `browser.local` is `browser.*` with provider `local-profile`, `desktop.macos` is `computer.use` with provider `macos`, `files` is `files.read` and `files.write`. `@jaari/capabilities` owns the manifest and loader."),
+                                    ("ADR-017", "The daemon host may be a VPS, a remote server, or home hardware; the placement rule decides where identity-bearing capabilities run.")],
+}
+
+# Open conflicts flagged on an ADR: id -> [(open question, one-line conflict)].
+ADR_FLAGS: dict[str, list[tuple[str, str]]] = {
+    "006-approval-gate": [("OQ-51", "\"Single-use\" conflicts with the standing grants that daily use needs.")],
+    "013-vault-providers": [("OQ-64", "Still Proposed; accept once the OQ-29 verification is done.")],
 }
 
 
 def render_adr(adr_id: str) -> str:
     title, status, decision, alternatives = ADRS[adr_id]
     num = adr_id.split("-", 1)[0]
+    extended = ADR_EXTENDED_BY.get(adr_id)
+    extended_line = f"- **Extended by:** {extended}\n" if extended else ""
+    flags = ADR_FLAGS.get(adr_id)
+    flags_block = ""
+    if adr_id in ADR_AMENDMENTS:
+        rows = "\n".join(f"- **{ref}:** {text}" for ref, text in ADR_AMENDMENTS[adr_id])
+        flags_block += f"\n## Amendments\n{rows}\n"
+    if flags:
+        rows = "\n".join(f"- [{oq}](../OPEN_QUESTIONS.md): {text}" for oq, text in flags)
+        flags_block += f"\n## Flagged conflicts\n{rows}\n"
     return f"""# ADR-{num}: {title}
 
 - **Status:** {status}
-- **Date:** {ADR_DATES.get(adr_id, TODAY)}
+{extended_line}- **Date:** {ADR_DATES.get(adr_id, TODAY)}
 
 ## Decision
 {decision}
 
 ## Alternatives rejected
 {alternatives}
-
+{flags_block}
 ## Consequences
 _TODO: fill in as implementation reveals them._
 """
@@ -345,7 +504,7 @@ OPEN_QUESTIONS: list[tuple[str, list[tuple[str, str, str, str, str]]]] = [
         ("OQ-07", "Backup and restore", "Encrypted git remote for memory, SQLite backup (e.g. Litestream), secret store backup, restore drill", "3", "All three + a scripted restore test"),
         ("OQ-08", "Encryption at rest", "age vs git-crypt for memory; how to purge a secret that reached git history", "3", "Undecided"),
         ("OQ-09", "Forgetting and retention", "\"Forget this\" command; raw daily log retention; does forgetting rewrite git history?", "3", "Undecided. Superseded facts are struck through with a date, not deleted; a forgotten-fact list stops canonicalize relearning them (learning/09)"),
-        ("OQ-10", "Deployment", "Host choice decided by ADR-015 (always-on VM, VPS, or server; laptop-only by configuration). Still open: Compose layout for the host, overlay network (Tailscale or self-hosted Headscale), reference VPS sizing, config and memory format migrations (see OQ-35)", "7", "Compose on the host; Tailscale first, Headscale documented; no public ports"),
+        ("OQ-10", "Deployment", "Host choice decided by ADR-015 and ADR-017 (VPS, remote server, home hardware, or laptop). Still open: overlay network details (Tailscale first, Headscale or WireGuard documented), reference sizing per target. The Compose layout and migrations moved to OQ-35", "7", "Tailscale first, Headscale documented; no public ports; sizing table per target"),
         ("OQ-11", "Kill switch", "Global pause, loop step limits, max concurrent children, spend-spike alerts", "3", "All four, enforced in code. Add a stall guard: two continuations without a successful tool call, or three identical errors, end the job as stalled; lowering a capability's permission also stops the running turn"),
         ("OQ-12", "Observability", "Tracing per turn/tool/child (OpenTelemetry?), admin page for jobs, approvals, usage, errors", "7", "OTel + small local admin page. One canonical event union plus a raw provider tee to spot protocol drift; that log is for inspection, `audit.jsonl` stays the record"),
         ("OQ-13", "Notification delivery", "Proactive messages via channel or push (ntfy, Pushover); urgent vs digest routing", "2", "Channel first, ntfy optional. OpenMausBot's notification QA rules become monitor fixtures: finished only with a non-empty result, one alert per failure and cause, every notification links to its exact thread, read state synced across clients"),
@@ -359,7 +518,7 @@ OPEN_QUESTIONS: list[tuple[str, list[tuple[str, str, str, str, str]]]] = [
         ("OQ-19", "Payments rail", "Virtual cards with per-merchant limits, or no payments in v1?", "later", "No payments in v1"),
     ]),
     ("D. Quality and process", [
-        ("OQ-20", "Behaviour evals", "Fixtures for staying quiet, asking before acting, persona adherence; session replay", "8", "Record/replay harness in Phase 2, fixtures grow over time. Evaluate the harness, not the model: a hermetic scripted engine, JSON scenarios, pure scorers, redacted golden threads (learning/09)"),
+        ("OQ-20", "Behaviour evals", "Fixtures for staying quiet, asking before acting, persona adherence; session replay", "2", "Record/replay harness in Phase 2, fixtures grow over time. Evaluate the harness, not the model: a hermetic scripted engine, JSON scenarios, pure scorers, redacted golden threads (learning/09)"),
         ("OQ-21", "Prompt versioning", "Version system prompts and persona files; trace and roll back changes", "2", "Prompts as files in repo, version in every log line"),
         ("OQ-22", "Project process", "SECURITY.md and disclosure contact, release/versioning policy, contribution rules (DCO or CLA?). License decided: MIT (ADR-014)", "0", "security@jaari.org, changesets, DCO sign-off"),
         ("OQ-23", "Multiple users", "Strictly single owner, or household members with limited access?", "0", "Single owner; keep user id in data model"),
@@ -375,14 +534,14 @@ OPEN_QUESTIONS: list[tuple[str, list[tuple[str, str, str, str, str]]]] = [
     ("F. Carried over from the computer-use research (learning/07-computer.md, 08-egress-identity-and-takeover.md)", [
         ("OQ-30", "Consequential browser actions", "A purchase, a sent message, or accepted terms arrives as an ordinary `left_click` / `type`; Anthropic's own `confirm` hook \"can't pick them out by name\". How does the gate recognise them: deterministic page heuristics, a reader-role check of the page state, or approval on every click within flagged origins?", "6", "Deterministic heuristics (submit controls, payment and consent URL patterns) escalate to a reader-role check; never an LLM alone (principle 9). A classifier that cannot read the action to the end returns unreadable, which means ask the owner (ADR-016)"),
         ("OQ-31", "Screenshots as untrusted content", "Do screenshots and accessibility trees fall under the reader-role rule (principle 8)? A reader pass per screenshot is too slow for a click loop, and vendor prompt-injection classifiers run only on native toolsets.", "6", "Gate + egress allowlist + classifier where available; log every action with its screenshot (OQ-12). While a filled secret is on the page, screenshots and page evaluation are refused until the field is cleared (ADR-016)"),
-        ("OQ-32", "Egress identity off the home network", "When the daemon or a Docker/Firecracker backend runs on a VPS, which IP does the browser use: the owner's home connection via a Tailscale/WireGuard exit node, the owner's own 4G/5G dongle, or a commercial residential proxy? Background: [learning/08-egress-identity-and-takeover.md](learning/08-egress-identity-and-takeover.md)", "7", "Under ADR-015 the egress identity follows where a capability is installed. A browser capability on a VPS or VM browses from its datacenter IP; on a home server or the laptop, from the owner's. For the owner's logged-in accounts, prefer a browser capability on an owner device, or route the host's browser through an owner exit node (home box or laptop) when one is up; residential proxies (sourcing check) and a 4G dongle are opt-in for anonymous browsing and `web.fetch` only; never a proxy for the owner's accounts (impossible-travel flags). Refinement from OpenMausBot: for a browser on a VPS, send only a short owner-set list of home sites (the owner's logged-in accounts) through an owner node, which re-checks each connection itself (ports 80 and 443, never its own LAN); everything else leaves direct. OpenMausBot measured routing all traffic home as 1.7 to 30 times slower (learning/09)"),
+        ("OQ-32", "Egress pool details", "ADR-017 fixes the shape: an egress pool of `owner-exit` (Tailscale, Headscale, WireGuard), `direct`, `mobile`, and `residential-proxy` providers; rotation for anonymous traffic only (owner exit nodes may join the rotation), owner accounts pinned to one owner node. Open: the provider interface, rotation and health-check policy, which residential providers pass the sourcing check, 4G dongle setup, and the home-sites list format. Background: [learning/08-egress-identity-and-takeover.md](learning/08-egress-identity-and-takeover.md)", "6", "Provider interface in `@jaari/http` with `owner-exit` and `direct` first (Phase 4 for fetch, Phase 6 for the browser); residential and mobile providers opt-in later. Home-sites split from OpenMausBot: a short owner-set list of the owner's accounts goes through an owner node, which re-checks each connection itself (ports 80 and 443, never its own LAN); everything else leaves direct. OpenMausBot measured routing all traffic home as 1.7 to 30 times slower (learning/09). Owner-account sessions refuse when no owner exit is up"),
         ("OQ-33", "Signed-agent identity", "Should `@jaari/http` and the browser sign requests per Web Bot Auth (RFC 9421, `Signature-Agent`, JWKS at `/.well-known/http-message-signatures-directory`)? Cloudflare's Signed Agents registry is per operator via the dashboard; it is unknown whether an individual self-hoster can register.", "4", "Implement signing with a per-install Ed25519 key; registration decided when the registry policy is known"),
         ("OQ-34", "Takeover transport", "How does the owner see and touch the agent's browser from a phone within seconds: CDP screencast in the web panel, noVNC over loopback, or a hosted live view? Takeover states, timeouts, and the rule that screenshots stop while the owner holds the session.", "6", "CDP screencast in `@jaari/channel-web` over Tailscale; a \"Take over\" link pushed through the active channel; states pending/active/completed/timeout/cancelled. Hold semantics are in ADR-016 (owner-held, drain then hand over, refuse rather than queue, 2-minute grace and 5-minute idle release); only the transport stays open"),
     ]),
     ("G. From the 2026 gap review (2026-11-09)", [
-        ("OQ-35", "Install, update, migrate", "One-command install (Compose, brew, single binary), `jaari doctor`, an update channel, and versioned config and memory schemas with migrations run at start. Nothing is specified today.", "0", "Compose + a single `jaari` binary; schema version in config and in the memory repo; migrations idempotent and run on daemon start"),
-        ("OQ-36", "Laptop as host", "The laptop-only configuration and laptop nodes: sleep and wake, network changes, battery, and the macOS permission matrix per capability (Automation, Accessibility, Screen Recording, Full Disk Access). Meta publishes none of this for Muse.", "6", "Published permission matrix per capability manifest; in laptop-only mode, jobs missed in sleep run once on wake, capped"),
-        ("OQ-37", "Multi-device state", "With ADR-015, how nodes and the daemon reconnect, and how the daemon moves between hosts (laptop to VPS, VPS to home server).", "7", "The daemon host is authoritative (ADR-015); memory pushed to an encrypted git remote (OQ-07); nodes hold no state; `jaari migrate-host` exports and imports. Node link: a Noise handshake with a QR-pinned daemon key over the overlay network; a relay, if one is ever added, must see only ids, timing, and volume (learning/09)"),
+        ("OQ-35", "Install, update, migrate", "One-command install per target of ADR-017 (Compose on a VPS or home box, brew or a single binary on a laptop), the Compose layout, `jaari doctor`, an update channel, and versioned config and memory schemas with migrations run at start. Nothing is specified today.", "0", "Compose + a single `jaari` binary; `jaari init` asks for the target; schema version in config and in the memory repo; migrations idempotent and run on daemon start"),
+        ("OQ-36", "Laptop as host", "The laptop as a daemon host (ADR-017 target 3) and as a node: sleep and wake, network changes, battery, and the macOS permission matrix per capability (Automation, Accessibility, Screen Recording, Full Disk Access). Meta publishes none of this for Muse. Sleep and wake is needed in Phase 0; the permission matrix with the desktop capability in Phase 6.", "0", "Published permission matrix per capability manifest; in laptop-only mode, jobs missed in sleep run once on wake, capped"),
+        ("OQ-37", "Multi-device state", "With ADR-015, how nodes and the daemon reconnect, and how the daemon moves between hosts (laptop, VPS, home server, in any direction).", "7", "The daemon host is authoritative (ADR-015); memory pushed to an encrypted git remote (OQ-07); nodes hold no state; `jaari migrate-host` exports and imports. Node link: a Noise handshake with a QR-pinned daemon key over the overlay network; a relay, if one is ever added, must see only ids, timing, and volume (learning/09)"),
         ("OQ-38", "Degraded mode", "Behaviour when the API tier is unreachable, the budget is spent, or a node is offline: what queues, what runs locally, what the owner is told.", "3", "Effectful work queues with expiry; local-only roles keep running; one notice per outage. Fall back only when the turn provably never started, and only to a model that has the same tools; remember provider limit-reset times instead of probing"),
         ("OQ-39", "Skills and procedural memory", "Skills as versioned Markdown playbooks (OpenClaw `SKILL.md`, open-instinct `skills/`, Anthropic Agent Skills): where they live, how they are installed, who approves them, how a skill becomes memory.", "2", "Playbooks in the memory repo under `ops/rules`, project `skills/` for built-ins; installing a third-party skill is a gated action; the reader role screens skill text. Scan skill text before install (base64 blobs, piped shell installs, invisible Unicode); third-party skills install disabled; exports scrub secrets (learning/09)"),
         ("OQ-40", "Learning from outcomes", "Failure receipts, `reflections → rules` promotion (gajae-way), router tuning from the outcome log. Today only the notification ledger learns.", "8", "Receipts write to `reflections`; the daily audit proposes promotions the owner confirms"),
@@ -395,7 +554,7 @@ OPEN_QUESTIONS: list[tuple[str, list[tuple[str, str, str, str, str]]]] = [
         ("OQ-47", "Shadow mode", "Observe-and-propose only for the first weeks: drafts instead of sends, plans instead of actions; the owner lifts it per capability.", "3", "On by default for 14 days; per-capability lift recorded in `audit.jsonl`"),
         ("OQ-48", "Threat model", "An enumerated `THREAT_MODEL.md`: injection via pages and screenshots, malicious MCP server or skill, compromised node, stolen phone, malicious channel plugin, poisoned memory.", "3", "Write it before Phase 3 code; one mitigation column per threat"),
         ("OQ-49", "Onboarding conversation", "The first conversation and first week: profile bootstrap, what is asked and what is inferred, when dials are explained.", "2", "An onboarding skill; ask only what the next task needs"),
-        ("OQ-50", "Capability packages", "ADR-015 makes capabilities installable units with a manifest. Open: manifest schema, where packages come from (npm `@jaari/capability-*`, local path), signing and update, how a capability declares and checks its OS permissions and sidecars (Xvfb or a desktop container for `computer.use` on a VPS), and how this relates to MCP servers (OQ-14) and skills (OQ-39).", "0", "Manifest schema and the in-process loader in Phase 0; npm packages with provenance, installed by `jaari capability install`; an MCP server can back a capability but never bypasses its manifest. Native sidecars pinned by SHA-256 and size with an SBOM and no runtime self-update; policy reads capability flags from the manifest, never package names (learning/09)"),
+        ("OQ-50", "Capability packages", "ADR-015 makes capabilities installable units with a manifest. Open: manifest schema, where packages come from (npm `@jaari/capability-*`, local path), signing and update, how a capability declares and checks its OS permissions and sidecars (Xvfb or a desktop container for `computer.use` on a VPS), and how this relates to MCP servers (OQ-14) and skills (OQ-39). The owning package is `@jaari/capabilities` and the names come from one vocabulary (ADR-018).", "0", "Manifest schema and the in-process loader in Phase 0; npm packages with provenance, installed by `jaari capability install`; an MCP server can back a capability but never bypasses its manifest. Native sidecars pinned by SHA-256 and size with an SBOM and no runtime self-update; policy reads capability flags from the manifest, never package names (learning/09)"),
     ]),
     ("H. From the OpenMausBot study (learning/09-openmausbot.md, 2026-11-10)", [
         ("OQ-51", "Standing grants", "ADR-006 approves one action per digest. Daily use needs some \"always allow\": which capabilities may have a standing grant, what it is keyed on, how it expires, and how the owner lists and revokes them. OpenMausBot keys grants on the exact command plus working directory, and MCP read grants on a hash of the server config.", "3", "Standing grants only for read-shaped capabilities and exact-match actions; keyed on capability, target, and a fingerprint of the tool's config so any edit revokes; never for send, submit, publish, pay, or `repo.write`; every use is an `audit.jsonl` row naming the grant"),
@@ -405,13 +564,25 @@ OPEN_QUESTIONS: list[tuple[str, list[tuple[str, str, str, str, str]]]] = [
         ("OQ-55", "External control surface", "Should other tools drive Jaari: a headless `jaari run` / `jaari wait` for scripts, and an MCP server for desktop clients? What must such a surface never expose?", "4", "`jaari run`, `wait`, and `export` with one JSON document and typed exit codes (needs input, timeout) in `apps/cli`; an MCP server later that can inspect and start work but never approves, changes credentials, deletes, or edits policy; long-poll waits, a paired token for anything that mutates"),
         ("OQ-56", "Subscription CLI engines", "OpenMausBot runs bots on the owner's installed `claude`, `codex`, and other CLIs (27 drivers, including Pi over `pi --mode rpc`), so work is billed to an existing subscription. Should a Jaari child be able to delegate a task to such a CLI? The gate cannot see tool calls inside another loop, and provider terms differ.", "4", "Not for the main session (ADR-001). Possibly for isolated children on code tasks, inside a sandbox with no secrets and no effectful capabilities, with the CLI's permission requests answered by the gate; check each provider's terms first"),
     ]),
+    ("I. Left over from the docs conflict audit (2026-11-10)", [
+        ("OQ-64", "Accept ADR-013", "ADR-011 and ADR-012 were accepted (ADR-019). ADR-013 (vault providers) is still Proposed and depends on OQ-29: Bitwarden Lite licence needs and the 1Password service-account setup are unverified.", "3", "Verify OQ-29 against vendor docs, then accept ADR-013 before the vault providers ship; the Phase 0 `os-keychain` provider does not depend on it (ADR-018)"),
+    ]),
 ]
-
 
 # Resolved: (question id, decision, ADR id)
 RESOLVED: list[tuple[str, str, str]] = [
     ("OQ-22 (license part)", "MIT", "014-license-mit"),
     ("OQ-10 (host part)", "Daemon on an always-on host (VM, VPS, or server); laptop-only supported by configuration", "015-control-plane-and-nodes"),
+    ("OQ-57", "Self-hosted on a VPS, remote server, or home hardware; placement rule keeps identity-bearing browsers on the owner's network identity; egress pool with owner exit nodes", "017-self-hosted-anywhere"),
+    ("OQ-58", "One capability vocabulary; host and provider are manifest fields; `pay` reserved", "018-capability-vocabulary-and-phase-0-floor"),
+    ("OQ-59", "Short code is a digest lookup; no tolerance; 15-minute default expiry, 5 for send and publish", "018-capability-vocabulary-and-phase-0-floor"),
+    ("OQ-60", "Phase 0 ships the resolver and an `os-keychain` provider", "018-capability-vocabulary-and-phase-0-floor"),
+    ("OQ-61", "Deny-all gate stub in Phase 0; third-party skills disabled until the reader role exists", "018-capability-vocabulary-and-phase-0-floor"),
+    ("OQ-62", "Phases are soft; blocker phases corrected (OQ-32, OQ-36, OQ-10, OQ-20)", "020-soft-phases-and-v1-scope"),
+    ("OQ-63", "Trust tiers, peers, payments, and voice deferred; wording corrected", "020-soft-phases-and-v1-scope"),
+    ("OQ-64 (ADR-011, ADR-012 part)", "ADR-011 and ADR-012 accepted; ADR-013 remains open as OQ-64", "019-model-pinning-and-local-only-defaults"),
+    ("OQ-65", "Main session pinned; outage failover at a turn boundary with one notice", "019-model-pinning-and-local-only-defaults"),
+    ("OQ-66", "Local-only canonicalize decided at `jaari init` by `jaari llm eval`", "019-model-pinning-and-local-only-defaults"),
 ]
 
 
@@ -439,13 +610,16 @@ the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
 # ─────────────────────────────────────────────────────────────────────────────
 FILES["README.md"] = r"""# Jaari
 
-A self-hosted personal AI agent with git-backed memory, a configurable personality,
-and owner-approved external actions.
+A self-hosted personal AI agent, in the shape of the commercial ones (Instinct, Muse, Grok
+Bot, ChatGPT Work), that you run yourself: on a VPS, a remote server, hardware at home, or a
+laptop. Git-backed memory, a configurable personality, a browser it can drive, and
+owner-approved external actions.
 
 Jaari (جاري, "my neighbor" / "ongoing", pronounced JAH-ree) is a single-owner agent you
 talk to over a messaging channel. It remembers in plain Markdown under git, works in the
 background, gets to know you at a pace you set, and never takes an external action
-(send, publish, pay) without an approval bound to the exact action.
+(send, publish) without an approval bound to the exact action. Payments are reserved, not
+in v1.
 
 > **Status: Phase 0 (Foundation). Design only, no runnable code yet.** The architecture,
 > decisions, and open questions are written down; packages are not scaffolded. See
@@ -455,11 +629,12 @@ background, gets to know you at a pace you set, and never takes an external acti
 
 | Area | Approach | Details |
 |---|---|---|
-| Hosting | Self-hosted, single owner, local-first | [ARCHITECTURE](docs/ARCHITECTURE.md) |
+| Hosting | Self-hosted, single owner. One daemon on a VPS, remote server, home hardware, or laptop; capabilities installed where they run; Tailscale as the default overlay | [ARCHITECTURE](docs/ARCHITECTURE.md), ADR-015/017 |
+| Browser identity | Identity-bearing browsing runs on or through the owner's network (home box, owner device, Tailscale exit node); rotating proxies only for anonymous traffic | [WEB](docs/WEB.md), ADR-017 |
 | Memory | Separate git repo of Markdown (gajae-way axes), canonicalized every 6 h, audited daily | [MEMORY](docs/MEMORY.md), ADR-003/004 |
 | Personality | Curiosity and Proactivity dials (0 to 3) enforced by a monitor; proactive messages must earn the interruption | [PERSONA](docs/PERSONA.md), ADR-008 |
-| Safety | Every external effect needs owner approval bound to a SHA-256 digest; secrets are `secretRef:` handles the model never sees; untrusted content goes through a tool-less `reader` role | [SECURITY_MODEL](docs/SECURITY_MODEL.md), ADR-006/007 |
-| Models | Provider-agnostic via Pi; role → tier → fallback chain; budgets and local-only roles | [LLM](docs/LLM.md), ADR-001/011 |
+| Safety | Every external effect needs owner approval bound to a SHA-256 digest; secrets are `secretRef:` handles the model never sees; untrusted content goes through a tool-less `reader` role; the gate exists from Phase 0 | [SECURITY_MODEL](docs/SECURITY_MODEL.md), ADR-006/007/016/018 |
+| Models | Provider-agnostic via Pi; role → tier → fallback chain; budgets and local-only roles | [LLM](docs/LLM.md), ADR-001/011/019 |
 | Web | Pluggable `web.search`, `web.fetch` ladder, and browser via Playwright MCP or Stagehand | [WEB](docs/WEB.md), ADR-012 |
 | Channels | Plugins behind a `ChannelAdapter` contract | [guides/channel-plugins](docs/guides/channel-plugins.md) |
 
@@ -469,9 +644,9 @@ background, gets to know you at a pace you set, and never takes an external acti
 |---|---|
 | [docs/STATE.md](docs/STATE.md) | What is done, what is next |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Principles, packages, trust boundaries |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | Phases 0 to 8 and the open questions blocking each |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Soft phases 0 to 8 and what each item needs before it ships |
 | [docs/ACTION_PLAN.md](docs/ACTION_PLAN.md) | Next steps |
-| [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Undecided design questions (OQ-01 to OQ-56) with current leanings |
+| [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Undecided design questions (OQ-01 to OQ-66; some resolved) with current leanings |
 | [docs/adr/](docs/adr/README.md) | Architecture decision records (the authoritative ADR numbering) |
 | [docs/MEMORY.md](docs/MEMORY.md), [PERSONA.md](docs/PERSONA.md), [SECURITY_MODEL.md](docs/SECURITY_MODEL.md), [LLM.md](docs/LLM.md), [WEB.md](docs/WEB.md), [INTEGRATIONS.md](docs/INTEGRATIONS.md) | Subsystem designs |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Dev setup, `refs/`, commands |
@@ -522,7 +697,7 @@ Jaari merges ideas from these projects. They are kept in `refs/` for study, not 
 
 | Project | License | What Jaari takes |
 |---|---|---|
-| [open-instinct](https://github.com/mariagorskikh/open-instinct) | MIT | Policy, trust tiers, and hosting shell; code reuse allowed with attribution |
+| [open-instinct](https://github.com/mariagorskikh/open-instinct) | MIT | Policy, capability tagging, and hosting shell; code reuse allowed with attribution. Trust tiers and the agent network are deferred (ADR-020) |
 | [openinstinct](https://github.com/Yeachan-Heo/openinstinct) | None found | Runtime semantics, as a behavioral spec only; no code copied (ADR-009) |
 | [gajae-way](https://github.com/Yeachan-Heo/gajae-way) | AGPL-3.0 | Memory axes design; no code copied |
 | [Pi](https://github.com/earendil-works/pi) | MIT | Agent loop and multi-provider LLM access (ADR-001) |
@@ -539,7 +714,8 @@ notices for reused code are in [NOTICE](NOTICE).
 FILES["docs/ARCHITECTURE.md"] = r"""# Jaari: Architecture
 
 ## Principles
-1. Single owner, self-hosted, local-first.
+1. Single owner, self-hosted, owner-controlled data. The owner chooses where it runs: a VPS, a
+   remote server, home hardware, or a laptop (ADR-017).
 2. Memory is git-backed Markdown that a human can read and fix (ADR-003).
 3. Model proposes, policy disposes: external effects need owner approval bound to a digest (ADR-006).
 4. Secrets never enter model context; only `secretRef` handles do (ADR-007).
@@ -552,9 +728,14 @@ FILES["docs/ARCHITECTURE.md"] = r"""# Jaari: Architecture
 10. `refs/` is reference only; openinstinct is a spec, never a code source (ADR-009).
 11. Model proposes, policy disposes, for model choice too (ADR-011).
 12. Cheapest capable option first: small model before large, http before browser.
-13. Always on, reachable anytime: one daemon on an always-on host (VM, VPS, or server);
-    capabilities are installed where they run, on that host or on owner devices as nodes
-    (ADR-015). Laptop-only is a supported configuration.
+13. Always on, reachable anytime: one daemon on an always-on host; capabilities are
+    installed where they run, on that host or on owner devices as nodes (ADR-015). A laptop
+    is a supported host, with the cost that work pauses while it sleeps.
+14. Identity follows the owner's network: a browser signed in to the owner's accounts runs on
+    or through the owner's connection; rotating addresses are for anonymous traffic only
+    (ADR-017).
+15. The gate exists from the first line of executor code: Phase 0 ships it deny-all
+    (ADR-018). Phases are a soft plan (ADR-020).
 
 ## Non-goals for v1
 - Agent-to-agent networking (tiers, grants, A2A envelopes from the merge plan): reconsidered
@@ -567,12 +748,13 @@ FILES["docs/ARCHITECTURE.md"] = r"""# Jaari: Architecture
 | Package | Responsibility |
 |---|---|
 | `@jaari/core` | Agent loop on Pi, sessions, children, tool registry |
+| `@jaari/capabilities` | Capability manifest schema, loader, and the daemon–node contract; the single capability vocabulary lives in SECURITY_MODEL.md (ADR-015, ADR-018) |
 | `@jaari/llm` | Wraps `@earendil-works/pi-ai`; tiers + fallback chains, role routing, escalation, budgets, local-only privacy, usage log, `jaari llm eval` (ADR-011) |
 | `@jaari/memory` | Git-backed memory repo, write path, canonicalize, daily audit, gap queue |
 | `@jaari/persona` | Curiosity/Proactivity dials, monitor, quiet hours, notification ledger |
 | `@jaari/gate` | Action digests, approvals, re-check at dispatch, hash-chained `audit.jsonl` (ADR-006, ADR-016) |
 | `@jaari/secrets` | `secretRef` resolution for executors only, through pluggable vault providers (Bitwarden, 1Password; ADR-013); exact-value scrubbing of resolved secrets (ADR-016) |
-| `@jaari/http` | Egress gate: resolve, classify every address against one address-class table, dial only checked addresses; SOCKS5 listener for the browser; per-capability allowlists (ADR-016) |
+| `@jaari/http` | Egress gate: resolve, classify every address against one address-class table, dial only checked addresses; SOCKS5 listener for the browser; per-capability allowlists (ADR-016); egress providers `owner-exit`, `direct`, `mobile`, `residential-proxy` (ADR-017) |
 | `@jaari/web` | `web.search`, `web.fetch`, fetch escalation ladder (ADR-012) |
 | `@jaari/computer` | Browser/desktop control via Playwright MCP or Stagehand, local profile or remote CDP, takeover (ADR-005, ADR-012) |
 | `@jaari/channels` | `ChannelAdapter` contract, ingress (principal resolution), delivery outbox, built-in adapters |
@@ -798,10 +980,37 @@ encodings) from tool results and logs; the model names a credential by a typed t
 never a path or URL; a value sent to a node is single-use; while a filled secret is on a
 page, screenshots and page evaluation are refused.
 
-## Capabilities
-`web.search`, `web.fetch`, `browser.read`, `browser.act`, `browser.submit`,
-`email.read`, `email.send`, `repo.write`, `publish`, `pay`. Submit/send/publish/pay →
-gate. Login/2FA → owner takeover.
+## Capabilities (ADR-018)
+The only names the model can ask for. A manifest's `provides` lists these and nothing else;
+host (`daemon` or `node`) and provider (`local-profile`, `remote-cdp`, `macos`, `xvfb`) are
+separate manifest fields.
+
+| Capability | Class | Notes |
+|---|---|---|
+| `web.search`, `web.fetch` | read | Results are untrusted content (reader role) |
+| `browser.read` | read | Page content is untrusted; screenshots OQ-31 |
+| `browser.act` | gated by classifier | Ordinary clicks and typing; consequential ones escalate (OQ-30) |
+| `browser.submit` | gated | Forms, purchases, consent |
+| `computer.use` | gated per action | Desktop control on a node or the host virtual desktop |
+| `shell`, `files.write` | gated | Sandbox rules OQ-15 |
+| `files.read` | read | |
+| `email.read` | read | Content is untrusted |
+| `email.send`, `publish`, `repo.write` | gated | Short approval expiry |
+| `pay` | reserved | No executor in v1 (OQ-19) |
+| `llm.escalate` | policy-checked | Children only (ADR-011) |
+
+Login, 2FA, and CAPTCHA go to owner takeover.
+
+## Approval card (ADR-006, ADR-018)
+The short code the owner types or taps is only a lookup of the digest. There is no amount
+or parameter tolerance: a different action is a different digest. Default expiry 15
+minutes; 5 for `email.send` and `publish`; overridable per capability.
+
+## Phase 0 floor (ADR-018)
+`@jaari/gate` ships as a deny-all stub: gated capabilities refuse, read ones run. The
+`secretRef` resolver and an `os-keychain` provider ship in Phase 0; `env` and `file` are
+for development and make `jaari doctor` warn. Third-party skills install disabled until
+the `reader` role exists.
 
 ## Untrusted content
 Email, web pages, search snippets, and documents go through the tool-less `reader`
@@ -823,6 +1032,13 @@ Mechanism (ADR-016, accepted):
 - The browser reaches the network only through a per-session loopback SOCKS5 listener;
   Chromium's loopback bypass is removed and non-proxied WebRTC UDP is disabled.
 - A refusal is returned to the model in the tool result, so it stops retrying.
+
+Egress pool (ADR-017): the SOCKS5 listener and `@jaari/http` choose a provider per session:
+`owner-exit` (Tailscale, Headscale, or WireGuard exit node on owner hardware), `direct`,
+`mobile` (owner 4G dongle), `residential-proxy` (sourcing check). Rotation is for anonymous
+traffic only and may mix owner exit nodes with proxies. Owner-account sessions are pinned to
+one owner node (or direct from home hardware), fail over only to another owner node, and
+refuse when none is up; they never fall back to a rotating or datacenter address.
 
 ## Owner hold (ADR-005, ADR-016)
 Takeover is a hold owned by the owner, not by one window: accepted agent calls drain,
@@ -851,7 +1067,7 @@ Owner override: "use the big model for this", `/model <tier>`.
 ## Roles
 | Role | Default tier | Notes |
 |---|---|---|
-| main | large | Pinned for the session |
+| main | large | Pinned for the session; outage failover only at a turn boundary (ADR-019) |
 | child | medium | Tier chosen at spawn; may request escalation |
 | canonicalize | medium | Local-only if possible |
 | curiosity, classify, summarize, title | small | Local preferred |
@@ -861,6 +1077,12 @@ Owner override: "use the big model for this", `/model <tier>`.
 
 ## Rules
 - Local-only roles never fall back to an API; they fail closed and notify once.
+- `canonicalize` and `curiosity` are local-only by default only if `jaari llm eval` qualifies
+  a local model at `jaari init`; otherwise `init` asks the owner to install one or allow an
+  API tier, and canonicalize does not run until they choose (ADR-019).
+- The main session is pinned: no routine switching. On a provider outage it may move down its
+  chain at a turn boundary, to a model with the same tools, with one notice, and stays there
+  until restart or until the owner reverts (ADR-019).
 - Every call logs role, model, tokens, cost, latency, escalation reason, outcome to SQLite;
   `jaari llm usage` reports it.
 - `jaari llm eval <model>` runs role fixtures (tool-call accuracy, JSON validity,
@@ -896,6 +1118,14 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
 | `web.fetch` | http + readability → Lightpanda → local Chromium | Jina Reader, Firecrawl Cloud |
 | `browser.*` | Playwright MCP or Stagehand on the local pinned profile | Any remote CDP: Steel, Kernel, Browser Use, Browserbase, Hyperbrowser |
 
+## Where the browser runs (ADR-017)
+- Placement rule: a browser signed in to the owner's accounts runs on home hardware, on an owner
+  device installed as a node, or on any host through an owner exit node (Tailscale, Headscale,
+  WireGuard). A browser on a VPS or other datacenter host does anonymous work only.
+- Egress pool: `owner-exit`, `direct`, `mobile`, `residential-proxy`. Rotation is for
+  anonymous traffic and may include owner exit nodes; owner-account sessions are pinned to one
+  owner node and refuse when none is up.
+
 ## Rules
 - Fetch escalates on: 403, 429, challenge page, < ~500 chars of text, JS-required.
 - Scraper contract is the Firecrawl API: self-hosted Firecrawl, CRW, or Firecrawl Cloud is
@@ -907,7 +1137,7 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
   ADR-016). Saved logins are filled by the executor; the model never sees the value, and
   screenshots stop while a filled secret is on the page.
 - A browser on a VPS may send an owner-set list of home sites through an owner node and
-  everything else direct (OQ-32).
+  everything else direct (OQ-32 holds the remaining pool details).
 - Search queries are sensitive: `curiosity` and `canonicalize` use SearXNG only.
 - AGPL/SSPL services (SearXNG, Firecrawl, CRW, Lightpanda, Browserless) run as separate
   processes; never vendor their code into Jaari packages.
@@ -916,9 +1146,9 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
 ## Presets
 | Preset | Search | Fetch | Browser |
 |---|---|---|---|
-| local-only | SearXNG | http → Lightpanda → Chromium | local Chromium |
-| hybrid (default) | SearXNG → Brave | http → Lightpanda → Chromium → Jina | local; remote CDP for background |
-| api-only | Brave or Tavily | Jina or Firecrawl Cloud | hosted CDP |
+| local-only | SearXNG | http → Lightpanda → Chromium | pinned profile on the daemon host (home hardware or laptop) |
+| hybrid (default) | SearXNG → Brave | http → Lightpanda → Chromium → Jina | pinned profile where the owner's identity is (home box or owner node, or any host through an owner exit node); remote CDP or host browser for anonymous background work |
+| api-only | Brave or Tavily | Jina or Firecrawl Cloud | hosted CDP (anonymous work only) |
 
 Config: see `jaari.config.example.jsonc`, section `web`.
 """
@@ -972,30 +1202,48 @@ Change `scripts/make_docs.py`, run it, commit both. Root build config and
 
 FILES["docs/ROADMAP.md"] = r"""# Jaari: Roadmap
 
-| Phase | Scope | Blocked by |
+The goal: a self-hosted personal agent in the shape of the commercial ones (always
+reachable, remembers, works in the background, drives a browser, asks before it acts), run
+by the owner on a VPS, a remote server, home hardware, or a laptop (ADR-017).
+
+**Phases are a soft plan (ADR-020).** They say what to build roughly first, not what is
+forbidden before. An item can start in any phase once its *needs* are met, and a phase is
+never "closed" by a calendar. *Needs* are questions or decisions required **before that item
+ships**, not before the phase starts. Per-item status lives in [STATE.md](STATE.md).
+
+| Phase | Scope | Needs before the item ships |
 |---|---|---|
-| 0 Foundation | Monorepo scaffolding; config loader; `@jaari/llm` providers, tiers, roles, fallback chains; `ChannelAdapter` contract + CLI channel; capability manifest and daemon–node contract, in-process loader (ADR-015); project process files | OQ-01, OQ-02, OQ-22, OQ-23, OQ-35, OQ-44, OQ-50 |
-| 1 Memory | Memory repo and write path; retrieval and context assembly; scheduler and routines; canonicalize (6h); daily audit | OQ-03 to OQ-06, OQ-24, OQ-26, OQ-43, OQ-53 |
-| 2 Persona | Dials and monitor; curiosity from gap queue; quiet hours; notification ledger; prompt versioning; replay harness; skills; owner panel; onboarding | OQ-13, OQ-20, OQ-21, OQ-39, OQ-46, OQ-49 |
-| 3 Safety | Gate + `audit.jsonl`; `secretRef`; LLM/web budgets + usage log; kill switch; backup and encryption; shadow mode; threat model; degraded mode | OQ-07 to OQ-09, OQ-11, OQ-25, OQ-29, OQ-38, OQ-47, OQ-48, OQ-51 |
-| 4 Background work | Children; `llm.escalate`; `reader` role; `web.search`, `web.fetch`; MCP client; headless CLI and external control | OQ-14, OQ-28, OQ-33, OQ-54, OQ-55, OQ-56 |
+| 0 Foundation | Monorepo scaffolding; config loader and `jaari init` (asks for the target); `@jaari/llm` providers, tiers, roles, fallback chains; `ChannelAdapter` contract + CLI channel; `@jaari/capabilities` (manifest, loader, daemon–node contract, ADR-015/018); deny-all `@jaari/gate` stub; `@jaari/secrets` resolver with the `os-keychain` provider; laptop sleep/wake rule; install and `jaari doctor`; project process files | OQ-01, OQ-02, OQ-22, OQ-23, OQ-35, OQ-36 (sleep/wake), OQ-44, OQ-50 |
+| 1 Memory | Memory repo and write path; retrieval and context assembly; scheduler and routines; canonicalize (6h); daily audit | OQ-03 to OQ-06, OQ-24, OQ-43, OQ-53 |
+| 2 Persona | Dials and monitor; curiosity from gap queue; quiet hours; notification ledger; prompt versioning; replay harness; skills (third-party ones disabled until the reader role exists); owner panel; onboarding | OQ-13, OQ-20, OQ-21, OQ-39, OQ-46, OQ-49 |
+| 3 Safety | Real gate (digests, approvals, 15-minute expiry) + hash-chained `audit.jsonl`; vault providers (Bitwarden, 1Password); LLM/web budgets + usage log; kill switch; backup and encryption; shadow mode; threat model; degraded mode | OQ-07 to OQ-09, OQ-11, OQ-25, OQ-29, OQ-38, OQ-47, OQ-48, OQ-51, OQ-64 |
+| 4 Background work | Children; `llm.escalate`; `reader` role; `web.search`, `web.fetch`; `@jaari/http` resolve-check-dial egress with `direct` and `owner-exit` providers; MCP client; headless CLI and external control | OQ-14, OQ-28, OQ-33, OQ-54, OQ-55, OQ-56 |
 | 5 Integrations | GitHub, npm, PyPI, email; OAuth broker; the agent's mailbox; calendar and personal data; documents; inbound triggers | OQ-17, OQ-18, OQ-41, OQ-42, OQ-52 |
-| 6 Computer use | Browser via Playwright MCP or Stagehand; local profile; remote CDP; takeover; `computer.use` on a host virtual desktop; remote nodes via `jaari capability install` | OQ-27, OQ-30, OQ-31, OQ-34, OQ-36 |
-| 7 Hardening | Docker/Firecracker backends; egress proxy; code execution; deployment; multi-device state; observability | OQ-10, OQ-12, OQ-15, OQ-32, OQ-37 |
-| 8 Evals | `jaari llm eval` fixtures; behaviour evals; learned router experiment; learning from outcomes | OQ-20, OQ-40 |
+| 6 Computer use | Browser via Playwright MCP or Stagehand under the placement rule (ADR-017); local profile or owner exit node; remote CDP; takeover; `computer.use` on a host virtual desktop; remote nodes via `jaari capability install`; macOS permission matrix | OQ-27, OQ-30, OQ-31, OQ-32, OQ-34, OQ-36 (permission matrix) |
+| 7 Hardening | Docker/Firecracker backends; container egress proxy; code execution; overlay and sizing per target; multi-device state and host migration; observability; mobile and residential egress providers | OQ-10, OQ-12, OQ-15, OQ-37 |
+| 8 Evals | `jaari llm eval` fixtures; behaviour evals; learned router experiment; learning from outcomes | OQ-20 (fixtures), OQ-40 |
+| Later | Voice; payments rail (`pay` is reserved); multimodal memory; trust tiers, agent network (non-goals for v1) | OQ-16, OQ-19, OQ-45 |
+
+Egress arrives in steps: the address-class gate with `direct` and `owner-exit` for fetch in
+Phase 4; the browser's SOCKS5 listener and owner-account pinning in Phase 6; `mobile` and
+`residential-proxy` providers (anonymous traffic only) in Phase 7.
 """
 
-FILES["docs/ACTION_PLAN.md"] = "# Jaari: Action plan\n\n## Next steps\n" + r"""1. Resolve OQ-01, OQ-02, OQ-22, OQ-23 (Phase 0 blockers) and record ADRs.
-2. Scaffold the monorepo from the config files this script generates.
-3. Build `@jaari/llm` on `@earendil-works/pi-ai` with the tier/role config.
-4. Define `ChannelAdapter` and ship the CLI channel.
-5. Then move to memory retrieval (OQ-03, OQ-04) and the scheduler (OQ-05).
-6. Build the capability manifest, the daemon–node contract, and the in-process loader in
-   Phase 0 (ADR-015, OQ-50); every executor goes through it. Remote nodes and the host
-   virtual desktop for `computer.use` in Phase 6; isolation backends in Phase 7.
-7. ADR-016 accepted (OpenMausBot hardening: dispatch re-check, chained audit,
-   resolve-check-dial egress, secret scrubbing, owner hold). Build `@jaari/gate`,
-   `@jaari/http`, and `@jaari/secrets` to it; it changes no package boundary.
+FILES["docs/ACTION_PLAN.md"] = "# Jaari: Action plan\n\nOrdered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are a soft plan\n(ADR-020): pick up the next item whose needs are met.\n\n## Workstreams\n" + r"""1. **Decide the Phase 0 questions.** OQ-01 (channels), OQ-02 (owner authentication),
+   OQ-22 (project process), OQ-23 (single owner), OQ-35 (install), OQ-44 (session). Record
+   an ADR for each as it closes.
+2. **Scaffold the monorepo** from the config this script generates; add `@jaari/capabilities`,
+   `@jaari/gate` (deny-all stub), and `@jaari/secrets` (resolver + `os-keychain`) with the
+   first package (ADR-018).
+3. **Build `@jaari/llm`** on `@earendil-works/pi-ai` with the tier/role config; add the
+   `jaari llm eval` hook that `jaari init` uses to decide local-only roles (ADR-019).
+4. **Define `ChannelAdapter` and ship the CLI channel**; then a first mobile messenger.
+5. **Daemon and install.** `apps/daemon`, `jaari init` (target: VPS, remote server, home
+   hardware, or laptop), `jaari doctor`, Compose, and the laptop sleep/wake rule (ADR-017).
+6. **Memory next** (OQ-03, OQ-04, OQ-05, OQ-06), then persona, then the real gate and the
+   vault (ADR-006, ADR-016, ADR-018; verify OQ-29 and accept ADR-013).
+7. **Egress and browser.** `@jaari/http` to ADR-016 with `direct` and `owner-exit` (Tailscale)
+   providers; the browser under the placement rule; pool details in OQ-32 (ADR-017).
 
 ## ADRs
 """ + adr_table() + "\n"
@@ -1004,35 +1252,36 @@ FILES["docs/STATE.md"] = f"""# Jaari: State
 
 Last updated: {STATE_UPDATED}
 
-## Done
-- Identity: `jaari.org`, GitHub org `jaari-ai`. npm/PyPI names not yet secured; checklist in
-  [guides/namespaces.md](guides/namespaces.md).
-- Architecture, memory, persona, security, LLM routing, web/browser, and vault-provider designs (ADR-001 to ADR-013).
-- Gap review against 2026 agents (Muse, Grok Bot, ChatGPT Work, OpenClaw, Instinct): fifteen
-  open questions added (OQ-35 to OQ-49), v1 non-goals stated in ARCHITECTURE.md, ADR-011
-  amended for provider refusals, and ADR-015 (one daemon, nodes on owner devices) proposed.
-- ADR-015 accepted: one daemon on an always-on host (VM, VPS, or server), laptop-only as a
-  supported configuration; capabilities are installable packages that run on the daemon host
-  or on owner devices as nodes. Phase 0 ships the manifest, the daemon–node contract, and the
-  in-process loader. OQ-10 host part resolved; OQ-32, OQ-36, OQ-37 updated; OQ-50 added.
-- License: MIT (ADR-014); `LICENSE` and `NOTICE` generated by the script.
-- Computer-use research (Meta Muse, xAI Grok Bot/Computer, ChatGPT Work, Anthropic and Gemini
-  toolsets) recorded in [learning/07-computer.md](learning/07-computer.md) and
-  [00-research.md §9](00-research.md); OQ-27 reframed, OQ-30 and OQ-31 added. No decision taken.
-- IP reputation, bot detection, signed agents, and owner takeover research recorded in
-  [learning/08-egress-identity-and-takeover.md](learning/08-egress-identity-and-takeover.md) and
-  [00-research.md §10](00-research.md); OQ-32 to OQ-34 added. No decision taken.
-- OpenMausBot added as a reference (`refs/openmausbot`, Apache-2.0) and studied:
-  [learning/09-openmausbot.md](learning/09-openmausbot.md). ADR-016 accepted (dispatch
-  re-check, hash-chained audit, resolve-check-dial egress, secret scrubbing, owner hold);
-  23 open questions gained a leaning from it and OQ-51 to OQ-56 were added. Its approval
-  model, bot roster, and hosted services were rejected. No code copied.
-- Doc generator (`scripts/make_docs.py`) as single source of truth; the v1 generator's
-  output is merged in and its outdated duplicates are dropped.
-- Reference repos tooling (`scripts/refs.sh`); root build config scaffolded (no packages yet).
+Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
+home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
+
+## Decided (20 ADRs)
+- Identity and publishing: `jaari.org`, GitHub org `jaari-ai`, MIT licence (ADR-010, 014). npm
+  and PyPI names are not yet secured; checklist in [guides/namespaces.md](guides/namespaces.md).
+- Core design: Pi agent loop, pnpm monorepo, git-backed Markdown memory, canonicalize and
+  audit, local-profile browser with takeover, digest-bound approvals, `secretRef` secrets,
+  persona dials, open-instinct as shell and openinstinct as spec (ADR-001 to 009).
+- Models and web: role/tier routing with a pinned main session, outage failover, and
+  local-only defaults decided at init; web search, fetch ladder, and browser (ADR-011, 012,
+  019). Vault providers are Proposed until OQ-29 is verified (ADR-013).
+- Hosting: one daemon on a VPS, remote server, home hardware, or laptop; capabilities
+  installed where they run; placement rule and egress pool with Tailscale owner exit nodes
+  (ADR-015, 017).
+- Safety: OpenMausBot hardening (dispatch re-check, chained audit, resolve-check-dial egress,
+  secret scrubbing, owner hold; ADR-016); one capability vocabulary, deny-all gate and
+  keychain secrets from Phase 0, approval expiry (ADR-018).
+- Plan: soft phases, corrected blockers, deferred scope (ADR-020).
+
+## Research and process
+- Instinct, Muse, Grok Bot, ChatGPT Work, and the open-source clones: [00-research.md](00-research.md).
+- Learning notes: [07 computer use](learning/07-computer.md), [08 egress and takeover](learning/08-egress-identity-and-takeover.md), [09 OpenMausBot](learning/09-openmausbot.md).
+- Docs conflict audit (2026-11-10): ten conflicts recorded, accepted, and folded into ADR-017
+  to ADR-020; the docs were realigned to them.
+- Doc generator `scripts/make_docs.py` is the single source of truth; reference tooling is
+  `scripts/refs.sh`; root build config is scaffolded; no packages exist yet.
 
 ## Now
-Phase 0: Foundation (monorepo, `@jaari/llm`, `ChannelAdapter`).
+Phase 0: Foundation. Nothing is built; the first items are in [ACTION_PLAN.md](ACTION_PLAN.md).
 
 ## Open questions
 {sum(len(i) for _, i in OPEN_QUESTIONS)} open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
@@ -1126,7 +1375,7 @@ use to rebuild the same "ops shape."
 | **OpenInstinct** (Merit Systems) | LICENSE file present, type not stated in README | Next.js/TypeScript "Eve" agent; Kernel cloud browsers; Neon Postgres; encrypted vault with autofill that keeps passwords out of model context; workstreams memory; scheduled runs | iMessage via Linq | Any model via Vercel AI Gateway | Cloud browser + iMessage + Gmail/Calendar + Stripe Link purchases; one-click Vercel deploy. Marked "not intended for production" |
 | **openinstinct** (Yeachan-Heo) | Not stated | Runs entirely on your Mac: `openinstinctd` daemon reads/sends via Messages.app on a separate Apple ID; dedicated Chrome profile; git-backed memory repo with daily notes rolled up into people/projects/decisions — the closest match to Instinct's memory design | iMessage (your phone → your Mac) | Claude, ChatGPT, API key, or custom endpoint | Background child sessions, scheduled watches, no telemetry/server |
 | **OpenClaw** | MIT | Locally run TypeScript/Swift agent; skills system (`SKILL.md` dirs); local config/history for persistence | Signal, Telegram, Discord, WhatsApp; iMessage via community openclaw-sendblue plugin | Claude, DeepSeek, GPT, etc. | The project Instinct was literally compared to; recommended default for "Instinct-like life admin" because of browser and tool breadth |
-| **MausBot** | Apache 2.0 | Localhost harness driving `claude`/`codex`/`grok` CLIs; OAuth via Composio with tokens on disk; allow/deny card before every action; optional cloud desktop per bot | Own desktop app + iOS/Android companions — not iMessage/WhatsApp | Claude, Codex, Grok, Cursor, Kimi, Qwen CLIs | Multi-agent/multi-thread, browses from your own IP (avoids Instinct's CAPTCHA problem) |
+| **MausBot** | Apache 2.0 | Localhost harness driving `claude`/`codex`/`grok` CLIs; OAuth via Composio with tokens on disk; allow/deny card before every action (as marketed; the code defaults to Full access, see [learning/09](learning/09-openmausbot.md)); optional cloud desktop per bot | Own desktop app + iOS/Android companions — not iMessage/WhatsApp | Claude, Codex, Grok, Cursor, Kimi, Qwen CLIs | Multi-agent/multi-thread, browses from your own IP (avoids Instinct's CAPTCHA problem) |
 | **Hermes Agent** | MIT | Self-hosted, self-improving (builds its own skills) | Sendblue webhook/community plugin | BYOK | Best if memory continuity is the priority |
 | **OpenOpenInstinct** | — | Self-hosted, local SQLite WAL, WebCrypto P-256 device auth, browser execution | iMessage + web | — | Minimal-infra variant |
 
@@ -1147,8 +1396,9 @@ shopping/booking permissions.
   teardown found.
 - **Most production-ready foundation:** OpenClaw (large community, MIT), with the Sendblue
   plugin for iMessage.
-- **If you want "asks first" instead of Instinct's "acts first":** MausBot or Merit's
-  OpenInstinct (vault-based autofill keeps credentials out of the model).
+- **If you want "asks first" instead of Instinct's "acts first":** MausBot's marketing says
+  so, but its source defaults to Full access (learning/09); Merit's OpenInstinct (vault-based
+  autofill keeps credentials out of the model) is the safer pick.
 
 ## 8. Persona/proactivity reference (added 2026-11-04)
 
@@ -1224,7 +1474,7 @@ your own IP") rely on the same fact.
 
 | Option | Mechanism | Cost | Fit for a single-owner agent |
 |---|---|---|---|
-| Owner's home IP, self-hosted | Tailscale (Headscale, plain WireGuard) exit node on a Pi or home server; a VPS-hosted browser routes through it | None; bounded by home uplink and Pi CPU | Default. Same IP the owner browses from, so login patterns stay consistent |
+| Owner's home IP, self-hosted | Tailscale (Headscale, plain WireGuard) exit node on a Pi or home server; a VPS-hosted browser routes through it | None; bounded by home uplink and Pi CPU | Default for the owner's accounts (pinned, ADR-017). Same IP the owner browses from, so login patterns stay consistent; may also join the anonymous rotation pool |
 | Owner's mobile IP, self-hosted | 4G/5G USB dongle on a Pi (Proxidize's open-source `4g-proxy` or manual); carrier CGNAT IPs are shared by thousands of real users; rotate by reconnecting | ~$80–130 per modem + SIM | Cleanest reputation; overkill for one owner; fallback for hostile sites |
 | Commercial residential proxies | Decodo (most recommended, ~$2–6/GB), Oxylabs (premium, publishes sourcing docs), Bright Data (KYC, business accounts, open-source proxy manager), IPRoyal and Webshare (budget; Webshare has a free tier), Evomi (cheapest, mixed reliability) | Per GB | Anonymous `web.fetch` only. A rotating IP in another city on the owner's accounts triggers fraud flags rather than avoiding them |
 | Commercial VPN (Gluetun and similar) | Datacenter IPs | Subscription | Privacy only; worse than nothing against bot detection |
@@ -1305,8 +1555,9 @@ only on their own platforms.
 MERGE_PLAN = r"""# 01 — Merge plan: open-instinct × openinstinct
 
 > Captured 2026-10-29. Historical reasoning; the authoritative package layout now lives in
-> ARCHITECTURE.md (channels became a plugin system, hosting became local-first, persona
-> and curiosity were added).
+> ARCHITECTURE.md (channels became a plugin system; hosting became one self-hosted daemon on a
+> VPS, remote server, home hardware, or laptop, ADR-015 and ADR-017; persona and curiosity were
+> added). The 7-tier matrix, peers, payments, and voice below are deferred (ADR-020).
 
 Short version: the two projects are complementary rather than overlapping.
 **open-instinct** is strong on *who may do what* (multi-principal trust, grants, payments,
@@ -1530,7 +1781,10 @@ contract as Muse's secure storage and Grok's Secure Form. `@jaari/http` plus the
 Muse's audit trail of planned actions matches the digest-bound approval of ADR-006.
 
 **Where Jaari differs.**
-- Cloud VM is optional (Docker/Firecracker backends), not the default. Muse, Grok Bot, and
+- The cloud VM is not where the owner's identity lives. ADR-015 and ADR-017 let the daemon run
+  on a VPS, but the placement rule keeps a browser signed in to the owner's accounts on home
+  hardware, an owner node, or behind an owner exit node; the host's own browser serves
+  anonymous work. Muse, Grok Bot, and
   Instinct all default to the cloud because they serve many users; a single-owner agent
   does not need the isolation and loses the owner's browser state.
 - No vendor lock on the model. Every product above is tied to its vendor's model; Jaari
@@ -2402,6 +2656,9 @@ FILES[".claude/settings.json"] = """{
 FILES["jaari.config.example.jsonc"] = r"""{
   "owner": { "timezone": "America/New_York", "quietHours": ["22:00", "08:00"] },
 
+  // ADR-017: where this daemon runs. "vps" | "server" | "home" | "laptop"
+  "deployment": { "target": "vps", "overlay": "tailscale" },
+
   "persona": { "curiosity": 2, "proactivity": 1 },
 
   "memory": {
@@ -2426,6 +2683,7 @@ FILES["jaari.config.example.jsonc"] = r"""{
       "curiosity": "small", "classify": "small", "summarize": "small", "title": "small",
       "reader": "small", "vision": { "capability": "image" }
     },
+    // ADR-019: `jaari init` sets this only if a local model passes `jaari llm eval`.
     "privacy": { "localOnly": ["canonicalize", "curiosity"] },
     "budget": { "monthlyUsd": 30, "perRoleUsd": { "child": 10 }, "onExceeded": "downgrade" },
     "escalation": { "allowRequest": ["child"], "maxPerDay": 20 }
@@ -2449,11 +2707,21 @@ FILES["jaari.config.example.jsonc"] = r"""{
     },
     "browser": {
       "driver": "playwright-mcp",
-      "host": "local-chromium",
+      // ADR-017: run it where the owner's identity is (home hardware or an owner node).
+      "host": "node:home-mini-pc",
       "remote": { "cdpUrl": "secretRef:browser.cdp", "enabled": false },
       "disabledTools": ["browser_run_code_unsafe"]
     },
     "budget": { "monthlyUsd": 10, "onExceeded": "local-only" }
+  },
+
+  // ADR-017: owner accounts pin to one owner exit node; rotation is for anonymous traffic.
+  "egress": {
+    "ownerAccounts": { "provider": "owner-exit", "node": "home-mini-pc", "failoverTo": [] },
+    "anonymous": {
+      "rotate": ["owner-exit:home-mini-pc", "owner-exit:laptop"],
+      "residentialProxy": { "enabled": false }
+    }
   }
 }
 """
