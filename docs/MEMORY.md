@@ -16,5 +16,11 @@
   checks the quote and rejects numbers, paths, and URLs that are not in it.
 - Recalled memory is placed in front of the owner's message inside a fenced data block,
   within a fixed budget, never in the cached prompt prefix (OQ-04).
-- Open: retrieval (OQ-03), context assembly (OQ-04), concurrent writes (OQ-06),
+- Structured records (ADR-023): typed records (ledger, event, task, commitment, tracker,
+  recurring bill, person, document and expiry, metric log, goal, list, trip, place, and custom
+  types) under schemas in `ops/schemas/`. The model fills fields; code computes totals, dates,
+  and run-out; ledgers are append-only and canonicalize never edits them. Capture is immediate.
+- Search (ADR-023): `memory.search` over SQLite FTS5, a cache rebuilt from the Markdown, with a
+  freshness check before each query; embeddings later, local-only.
+- Open: context assembly (OQ-04), concurrent writes (OQ-06),
   encryption (OQ-08), forgetting (OQ-09), backup (OQ-07), capture evidence (OQ-53).
