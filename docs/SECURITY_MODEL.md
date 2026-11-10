@@ -95,6 +95,11 @@ Takeover is a hold owned by the owner, not by one window: accepted agent calls d
 new agent input is refused (never queued), and the hold ends on release, two minutes
 after the last view closes, or after five idle minutes. Transport: OQ-34.
 
+## Pause, stop, and limits (ADR-031)
+Pause stops new work and survives restarts; emergency stop also aborts running work and cancels
+pending approvals. Step, child, stall, watchdog, loop, and spend-spike limits are enforced in
+code, configurable, and logged when they fire.
+
 ## Encryption at rest (ADR-028)
 Memory writes are scanned for secrets before they are stored. The host relies on full-disk
 encryption; remotes the owner does not control get age-encrypted bundles or `git-remote-gcrypt`;
@@ -102,6 +107,6 @@ encryption; remotes the owner does not control get age-encrypted bundles or `git
 [guides/securing-your-install.md](guides/securing-your-install.md).
 
 ## Open
-Kill switch (OQ-11), MCP plugin
+MCP plugin
 sandboxing (OQ-14), code execution (OQ-15), standing grants (OQ-51), inbound triggers
 (OQ-52), outside lineage (OQ-54).
