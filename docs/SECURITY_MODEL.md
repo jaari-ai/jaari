@@ -95,6 +95,6 @@ new agent input is refused (never queued), and the hold ends on release, two min
 after the last view closes, or after five idle minutes. Transport: OQ-34.
 
 ## Open
-Owner auth (OQ-02), kill switch (OQ-11), encryption at rest (OQ-08), MCP plugin
+Kill switch (OQ-11), encryption at rest (OQ-08), MCP plugin
 sandboxing (OQ-14), code execution (OQ-15), standing grants (OQ-51), inbound triggers
 (OQ-52), outside lineage (OQ-54).

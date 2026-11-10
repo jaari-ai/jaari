@@ -135,8 +135,8 @@ export interface ChannelAdapter {
   first, like web pages and documents.
 
 ### Identity binding
-The manifest's `identity` says what the transport can prove. Proposed design, pending
-OQ-02 (owner authentication, pairing, revocation):
+The manifest's `identity` says what the transport can prove. Decided in ADR-022, which also
+sets pairing, revocation, and the single active channel:
 
 | `identity` | Transport proves | Can produce owner turns? | Pairing |
 |---|---|---|---|
@@ -145,7 +145,10 @@ OQ-02 (owner authentication, pairing, revocation):
 | `device` | A device key (web panel, WebCrypto P-256) | Yes, per enrolled device | QR / device enrolment |
 | `none` | Nothing (email: `From` is forgeable) | **No.** Mail from the owner's address is untrusted content, never authority | n/a |
 
-Unknown senders get nothing. In group threads each participant gets their own transcript,
+Unknown senders get nothing. Paired channels are equal; only the active channel (the one
+the owner's latest message came from) receives replies, approvals, and proactive messages,
+and switching channels continues the same session without replaying history (ADR-022).
+In group threads each participant gets their own transcript,
 owner turns run at the lowest trust level present, and a bare "yes" in a group never
 settles an approval (approvals bind to a digest, ADR-006).
 
@@ -168,7 +171,7 @@ Hosted bridges (Inkbox, Sendblue, Linq) can exist as third-party plugins; none i
 dependency.
 
 ## Trust boundaries
-- Owner ↔ channels: authenticated owner only (see [Channels](#channels) and OQ-02).
+- Owner ↔ channels: authenticated owner only (see [Channels](#channels) and ADR-022).
 - Model ↔ tools: every tool maps to a capability; effectful capabilities go through the gate.
 - Tools ↔ internet: all egress through `@jaari/http` or the container egress proxy.
 - Untrusted content ↔ main session: `reader` summary only, never raw instructions. Whether

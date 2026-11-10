@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **56**.
+Last updated: 2026-11-10. Open: **55**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -14,7 +14,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-02 | Owner authentication | How does Jaari verify a message is from the owner? How are new devices paired and revoked? | 0 | Per-channel allowlist + pairing code; unknown senders get nothing. Device pairing shaped like OpenMausBot's: a QR that pins the daemon's transport key, device tokens stored hashed, revocation per token (learning/09) |
 | OQ-03 | Memory retrieval | grep, SQLite FTS5, embeddings, or hybrid? Which embedding provider (local or API tier)? | 1 | FTS5 first, embeddings as optional layer. OpenMausBot ships word-match FTS only, with a fixed recall budget (4 notes and 4 passages); that supports FTS5 first |
 | OQ-04 | Context assembly | Who decides what memory enters each prompt? How are long sessions compacted? | 1 | Deterministic assembler with token budget per section. Split the prompt into a stable and a volatile part; recalled memory goes in front of the owner's message, fenced as data, never into the cached prefix (learning/09) |
 | OQ-05 | Scheduler | One job engine for canonicalize, audit, reminders, children: persistence, retries, crash recovery, missed runs during sleep, time zones | 1 | SQLite-backed queue in the daemon. A job tree with an append-only events table whose status can be rebuilt from its events; a turn cut by a restart reruns at most once and never after an effectful action (ADR-016) |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-65 | Main session pinned; outage failover at a turn boundary with one notice | [ADR-019](adr/019-model-pinning-and-local-only-defaults.md) |
 | OQ-66 | Local-only canonicalize decided at `jaari init` by `jaari llm eval` | [ADR-019](adr/019-model-pinning-and-local-only-defaults.md) |
 | OQ-01 | CLI, web panel, and Telegram in v1; email as input only (Phase 5); WhatsApp and iMessage first after v1 | [ADR-021](adr/021-v1-channels.md) |
+| OQ-02 | Ingress mints authority; paired channels are equal; one active channel (latest inbound); pluggable pairing into one hashed device registry; immediate revoke | [ADR-022](adr/022-owner-authentication-and-active-channel.md) |

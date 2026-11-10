@@ -4,8 +4,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 (ADR-020): pick up the next item whose needs are met.
 
 ## Workstreams
-1. **Decide the Phase 0 questions.** OQ-02 (owner authentication),
-   OQ-22 (project process), OQ-23 (single owner), OQ-35 (install), OQ-44 (session). Record
+1. **Decide the Phase 0 questions.** OQ-22 (project process), OQ-23 (single owner), OQ-35 (install), OQ-44 (session). Record
    an ADR for each as it closes.
 2. **Scaffold the monorepo** from the config this script generates; add `@jaari/capabilities`,
    `@jaari/gate` (deny-all stub), and `@jaari/secrets` (resolver + `os-keychain`) with the
@@ -44,3 +43,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [019](adr/019-model-pinning-and-local-only-defaults.md) | Main session pin with outage failover; local-only canonicalize decided at init | Accepted |
 | [020](adr/020-soft-phases-and-v1-scope.md) | Roadmap phases are a soft plan; scope deferred from the merge plan | Accepted |
 | [021](adr/021-v1-channels.md) | v1 channels: CLI, web panel, Telegram; email as input only | Accepted |
+| [022](adr/022-owner-authentication-and-active-channel.md) | Owner authentication: pluggable pairing, one device registry, one active channel | Accepted |
