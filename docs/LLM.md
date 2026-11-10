@@ -44,6 +44,28 @@ Owner override: "use the big model for this", `/model <tier>`.
   timeout and a calibrated acceptance threshold; below it, a deterministic rule decides.
   Local-only roles still fail closed.
 
+## Local models per target
+Size guide, not a model list: models change monthly and a model qualifies for a tier only by
+passing `jaari llm eval`, never by its size (OQ-24). Memory rule of thumb at 4-bit
+quantization: about 0.6 GB per billion parameters, plus a few GB for context.
+
+| Target (ADR-017) | Typical hardware | Local model size | Local roles | API roles |
+|---|---|---|---|---|
+| VPS or remote server (CPU only) | 4–8 vCPU, 8–16 GB RAM | 3–8B dense, or none | small tier at most (classify, title, summarize, reader); slow, so background only | main, child, canonicalize (unless the owner chooses local-only and accepts the speed) |
+| GPU server or GPU VPS | 24–48 GB VRAM | 14–32B dense, or a ~30B mixture-of-experts (MoE) model with a few billion active | small and medium tiers if they pass; canonicalize | main; hard children |
+| Home hardware, mid | Mini PC or Mac with 32 GB unified memory, or a 24 GB GPU | 14–32B dense or ~30B MoE | small tier; canonicalize if it passes | main; most children |
+| Home hardware, large | 64–128 GB unified memory, or 48 GB+ GPU | 70B-class dense or a large MoE | small and medium tiers; canonicalize; many children | main (frontier models still lead on long tool-using sessions) |
+| Laptop | 16–32 GB | 3–8B, up to ~14B | small tier while awake | everything else |
+| Local-only preset | 64 GB+ recommended | Largest that passes the main-role fixtures | every role | none; expect a weaker main session |
+
+Rules:
+- `jaari init` detects memory and GPU, proposes the row, runs `jaari llm eval` on the
+  suggested models, and writes only the ones that pass into the tier chains.
+- A role is local-only only if a local model qualified for it (ADR-019); otherwise `init` asks.
+- Tool-calling accuracy and JSON validity decide the small tier; the canonicalize golden set
+  decides the medium tier; the main role needs long multi-turn tool use, which is why it
+  defaults to the API.
+
 ## Presets (`jaari init`)
 | Preset | Main | Background |
 |---|---|---|
