@@ -32,4 +32,8 @@
   a NAS, or S3-compatible storage; monthly restore drill.
 - Encryption (ADR-028): secrets are blocked before they reach memory; remotes not owned by the
   owner are encrypted; `jaari memory purge` rewrites history.
-- Open: forgetting (OQ-09), capture evidence (OQ-53).
+- Forgetting (ADR-029): corrections supersede and keep the old line struck through; forget
+  removes a fact and can always be undone; erase rewrites history and cannot. The owner asks in
+  plain words and confirms a preview; every line carries a source id so forgetting a source
+  cascades.
+- Open: capture evidence (OQ-53).

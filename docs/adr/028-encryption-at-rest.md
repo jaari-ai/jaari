@@ -34,7 +34,7 @@ unlock) set it up themselves, and the trade-offs are documented in
 (ADR-026): it rewrites history with `git filter-repo`, replaces history on every remote
 (force-push, or a new bundle chain), rebuilds the FTS index, records the purge in the audit log
 without the purged text, and tells the owner that clones or copies outside Jaari cannot be
-reached. OQ-09 may use it for true erasure.
+reached. ADR-029 uses it for erase.
 
 ## Alternatives rejected
 App-level encryption of memory on the host (the running daemon holds the key, so it adds
