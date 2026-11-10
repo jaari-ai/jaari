@@ -39,7 +39,7 @@ tokenizers (stemming and typo tolerance), `unicode61` accent folding, and column
 and titles above body). Code adds axis priority (profile and rules above raw daily logs) and
 linked-note expansion. The Markdown files stay the source of truth and the index is a cache:
 rebuilt from the files on start; Jaari's own writes update it through the single writer
-(OQ-06); a freshness check by modification time and hash before each search re-indexes files
+(ADR-026); a freshness check by modification time and hash before each search re-indexes files
 edited by hand or pulled from git; if the index is missing or corrupt, search scans the files.
 Embeddings come later as an optional layer behind the same tool, local-only by default.
 

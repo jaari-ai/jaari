@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **52**.
+Last updated: 2026-11-10. Open: **51**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -14,7 +14,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-06 | Concurrent memory writes | Lock, single writer queue, or branch-per-task then merge? | 1 | Single writer; others enqueue patches |
 
 ## B. Before daily use
 
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-03 | Typed structured records (13 built-in types plus custom) with code-computed values; SQLite FTS5 search as a rebuildable cache; embeddings later | [ADR-023](adr/023-structured-records-and-memory-search.md) |
 | OQ-04 | Code-built layout with per-section budgets; 14-day window plus date-aware recall, a horizon line, and records.query for later dates; model may search more | [ADR-024](adr/024-context-assembly.md) |
 | OQ-05 | Own SQLite job engine with an events table, per-tool replay flag, per-job catch-up window (default 12 h), DST rules, retry ladder; replaceable by pi-durable | [ADR-025](adr/025-scheduler-and-job-engine.md) |
+| OQ-06 | One writer with the closure ladder and commit trailers; canonicalize submits patches, conflicts redone; owner edits committed separately and win | [ADR-026](adr/026-memory-single-writer.md) |

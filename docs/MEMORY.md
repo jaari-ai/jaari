@@ -24,5 +24,8 @@
   and run-out; ledgers are append-only and canonicalize never edits them. Capture is immediate.
 - Search (ADR-023): `memory.search` over SQLite FTS5, a cache rebuilt from the Markdown, with a
   freshness check before each query; embeddings later, local-only.
-- Open: concurrent writes (OQ-06),
+- Writes (ADR-026): one writer applies every change (intent, files, commit with mutation id,
+  actor, and session trailers, index update); the owner's hand edits are committed separately
+  and win any conflict.
+- Open:
   encryption (OQ-08), forgetting (OQ-09), backup (OQ-07), capture evidence (OQ-53).
