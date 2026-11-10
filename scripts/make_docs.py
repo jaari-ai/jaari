@@ -189,33 +189,46 @@ ADRS: dict[str, tuple[str, str, str, str]] = {
         "legally use or contribute).",
     ),
     "015-control-plane-and-nodes": (
-        "One daemon decides, nodes on owner devices execute",
-        "Proposed",
-        "Jaari runs anywhere by splitting brain from hands. One daemon (`apps/daemon`) is the "
-        "control plane: sessions, memory, gate, scheduler, channels, LLM routing, and the "
-        "notification ledger. It runs where the owner puts it (laptop, home server, VPS). "
-        "Effectful hands run on **nodes** (`apps/node`): a thin executor on any owner device "
-        "that enrols with a `device` identity (the same pairing as channels, OQ-02), advertises "
-        "capabilities (`browser.local` on the pinned profile of ADR-005, `desktop.macos`, "
-        "`desktop.linux`, `files`, `shell`), executes only actions the gate has already "
-        "approved, and streams results and screenshots back. A single-machine install runs a "
-        "node inside the daemon process; Docker and Firecracker backends are nodes too. Nodes "
-        "talk to the daemon over a mutually authenticated connection on the owner's overlay "
-        "network (Tailscale, Headscale, or plain WireGuard) or the daemon's own WebSocket; a node "
-        "holds no memory, no LLM credentials, and no secrets beyond its device key. `secretRef` "
-        "values are resolved by the daemon's executor and sent to the node just in time for one "
-        "action, which fills them into the page and discards them (ADR-007). Takeover (ADR-005) "
-        "and the live view (OQ-34) are node features because the node is the only place the "
-        "owner's screen exists. An offline node queues approved actions with an expiry and the "
-        "owner is told once; capabilities a node does not advertise are not offered to the "
-        "model. Where the daemon runs decides the egress identity of `web.fetch`; where the node "
-        "runs decides the egress identity of `browser.*` (OQ-32).",
-        "One process on one machine (a VPS daemon cannot reach the owner's browser profile; a "
-        "laptop daemon is asleep half the day); a cloud VM per owner by default (the Instinct, "
-        "Muse, and Grok Bot shape: datacenter IP, credentials off-device); several full daemons "
+        "One daemon on an always-on host; capabilities installed where they run",
+        "Accepted",
+        "**Primary deployment: an always-on host the owner can reach at any time** (a VM, a "
+        "VPS, or a home server). One daemon (`apps/daemon`) runs there and is the control "
+        "plane: sessions, memory, gate, scheduler, channels, LLM routing, the notification "
+        "ledger, and `secretRef` resolution. Running everything on a laptop is a supported "
+        "configuration, with the documented cost that work stops while it sleeps. "
+        "**Capabilities are installed where they run.** A capability is a versioned package "
+        "with a manifest (id, version, the gated capability names it provides from "
+        "SECURITY_MODEL.md, required OS permissions, health check). Installed on the daemon "
+        "host, it runs in-process or as a local sidecar: for example `computer.use` on a "
+        "virtual desktop on the VPS (Xvfb or a desktop container with VNC), `browser.remote`, "
+        "`shell`, `files`. Installed on another owner device, it turns that device into a "
+        "**node** (`apps/node`): `jaari capability install desktop` on a laptop pairs it with "
+        "the daemon as a `device` (OQ-02) and provides `desktop.macos`, `browser.local` on the "
+        "pinned profile of ADR-005, or `files`. The model is offered only capabilities that "
+        "are installed, enabled, and on a connected host. "
+        "**Rules for nodes.** A node executes only actions the gate has already approved and "
+        "streams results and screenshots back. It holds no memory, no LLM credentials, and no "
+        "secrets beyond its device key; the daemon resolves a `secretRef` and sends the value "
+        "for one action, which the node fills in and discards (ADR-007). Nodes connect over a "
+        "mutually authenticated channel on the owner's overlay network (Tailscale, Headscale, "
+        "WireGuard) or the daemon's WebSocket; the host exposes no public ports. An offline "
+        "node queues approved actions with an expiry and the owner is told once. Takeover "
+        "(ADR-005) and the live view (OQ-34) belong to whichever host runs the screen. Where a "
+        "capability is installed decides its egress identity (OQ-32): a browser on the VPS "
+        "browses from the VPS's IP, a browser capability on the laptop from the owner's. "
+        "**Phasing.** Phase 0 defines the capability manifest and the daemon-node contract and "
+        "runs every capability through it in-process, so executors never assume they are "
+        "local. Remote nodes (`jaari capability install` on another device) and the VPS "
+        "virtual desktop for `computer.use` ship with computer use (Phase 6); Docker and "
+        "Firecracker isolation for host capabilities with hardening (Phase 7).",
+        "One process with every capability built in (a VPS cannot reach the owner's laptop; "
+        "a laptop is asleep half the day); laptop-first as the main target (always-on work "
+        "depends on the lid); a cloud VM per owner run by the project (the Instinct, Muse, "
+        "and Grok Bot shape: not self-hosted, credentials off-device); several full daemons "
         "(split brain for memory, approvals, and budgets); nodes with their own LLM access "
         "(unauditable, secrets sprawl); nodes that resolve `secretRef` themselves (every device "
-        "becomes a vault client).",
+        "becomes a vault client); capabilities as model-visible plugins without a manifest "
+        "(nothing maps them to gated capability names).",
     ),
 }
 
@@ -269,7 +282,7 @@ OPEN_QUESTIONS: list[tuple[str, list[tuple[str, str, str, str, str]]]] = [
         ("OQ-07", "Backup and restore", "Encrypted git remote for memory, SQLite backup (e.g. Litestream), secret store backup, restore drill", "3", "All three + a scripted restore test"),
         ("OQ-08", "Encryption at rest", "age vs git-crypt for memory; how to purge a secret that reached git history", "3", "Undecided"),
         ("OQ-09", "Forgetting and retention", "\"Forget this\" command; raw daily log retention; does forgetting rewrite git history?", "3", "Undecided"),
-        ("OQ-10", "Deployment", "Home server, VPS, or laptop; Compose layout; remote access via Tailscale/WireGuard; config and memory format migrations", "7", "Home server + Tailscale, no public ports"),
+        ("OQ-10", "Deployment", "Host choice decided by ADR-015 (always-on VM, VPS, or server; laptop-only by configuration). Still open: Compose layout for the host, overlay network (Tailscale or self-hosted Headscale), reference VPS sizing, config and memory format migrations (see OQ-35)", "7", "Compose on the host; Tailscale first, Headscale documented; no public ports"),
         ("OQ-11", "Kill switch", "Global pause, loop step limits, max concurrent children, spend-spike alerts", "3", "All four, enforced in code"),
         ("OQ-12", "Observability", "Tracing per turn/tool/child (OpenTelemetry?), admin page for jobs, approvals, usage, errors", "7", "OTel + small local admin page"),
         ("OQ-13", "Notification delivery", "Proactive messages via channel or push (ntfy, Pushover); urgent vs digest routing", "2", "Channel first, ntfy optional"),
@@ -299,14 +312,14 @@ OPEN_QUESTIONS: list[tuple[str, list[tuple[str, str, str, str, str]]]] = [
     ("F. Carried over from the computer-use research (learning/07-computer.md, 08-egress-identity-and-takeover.md)", [
         ("OQ-30", "Consequential browser actions", "A purchase, a sent message, or accepted terms arrives as an ordinary `left_click` / `type`; Anthropic's own `confirm` hook \"can't pick them out by name\". How does the gate recognise them: deterministic page heuristics, a reader-role check of the page state, or approval on every click within flagged origins?", "6", "Deterministic heuristics (submit controls, payment and consent URL patterns) escalate to a reader-role check; never an LLM alone (principle 9)"),
         ("OQ-31", "Screenshots as untrusted content", "Do screenshots and accessibility trees fall under the reader-role rule (principle 8)? A reader pass per screenshot is too slow for a click loop, and vendor prompt-injection classifiers run only on native toolsets.", "6", "Gate + egress allowlist + classifier where available; log every action with its screenshot (OQ-12)"),
-        ("OQ-32", "Egress identity off the home network", "When the daemon or a Docker/Firecracker backend runs on a VPS, which IP does the browser use: the owner's home connection via a Tailscale/WireGuard exit node, the owner's own 4G/5G dongle, or a commercial residential proxy? Background: [learning/08-egress-identity-and-takeover.md](learning/08-egress-identity-and-takeover.md)", "7", "Home exit node by default; commercial residential proxies, if ever, only for anonymous `web.fetch` and behind a provider interface with a sourcing check; never for `browser.*` on the owner's accounts (impossible-travel flags)"),
+        ("OQ-32", "Egress identity off the home network", "When the daemon or a Docker/Firecracker backend runs on a VPS, which IP does the browser use: the owner's home connection via a Tailscale/WireGuard exit node, the owner's own 4G/5G dongle, or a commercial residential proxy? Background: [learning/08-egress-identity-and-takeover.md](learning/08-egress-identity-and-takeover.md)", "7", "Under ADR-015 the egress identity follows where a capability is installed. A browser capability on a VPS or VM browses from its datacenter IP; on a home server or the laptop, from the owner's. For the owner's logged-in accounts, prefer a browser capability on an owner device, or route the host's browser through an owner exit node (home box or laptop) when one is up; residential proxies (sourcing check) and a 4G dongle are opt-in for anonymous browsing and `web.fetch` only; never a proxy for the owner's accounts (impossible-travel flags)"),
         ("OQ-33", "Signed-agent identity", "Should `@jaari/http` and the browser sign requests per Web Bot Auth (RFC 9421, `Signature-Agent`, JWKS at `/.well-known/http-message-signatures-directory`)? Cloudflare's Signed Agents registry is per operator via the dashboard; it is unknown whether an individual self-hoster can register.", "4", "Implement signing with a per-install Ed25519 key; registration decided when the registry policy is known"),
         ("OQ-34", "Takeover transport", "How does the owner see and touch the agent's browser from a phone within seconds: CDP screencast in the web panel, noVNC over loopback, or a hosted live view? Takeover states, timeouts, and the rule that screenshots stop while the owner holds the session.", "6", "CDP screencast in `@jaari/channel-web` over Tailscale; a \"Take over\" link pushed through the active channel; states pending/active/completed/timeout/cancelled"),
     ]),
     ("G. From the 2026 gap review (2026-11-09)", [
         ("OQ-35", "Install, update, migrate", "One-command install (Compose, brew, single binary), `jaari doctor`, an update channel, and versioned config and memory schemas with migrations run at start. Nothing is specified today.", "0", "Compose + a single `jaari` binary; schema version in config and in the memory repo; migrations idempotent and run on daemon start"),
-        ("OQ-36", "Laptop as host", "Sleep and wake, network changes, battery, and the macOS permission matrix per capability (Automation, Accessibility, Screen Recording, Full Disk Access). Meta publishes none of this for Muse.", "6", "Published permission matrix in the node guide; jobs missed in sleep run once on wake, capped"),
-        ("OQ-37", "Multi-device state", "With ADR-015, which host is authoritative for the memory repo and SQLite state, how nodes and daemon reconnect, and how a daemon move (laptop to server) works.", "7", "Exactly one daemon; memory via its git remote; nodes hold no state; `jaari migrate-host` exports and imports"),
+        ("OQ-36", "Laptop as host", "The laptop-only configuration and laptop nodes: sleep and wake, network changes, battery, and the macOS permission matrix per capability (Automation, Accessibility, Screen Recording, Full Disk Access). Meta publishes none of this for Muse.", "6", "Published permission matrix per capability manifest; in laptop-only mode, jobs missed in sleep run once on wake, capped"),
+        ("OQ-37", "Multi-device state", "With ADR-015, how nodes and the daemon reconnect, and how the daemon moves between hosts (laptop to VPS, VPS to home server).", "7", "The daemon host is authoritative (ADR-015); memory pushed to an encrypted git remote (OQ-07); nodes hold no state; `jaari migrate-host` exports and imports"),
         ("OQ-38", "Degraded mode", "Behaviour when the API tier is unreachable, the budget is spent, or a node is offline: what queues, what runs locally, what the owner is told.", "3", "Effectful work queues with expiry; local-only roles keep running; one notice per outage"),
         ("OQ-39", "Skills and procedural memory", "Skills as versioned Markdown playbooks (OpenClaw `SKILL.md`, open-instinct `skills/`, Anthropic Agent Skills): where they live, how they are installed, who approves them, how a skill becomes memory.", "2", "Playbooks in the memory repo under `ops/rules`, project `skills/` for built-ins; installing a third-party skill is a gated action; the reader role screens skill text"),
         ("OQ-40", "Learning from outcomes", "Failure receipts, `reflections → rules` promotion (gajae-way), router tuning from the outcome log. Today only the notification ledger learns.", "8", "Receipts write to `reflections`; the daily audit proposes promotions the owner confirms"),
@@ -319,6 +332,7 @@ OPEN_QUESTIONS: list[tuple[str, list[tuple[str, str, str, str, str]]]] = [
         ("OQ-47", "Shadow mode", "Observe-and-propose only for the first weeks: drafts instead of sends, plans instead of actions; the owner lifts it per capability.", "3", "On by default for 14 days; per-capability lift recorded in `audit.jsonl`"),
         ("OQ-48", "Threat model", "An enumerated `THREAT_MODEL.md`: injection via pages and screenshots, malicious MCP server or skill, compromised node, stolen phone, malicious channel plugin, poisoned memory.", "3", "Write it before Phase 3 code; one mitigation column per threat"),
         ("OQ-49", "Onboarding conversation", "The first conversation and first week: profile bootstrap, what is asked and what is inferred, when dials are explained.", "2", "An onboarding skill; ask only what the next task needs"),
+        ("OQ-50", "Capability packages", "ADR-015 makes capabilities installable units with a manifest. Open: manifest schema, where packages come from (npm `@jaari/capability-*`, local path), signing and update, how a capability declares and checks its OS permissions and sidecars (Xvfb or a desktop container for `computer.use` on a VPS), and how this relates to MCP servers (OQ-14) and skills (OQ-39).", "0", "Manifest schema and the in-process loader in Phase 0; npm packages with provenance, installed by `jaari capability install`; an MCP server can back a capability but never bypasses its manifest"),
     ]),
 ]
 
@@ -326,6 +340,7 @@ OPEN_QUESTIONS: list[tuple[str, list[tuple[str, str, str, str, str]]]] = [
 # Resolved: (question id, decision, ADR id)
 RESOLVED: list[tuple[str, str, str]] = [
     ("OQ-22 (license part)", "MIT", "014-license-mit"),
+    ("OQ-10 (host part)", "Daemon on an always-on host (VM, VPS, or server); laptop-only supported by configuration", "015-control-plane-and-nodes"),
 ]
 
 
@@ -385,7 +400,7 @@ background, gets to know you at a pace you set, and never takes an external acti
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Principles, packages, trust boundaries |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phases 0 to 8 and the open questions blocking each |
 | [docs/ACTION_PLAN.md](docs/ACTION_PLAN.md) | Next steps |
-| [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Undecided design questions (OQ-01 to OQ-49) with current leanings |
+| [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Undecided design questions (OQ-01 to OQ-50) with current leanings |
 | [docs/adr/](docs/adr/README.md) | Architecture decision records (the authoritative ADR numbering) |
 | [docs/MEMORY.md](docs/MEMORY.md), [PERSONA.md](docs/PERSONA.md), [SECURITY_MODEL.md](docs/SECURITY_MODEL.md), [LLM.md](docs/LLM.md), [WEB.md](docs/WEB.md), [INTEGRATIONS.md](docs/INTEGRATIONS.md) | Subsystem designs |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Dev setup, `refs/`, commands |
@@ -465,8 +480,9 @@ FILES["docs/ARCHITECTURE.md"] = r"""# Jaari: Architecture
 10. `refs/` is reference only; openinstinct is a spec, never a code source (ADR-009).
 11. Model proposes, policy disposes, for model choice too (ADR-011).
 12. Cheapest capable option first: small model before large, http before browser.
-13. One brain, many hands: a single daemon decides; nodes on the owner's devices execute
-    (ADR-015, proposed).
+13. Always on, reachable anytime: one daemon on an always-on host (VM, VPS, or server);
+    capabilities are installed where they run, on that host or on owner devices as nodes
+    (ADR-015). Laptop-only is a supported configuration.
 
 ## Non-goals for v1
 - Agent-to-agent networking (tiers, grants, A2A envelopes from the merge plan): reconsidered
@@ -491,7 +507,7 @@ FILES["docs/ARCHITECTURE.md"] = r"""# Jaari: Architecture
 | `@jaari/integrations` | GitHub, npm, PyPI, email |
 | `apps/daemon` | Long-running process: scheduler, channels, jobs |
 | `apps/cli` | `jaari init`, `jaari llm eval`, `jaari llm usage`, admin commands |
-| `apps/node` | Thin executor on an owner device: enrols as a `device`, advertises capabilities, runs gate-approved actions, hosts takeover and live view (ADR-015, proposed) |
+| `apps/node` | Capability host on an owner device: `jaari capability install <name>` pairs it as a `device`, it advertises installed capabilities, runs gate-approved actions, hosts takeover and live view. Capabilities on the daemon host run through the same contract in-process (ADR-015) |
 
 ## Channels
 Every way of talking to Jaari (CLI, web panel, messengers, email) is a plugin behind one
@@ -813,13 +829,13 @@ FILES["docs/ROADMAP.md"] = r"""# Jaari: Roadmap
 
 | Phase | Scope | Blocked by |
 |---|---|---|
-| 0 Foundation | Monorepo scaffolding; config loader; `@jaari/llm` providers, tiers, roles, fallback chains; `ChannelAdapter` contract + CLI channel; daemon/node contract (ADR-015); project process files | OQ-01, OQ-02, OQ-22, OQ-23, OQ-35, OQ-44 |
+| 0 Foundation | Monorepo scaffolding; config loader; `@jaari/llm` providers, tiers, roles, fallback chains; `ChannelAdapter` contract + CLI channel; capability manifest and daemon–node contract, in-process loader (ADR-015); project process files | OQ-01, OQ-02, OQ-22, OQ-23, OQ-35, OQ-44, OQ-50 |
 | 1 Memory | Memory repo and write path; retrieval and context assembly; scheduler and routines; canonicalize (6h); daily audit | OQ-03 to OQ-06, OQ-24, OQ-26, OQ-43 |
 | 2 Persona | Dials and monitor; curiosity from gap queue; quiet hours; notification ledger; prompt versioning; replay harness; skills; owner panel; onboarding | OQ-13, OQ-20, OQ-21, OQ-39, OQ-46, OQ-49 |
 | 3 Safety | Gate + `audit.jsonl`; `secretRef`; LLM/web budgets + usage log; kill switch; backup and encryption; shadow mode; threat model; degraded mode | OQ-07 to OQ-09, OQ-11, OQ-25, OQ-29, OQ-38, OQ-47, OQ-48 |
 | 4 Background work | Children; `llm.escalate`; `reader` role; `web.search`, `web.fetch`; MCP client | OQ-14, OQ-28, OQ-33 |
 | 5 Integrations | GitHub, npm, PyPI, email; OAuth broker; the agent's mailbox; calendar and personal data; documents | OQ-17, OQ-18, OQ-41, OQ-42 |
-| 6 Computer use | Browser via Playwright MCP or Stagehand; local profile; remote CDP; takeover; laptop node | OQ-27, OQ-30, OQ-31, OQ-34, OQ-36 |
+| 6 Computer use | Browser via Playwright MCP or Stagehand; local profile; remote CDP; takeover; `computer.use` on a host virtual desktop; remote nodes via `jaari capability install` | OQ-27, OQ-30, OQ-31, OQ-34, OQ-36 |
 | 7 Hardening | Docker/Firecracker backends; egress proxy; code execution; deployment; multi-device state; observability | OQ-10, OQ-12, OQ-15, OQ-32, OQ-37 |
 | 8 Evals | `jaari llm eval` fixtures; behaviour evals; learned router experiment; learning from outcomes | OQ-20, OQ-40 |
 """
@@ -829,7 +845,9 @@ FILES["docs/ACTION_PLAN.md"] = "# Jaari: Action plan\n\n## Next steps\n" + r"""1
 3. Build `@jaari/llm` on `@earendil-works/pi-ai` with the tier/role config.
 4. Define `ChannelAdapter` and ship the CLI channel.
 5. Then move to memory retrieval (OQ-03, OQ-04) and the scheduler (OQ-05).
-6. Decide ADR-015 (daemon and nodes) before the `apps/*` layout is fixed in code; it adds `apps/node`.
+6. Build the capability manifest, the daemon–node contract, and the in-process loader in
+   Phase 0 (ADR-015, OQ-50); every executor goes through it. Remote nodes and the host
+   virtual desktop for `computer.use` in Phase 6; isolation backends in Phase 7.
 
 ## ADRs
 """ + adr_table() + "\n"
@@ -845,6 +863,10 @@ Last updated: {STATE_UPDATED}
 - Gap review against 2026 agents (Muse, Grok Bot, ChatGPT Work, OpenClaw, Instinct): fifteen
   open questions added (OQ-35 to OQ-49), v1 non-goals stated in ARCHITECTURE.md, ADR-011
   amended for provider refusals, and ADR-015 (one daemon, nodes on owner devices) proposed.
+- ADR-015 accepted: one daemon on an always-on host (VM, VPS, or server), laptop-only as a
+  supported configuration; capabilities are installable packages that run on the daemon host
+  or on owner devices as nodes. Phase 0 ships the manifest, the daemon–node contract, and the
+  in-process loader. OQ-10 host part resolved; OQ-32, OQ-36, OQ-37 updated; OQ-50 added.
 - License: MIT (ADR-014); `LICENSE` and `NOTICE` generated by the script.
 - Computer-use research (Meta Muse, xAI Grok Bot/Computer, ChatGPT Work, Anthropic and Gemini
   toolsets) recorded in [learning/07-computer.md](learning/07-computer.md) and

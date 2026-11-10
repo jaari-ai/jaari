@@ -2,7 +2,7 @@
 
 # Jaari: Open questions
 
-Last updated: 2026-11-09. Open: **49**.
+Last updated: 2026-11-09. Open: **50**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
@@ -26,7 +26,7 @@ the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
 | OQ-07 | Backup and restore | Encrypted git remote for memory, SQLite backup (e.g. Litestream), secret store backup, restore drill | 3 | All three + a scripted restore test |
 | OQ-08 | Encryption at rest | age vs git-crypt for memory; how to purge a secret that reached git history | 3 | Undecided |
 | OQ-09 | Forgetting and retention | "Forget this" command; raw daily log retention; does forgetting rewrite git history? | 3 | Undecided |
-| OQ-10 | Deployment | Home server, VPS, or laptop; Compose layout; remote access via Tailscale/WireGuard; config and memory format migrations | 7 | Home server + Tailscale, no public ports |
+| OQ-10 | Deployment | Host choice decided by ADR-015 (always-on VM, VPS, or server; laptop-only by configuration). Still open: Compose layout for the host, overlay network (Tailscale or self-hosted Headscale), reference VPS sizing, config and memory format migrations (see OQ-35) | 7 | Compose on the host; Tailscale first, Headscale documented; no public ports |
 | OQ-11 | Kill switch | Global pause, loop step limits, max concurrent children, spend-spike alerts | 3 | All four, enforced in code |
 | OQ-12 | Observability | Tracing per turn/tool/child (OpenTelemetry?), admin page for jobs, approvals, usage, errors | 7 | OTel + small local admin page |
 | OQ-13 | Notification delivery | Proactive messages via channel or push (ntfy, Pushover); urgent vs digest routing | 2 | Channel first, ntfy optional |
@@ -68,7 +68,7 @@ the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
 |---|---|---|---|---|
 | OQ-30 | Consequential browser actions | A purchase, a sent message, or accepted terms arrives as an ordinary `left_click` / `type`; Anthropic's own `confirm` hook "can't pick them out by name". How does the gate recognise them: deterministic page heuristics, a reader-role check of the page state, or approval on every click within flagged origins? | 6 | Deterministic heuristics (submit controls, payment and consent URL patterns) escalate to a reader-role check; never an LLM alone (principle 9) |
 | OQ-31 | Screenshots as untrusted content | Do screenshots and accessibility trees fall under the reader-role rule (principle 8)? A reader pass per screenshot is too slow for a click loop, and vendor prompt-injection classifiers run only on native toolsets. | 6 | Gate + egress allowlist + classifier where available; log every action with its screenshot (OQ-12) |
-| OQ-32 | Egress identity off the home network | When the daemon or a Docker/Firecracker backend runs on a VPS, which IP does the browser use: the owner's home connection via a Tailscale/WireGuard exit node, the owner's own 4G/5G dongle, or a commercial residential proxy? Background: [learning/08-egress-identity-and-takeover.md](learning/08-egress-identity-and-takeover.md) | 7 | Home exit node by default; commercial residential proxies, if ever, only for anonymous `web.fetch` and behind a provider interface with a sourcing check; never for `browser.*` on the owner's accounts (impossible-travel flags) |
+| OQ-32 | Egress identity off the home network | When the daemon or a Docker/Firecracker backend runs on a VPS, which IP does the browser use: the owner's home connection via a Tailscale/WireGuard exit node, the owner's own 4G/5G dongle, or a commercial residential proxy? Background: [learning/08-egress-identity-and-takeover.md](learning/08-egress-identity-and-takeover.md) | 7 | Under ADR-015 the egress identity follows where a capability is installed. A browser capability on a VPS or VM browses from its datacenter IP; on a home server or the laptop, from the owner's. For the owner's logged-in accounts, prefer a browser capability on an owner device, or route the host's browser through an owner exit node (home box or laptop) when one is up; residential proxies (sourcing check) and a 4G dongle are opt-in for anonymous browsing and `web.fetch` only; never a proxy for the owner's accounts (impossible-travel flags) |
 | OQ-33 | Signed-agent identity | Should `@jaari/http` and the browser sign requests per Web Bot Auth (RFC 9421, `Signature-Agent`, JWKS at `/.well-known/http-message-signatures-directory`)? Cloudflare's Signed Agents registry is per operator via the dashboard; it is unknown whether an individual self-hoster can register. | 4 | Implement signing with a per-install Ed25519 key; registration decided when the registry policy is known |
 | OQ-34 | Takeover transport | How does the owner see and touch the agent's browser from a phone within seconds: CDP screencast in the web panel, noVNC over loopback, or a hosted live view? Takeover states, timeouts, and the rule that screenshots stop while the owner holds the session. | 6 | CDP screencast in `@jaari/channel-web` over Tailscale; a "Take over" link pushed through the active channel; states pending/active/completed/timeout/cancelled |
 
@@ -77,8 +77,8 @@ the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
 | OQ-35 | Install, update, migrate | One-command install (Compose, brew, single binary), `jaari doctor`, an update channel, and versioned config and memory schemas with migrations run at start. Nothing is specified today. | 0 | Compose + a single `jaari` binary; schema version in config and in the memory repo; migrations idempotent and run on daemon start |
-| OQ-36 | Laptop as host | Sleep and wake, network changes, battery, and the macOS permission matrix per capability (Automation, Accessibility, Screen Recording, Full Disk Access). Meta publishes none of this for Muse. | 6 | Published permission matrix in the node guide; jobs missed in sleep run once on wake, capped |
-| OQ-37 | Multi-device state | With ADR-015, which host is authoritative for the memory repo and SQLite state, how nodes and daemon reconnect, and how a daemon move (laptop to server) works. | 7 | Exactly one daemon; memory via its git remote; nodes hold no state; `jaari migrate-host` exports and imports |
+| OQ-36 | Laptop as host | The laptop-only configuration and laptop nodes: sleep and wake, network changes, battery, and the macOS permission matrix per capability (Automation, Accessibility, Screen Recording, Full Disk Access). Meta publishes none of this for Muse. | 6 | Published permission matrix per capability manifest; in laptop-only mode, jobs missed in sleep run once on wake, capped |
+| OQ-37 | Multi-device state | With ADR-015, how nodes and the daemon reconnect, and how the daemon moves between hosts (laptop to VPS, VPS to home server). | 7 | The daemon host is authoritative (ADR-015); memory pushed to an encrypted git remote (OQ-07); nodes hold no state; `jaari migrate-host` exports and imports |
 | OQ-38 | Degraded mode | Behaviour when the API tier is unreachable, the budget is spent, or a node is offline: what queues, what runs locally, what the owner is told. | 3 | Effectful work queues with expiry; local-only roles keep running; one notice per outage |
 | OQ-39 | Skills and procedural memory | Skills as versioned Markdown playbooks (OpenClaw `SKILL.md`, open-instinct `skills/`, Anthropic Agent Skills): where they live, how they are installed, who approves them, how a skill becomes memory. | 2 | Playbooks in the memory repo under `ops/rules`, project `skills/` for built-ins; installing a third-party skill is a gated action; the reader role screens skill text |
 | OQ-40 | Learning from outcomes | Failure receipts, `reflections → rules` promotion (gajae-way), router tuning from the outcome log. Today only the notification ledger learns. | 8 | Receipts write to `reflections`; the daily audit proposes promotions the owner confirms |
@@ -91,9 +91,11 @@ the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
 | OQ-47 | Shadow mode | Observe-and-propose only for the first weeks: drafts instead of sends, plans instead of actions; the owner lifts it per capability. | 3 | On by default for 14 days; per-capability lift recorded in `audit.jsonl` |
 | OQ-48 | Threat model | An enumerated `THREAT_MODEL.md`: injection via pages and screenshots, malicious MCP server or skill, compromised node, stolen phone, malicious channel plugin, poisoned memory. | 3 | Write it before Phase 3 code; one mitigation column per threat |
 | OQ-49 | Onboarding conversation | The first conversation and first week: profile bootstrap, what is asked and what is inferred, when dials are explained. | 2 | An onboarding skill; ask only what the next task needs |
+| OQ-50 | Capability packages | ADR-015 makes capabilities installable units with a manifest. Open: manifest schema, where packages come from (npm `@jaari/capability-*`, local path), signing and update, how a capability declares and checks its OS permissions and sidecars (Xvfb or a desktop container for `computer.use` on a VPS), and how this relates to MCP servers (OQ-14) and skills (OQ-39). | 0 | Manifest schema and the in-process loader in Phase 0; npm packages with provenance, installed by `jaari capability install`; an MCP server can back a capability but never bypasses its manifest |
 
 ## Resolved
 
 | ID | Decision | ADR |
 |---|---|---|
 | OQ-22 (license part) | MIT | [ADR-014](adr/014-license-mit.md) |
+| OQ-10 (host part) | Daemon on an always-on host (VM, VPS, or server); laptop-only supported by configuration | [ADR-015](adr/015-control-plane-and-nodes.md) |

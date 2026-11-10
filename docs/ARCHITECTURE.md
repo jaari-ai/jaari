@@ -16,8 +16,9 @@
 10. `refs/` is reference only; openinstinct is a spec, never a code source (ADR-009).
 11. Model proposes, policy disposes, for model choice too (ADR-011).
 12. Cheapest capable option first: small model before large, http before browser.
-13. One brain, many hands: a single daemon decides; nodes on the owner's devices execute
-    (ADR-015, proposed).
+13. Always on, reachable anytime: one daemon on an always-on host (VM, VPS, or server);
+    capabilities are installed where they run, on that host or on owner devices as nodes
+    (ADR-015). Laptop-only is a supported configuration.
 
 ## Non-goals for v1
 - Agent-to-agent networking (tiers, grants, A2A envelopes from the merge plan): reconsidered
@@ -42,7 +43,7 @@
 | `@jaari/integrations` | GitHub, npm, PyPI, email |
 | `apps/daemon` | Long-running process: scheduler, channels, jobs |
 | `apps/cli` | `jaari init`, `jaari llm eval`, `jaari llm usage`, admin commands |
-| `apps/node` | Thin executor on an owner device: enrols as a `device`, advertises capabilities, runs gate-approved actions, hosts takeover and live view (ADR-015, proposed) |
+| `apps/node` | Capability host on an owner device: `jaari capability install <name>` pairs it as a `device`, it advertises installed capabilities, runs gate-approved actions, hosts takeover and live view. Capabilities on the daemon host run through the same contract in-process (ADR-015) |
 
 ## Channels
 Every way of talking to Jaari (CLI, web panel, messengers, email) is a plugin behind one
