@@ -22,3 +22,4 @@
 | [018](018-capability-vocabulary-and-phase-0-floor.md) | Capability vocabulary, `@jaari/capabilities`, and the Phase 0 safety floor | Accepted |
 | [019](019-model-pinning-and-local-only-defaults.md) | Main session pin with outage failover; local-only canonicalize decided at init | Accepted |
 | [020](020-soft-phases-and-v1-scope.md) | Roadmap phases are a soft plan; scope deferred from the merge plan | Accepted |
+| [021](021-v1-channels.md) | v1 channels: CLI, web panel, Telegram; email as input only | Accepted |

@@ -4,7 +4,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 (ADR-020): pick up the next item whose needs are met.
 
 ## Workstreams
-1. **Decide the Phase 0 questions.** OQ-01 (channels), OQ-02 (owner authentication),
+1. **Decide the Phase 0 questions.** OQ-02 (owner authentication),
    OQ-22 (project process), OQ-23 (single owner), OQ-35 (install), OQ-44 (session). Record
    an ADR for each as it closes.
 2. **Scaffold the monorepo** from the config this script generates; add `@jaari/capabilities`,
@@ -12,7 +12,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
    first package (ADR-018).
 3. **Build `@jaari/llm`** on `@earendil-works/pi-ai` with the tier/role config; add the
    `jaari llm eval` hook that `jaari init` uses to decide local-only roles (ADR-019).
-4. **Define `ChannelAdapter` and ship the CLI channel**; then a first mobile messenger.
+4. **Define `ChannelAdapter` and ship the CLI channel**; then the web panel and Telegram (ADR-021).
 5. **Daemon and install.** `apps/daemon`, `jaari init` (target: VPS, remote server, home
    hardware, or laptop), `jaari doctor`, Compose, and the laptop sleep/wake rule (ADR-017).
 6. **Memory next** (OQ-03, OQ-04, OQ-05, OQ-06), then persona, then the real gate and the
@@ -43,3 +43,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [018](adr/018-capability-vocabulary-and-phase-0-floor.md) | Capability vocabulary, `@jaari/capabilities`, and the Phase 0 safety floor | Accepted |
 | [019](adr/019-model-pinning-and-local-only-defaults.md) | Main session pin with outage failover; local-only canonicalize decided at init | Accepted |
 | [020](adr/020-soft-phases-and-v1-scope.md) | Roadmap phases are a soft plan; scope deferred from the merge plan | Accepted |
+| [021](adr/021-v1-channels.md) | v1 channels: CLI, web panel, Telegram; email as input only | Accepted |

@@ -150,7 +150,8 @@ owner turns run at the lowest trust level present, and a bare "yes" in a group n
 settles an approval (approvals bind to a digest, ADR-006).
 
 ### Candidate plugins
-Which ones ship in v1 is OQ-01; the CLI channel ships in Phase 0.
+v1 ships the CLI (Phase 0), the web panel, and Telegram; email is an input only (Phase 5).
+WhatsApp and iMessage come first after v1 (ADR-021).
 
 | Plugin | Backend (OSS first) | Identity | Notes |
 |---|---|---|---|
