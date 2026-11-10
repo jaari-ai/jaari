@@ -3,7 +3,7 @@
 One file per topic studied, named `NN-topic.md`, written at the end of the conversation
 that covered it. Each file answers three questions:
 
-1. What does the source project (open-instinct / openinstinct / gajae-way / OpenMausBot / Instinct / Muse) do?
+1. What does the source project (open-instinct / openinstinct / gajae-way / OpenMausBot / Instinct / Pally / Muse) do?
 2. Why does it do it that way (what failure is it preventing)?
 3. What did Jaari do, and where does it differ?
 
@@ -16,6 +16,8 @@ Written:
   Jaari borrows (ADR-016), what it rejects (2026-11-10)
 - [10-open-questions-review.md](10-open-questions-review.md) — a recommendation per open
   question, borrowed from open-instinct, openinstinct, gajae-way, Pi, and OpenMausBot (2026-11-10)
+- [11-pally.md](11-pally.md) — Pally, a second commercial reference: cloud plus a Mac companion
+  app, what Jaari borrows, and alternatives to the note-10 recommendations (2026-11-10)
 
 Planned:
 - 01-session.md — persistent session, steering, segments, compaction

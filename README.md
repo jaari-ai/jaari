@@ -1,6 +1,6 @@
 # Jaari
 
-A self-hosted personal AI agent, in the shape of the commercial ones (Instinct, Muse, Grok
+A self-hosted personal AI agent, in the shape of the commercial ones (Instinct, Pally, Muse, Grok
 Bot, ChatGPT Work), that you run yourself: on a VPS, a remote server, hardware at home, or a
 laptop. Git-backed memory, a configurable personality, a browser it can drive, and
 owner-approved external actions.
