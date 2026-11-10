@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **50**.
+Last updated: 2026-11-10. Open: **49**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -19,7 +19,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-08 | Encryption at rest | age vs git-crypt for memory; how to purge a secret that reached git history | 3 | Undecided |
 | OQ-09 | Forgetting and retention | "Forget this" command; raw daily log retention; does forgetting rewrite git history? | 3 | Undecided. Superseded facts are struck through with a date, not deleted; a forgotten-fact list stops canonicalize relearning them (learning/09). Affected by ADR-023: forgetting must also cover structured records and purge the FTS cache. |
 | OQ-10 | Deployment | Host choice decided by ADR-015 and ADR-017 (VPS, remote server, home hardware, or laptop). Still open: overlay network details (Tailscale first, Headscale or WireGuard documented), reference sizing per target. The Compose layout and migrations moved to OQ-35 | 7 | Tailscale first, Headscale documented; no public ports; sizing table per target |
 | OQ-11 | Kill switch | Global pause, loop step limits, max concurrent children, spend-spike alerts | 3 | All four, enforced in code. Add a stall guard: two continuations without a successful tool call, or three identical errors, end the job as stalled; lowering a capability's permission also stops the running turn |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-05 | Own SQLite job engine with an events table, per-tool replay flag, per-job catch-up window (default 12 h), DST rules, retry ladder; replaceable by pi-durable | [ADR-025](adr/025-scheduler-and-job-engine.md) |
 | OQ-06 | One writer with the closure ladder and commit trailers; canonicalize submits patches, conflicts redone; owner edits committed separately and win | [ADR-026](adr/026-memory-single-writer.md) |
 | OQ-07 | Memory pushed to owner-chosen git remotes; nightly (configurable) encrypted snapshots to local, NAS, or S3-compatible (S3, R2, B2, MinIO); advice not enforcement; recovery key; journaled restore; monthly drill | [ADR-027](adr/027-backup-and-restore.md) |
+| OQ-08 | Scan writes for secrets; host relies on full-disk encryption (owner-managed volumes documented); age bundles or gcrypt for remotes not owned; plain only to own remotes; jaari memory purge | [ADR-028](adr/028-encryption-at-rest.md) |

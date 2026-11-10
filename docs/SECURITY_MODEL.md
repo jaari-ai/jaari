@@ -94,7 +94,13 @@ Takeover is a hold owned by the owner, not by one window: accepted agent calls d
 new agent input is refused (never queued), and the hold ends on release, two minutes
 after the last view closes, or after five idle minutes. Transport: OQ-34.
 
+## Encryption at rest (ADR-028)
+Memory writes are scanned for secrets before they are stored. The host relies on full-disk
+encryption; remotes the owner does not control get age-encrypted bundles or `git-remote-gcrypt`;
+`jaari memory purge` rewrites history everywhere Jaari can reach. Owner-facing trade-offs:
+[guides/securing-your-install.md](guides/securing-your-install.md).
+
 ## Open
-Kill switch (OQ-11), encryption at rest (OQ-08), MCP plugin
+Kill switch (OQ-11), MCP plugin
 sandboxing (OQ-14), code execution (OQ-15), standing grants (OQ-51), inbound triggers
 (OQ-52), outside lineage (OQ-54).

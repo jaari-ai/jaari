@@ -30,4 +30,6 @@
 - Backup (ADR-027): memory pushed to owner-chosen git remotes within minutes; snapshots of
   SQLite, audit log, and config on an owner-set schedule (nightly by default) to local disk,
   a NAS, or S3-compatible storage; monthly restore drill.
-- Open: encryption (OQ-08), forgetting (OQ-09), capture evidence (OQ-53).
+- Encryption (ADR-028): secrets are blocked before they reach memory; remotes not owned by the
+  owner are encrypted; `jaari memory purge` rewrites history.
+- Open: forgetting (OQ-09), capture evidence (OQ-53).

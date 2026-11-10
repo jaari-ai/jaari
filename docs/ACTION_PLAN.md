@@ -49,3 +49,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [025](adr/025-scheduler-and-job-engine.md) | Scheduler and job engine: a small SQLite queue built to pi-durable's contract | Accepted |
 | [026](adr/026-memory-single-writer.md) | Memory writes go through one writer; the owner's edits win | Accepted |
 | [027](adr/027-backup-and-restore.md) | Backup and restore: owner-chosen destinations and schedule, encrypted archives, monthly drill | Accepted |
+| [028](adr/028-encryption-at-rest.md) | Encryption at rest: prevent secrets in memory, encrypt every remote you do not control, purge on demand | Accepted |

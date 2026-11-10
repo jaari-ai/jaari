@@ -14,7 +14,7 @@ ledger, usage log); `audit.jsonl`; and the config file. The FTS index is a cache
 **Memory.** Pushed through the single writer (ADR-026) to one or more git remotes chosen at
 `jaari init`, a few minutes after each commit: a self-hosted git server (for example Forgejo),
 a bare repo on another owner device over Tailscale, or a private repo at any git host,
-encrypted so the host sees nothing (method in OQ-08). Structured records such as ledgers live
+encrypted so the host sees nothing (method in ADR-028). Structured records such as ledgers live
 in the memory repo, so they get this minutes-level backup.
 
 **Snapshots.** SQLite, the audit log, and the config are bundled into one encrypted archive

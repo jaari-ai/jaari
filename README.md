@@ -40,7 +40,7 @@ in v1.
 | [docs/adr/](docs/adr/README.md) | Architecture decision records (the authoritative ADR numbering) |
 | [docs/MEMORY.md](docs/MEMORY.md), [PERSONA.md](docs/PERSONA.md), [SECURITY_MODEL.md](docs/SECURITY_MODEL.md), [LLM.md](docs/LLM.md), [WEB.md](docs/WEB.md), [INTEGRATIONS.md](docs/INTEGRATIONS.md) | Subsystem designs |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Dev setup, `refs/`, commands |
-| [docs/guides/](docs/guides/channel-plugins.md) | [Writing a channel plugin](docs/guides/channel-plugins.md); [securing the npm and PyPI namespaces](docs/guides/namespaces.md) |
+| [docs/guides/](docs/guides/channel-plugins.md) | [Securing your install](docs/guides/securing-your-install.md) (owner-facing trade-offs); [writing a channel plugin](docs/guides/channel-plugins.md); [securing the npm and PyPI namespaces](docs/guides/namespaces.md) |
 | [docs/00-research.md](docs/00-research.md), [docs/01-merge-plan.md](docs/01-merge-plan.md) | Background research and the original merge reasoning (historical) |
 | [docs/learning/](docs/learning/README.md) | Learning log, one file per topic studied |
 
