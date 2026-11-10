@@ -27,5 +27,4 @@
 - Writes (ADR-026): one writer applies every change (intent, files, commit with mutation id,
   actor, and session trailers, index update); the owner's hand edits are committed separately
   and win any conflict.
-- Open:
-  encryption (OQ-08), forgetting (OQ-09), backup (OQ-07), capture evidence (OQ-53).
+- Open: encryption (OQ-08), forgetting (OQ-09), backup (OQ-07), capture evidence (OQ-53).
