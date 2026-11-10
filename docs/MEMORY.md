@@ -27,4 +27,7 @@
 - Writes (ADR-026): one writer applies every change (intent, files, commit with mutation id,
   actor, and session trailers, index update); the owner's hand edits are committed separately
   and win any conflict.
-- Open: encryption (OQ-08), forgetting (OQ-09), backup (OQ-07), capture evidence (OQ-53).
+- Backup (ADR-027): memory pushed to owner-chosen git remotes within minutes; snapshots of
+  SQLite, audit log, and config on an owner-set schedule (nightly by default) to local disk,
+  a NAS, or S3-compatible storage; monthly restore drill.
+- Open: encryption (OQ-08), forgetting (OQ-09), capture evidence (OQ-53).

@@ -28,3 +28,4 @@
 | [024](024-context-assembly.md) | Context assembly: a fixed layout built by code, automatic recall, time anchors | Accepted |
 | [025](025-scheduler-and-job-engine.md) | Scheduler and job engine: a small SQLite queue built to pi-durable's contract | Accepted |
 | [026](026-memory-single-writer.md) | Memory writes go through one writer; the owner's edits win | Accepted |
+| [027](027-backup-and-restore.md) | Backup and restore: owner-chosen destinations and schedule, encrypted archives, monthly drill | Accepted |

@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **51**.
+Last updated: 2026-11-10. Open: **50**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -19,7 +19,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-07 | Backup and restore | Encrypted git remote for memory, SQLite backup (e.g. Litestream), secret store backup, restore drill | 3 | All three + a scripted restore test |
 | OQ-08 | Encryption at rest | age vs git-crypt for memory; how to purge a secret that reached git history | 3 | Undecided |
 | OQ-09 | Forgetting and retention | "Forget this" command; raw daily log retention; does forgetting rewrite git history? | 3 | Undecided. Superseded facts are struck through with a date, not deleted; a forgotten-fact list stops canonicalize relearning them (learning/09). Affected by ADR-023: forgetting must also cover structured records and purge the FTS cache. |
 | OQ-10 | Deployment | Host choice decided by ADR-015 and ADR-017 (VPS, remote server, home hardware, or laptop). Still open: overlay network details (Tailscale first, Headscale or WireGuard documented), reference sizing per target. The Compose layout and migrations moved to OQ-35 | 7 | Tailscale first, Headscale documented; no public ports; sizing table per target |
@@ -74,7 +73,7 @@ leanings below are unchanged until the owner accepts them).
 |---|---|---|---|---|
 | OQ-35 | Install, update, migrate | One-command install per target of ADR-017 (Compose on a VPS or home box, brew or a single binary on a laptop), the Compose layout, `jaari doctor`, an update channel, and versioned config and memory schemas with migrations run at start. Nothing is specified today. | 0 | Compose + a single `jaari` binary; `jaari init` asks for the target; schema version in config and in the memory repo; migrations idempotent and run on daemon start |
 | OQ-36 | Laptop as host | The laptop as a daemon host (ADR-017 target 3) and as a node: sleep and wake, network changes, battery, and the macOS permission matrix per capability (Automation, Accessibility, Screen Recording, Full Disk Access). Meta publishes none of this for Muse. Sleep and wake is needed in Phase 0; the permission matrix with the desktop capability in Phase 6. | 0 | Published permission matrix per capability manifest; in laptop-only mode, jobs missed in sleep run once on wake, capped |
-| OQ-37 | Multi-device state | With ADR-015, how nodes and the daemon reconnect, and how the daemon moves between hosts (laptop, VPS, home server, in any direction). | 7 | The daemon host is authoritative (ADR-015); memory pushed to an encrypted git remote (OQ-07); nodes hold no state; `jaari migrate-host` exports and imports. Node link: a Noise handshake with a QR-pinned daemon key over the overlay network; a relay, if one is ever added, must see only ids, timing, and volume (learning/09) |
+| OQ-37 | Multi-device state | With ADR-015, how nodes and the daemon reconnect, and how the daemon moves between hosts (laptop, VPS, home server, in any direction). | 7 | The daemon host is authoritative (ADR-015); memory pushed to an encrypted git remote (ADR-027); nodes hold no state; `jaari migrate-host` exports and imports. Node link: a Noise handshake with a QR-pinned daemon key over the overlay network; a relay, if one is ever added, must see only ids, timing, and volume (learning/09) |
 | OQ-38 | Degraded mode | Behaviour when the API tier is unreachable, the budget is spent, or a node is offline: what queues, what runs locally, what the owner is told. | 3 | Effectful work queues with expiry; local-only roles keep running; one notice per outage. Fall back only when the turn provably never started, and only to a model that has the same tools; remember provider limit-reset times instead of probing |
 | OQ-39 | Skills and procedural memory | Skills as versioned Markdown playbooks (OpenClaw `SKILL.md`, open-instinct `skills/`, Anthropic Agent Skills): where they live, how they are installed, who approves them, how a skill becomes memory. | 2 | Playbooks in the memory repo under `ops/rules`, project `skills/` for built-ins; installing a third-party skill is a gated action; the reader role screens skill text. Scan skill text before install (base64 blobs, piped shell installs, invisible Unicode); third-party skills install disabled; exports scrub secrets (learning/09) |
 | OQ-40 | Learning from outcomes | Failure receipts, `reflections → rules` promotion (gajae-way), router tuning from the outcome log. Today only the notification ledger learns. | 8 | Receipts write to `reflections`; the daily audit proposes promotions the owner confirms |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-04 | Code-built layout with per-section budgets; 14-day window plus date-aware recall, a horizon line, and records.query for later dates; model may search more | [ADR-024](adr/024-context-assembly.md) |
 | OQ-05 | Own SQLite job engine with an events table, per-tool replay flag, per-job catch-up window (default 12 h), DST rules, retry ladder; replaceable by pi-durable | [ADR-025](adr/025-scheduler-and-job-engine.md) |
 | OQ-06 | One writer with the closure ladder and commit trailers; canonicalize submits patches, conflicts redone; owner edits committed separately and win | [ADR-026](adr/026-memory-single-writer.md) |
+| OQ-07 | Memory pushed to owner-chosen git remotes; nightly (configurable) encrypted snapshots to local, NAS, or S3-compatible (S3, R2, B2, MinIO); advice not enforcement; recovery key; journaled restore; monthly drill | [ADR-027](adr/027-backup-and-restore.md) |
