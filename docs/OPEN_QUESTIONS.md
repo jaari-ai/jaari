@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **53**.
+Last updated: 2026-11-10. Open: **52**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -14,7 +14,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-05 | Scheduler | One job engine for canonicalize, audit, reminders, children: persistence, retries, crash recovery, missed runs during sleep, time zones | 1 | SQLite-backed queue in the daemon. A job tree with an append-only events table whose status can be rebuilt from its events; a turn cut by a restart reruns at most once and never after an effectful action (ADR-016) |
 | OQ-06 | Concurrent memory writes | Lock, single writer queue, or branch-per-task then merge? | 1 | Single writer; others enqueue patches |
 
 ## B. Before daily use
@@ -82,7 +81,7 @@ leanings below are unchanged until the owner accepts them).
 | OQ-40 | Learning from outcomes | Failure receipts, `reflections → rules` promotion (gajae-way), router tuning from the outcome log. Today only the notification ledger learns. | 8 | Receipts write to `reflections`; the daily audit proposes promotions the owner confirms |
 | OQ-41 | OAuth broker | Connected apps (Google, Microsoft, Slack) need tokens the model never sees: storage, refresh, scope-to-capability mapping, revocation, admin consent. | 5 | Tokens in the vault (ADR-013), resolved per call like `secretRef`; one scope set per capability; revoke from CLI and panel. Tool grants per capability are enforced on the real tool name at call time and logged; with several accounts connected, the account is always chosen explicitly |
 | OQ-42 | The agent's own mailbox and number | A mailbox for one-time codes, receipts, and confirmations (Grok Bot, Instinct), and later a phone number (Instinct phones businesses). Inbound mail stays data (reader role). | 5 | Mailbox on the owner's domain, IMAP, read by the reader role; telephony after voice (OQ-16) |
-| OQ-43 | Owner routines | "Every morning summarise X", "watch this price": routines as owner-visible objects (cron, watcher, webhook) with pause, history, and budgets; all output through the persona monitor. | 1 | Routines are rows the owner can list and pause; built on the scheduler (OQ-05); children do the work. Schedule semantics from OpenMausBot: anchor-aligned intervals, overlap skip or queue, one catch-up run within 12 hours and a missed-run receipt otherwise; plain-code checks run before any model call, and a run with nothing new posts nothing (learning/09). Requirement from the owner (ADR-023): connecting email creates a default inbox-watch routine; dated mail becomes events and bills become draft ledger lines |
+| OQ-43 | Owner routines | "Every morning summarise X", "watch this price": routines as owner-visible objects (cron, watcher, webhook) with pause, history, and budgets; all output through the persona monitor. | 1 | Routines are rows the owner can list and pause; built on the job engine (ADR-025); children do the work. Schedule semantics from OpenMausBot: anchor-aligned intervals, overlap skip or queue, one catch-up run within 12 hours and a missed-run receipt otherwise; plain-code checks run before any model call, and a run with nothing new posts nothing (learning/09). Requirement from the owner (ADR-023): connecting email creates a default inbox-watch routine; dated mail becomes events and bills become draft ledger lines |
 | OQ-44 | Persistent session and context | One main session reopened over its transcript across restarts, steering, segment flushing, daemon-managed compaction, a stable prompt prefix for caching, and how 2026 API features (server compaction, threads) are used. | 0 | openinstinct's session semantics on Pi; compaction at ~50% of the window; stable prefix first. Keep the tool list byte-identical across a session's turns (pinned by a test); cache keep-warm only behind a cost guard (learning/09) |
 | OQ-45 | Multimodal memory | Photos, receipts, and screenshots as memory, and what the audit does with them. | later | Undecided |
 | OQ-46 | Owner panel | `channel-web` as a PWA: approval cards showing the digest, live view (OQ-34), a memory browser and editor, audit viewer, budgets, kill switch (OQ-11), push (OQ-13). | 2 | One PWA over Tailscale; memory editing commits like any other write |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-02 | Ingress mints authority; paired channels are equal; one active channel (latest inbound); pluggable pairing into one hashed device registry; immediate revoke | [ADR-022](adr/022-owner-authentication-and-active-channel.md) |
 | OQ-03 | Typed structured records (13 built-in types plus custom) with code-computed values; SQLite FTS5 search as a rebuildable cache; embeddings later | [ADR-023](adr/023-structured-records-and-memory-search.md) |
 | OQ-04 | Code-built layout with per-section budgets; 14-day window plus date-aware recall, a horizon line, and records.query for later dates; model may search more | [ADR-024](adr/024-context-assembly.md) |
+| OQ-05 | Own SQLite job engine with an events table, per-tool replay flag, per-job catch-up window (default 12 h), DST rules, retry ladder; replaceable by pi-durable | [ADR-025](adr/025-scheduler-and-job-engine.md) |

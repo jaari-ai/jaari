@@ -14,7 +14,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 4. **Define `ChannelAdapter` and ship the CLI channel**; then the web panel and Telegram (ADR-021).
 5. **Daemon and install.** `apps/daemon`, `jaari init` (target: VPS, remote server, home
    hardware, or laptop), `jaari doctor`, Compose, and the laptop sleep/wake rule (ADR-017).
-6. **Memory next**: structured records and FTS5 search (ADR-023) and context assembly (ADR-024), then OQ-05, OQ-06; then persona, then the real gate and the
+6. **Memory next**: structured records and FTS5 search (ADR-023) and context assembly (ADR-024), the job engine (ADR-025), then OQ-06; then persona, then the real gate and the
    vault (ADR-006, ADR-016, ADR-018; verify OQ-29 and accept ADR-013).
 7. **Egress and browser.** `@jaari/http` to ADR-016 with `direct` and `owner-exit` (Tailscale)
    providers; the browser under the placement rule; pool details in OQ-32 (ADR-017).
@@ -46,3 +46,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [022](adr/022-owner-authentication-and-active-channel.md) | Owner authentication: pluggable pairing, one device registry, one active channel | Accepted |
 | [023](adr/023-structured-records-and-memory-search.md) | Structured records first, SQLite FTS5 search behind one tool | Accepted |
 | [024](adr/024-context-assembly.md) | Context assembly: a fixed layout built by code, automatic recall, time anchors | Accepted |
+| [025](adr/025-scheduler-and-job-engine.md) | Scheduler and job engine: a small SQLite queue built to pi-durable's contract | Accepted |
