@@ -18,7 +18,7 @@ ships**, not before the phase starts. Per-item status lives in [STATE.md](STATE.
 | 4 Background work | Children; `llm.escalate`; `reader` role; `web.search`, `web.fetch`; `@jaari/http` resolve-check-dial egress with `direct` and `owner-exit` providers; MCP client; headless CLI and external control | OQ-14, OQ-28, OQ-33, OQ-54, OQ-55, OQ-56 |
 | 5 Integrations | GitHub, npm, PyPI, email; OAuth broker; the agent's mailbox; calendar and personal data; documents; inbound triggers | OQ-17, OQ-18, OQ-41, OQ-42, OQ-52 |
 | 6 Computer use | Browser via Playwright MCP or Stagehand under the placement rule (ADR-017); local profile or owner exit node; remote CDP; takeover; `computer.use` on a host virtual desktop; remote nodes via `jaari capability install`; macOS permission matrix | OQ-27, OQ-30, OQ-31, OQ-32, OQ-34, OQ-36 (permission matrix) |
-| 7 Hardening | Docker/Firecracker backends; container egress proxy; code execution; overlay and sizing per target; multi-device state and host migration; observability; mobile and residential egress providers | OQ-12, OQ-15, OQ-37 |
+| 7 Hardening | Docker/Firecracker backends; container egress proxy; code execution; overlay and sizing per target; multi-device state and host migration; observability; mobile and residential egress providers | OQ-15, OQ-37 |
 | 8 Evals | `jaari llm eval` fixtures; behaviour evals; learned router experiment; learning from outcomes | OQ-20 (fixtures), OQ-40 |
 | Later | Voice; payments rail (`pay` is reserved); multimodal memory; trust tiers, agent network (non-goals for v1) | OQ-16, OQ-19, OQ-45 |
 
