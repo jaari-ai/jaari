@@ -14,9 +14,13 @@
 | [008](008-persona-dials.md) | Persona: two dials, enforced by a monitor | Accepted |
 | [009](009-merge-strategy.md) | open-instinct as the shell, openinstinct as a spec | Accepted |
 | [010](010-identity-and-publishing.md) | Project identity and trusted publishing | Accepted |
-| [011](011-llm-routing.md) | LLM routing: owner policy, role-based tiers, request-only escalation | Proposed |
-| [012](012-web-and-browser.md) | Web search, fetch, and browser as separate pluggable tools | Proposed |
+| [011](011-llm-routing.md) | LLM routing: owner policy, role-based tiers, request-only escalation | Accepted |
+| [012](012-web-and-browser.md) | Web search, fetch, and browser as separate pluggable tools | Accepted |
 | [013](013-vault-providers.md) | Pluggable vault providers: Bitwarden first, 1Password second | Proposed |
 | [014](014-license-mit.md) | License: MIT | Accepted |
 | [015](015-control-plane-and-nodes.md) | One daemon on an always-on host; capabilities installed where they run | Accepted |
 | [016](016-openmausbot-hardening.md) | Hardening borrowed from OpenMausBot: dispatch re-check, chained audit, resolve-check-dial egress, owner hold | Accepted |
+| [017](017-self-hosted-anywhere.md) | Self-hosted anywhere: VPS, remote server, or home hardware; placement rule and egress pool | Accepted |
+| [018](018-capability-vocabulary-and-phase-0-floor.md) | Capability vocabulary, `@jaari/capabilities`, and the Phase 0 safety floor | Accepted |
+| [019](019-model-pinning-and-local-only-defaults.md) | Main session pin with outage failover; local-only canonicalize decided at init | Accepted |
+| [020](020-soft-phases-and-v1-scope.md) | Roadmap phases are a soft plan; scope deferred from the merge plan | Accepted |

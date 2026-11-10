@@ -1,6 +1,9 @@
 {
   "owner": { "timezone": "America/New_York", "quietHours": ["22:00", "08:00"] },
 
+  // ADR-017: where this daemon runs. "vps" | "server" | "home" | "laptop"
+  "deployment": { "target": "vps", "overlay": "tailscale" },
+
   "persona": { "curiosity": 2, "proactivity": 1 },
 
   "memory": {
@@ -25,6 +28,7 @@
       "curiosity": "small", "classify": "small", "summarize": "small", "title": "small",
       "reader": "small", "vision": { "capability": "image" }
     },
+    // ADR-019: `jaari init` sets this only if a local model passes `jaari llm eval`.
     "privacy": { "localOnly": ["canonicalize", "curiosity"] },
     "budget": { "monthlyUsd": 30, "perRoleUsd": { "child": 10 }, "onExceeded": "downgrade" },
     "escalation": { "allowRequest": ["child"], "maxPerDay": 20 }
@@ -48,10 +52,20 @@
     },
     "browser": {
       "driver": "playwright-mcp",
-      "host": "local-chromium",
+      // ADR-017: run it where the owner's identity is (home hardware or an owner node).
+      "host": "node:home-mini-pc",
       "remote": { "cdpUrl": "secretRef:browser.cdp", "enabled": false },
       "disabledTools": ["browser_run_code_unsafe"]
     },
     "budget": { "monthlyUsd": 10, "onExceeded": "local-only" }
+  },
+
+  // ADR-017: owner accounts pin to one owner exit node; rotation is for anonymous traffic.
+  "egress": {
+    "ownerAccounts": { "provider": "owner-exit", "node": "home-mini-pc", "failoverTo": [] },
+    "anonymous": {
+      "rotate": ["owner-exit:home-mini-pc", "owner-exit:laptop"],
+      "residentialProxy": { "enabled": false }
+    }
   }
 }

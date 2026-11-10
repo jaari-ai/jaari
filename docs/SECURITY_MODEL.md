@@ -31,10 +31,37 @@ encodings) from tool results and logs; the model names a credential by a typed t
 never a path or URL; a value sent to a node is single-use; while a filled secret is on a
 page, screenshots and page evaluation are refused.
 
-## Capabilities
-`web.search`, `web.fetch`, `browser.read`, `browser.act`, `browser.submit`,
-`email.read`, `email.send`, `repo.write`, `publish`, `pay`. Submit/send/publish/pay →
-gate. Login/2FA → owner takeover.
+## Capabilities (ADR-018)
+The only names the model can ask for. A manifest's `provides` lists these and nothing else;
+host (`daemon` or `node`) and provider (`local-profile`, `remote-cdp`, `macos`, `xvfb`) are
+separate manifest fields.
+
+| Capability | Class | Notes |
+|---|---|---|
+| `web.search`, `web.fetch` | read | Results are untrusted content (reader role) |
+| `browser.read` | read | Page content is untrusted; screenshots OQ-31 |
+| `browser.act` | gated by classifier | Ordinary clicks and typing; consequential ones escalate (OQ-30) |
+| `browser.submit` | gated | Forms, purchases, consent |
+| `computer.use` | gated per action | Desktop control on a node or the host virtual desktop |
+| `shell`, `files.write` | gated | Sandbox rules OQ-15 |
+| `files.read` | read | |
+| `email.read` | read | Content is untrusted |
+| `email.send`, `publish`, `repo.write` | gated | Short approval expiry |
+| `pay` | reserved | No executor in v1 (OQ-19) |
+| `llm.escalate` | policy-checked | Children only (ADR-011) |
+
+Login, 2FA, and CAPTCHA go to owner takeover.
+
+## Approval card (ADR-006, ADR-018)
+The short code the owner types or taps is only a lookup of the digest. There is no amount
+or parameter tolerance: a different action is a different digest. Default expiry 15
+minutes; 5 for `email.send` and `publish`; overridable per capability.
+
+## Phase 0 floor (ADR-018)
+`@jaari/gate` ships as a deny-all stub: gated capabilities refuse, read ones run. The
+`secretRef` resolver and an `os-keychain` provider ship in Phase 0; `env` and `file` are
+for development and make `jaari doctor` warn. Third-party skills install disabled until
+the `reader` role exists.
 
 ## Untrusted content
 Email, web pages, search snippets, and documents go through the tool-less `reader`
@@ -56,6 +83,13 @@ Mechanism (ADR-016, accepted):
 - The browser reaches the network only through a per-session loopback SOCKS5 listener;
   Chromium's loopback bypass is removed and non-proxied WebRTC UDP is disabled.
 - A refusal is returned to the model in the tool result, so it stops retrying.
+
+Egress pool (ADR-017): the SOCKS5 listener and `@jaari/http` choose a provider per session:
+`owner-exit` (Tailscale, Headscale, or WireGuard exit node on owner hardware), `direct`,
+`mobile` (owner 4G dongle), `residential-proxy` (sourcing check). Rotation is for anonymous
+traffic only and may mix owner exit nodes with proxies. Owner-account sessions are pinned to
+one owner node (or direct from home hardware), fail over only to another owner node, and
+refuse when none is up; they never fall back to a rotating or datacenter address.
 
 ## Owner hold (ADR-005, ADR-016)
 Takeover is a hold owned by the owner, not by one window: accepted agent calls drain,

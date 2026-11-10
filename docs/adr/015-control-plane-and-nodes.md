@@ -3,6 +3,7 @@
 # ADR-015: One daemon on an always-on host; capabilities installed where they run
 
 - **Status:** Accepted
+- **Extended by:** [ADR-017](017-self-hosted-anywhere.md), [ADR-018](018-capability-vocabulary-and-phase-0-floor.md)
 - **Date:** 2026-11-09
 
 ## Decision
@@ -10,6 +11,10 @@
 
 ## Alternatives rejected
 One process with every capability built in (a VPS cannot reach the owner's laptop; a laptop is asleep half the day); laptop-first as the main target (always-on work depends on the lid); a cloud VM per owner run by the project (the Instinct, Muse, and Grok Bot shape: not self-hosted, credentials off-device); several full daemons (split brain for memory, approvals, and budgets); nodes with their own LLM access (unauditable, secrets sprawl); nodes that resolve `secretRef` themselves (every device becomes a vault client); capabilities as model-visible plugins without a manifest (nothing maps them to gated capability names).
+
+## Amendments
+- **ADR-018:** Capability names in the examples follow the single vocabulary: `browser.local` is `browser.*` with provider `local-profile`, `desktop.macos` is `computer.use` with provider `macos`, `files` is `files.read` and `files.write`. `@jaari/capabilities` owns the manifest and loader.
+- **ADR-017:** The daemon host may be a VPS, a remote server, or home hardware; the placement rule decides where identity-bearing capabilities run.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

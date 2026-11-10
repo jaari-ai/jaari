@@ -2,14 +2,28 @@
 
 # Jaari: Roadmap
 
-| Phase | Scope | Blocked by |
+The goal: a self-hosted personal agent in the shape of the commercial ones (always
+reachable, remembers, works in the background, drives a browser, asks before it acts), run
+by the owner on a VPS, a remote server, home hardware, or a laptop (ADR-017).
+
+**Phases are a soft plan (ADR-020).** They say what to build roughly first, not what is
+forbidden before. An item can start in any phase once its *needs* are met, and a phase is
+never "closed" by a calendar. *Needs* are questions or decisions required **before that item
+ships**, not before the phase starts. Per-item status lives in [STATE.md](STATE.md).
+
+| Phase | Scope | Needs before the item ships |
 |---|---|---|
-| 0 Foundation | Monorepo scaffolding; config loader; `@jaari/llm` providers, tiers, roles, fallback chains; `ChannelAdapter` contract + CLI channel; capability manifest and daemon–node contract, in-process loader (ADR-015); project process files | OQ-01, OQ-02, OQ-22, OQ-23, OQ-35, OQ-44, OQ-50 |
-| 1 Memory | Memory repo and write path; retrieval and context assembly; scheduler and routines; canonicalize (6h); daily audit | OQ-03 to OQ-06, OQ-24, OQ-26, OQ-43, OQ-53 |
-| 2 Persona | Dials and monitor; curiosity from gap queue; quiet hours; notification ledger; prompt versioning; replay harness; skills; owner panel; onboarding | OQ-13, OQ-20, OQ-21, OQ-39, OQ-46, OQ-49 |
-| 3 Safety | Gate + `audit.jsonl`; `secretRef`; LLM/web budgets + usage log; kill switch; backup and encryption; shadow mode; threat model; degraded mode | OQ-07 to OQ-09, OQ-11, OQ-25, OQ-29, OQ-38, OQ-47, OQ-48, OQ-51 |
-| 4 Background work | Children; `llm.escalate`; `reader` role; `web.search`, `web.fetch`; MCP client; headless CLI and external control | OQ-14, OQ-28, OQ-33, OQ-54, OQ-55, OQ-56 |
+| 0 Foundation | Monorepo scaffolding; config loader and `jaari init` (asks for the target); `@jaari/llm` providers, tiers, roles, fallback chains; `ChannelAdapter` contract + CLI channel; `@jaari/capabilities` (manifest, loader, daemon–node contract, ADR-015/018); deny-all `@jaari/gate` stub; `@jaari/secrets` resolver with the `os-keychain` provider; laptop sleep/wake rule; install and `jaari doctor`; project process files | OQ-01, OQ-02, OQ-22, OQ-23, OQ-35, OQ-36 (sleep/wake), OQ-44, OQ-50 |
+| 1 Memory | Memory repo and write path; retrieval and context assembly; scheduler and routines; canonicalize (6h); daily audit | OQ-03 to OQ-06, OQ-24, OQ-43, OQ-53 |
+| 2 Persona | Dials and monitor; curiosity from gap queue; quiet hours; notification ledger; prompt versioning; replay harness; skills (third-party ones disabled until the reader role exists); owner panel; onboarding | OQ-13, OQ-20, OQ-21, OQ-39, OQ-46, OQ-49 |
+| 3 Safety | Real gate (digests, approvals, 15-minute expiry) + hash-chained `audit.jsonl`; vault providers (Bitwarden, 1Password); LLM/web budgets + usage log; kill switch; backup and encryption; shadow mode; threat model; degraded mode | OQ-07 to OQ-09, OQ-11, OQ-25, OQ-29, OQ-38, OQ-47, OQ-48, OQ-51, OQ-64 |
+| 4 Background work | Children; `llm.escalate`; `reader` role; `web.search`, `web.fetch`; `@jaari/http` resolve-check-dial egress with `direct` and `owner-exit` providers; MCP client; headless CLI and external control | OQ-14, OQ-28, OQ-33, OQ-54, OQ-55, OQ-56 |
 | 5 Integrations | GitHub, npm, PyPI, email; OAuth broker; the agent's mailbox; calendar and personal data; documents; inbound triggers | OQ-17, OQ-18, OQ-41, OQ-42, OQ-52 |
-| 6 Computer use | Browser via Playwright MCP or Stagehand; local profile; remote CDP; takeover; `computer.use` on a host virtual desktop; remote nodes via `jaari capability install` | OQ-27, OQ-30, OQ-31, OQ-34, OQ-36 |
-| 7 Hardening | Docker/Firecracker backends; egress proxy; code execution; deployment; multi-device state; observability | OQ-10, OQ-12, OQ-15, OQ-32, OQ-37 |
-| 8 Evals | `jaari llm eval` fixtures; behaviour evals; learned router experiment; learning from outcomes | OQ-20, OQ-40 |
+| 6 Computer use | Browser via Playwright MCP or Stagehand under the placement rule (ADR-017); local profile or owner exit node; remote CDP; takeover; `computer.use` on a host virtual desktop; remote nodes via `jaari capability install`; macOS permission matrix | OQ-27, OQ-30, OQ-31, OQ-32, OQ-34, OQ-36 (permission matrix) |
+| 7 Hardening | Docker/Firecracker backends; container egress proxy; code execution; overlay and sizing per target; multi-device state and host migration; observability; mobile and residential egress providers | OQ-10, OQ-12, OQ-15, OQ-37 |
+| 8 Evals | `jaari llm eval` fixtures; behaviour evals; learned router experiment; learning from outcomes | OQ-20 (fixtures), OQ-40 |
+| Later | Voice; payments rail (`pay` is reserved); multimodal memory; trust tiers, agent network (non-goals for v1) | OQ-16, OQ-19, OQ-45 |
+
+Egress arrives in steps: the address-class gate with `direct` and `owner-exit` for fetch in
+Phase 4; the browser's SOCKS5 listener and owner-account pinning in Phase 6; `mobile` and
+`residential-proxy` providers (anonymous traffic only) in Phase 7.

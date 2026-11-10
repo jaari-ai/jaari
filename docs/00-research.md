@@ -75,7 +75,7 @@ use to rebuild the same "ops shape."
 | **OpenInstinct** (Merit Systems) | LICENSE file present, type not stated in README | Next.js/TypeScript "Eve" agent; Kernel cloud browsers; Neon Postgres; encrypted vault with autofill that keeps passwords out of model context; workstreams memory; scheduled runs | iMessage via Linq | Any model via Vercel AI Gateway | Cloud browser + iMessage + Gmail/Calendar + Stripe Link purchases; one-click Vercel deploy. Marked "not intended for production" |
 | **openinstinct** (Yeachan-Heo) | Not stated | Runs entirely on your Mac: `openinstinctd` daemon reads/sends via Messages.app on a separate Apple ID; dedicated Chrome profile; git-backed memory repo with daily notes rolled up into people/projects/decisions — the closest match to Instinct's memory design | iMessage (your phone → your Mac) | Claude, ChatGPT, API key, or custom endpoint | Background child sessions, scheduled watches, no telemetry/server |
 | **OpenClaw** | MIT | Locally run TypeScript/Swift agent; skills system (`SKILL.md` dirs); local config/history for persistence | Signal, Telegram, Discord, WhatsApp; iMessage via community openclaw-sendblue plugin | Claude, DeepSeek, GPT, etc. | The project Instinct was literally compared to; recommended default for "Instinct-like life admin" because of browser and tool breadth |
-| **MausBot** | Apache 2.0 | Localhost harness driving `claude`/`codex`/`grok` CLIs; OAuth via Composio with tokens on disk; allow/deny card before every action; optional cloud desktop per bot | Own desktop app + iOS/Android companions — not iMessage/WhatsApp | Claude, Codex, Grok, Cursor, Kimi, Qwen CLIs | Multi-agent/multi-thread, browses from your own IP (avoids Instinct's CAPTCHA problem) |
+| **MausBot** | Apache 2.0 | Localhost harness driving `claude`/`codex`/`grok` CLIs; OAuth via Composio with tokens on disk; allow/deny card before every action (as marketed; the code defaults to Full access, see [learning/09](learning/09-openmausbot.md)); optional cloud desktop per bot | Own desktop app + iOS/Android companions — not iMessage/WhatsApp | Claude, Codex, Grok, Cursor, Kimi, Qwen CLIs | Multi-agent/multi-thread, browses from your own IP (avoids Instinct's CAPTCHA problem) |
 | **Hermes Agent** | MIT | Self-hosted, self-improving (builds its own skills) | Sendblue webhook/community plugin | BYOK | Best if memory continuity is the priority |
 | **OpenOpenInstinct** | — | Self-hosted, local SQLite WAL, WebCrypto P-256 device auth, browser execution | iMessage + web | — | Minimal-infra variant |
 
@@ -96,8 +96,9 @@ shopping/booking permissions.
   teardown found.
 - **Most production-ready foundation:** OpenClaw (large community, MIT), with the Sendblue
   plugin for iMessage.
-- **If you want "asks first" instead of Instinct's "acts first":** MausBot or Merit's
-  OpenInstinct (vault-based autofill keeps credentials out of the model).
+- **If you want "asks first" instead of Instinct's "acts first":** MausBot's marketing says
+  so, but its source defaults to Full access (learning/09); Merit's OpenInstinct (vault-based
+  autofill keeps credentials out of the model) is the safer pick.
 
 ## 8. Persona/proactivity reference (added 2026-11-04)
 
@@ -173,7 +174,7 @@ your own IP") rely on the same fact.
 
 | Option | Mechanism | Cost | Fit for a single-owner agent |
 |---|---|---|---|
-| Owner's home IP, self-hosted | Tailscale (Headscale, plain WireGuard) exit node on a Pi or home server; a VPS-hosted browser routes through it | None; bounded by home uplink and Pi CPU | Default. Same IP the owner browses from, so login patterns stay consistent |
+| Owner's home IP, self-hosted | Tailscale (Headscale, plain WireGuard) exit node on a Pi or home server; a VPS-hosted browser routes through it | None; bounded by home uplink and Pi CPU | Default for the owner's accounts (pinned, ADR-017). Same IP the owner browses from, so login patterns stay consistent; may also join the anonymous rotation pool |
 | Owner's mobile IP, self-hosted | 4G/5G USB dongle on a Pi (Proxidize's open-source `4g-proxy` or manual); carrier CGNAT IPs are shared by thousands of real users; rotate by reconnecting | ~$80–130 per modem + SIM | Cleanest reputation; overkill for one owner; fallback for hostile sites |
 | Commercial residential proxies | Decodo (most recommended, ~$2–6/GB), Oxylabs (premium, publishes sourcing docs), Bright Data (KYC, business accounts, open-source proxy manager), IPRoyal and Webshare (budget; Webshare has a free tier), Evomi (cheapest, mixed reliability) | Per GB | Anonymous `web.fetch` only. A rotating IP in another city on the owner's accounts triggers fraud flags rather than avoiding them |
 | Commercial VPN (Gluetun and similar) | Datacenter IPs | Subscription | Privacy only; worse than nothing against bot detection |

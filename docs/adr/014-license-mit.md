@@ -3,6 +3,7 @@
 # ADR-014: License: MIT
 
 - **Status:** Accepted
+- **Extended by:** [ADR-016](016-openmausbot-hardening.md) (Apache-2.0 reuse from `refs/openmausbot`: header kept, `NOTICE` entry, never `enterprise/`)
 - **Date:** 2026-11-05
 
 ## Decision

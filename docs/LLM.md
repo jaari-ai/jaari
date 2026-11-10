@@ -16,7 +16,7 @@ Owner override: "use the big model for this", `/model <tier>`.
 ## Roles
 | Role | Default tier | Notes |
 |---|---|---|
-| main | large | Pinned for the session |
+| main | large | Pinned for the session; outage failover only at a turn boundary (ADR-019) |
 | child | medium | Tier chosen at spawn; may request escalation |
 | canonicalize | medium | Local-only if possible |
 | curiosity, classify, summarize, title | small | Local preferred |
@@ -26,6 +26,12 @@ Owner override: "use the big model for this", `/model <tier>`.
 
 ## Rules
 - Local-only roles never fall back to an API; they fail closed and notify once.
+- `canonicalize` and `curiosity` are local-only by default only if `jaari llm eval` qualifies
+  a local model at `jaari init`; otherwise `init` asks the owner to install one or allow an
+  API tier, and canonicalize does not run until they choose (ADR-019).
+- The main session is pinned: no routine switching. On a provider outage it may move down its
+  chain at a turn boundary, to a model with the same tools, with one notice, and stays there
+  until restart or until the owner reverts (ADR-019).
 - Every call logs role, model, tokens, cost, latency, escalation reason, outcome to SQLite;
   `jaari llm usage` reports it.
 - `jaari llm eval <model>` runs role fixtures (tool-call accuracy, JSON validity,

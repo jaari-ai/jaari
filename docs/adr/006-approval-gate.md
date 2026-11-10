@@ -3,6 +3,7 @@
 # ADR-006: Approval gate with digest binding
 
 - **Status:** Accepted
+- **Extended by:** [ADR-016](016-openmausbot-hardening.md), [ADR-018](018-capability-vocabulary-and-phase-0-floor.md)
 - **Date:** 2026-11-05
 
 ## Decision
@@ -10,6 +11,12 @@ Every external effect or payment is a proposed action serialized to canonical JS
 
 ## Alternatives rejected
 Model self-approval; approval by free-text summary (summary can differ from action).
+
+## Amendments
+- **ADR-018:** Approvals expire after 15 minutes by default (5 for `email.send` and `publish`); the short code is only a lookup of the digest; no amount tolerance.
+
+## Flagged conflicts
+- [OQ-51](../OPEN_QUESTIONS.md): "Single-use" conflicts with the standing grants that daily use needs.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

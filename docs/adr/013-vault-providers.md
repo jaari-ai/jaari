@@ -3,6 +3,7 @@
 # ADR-013: Pluggable vault providers: Bitwarden first, 1Password second
 
 - **Status:** Proposed
+- **Extended by:** [ADR-018](018-capability-vocabulary-and-phase-0-floor.md)
 - **Date:** 2026-11-05
 
 ## Decision
@@ -10,6 +11,12 @@
 
 ## Alternatives rejected
 1Password only (not self-hostable, closed source); Vaultwarden as the reference target (no audit, no Secrets Manager; still supported through the `bw` backend); linking Bitwarden or 1Password SDKs whose licences restrict use, instead of calling a separate process; giving the model the vendor MCP server (puts credentials in model context, violates ADR-007); a Jaari-built encrypted store (re-solves sync, backup, and audit that vaults already provide).
+
+## Amendments
+- **ADR-018:** Phase 0 ships the resolver and an `os-keychain` provider; `env` and `file` stay development-only with a `jaari doctor` warning.
+
+## Flagged conflicts
+- [OQ-64](../OPEN_QUESTIONS.md): Still Proposed; accept once the OQ-29 verification is done.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
