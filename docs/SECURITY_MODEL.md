@@ -47,6 +47,7 @@ separate manifest fields.
 | `email.send`, `publish`, `repo.write` | gated | Short approval expiry |
 | `pay` | reserved | No executor in v1 (OQ-19) |
 | `llm.escalate` | policy-checked | Children only (ADR-011) |
+| `mcp.read`, `mcp.act` | read, gated | MCP tools that match no other name; unconfirmed or unreadable tools are `mcp.act` (ADR-034) |
 
 Login, 2FA, and CAPTCHA go to owner takeover.
 
@@ -106,7 +107,14 @@ encryption; remotes the owner does not control get age-encrypted bundles or `git
 `jaari memory purge` rewrites history everywhere Jaari can reach. Owner-facing trade-offs:
 [guides/securing-your-install.md](guides/securing-your-install.md).
 
+## MCP servers (ADR-034)
+Servers are added by the owner; one the model proposes arrives switched off. Each tool is
+pre-classified and the owner confirms the mapping in one step; until then it is `mcp.act`.
+Config and tool list are pinned by SHA-256, and any change holds the server for re-approval.
+Server text is untrusted and results are capped at 20 KB. Local servers run in a sandbox whose
+only network is a loopback proxy into `@jaari/http`; without a backend they run only after a
+per-server "unsandboxed" warning the owner accepts.
+
 ## Open
-MCP plugin
-sandboxing (OQ-14), code execution (OQ-15), standing grants (OQ-51), inbound triggers
+Code execution (OQ-15), standing grants (OQ-51), inbound triggers
 (OQ-52), outside lineage (OQ-54).

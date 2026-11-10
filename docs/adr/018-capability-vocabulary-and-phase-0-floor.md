@@ -1,6 +1,7 @@
 # ADR-018: Capability vocabulary, `@jaari/capabilities`, and the Phase 0 safety floor
 
 - **Status:** Accepted
+- **Extended by:** [ADR-034](034-mcp-servers.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -8,6 +9,10 @@
 
 ## Alternatives rejected
 Per-host capability names (`browser.local` as a gate class: the policy would depend on where code runs); a gate that arrives in Phase 3 with executors written before it; plaintext keys in config until the vault exists; an approval tolerance ("within 5%"), which is a second, weaker binding.
+
+## Amendments
+- **ADR-034:** The vocabulary gains `mcp.read` (read) and `mcp.act` (gated) for MCP tools
+  that match no other name; server and tool are manifest fields.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
