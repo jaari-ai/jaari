@@ -14,13 +14,15 @@
   ("always", "never") and health or safety facts are never moved or archived by upkeep.
 - Proposed capture rule (OQ-53): a captured fact carries the owner's quoted words; code
   checks the quote and rejects numbers, paths, and URLs that are not in it.
-- Recalled memory is placed in front of the owner's message inside a fenced data block,
-  within a fixed budget, never in the cached prompt prefix (OQ-04).
+- Context assembly (ADR-024): code builds each prompt in a fixed layout. Upcoming events (14
+  days), trackers, budget, commitments, and warnings go in front of the owner's message;
+  dates mentioned in a message pull in records from that window at any distance; a horizon
+  line points past 14 days. Recall is fenced as data and never in the cached prefix.
 - Structured records (ADR-023): typed records (ledger, event, task, commitment, tracker,
   recurring bill, person, document and expiry, metric log, goal, list, trip, place, and custom
   types) under schemas in `ops/schemas/`. The model fills fields; code computes totals, dates,
   and run-out; ledgers are append-only and canonicalize never edits them. Capture is immediate.
 - Search (ADR-023): `memory.search` over SQLite FTS5, a cache rebuilt from the Markdown, with a
   freshness check before each query; embeddings later, local-only.
-- Open: context assembly (OQ-04), concurrent writes (OQ-06),
+- Open: concurrent writes (OQ-06),
   encryption (OQ-08), forgetting (OQ-09), backup (OQ-07), capture evidence (OQ-53).

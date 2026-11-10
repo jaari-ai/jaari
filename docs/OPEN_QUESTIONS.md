@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **54**.
+Last updated: 2026-11-10. Open: **53**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -14,7 +14,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-04 | Context assembly | Who decides what memory enters each prompt? How are long sessions compacted? | 1 | Deterministic assembler with token budget per section. Split the prompt into a stable and a volatile part; recalled memory goes in front of the owner's message, fenced as data, never into the cached prefix (learning/09) |
 | OQ-05 | Scheduler | One job engine for canonicalize, audit, reminders, children: persistence, retries, crash recovery, missed runs during sleep, time zones | 1 | SQLite-backed queue in the daemon. A job tree with an append-only events table whose status can be rebuilt from its events; a turn cut by a restart reruns at most once and never after an effectful action (ADR-016) |
 | OQ-06 | Concurrent memory writes | Lock, single writer queue, or branch-per-task then merge? | 1 | Single writer; others enqueue patches |
 
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-01 | CLI, web panel, and Telegram in v1; email as input only (Phase 5); WhatsApp and iMessage first after v1 | [ADR-021](adr/021-v1-channels.md) |
 | OQ-02 | Ingress mints authority; paired channels are equal; one active channel (latest inbound); pluggable pairing into one hashed device registry; immediate revoke | [ADR-022](adr/022-owner-authentication-and-active-channel.md) |
 | OQ-03 | Typed structured records (13 built-in types plus custom) with code-computed values; SQLite FTS5 search as a rebuildable cache; embeddings later | [ADR-023](adr/023-structured-records-and-memory-search.md) |
+| OQ-04 | Code-built layout with per-section budgets; 14-day window plus date-aware recall, a horizon line, and records.query for later dates; model may search more | [ADR-024](adr/024-context-assembly.md) |

@@ -25,3 +25,4 @@
 | [021](021-v1-channels.md) | v1 channels: CLI, web panel, Telegram; email as input only | Accepted |
 | [022](022-owner-authentication-and-active-channel.md) | Owner authentication: pluggable pairing, one device registry, one active channel | Accepted |
 | [023](023-structured-records-and-memory-search.md) | Structured records first, SQLite FTS5 search behind one tool | Accepted |
+| [024](024-context-assembly.md) | Context assembly: a fixed layout built by code, automatic recall, time anchors | Accepted |
