@@ -7,5 +7,6 @@
   denied or failed write under `refs/` is intended; do not work around it.
 - Searches that honour git excludes (ripgrep-based Grep) can skip `refs/`. Pass a
   `refs/...` path explicitly when you need to search a reference.
-- Do not edit generated files with Edit or Write. Change `scripts/make_docs.py` and run
-  `python3 scripts/make_docs.py`.
+- Docs under `docs/` are hand-edited Markdown; follow `docs/DEVELOPMENT.md` (Docs). Run
+  `python3 scripts/merge_docs.py --check` after changing them. `JAARI_CONTEXT.md` is an
+  untracked build artifact: never edit it, regenerate it.
