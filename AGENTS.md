@@ -14,9 +14,10 @@ exist yet.
   Apache-2.0). The rest of `refs/openmausbot` is a design reference; copying code from it
   needs a `NOTICE` entry and the file's Apache-2.0 header kept (ADR-016).
 - When you copy code from `refs/pi` or `refs/open-instinct` (MIT), add an entry to
-  `NOTICE` (in the script) with the source path and pinned commit (ADR-014).
-- Generated files (`docs/**`, `README.md`, `AGENTS.md`, `CLAUDE.md`, `LICENSE`, `NOTICE`)
-  are never edited by hand: edit `scripts/make_docs.py`, then run it.
+  `NOTICE` with the source path and pinned commit (ADR-014).
+- Docs are hand-maintained Markdown under `docs/` (no generator). Follow the conventions in
+  `docs/DEVELOPMENT.md` (ADRs, open questions, learning notes, state) and keep every
+  cross-reference valid: `python3 scripts/merge_docs.py --check`.
 - Never put secrets in code, tests, fixtures, prompts, or logs; use `secretRef:` handles.
 - Never run `git clean -fdx` at the repo root (it deletes the git-excluded `refs/`).
 
@@ -30,28 +31,29 @@ exist yet.
 ## Repository layout
 | Path | What | Editable |
 |---|---|---|
-| `scripts/make_docs.py` | Single source of truth for docs, ADRs (`ADRS`), open questions (`OPEN_QUESTIONS`), agent files, base config | Yes |
 | `scripts/refs.sh` | Manages `refs/` (sync to pinned commits, lock, status, `refs/INDEX.md`) | Yes |
-| `docs/` | Generated docs. `docs/adr/` is the authoritative ADR set. | Via the script |
+| `scripts/merge_docs.py` | Merges README, AGENTS, docs, and config into one untracked context file for AI discussions; `--check` validates doc links and IDs | Yes |
+| `docs/` | Hand-maintained docs. `docs/adr/` is the authoritative ADR set. | Yes, per conventions |
 | `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon`, `cli`); not created yet | Yes |
-| Root config | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.claude/settings.json` | Scaffold-once: edit the script and run with `--force`, or edit directly and mirror the change in the script |
-| `jaari.config.example.jsonc` | Example owner config (`owner`, `persona`, `memory`, `llm`, `web`) | Via the script |
-| `.github/workflows/release.yml` | Tag-triggered release workflow, actions pinned to commit SHAs (`RELEASE_WORKFLOW`) | Via the script |
+| Root config | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.claude/settings.json` | Yes |
+| `jaari.config.example.jsonc` | Example owner config (`owner`, `persona`, `memory`, `llm`, `web`) | Yes |
+| `.github/workflows/release.yml` | Tag-triggered release workflow, actions pinned to commit SHAs; keep in sync with `docs/guides/namespaces.md` | Yes |
 | `refs/` | Read-only reference repos, local only (`.git/info/exclude`) | Never |
 
 ## Docs workflow
+Docs are plain Markdown edited by hand. Full conventions: `docs/DEVELOPMENT.md` (Docs).
 ~~~bash
-python3 scripts/make_docs.py --dry-run --diff   # preview
-python3 scripts/make_docs.py                    # write changed files
+python3 scripts/merge_docs.py --check   # validate links, ADR index, and OQ references
+python3 scripts/merge_docs.py           # rebuild the untracked context file (JAARI_CONTEXT.md)
 ~~~
-- Commit the script together with the files it regenerates.
-- New decision: add an entry to `ADRS` (id `NNN-slug`, title, status, decision,
-  alternatives rejected). Index tables regenerate automatically.
-- Resolved open question: remove it from `OPEN_QUESTIONS`, record the ADR, and list it
-  under *Resolved*.
-- At the end of a work session, update the `docs/STATE.md` text in the script. If you
-  studied a reference to make a call, add a learning note (`docs/learning/NN-topic.md`,
-  format in `docs/learning/README.md`).
+- New decision: add `docs/adr/NNN-slug.md` from the template, then add its row to
+  `docs/adr/README.md` and the ADR table in `docs/ACTION_PLAN.md`.
+- Resolved open question: remove its row from `docs/OPEN_QUESTIONS.md`, record the ADR, and
+  list it under *Resolved*; update the open count there and in `docs/STATE.md`.
+- At the end of a work session, update `docs/STATE.md`. If you studied a reference to make
+  a call, add a learning note (`docs/learning/NN-topic.md`, format in
+  `docs/learning/README.md`).
+- Commit docs changes together with the decision they record.
 
 ## Reference repos (`refs/`)
 | Ref | License | Use |
@@ -90,4 +92,4 @@ python3 scripts/make_docs.py                    # write changed files
 - Lint: ESLint flat config. All tooling uses allowlists so `refs/` is never included.
   Keep it that way when adding config.
 - Package names `@jaari/<name>`. The package list is in `docs/ARCHITECTURE.md`. Update
-  that table (in the script) when a package's responsibility changes.
+  that table when a package's responsibility changes.
