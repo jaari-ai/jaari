@@ -2,7 +2,7 @@
 
 # Jaari: State
 
-Last updated: 2026-11-09
+Last updated: 2026-11-10
 
 ## Done
 - Identity: `jaari.org`, GitHub org `jaari-ai`. npm/PyPI names not yet secured; checklist in
@@ -22,6 +22,11 @@ Last updated: 2026-11-09
 - IP reputation, bot detection, signed agents, and owner takeover research recorded in
   [learning/08-egress-identity-and-takeover.md](learning/08-egress-identity-and-takeover.md) and
   [00-research.md §10](00-research.md); OQ-32 to OQ-34 added. No decision taken.
+- OpenMausBot added as a reference (`refs/openmausbot`, Apache-2.0) and studied:
+  [learning/09-openmausbot.md](learning/09-openmausbot.md). ADR-016 accepted (dispatch
+  re-check, hash-chained audit, resolve-check-dial egress, secret scrubbing, owner hold);
+  23 open questions gained a leaning from it and OQ-51 to OQ-56 were added. Its approval
+  model, bot roster, and hosted services were rejected. No code copied.
 - Doc generator (`scripts/make_docs.py`) as single source of truth; the v1 generator's
   output is merged in and its outdated duplicates are dropped.
 - Reference repos tooling (`scripts/refs.sh`); root build config scaffolded (no packages yet).
@@ -30,4 +35,4 @@ Last updated: 2026-11-09
 Phase 0: Foundation (monorepo, `@jaari/llm`, `ChannelAdapter`).
 
 ## Open questions
-50 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+56 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

@@ -220,6 +220,8 @@ only on their own platforms.
 - OpenClaw — https://github.com/openclaw/openclaw
 - openclaw-sendblue plugin — https://github.com/njerschow/openclaw-sendblue
 - MausBot, "Instinct AI alternative" — https://mausbot.com/blog/instinct-ai-alternative
+- OpenMausBot source — https://github.com/milind-soni/OpenMausBot (studied 2026-11-10 in
+  [learning/09-openmausbot.md](learning/09-openmausbot.md); `refs/openmausbot`)
 - OpenOpenInstinct — https://maceip.github.io/OpenOpenInstinct/
 - supermemory teardown of Instinct's memory system (blog post, Oct 2026)
 - Instinct Terms of Service; press coverage of the Series C (Sept 28, 2026); investor posts

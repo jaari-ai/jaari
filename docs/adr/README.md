@@ -19,3 +19,4 @@
 | [013](013-vault-providers.md) | Pluggable vault providers: Bitwarden first, 1Password second | Proposed |
 | [014](014-license-mit.md) | License: MIT | Accepted |
 | [015](015-control-plane-and-nodes.md) | One daemon on an always-on host; capabilities installed where they run | Accepted |
+| [016](016-openmausbot-hardening.md) | Hardening borrowed from OpenMausBot: dispatch re-check, chained audit, resolve-check-dial egress, owner hold | Accepted |

@@ -22,3 +22,16 @@ Two dials, 0 to 3, enforced by a monitor in code (ADR-008). Defaults below; tune
 - Every proactive message and the owner's reaction go to the notification ledger, which
   tunes thresholds over time.
 - Delivery path is open (OQ-13).
+
+## Routines and staying quiet
+Rules taken from OpenMausBot's routines and its notification QA list (learning/09); they
+apply before the monitor scores anything:
+- Proactive work starts only from a visible trigger (a routine, a watcher, an inbound
+  event, the curiosity budget). There is no unconfigured heartbeat.
+- A routine first runs plain-code checks (new mail ids, calendar changes, a changed
+  price). No model call happens when nothing is new; the cursor advances only after the
+  run's result is stored.
+- A run that finds nothing posts nothing. A failure alerts once per routine and cause.
+- "Finished" is sent only with a non-empty result, and every notification links to the
+  exact thread it is about.
+- Schedule semantics (anchoring, overlap, catch-up) are OQ-43.

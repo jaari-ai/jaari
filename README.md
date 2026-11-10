@@ -32,7 +32,7 @@ background, gets to know you at a pace you set, and never takes an external acti
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Principles, packages, trust boundaries |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phases 0 to 8 and the open questions blocking each |
 | [docs/ACTION_PLAN.md](docs/ACTION_PLAN.md) | Next steps |
-| [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Undecided design questions (OQ-01 to OQ-50) with current leanings |
+| [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Undecided design questions (OQ-01 to OQ-56) with current leanings |
 | [docs/adr/](docs/adr/README.md) | Architecture decision records (the authoritative ADR numbering) |
 | [docs/MEMORY.md](docs/MEMORY.md), [PERSONA.md](docs/PERSONA.md), [SECURITY_MODEL.md](docs/SECURITY_MODEL.md), [LLM.md](docs/LLM.md), [WEB.md](docs/WEB.md), [INTEGRATIONS.md](docs/INTEGRATIONS.md) | Subsystem designs |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Dev setup, `refs/`, commands |
@@ -87,6 +87,7 @@ Jaari merges ideas from these projects. They are kept in `refs/` for study, not 
 | [openinstinct](https://github.com/Yeachan-Heo/openinstinct) | None found | Runtime semantics, as a behavioral spec only; no code copied (ADR-009) |
 | [gajae-way](https://github.com/Yeachan-Heo/gajae-way) | AGPL-3.0 | Memory axes design; no code copied |
 | [Pi](https://github.com/earendil-works/pi) | MIT | Agent loop and multi-provider LLM access (ADR-001) |
+| [OpenMausBot](https://github.com/milind-soni/OpenMausBot) | Apache-2.0 (`enterprise/` excluded) | Hardening details: egress gate, dispatch re-check, owner hold, routine semantics (ADR-016); no code copied |
 
 Background on Instinct AI and Meta's Muse is in [docs/00-research.md](docs/00-research.md).
 

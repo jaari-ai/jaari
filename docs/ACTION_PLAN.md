@@ -11,6 +11,9 @@
 6. Build the capability manifest, the daemon–node contract, and the in-process loader in
    Phase 0 (ADR-015, OQ-50); every executor goes through it. Remote nodes and the host
    virtual desktop for `computer.use` in Phase 6; isolation backends in Phase 7.
+7. ADR-016 accepted (OpenMausBot hardening: dispatch re-check, chained audit,
+   resolve-check-dial egress, secret scrubbing, owner hold). Build `@jaari/gate`,
+   `@jaari/http`, and `@jaari/secrets` to it; it changes no package boundary.
 
 ## ADRs
 | ADR | Title | Status |
@@ -30,3 +33,4 @@
 | [013](adr/013-vault-providers.md) | Pluggable vault providers: Bitwarden first, 1Password second | Proposed |
 | [014](adr/014-license-mit.md) | License: MIT | Accepted |
 | [015](adr/015-control-plane-and-nodes.md) | One daemon on an always-on host; capabilities installed where they run | Accepted |
+| [016](adr/016-openmausbot-hardening.md) | Hardening borrowed from OpenMausBot: dispatch re-check, chained audit, resolve-check-dial egress, owner hold | Accepted |

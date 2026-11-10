@@ -34,9 +34,9 @@
 | `@jaari/llm` | Wraps `@earendil-works/pi-ai`; tiers + fallback chains, role routing, escalation, budgets, local-only privacy, usage log, `jaari llm eval` (ADR-011) |
 | `@jaari/memory` | Git-backed memory repo, write path, canonicalize, daily audit, gap queue |
 | `@jaari/persona` | Curiosity/Proactivity dials, monitor, quiet hours, notification ledger |
-| `@jaari/gate` | Action digests, approvals, `audit.jsonl` |
-| `@jaari/secrets` | `secretRef` resolution for executors only, through pluggable vault providers (Bitwarden, 1Password; ADR-013) |
-| `@jaari/http` | Egress policy: blocks private ranges and cloud metadata, per-capability allowlists |
+| `@jaari/gate` | Action digests, approvals, re-check at dispatch, hash-chained `audit.jsonl` (ADR-006, ADR-016) |
+| `@jaari/secrets` | `secretRef` resolution for executors only, through pluggable vault providers (Bitwarden, 1Password; ADR-013); exact-value scrubbing of resolved secrets (ADR-016) |
+| `@jaari/http` | Egress gate: resolve, classify every address against one address-class table, dial only checked addresses; SOCKS5 listener for the browser; per-capability allowlists (ADR-016) |
 | `@jaari/web` | `web.search`, `web.fetch`, fetch escalation ladder (ADR-012) |
 | `@jaari/computer` | Browser/desktop control via Playwright MCP or Stagehand, local profile or remote CDP, takeover (ADR-005, ADR-012) |
 | `@jaari/channels` | `ChannelAdapter` contract, ingress (principal resolution), delivery outbox, built-in adapters |
@@ -165,7 +165,8 @@ dependency.
 - Owner ↔ channels: authenticated owner only (see [Channels](#channels) and OQ-02).
 - Model ↔ tools: every tool maps to a capability; effectful capabilities go through the gate.
 - Tools ↔ internet: all egress through `@jaari/http` or the container egress proxy.
-- Untrusted content ↔ main session: `reader` summary only, never raw instructions.
+- Untrusted content ↔ main session: `reader` summary only, never raw instructions. Whether
+  the outside origin sticks to derived work is OQ-54.
 
 ## Decisions
 See [adr/README.md](adr/README.md).
