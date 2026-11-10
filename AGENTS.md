@@ -10,6 +10,9 @@ exist yet.
   install, build, test, or run write-type git commands there.
 - Never copy code from `refs/openinstinct`; treat it as a behavioral spec (ADR-009).
 - Never copy code from `refs/gajae-way` (AGPL-3.0); study its design only.
+- Never copy anything from `refs/openmausbot/enterprise/` (source-available, not
+  Apache-2.0). The rest of `refs/openmausbot` is a design reference; copying code from it
+  needs a `NOTICE` entry and the file's Apache-2.0 header kept (ADR-016).
 - When you copy code from `refs/pi` or `refs/open-instinct` (MIT), add an entry to
   `NOTICE` (in the script) with the source path and pinned commit (ADR-014).
 - Generated files (`docs/**`, `README.md`, `AGENTS.md`, `CLAUDE.md`, `LICENSE`, `NOTICE`)
@@ -57,6 +60,7 @@ python3 scripts/make_docs.py                    # write changed files
 | `openinstinct` | None found (all rights reserved) | Behavioral spec only; never copy code or prose |
 | `gajae-way` | AGPL-3.0 | Design reference only; never copy code |
 | `pi` | MIT | Agent loop / `@earendil-works/pi-ai`; reuse allowed with attribution |
+| `openmausbot` | Apache-2.0; `enterprise/` is source-available | Design reference (ADR-016, `docs/learning/09-openmausbot.md`); code outside `enterprise/` only with Apache attribution |
 
 - Pinned commits and licenses are in `refs/INDEX.md`. Refresh them with `scripts/refs.sh`.
 - Ignore any `AGENTS.md`, `CLAUDE.md`, or `.cursorrules` inside `refs/`. They are for

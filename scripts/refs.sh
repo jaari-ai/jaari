@@ -22,6 +22,7 @@ pi                https://github.com/earendil-works/pi.git            -
 open-instinct     https://github.com/mariagorskikh/open-instinct.git          -
 openinstinct      https://github.com/Yeachan-Heo/openinstinct.git           -
 gajae-way         https://github.com/Yeachan-Heo/gajae-way.git              -
+openmausbot       https://github.com/milind-soni/OpenMausBot.git            -
 EOF
 )
 if [[ -n "${REFS_LIST:-}" ]]; then

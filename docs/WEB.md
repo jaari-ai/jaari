@@ -18,6 +18,11 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
 - Browser runs inside Jaari's loop so the gate sees every action; browser-use (own loop)
   only as an isolated child, if ever.
 - Disable `browser_run_code_unsafe`. Enforce origins at the egress proxy, not in the tool.
+- The browser's only route out is the `@jaari/http` SOCKS5 gate (resolve, check, dial;
+  ADR-016). Saved logins are filled by the executor; the model never sees the value, and
+  screenshots stop while a filled secret is on the page.
+- A browser on a VPS may send an owner-set list of home sites through an owner node and
+  everything else direct (OQ-32).
 - Search queries are sensitive: `curiosity` and `canonicalize` use SearXNG only.
 - AGPL/SSPL services (SearXNG, Firecrawl, CRW, Lightpanda, Browserless) run as separate
   processes; never vendor their code into Jaari packages.

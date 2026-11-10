@@ -10,5 +10,13 @@
 - Daily audit: contradictions, stale facts, orphan files; results to the owner digest.
 - Canonicalize reads the most sensitive data, so its model tier is local-only by default
   if a capable local model passes the fixtures (ADR-011, OQ-24, OQ-26).
+- Proposed line conventions, after OpenMausBot (learning/09): entries are dated and name
+  their source; a superseded fact is struck through with the date instead of deleted; an
+  `until YYYY-MM-DD` suffix stops a line loading after that day. Rules the owner stated
+  ("always", "never") and health or safety facts are never moved or archived by upkeep.
+- Proposed capture rule (OQ-53): a captured fact carries the owner's quoted words; code
+  checks the quote and rejects numbers, paths, and URLs that are not in it.
+- Recalled memory is placed in front of the owner's message inside a fenced data block,
+  within a fixed budget, never in the cached prompt prefix (OQ-04).
 - Open: retrieval (OQ-03), context assembly (OQ-04), concurrent writes (OQ-06),
-  encryption (OQ-08), forgetting (OQ-09), backup (OQ-07).
+  encryption (OQ-08), forgetting (OQ-09), backup (OQ-07), capture evidence (OQ-53).

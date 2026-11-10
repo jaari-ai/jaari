@@ -9,8 +9,27 @@
 4. Executor recomputes the digest; mismatch, reuse, or expiry → refuse.
 5. Decision appended to `audit.jsonl`. No LLM in this path.
 
+Additions from ADR-016 (accepted; from the OpenMausBot study):
+- The owner is shown the whole action, never a truncated one. If it does not fit a card,
+  the card links to the full canonical JSON whose digest is being approved.
+- Re-check at dispatch: after the digest matches, the executor re-reads capability state,
+  standing policy, account scope, kill switch, and shadow mode, and refuses if any changed.
+- A deterministic classifier that cannot read an action to the end returns "unreadable",
+  which is handled as "ask the owner".
+- `audit.jsonl` is hash-chained (each row holds the SHA-256 of the previous one) and
+  records the deciding rule, the actor, whether the owner was present, and the medium.
+  An action whose audit row cannot be written does not run.
+- After a crash, a cut turn reruns at most once and never if an effectful action had
+  started in it.
+- Standing grants ("always allow") are OQ-51.
+
 ## Secrets (ADR-007)
 `secretRef:<name>` in config and tool args; resolved only inside executors.
+
+Additions from ADR-016 (accepted): resolved values are scrubbed by exact value (and common
+encodings) from tool results and logs; the model names a credential by a typed target id,
+never a path or URL; a value sent to a node is single-use; while a filled secret is on a
+page, screenshots and page evaluation are refused.
 
 ## Capabilities
 `web.search`, `web.fetch`, `browser.read`, `browser.act`, `browser.submit`,
@@ -19,12 +38,31 @@ gate. Login/2FA → owner takeover.
 
 ## Untrusted content
 Email, web pages, search snippets, and documents go through the tool-less `reader`
-role before the main session sees them.
+role before the main session sees them. Webhook and app-event payloads are untrusted
+content too (OQ-52). Whether work caused by untrusted content stays restricted (sticky
+outside lineage) is OQ-54.
 
 ## Egress
 All network calls via `@jaari/http`; containers via an egress proxy that blocks private
 ranges and cloud metadata. Tool-level origin allowlists are not a security boundary.
 
+Mechanism (ADR-016, accepted):
+- Resolve, check, dial: the gate resolves the name, classifies every address, and
+  connects only to the addresses it checked. This closes DNS rebinding and redirects.
+- One address-class table for the HTTP client, the browser, and sandboxes. Always denied:
+  cloud metadata, link-local, `0.0.0.0/8`, multicast, benchmark ranges, and the daemon's
+  own ports. NAT64 and 6to4 addresses are unwrapped before classification. Private ranges
+  are denied unless the owner allows a host.
+- The browser reaches the network only through a per-session loopback SOCKS5 listener;
+  Chromium's loopback bypass is removed and non-proxied WebRTC UDP is disabled.
+- A refusal is returned to the model in the tool result, so it stops retrying.
+
+## Owner hold (ADR-005, ADR-016)
+Takeover is a hold owned by the owner, not by one window: accepted agent calls drain,
+new agent input is refused (never queued), and the hold ends on release, two minutes
+after the last view closes, or after five idle minutes. Transport: OQ-34.
+
 ## Open
 Owner auth (OQ-02), kill switch (OQ-11), encryption at rest (OQ-08), MCP plugin
-sandboxing (OQ-14), code execution (OQ-15).
+sandboxing (OQ-14), code execution (OQ-15), standing grants (OQ-51), inbound triggers
+(OQ-52), outside lineage (OQ-54).

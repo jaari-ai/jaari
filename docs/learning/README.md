@@ -5,7 +5,7 @@
 One file per topic studied, named `NN-topic.md`, written at the end of the conversation
 that covered it. Each file answers three questions:
 
-1. What does the source project (open-instinct / openinstinct / gajae-way / Instinct / Muse) do?
+1. What does the source project (open-instinct / openinstinct / gajae-way / OpenMausBot / Instinct / Muse) do?
 2. Why does it do it that way (what failure is it preventing)?
 3. What did Jaari do, and where does it differ?
 
@@ -14,6 +14,8 @@ Written:
   egress gatekeepers, the vendor toolsets (2026-11-09)
 - [08-egress-identity-and-takeover.md](08-egress-identity-and-takeover.md) — IP reputation,
   proxies vs the owner's own connection, signed agents, owner takeover (2026-11-09)
+- [09-openmausbot.md](09-openmausbot.md) — OpenMausBot's features and architecture, what
+  Jaari borrows (ADR-016), what it rejects (2026-11-10)
 
 Planned:
 - 01-session.md — persistent session, steering, segments, compaction

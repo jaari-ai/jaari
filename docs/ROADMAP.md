@@ -4,12 +4,12 @@
 
 | Phase | Scope | Blocked by |
 |---|---|---|
-| 0 Foundation | Monorepo scaffolding; config loader; `@jaari/llm` providers, tiers, roles, fallback chains; `ChannelAdapter` contract + CLI channel; daemon/node contract (ADR-015); project process files | OQ-01, OQ-02, OQ-22, OQ-23, OQ-35, OQ-44 |
-| 1 Memory | Memory repo and write path; retrieval and context assembly; scheduler and routines; canonicalize (6h); daily audit | OQ-03 to OQ-06, OQ-24, OQ-26, OQ-43 |
+| 0 Foundation | Monorepo scaffolding; config loader; `@jaari/llm` providers, tiers, roles, fallback chains; `ChannelAdapter` contract + CLI channel; capability manifest and daemon–node contract, in-process loader (ADR-015); project process files | OQ-01, OQ-02, OQ-22, OQ-23, OQ-35, OQ-44, OQ-50 |
+| 1 Memory | Memory repo and write path; retrieval and context assembly; scheduler and routines; canonicalize (6h); daily audit | OQ-03 to OQ-06, OQ-24, OQ-26, OQ-43, OQ-53 |
 | 2 Persona | Dials and monitor; curiosity from gap queue; quiet hours; notification ledger; prompt versioning; replay harness; skills; owner panel; onboarding | OQ-13, OQ-20, OQ-21, OQ-39, OQ-46, OQ-49 |
-| 3 Safety | Gate + `audit.jsonl`; `secretRef`; LLM/web budgets + usage log; kill switch; backup and encryption; shadow mode; threat model; degraded mode | OQ-07 to OQ-09, OQ-11, OQ-25, OQ-29, OQ-38, OQ-47, OQ-48 |
-| 4 Background work | Children; `llm.escalate`; `reader` role; `web.search`, `web.fetch`; MCP client | OQ-14, OQ-28, OQ-33 |
-| 5 Integrations | GitHub, npm, PyPI, email; OAuth broker; the agent's mailbox; calendar and personal data; documents | OQ-17, OQ-18, OQ-41, OQ-42 |
-| 6 Computer use | Browser via Playwright MCP or Stagehand; local profile; remote CDP; takeover; laptop node | OQ-27, OQ-30, OQ-31, OQ-34, OQ-36 |
+| 3 Safety | Gate + `audit.jsonl`; `secretRef`; LLM/web budgets + usage log; kill switch; backup and encryption; shadow mode; threat model; degraded mode | OQ-07 to OQ-09, OQ-11, OQ-25, OQ-29, OQ-38, OQ-47, OQ-48, OQ-51 |
+| 4 Background work | Children; `llm.escalate`; `reader` role; `web.search`, `web.fetch`; MCP client; headless CLI and external control | OQ-14, OQ-28, OQ-33, OQ-54, OQ-55, OQ-56 |
+| 5 Integrations | GitHub, npm, PyPI, email; OAuth broker; the agent's mailbox; calendar and personal data; documents; inbound triggers | OQ-17, OQ-18, OQ-41, OQ-42, OQ-52 |
+| 6 Computer use | Browser via Playwright MCP or Stagehand; local profile; remote CDP; takeover; `computer.use` on a host virtual desktop; remote nodes via `jaari capability install` | OQ-27, OQ-30, OQ-31, OQ-34, OQ-36 |
 | 7 Hardening | Docker/Firecracker backends; egress proxy; code execution; deployment; multi-device state; observability | OQ-10, OQ-12, OQ-15, OQ-32, OQ-37 |
 | 8 Evals | `jaari llm eval` fixtures; behaviour evals; learned router experiment; learning from outcomes | OQ-20, OQ-40 |
