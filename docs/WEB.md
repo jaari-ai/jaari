@@ -13,7 +13,8 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
 - Placement rule: a browser signed in to the owner's accounts runs on home hardware, on an owner
   device installed as a node, or on any host through an owner exit node (Tailscale, Headscale,
   WireGuard). A browser on a VPS or other datacenter host does anonymous work only.
-- Egress pool: `owner-exit`, `direct`, `mobile`, `residential-proxy`. Rotation is for
+- Egress pool: `owner-exit` (WireGuard peer or SOCKS5/HTTP proxy such as sing-box), `direct`,
+  `mobile`, `residential-proxy`, `vpn` (WARP and similar; anonymous only, ADR-030). Rotation is for
   anonymous traffic and may include owner exit nodes; owner-account sessions are pinned to one
   owner node and refuse when none is up.
 

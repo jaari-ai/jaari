@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **48**.
+Last updated: 2026-11-10. Open: **47**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -19,7 +19,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-10 | Deployment | Host choice decided by ADR-015 and ADR-017 (VPS, remote server, home hardware, or laptop). Still open: overlay network details (Tailscale first, Headscale or WireGuard documented), reference sizing per target. The Compose layout and migrations moved to OQ-35 | 7 | Tailscale first, Headscale documented; no public ports; sizing table per target |
 | OQ-11 | Kill switch | Global pause, loop step limits, max concurrent children, spend-spike alerts | 3 | All four, enforced in code. Add a stall guard: two continuations without a successful tool call, or three identical errors, end the job as stalled; lowering a capability's permission also stops the running turn |
 | OQ-12 | Observability | Tracing per turn/tool/child (OpenTelemetry?), admin page for jobs, approvals, usage, errors | 7 | OTel + small local admin page. One canonical event union plus a raw provider tee to spot protocol drift; that log is for inspection, `audit.jsonl` stays the record |
 | OQ-13 | Notification delivery | Proactive messages via channel or push (ntfy, Pushover); urgent vs digest routing | 2 | Channel first, ntfy optional. OpenMausBot's notification QA rules become monitor fixtures: finished only with a non-empty result, one alert per failure and cause, every notification links to its exact thread, read state synced across clients. Requirement from the owner (ADR-023): important mail is surfaced without naming senders; importance computed from relationship (people records), content class (money, deadlines, appointments, commitment changes, security), and context, and tuned by the owner's reactions. Affected by ADR-022: proactive messages go only to the active channel, so a separate push service (ntfy) would be a second stream; must be reconciled. |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-07 | Memory pushed to owner-chosen git remotes; nightly (configurable) encrypted snapshots to local, NAS, or S3-compatible (S3, R2, B2, MinIO); advice not enforcement; recovery key; journaled restore; monthly drill | [ADR-027](adr/027-backup-and-restore.md) |
 | OQ-08 | Scan writes for secrets; host relies on full-disk encryption (owner-managed volumes documented); age bundles or gcrypt for remotes not owned; plain only to own remotes; jaari memory purge | [ADR-028](adr/028-encryption-at-rest.md) |
 | OQ-09 | Correction supersedes; forget removes and can always be undone; erase purges history through the gate; plain-language requests with preview; forget by source; raw logs kept, others' messages 30 days, operational rows 7 days | [ADR-029](adr/029-forgetting-and-retention.md) |
+| OQ-10 | Owner picks and changes the overlay (Tailscale default, Headscale, WireGuard generated or existing, Cloudflare private network, custom); app-level auth; vpn egress class for anonymous traffic; sizing estimates | [ADR-030](adr/030-overlay-network-and-sizing.md) |

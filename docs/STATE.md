@@ -5,7 +5,7 @@ Last updated: 2026-11-10
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (29 ADRs)
+## Decided (30 ADRs)
 - Identity and publishing: `jaari.org`, GitHub org `jaari-ai`, MIT licence (ADR-010, 014). npm
   and PyPI names are not yet secured; checklist in [guides/namespaces.md](guides/namespaces.md).
 - Core design: Pi agent loop, pnpm monorepo, git-backed Markdown memory, canonicalize and
@@ -15,7 +15,8 @@ home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
   local-only defaults decided at init; web search, fetch ladder, and browser (ADR-011, 012,
   019). Vault providers are Proposed until OQ-29 is verified (ADR-013).
 - Hosting: one daemon on a VPS, remote server, home hardware, or laptop; capabilities
-  installed where they run; placement rule and egress pool with Tailscale owner exit nodes
+  installed where they run; placement rule and egress pool with owner exit nodes; the
+  overlay network is the owner's choice (ADR-030)
   (ADR-015, 017).
 - Safety: OpenMausBot hardening (dispatch re-check, chained audit, resolve-check-dial egress,
   secret scrubbing, owner hold; ADR-016); one capability vocabulary, deny-all gate and
@@ -39,4 +40,4 @@ home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 Phase 0: Foundation. Nothing is built; the first items are in [ACTION_PLAN.md](ACTION_PLAN.md).
 
 ## Open questions
-48 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+47 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

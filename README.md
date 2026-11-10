@@ -19,8 +19,8 @@ in v1.
 
 | Area | Approach | Details |
 |---|---|---|
-| Hosting | Self-hosted, single owner. One daemon on a VPS, remote server, home hardware, or laptop; capabilities installed where they run; Tailscale as the default overlay | [ARCHITECTURE](docs/ARCHITECTURE.md), ADR-015/017 |
-| Browser identity | Identity-bearing browsing runs on or through the owner's network (home box, owner device, Tailscale exit node); rotating proxies only for anonymous traffic | [WEB](docs/WEB.md), ADR-017 |
+| Hosting | Self-hosted, single owner. One daemon on a VPS, remote server, home hardware, or laptop; capabilities installed where they run; bring your own overlay (Tailscale by default, or WireGuard, Headscale, Cloudflare, sing-box) | [ARCHITECTURE](docs/ARCHITECTURE.md), ADR-015/017/030 |
+| Browser identity | Identity-bearing browsing runs on or through the owner's network (home box, owner device, or an owner exit node over the overlay); rotating proxies only for anonymous traffic | [WEB](docs/WEB.md), ADR-017 |
 | Memory | Separate git repo of Markdown (gajae-way axes), canonicalized every 6 h, audited daily | [MEMORY](docs/MEMORY.md), ADR-003/004 |
 | Personality | Curiosity and Proactivity dials (0 to 3) enforced by a monitor; proactive messages must earn the interruption | [PERSONA](docs/PERSONA.md), ADR-008 |
 | Safety | Every external effect needs owner approval bound to a SHA-256 digest; secrets are `secretRef:` handles the model never sees; untrusted content goes through a tool-less `reader` role; the gate exists from Phase 0 | [SECURITY_MODEL](docs/SECURITY_MODEL.md), ADR-006/007/016/018 |
