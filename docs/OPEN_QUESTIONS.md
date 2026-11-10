@@ -3,7 +3,11 @@
 Last updated: 2026-11-10. Open: **57**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
-the ADR link → regenerate. "Leaning" is a suggestion, not a decision.
+the ADR link. "Leaning" is a suggestion, not a decision.
+
+A recommendation per question, with the reference it is borrowed from, is in
+[learning/10-open-questions-review.md](learning/10-open-questions-review.md) (proposals; the
+leanings below are unchanged until the owner accepts them).
 
 
 ## A. Blocking soon (Phase 0 to 2)

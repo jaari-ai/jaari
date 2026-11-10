@@ -14,6 +14,8 @@ Written:
   proxies vs the owner's own connection, signed agents, owner takeover (2026-11-09)
 - [09-openmausbot.md](09-openmausbot.md) — OpenMausBot's features and architecture, what
   Jaari borrows (ADR-016), what it rejects (2026-11-10)
+- [10-open-questions-review.md](10-open-questions-review.md) — a recommendation per open
+  question, borrowed from open-instinct, openinstinct, gajae-way, Pi, and OpenMausBot (2026-11-10)
 
 Planned:
 - 01-session.md — persistent session, steering, segments, compaction
