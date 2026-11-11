@@ -19,7 +19,7 @@ ships**, not before the phase starts. Per-item status lives in [STATE.md](STATE.
 | 5 Integrations | GitHub, npm, PyPI, email; OAuth broker; the agent's mailbox; calendar, contacts, and file storage (ADR-039); documents (ADR-038); inbound triggers | OQ-41, OQ-42, OQ-52 |
 | 6 Computer use | Neutral `browser.*`/`computer.*` surface and pluggable browser adapters (ADR-048) under the placement rule (ADR-017); native Anthropic and Gemini toolsets as an `@jaari/llm` mapping; local profile or owner exit node; remote CDP; takeover (ADR-055); commitment classifier (ADR-051); browser worker child and task-scoped origins, with the scope rule reviewed from shadow-mode logs (ADR-052); `computer.use` on a host virtual desktop; remote nodes via `jaari capability install`; macOS permission matrix (ADR-057) | None open |
 | 7 Hardening | Firecracker backend; container egress proxy; overlay and sizing per target; multi-device state and host migration (ADR-058); observability; mobile and residential egress providers | None open |
-| 8 Evals | `jaari llm eval` fixtures and live behaviour tests (ADR-041); learned router experiment; learning from outcomes | OQ-40 |
+| 8 Evals | `jaari llm eval` fixtures and live behaviour tests (ADR-041); learned router experiment; learning from outcomes (ADR-061) | None open |
 | Later | Live calls (ADR-037); payments rail (`pay` is reserved, ADR-040); multimodal memory; trust tiers, agent network (non-goals for v1) | OQ-45 |
 
 Egress arrives in steps: the address-class gate with `direct` and `owner-exit` for fetch in
