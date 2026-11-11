@@ -20,7 +20,7 @@ ships**, not before the phase starts. Per-item status lives in [STATE.md](STATE.
 | 6 Computer use | Browser via Playwright MCP or Stagehand under the placement rule (ADR-017); local profile or owner exit node; remote CDP; takeover; `computer.use` on a host virtual desktop; remote nodes via `jaari capability install`; macOS permission matrix | OQ-27, OQ-30, OQ-31, OQ-32, OQ-34, OQ-36 (permission matrix) |
 | 7 Hardening | Firecracker backend; container egress proxy; overlay and sizing per target; multi-device state and host migration; observability; mobile and residential egress providers | OQ-37 |
 | 8 Evals | `jaari llm eval` fixtures; behaviour evals; learned router experiment; learning from outcomes | OQ-20 (fixtures), OQ-40 |
-| Later | Live calls (ADR-037); payments rail (`pay` is reserved); multimodal memory; trust tiers, agent network (non-goals for v1) | OQ-19, OQ-45 |
+| Later | Live calls (ADR-037); payments rail (`pay` is reserved, ADR-040); multimodal memory; trust tiers, agent network (non-goals for v1) | OQ-45 |
 
 Egress arrives in steps: the address-class gate with `direct` and `owner-exit` for fetch in
 Phase 4; the browser's SOCKS5 listener and owner-account pinning in Phase 6; `mobile` and

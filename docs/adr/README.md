@@ -41,3 +41,4 @@
 | [037](037-voice.md) | Voice: voice notes in v1, local speech by default, owner-chosen approval strictness | Accepted |
 | [038](038-documents-and-files.md) | Documents and files: content-addressed store, sealed parsing, sensitive files local-only, disk watch | Accepted |
 | [039](039-personal-data.md) | Personal data: calendar first, native for calendar, contacts, and files, MCP for the rest | Accepted |
+| [040](040-no-payments-in-v1.md) | No payments in v1; checkouts end at an owner takeover | Accepted |

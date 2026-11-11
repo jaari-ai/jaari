@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **39**.
+Last updated: 2026-11-10. Open: **38**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -24,7 +24,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-19 | Payments rail | Virtual cards with per-merchant limits, or no payments in v1? | later | No payments in v1 |
 
 ## D. Quality and process
 
@@ -40,7 +39,7 @@ leanings below are unchanged until the owner accepts them).
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
 | OQ-24 | Local model per target | Size classes per deployment target are set in [LLM.md](LLM.md#local-models-per-target). Open: which concrete open-weight model passes the `jaari llm eval` fixtures (tool calls, JSON validity, canonicalize golden set, injection resistance) for the small and medium tiers on each target, and which to suggest at `jaari init`. | 1 | Measure with `jaari llm eval` per target; ship a suggested-models list that is data, refreshed as models change, never hard-coded |
-| OQ-25 | LLM budget | Default monthly LLM budget? | 3 | $30/month placeholder |
+| OQ-25 | LLM budget | Default monthly LLM budget? | 3 | $30/month placeholder Affected by ADR-040: the later payment spend check (per payment, day, month) shares these budgets. |
 | OQ-26 | Canonicalize privacy | Should canonicalize be local-only by default? | 1 | Yes, if a capable local model exists. Affected by ADR-023: canonicalize never edits append-only records such as ledgers. |
 | OQ-27 | Browser tool surface | Provider-neutral `browser.*` / `computer.*` members run by Jaari's own driver (Playwright/CDP, Stagehand), or the vendor-native toolsets (Anthropic `browser_toolset_20260801` / `computer_toolset_20260801`, Gemini `computer_use`) mapped per routed model? `pi-ai` has no toolset support today, and a native toolset reaches the gate only through the driver's `confirm` hook. Driver hygiene against automation markers (Patchright-level) is part of this; full anti-detect browsers are not (see learning/08). Background: [learning/07-computer.md](learning/07-computer.md) | 6 | Neutral surface shaped like the Anthropic member set; native toolsets as an `@jaari/llm` mapping where the routed model supports them |
 | OQ-28 | Lightpanda | Is Lightpanda worth running, or is http + Chromium enough? | 4 | Decide from fetch-ladder usage logs |
@@ -50,7 +49,7 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-30 | Consequential browser actions | A purchase, a sent message, or accepted terms arrives as an ordinary `left_click` / `type`; Anthropic's own `confirm` hook "can't pick them out by name". How does the gate recognise them: deterministic page heuristics, a reader-role check of the page state, or approval on every click within flagged origins? | 6 | Deterministic heuristics (submit controls, payment and consent URL patterns) escalate to a reader-role check; never an LLM alone (principle 9). A classifier that cannot read the action to the end returns unreadable, which means ask the owner (ADR-016) |
+| OQ-30 | Consequential browser actions | A purchase, a sent message, or accepted terms arrives as an ordinary `left_click` / `type`; Anthropic's own `confirm` hook "can't pick them out by name". How does the gate recognise them: deterministic page heuristics, a reader-role check of the page state, or approval on every click within flagged origins? | 6 | Deterministic heuristics (submit controls, payment and consent URL patterns) escalate to a reader-role check; never an LLM alone (principle 9). A classifier that cannot read the action to the end returns unreadable, which means ask the owner (ADR-016) Affected by ADR-040: a payment step is never automated in v1; the classifier hands it to the owner as a takeover. |
 | OQ-31 | Screenshots as untrusted content | Do screenshots and accessibility trees fall under the reader-role rule (principle 8)? A reader pass per screenshot is too slow for a click loop, and vendor prompt-injection classifiers run only on native toolsets. | 6 | Gate + egress allowlist + classifier where available; log every action with its screenshot (ADR-032). While a filled secret is on the page, screenshots and page evaluation are refused until the field is cleared (ADR-016) |
 | OQ-32 | Egress pool details | ADR-017 fixes the shape: an egress pool of `owner-exit` (Tailscale, Headscale, WireGuard), `direct`, `mobile`, and `residential-proxy` providers; rotation for anonymous traffic only (owner exit nodes may join the rotation), owner accounts pinned to one owner node. Open: the provider interface, rotation and health-check policy, which residential providers pass the sourcing check, 4G dongle setup, and the home-sites list format. Background: [learning/08-egress-identity-and-takeover.md](learning/08-egress-identity-and-takeover.md) | 6 | Provider interface in `@jaari/http` with `owner-exit` and `direct` first (Phase 4 for fetch, Phase 6 for the browser); residential and mobile providers opt-in later. Home-sites split from OpenMausBot: a short owner-set list of the owner's accounts goes through an owner node, which re-checks each connection itself (ports 80 and 443, never its own LAN); everything else leaves direct. OpenMausBot measured routing all traffic home as 1.7 to 30 times slower (learning/09). Owner-account sessions refuse when no owner exit is up. Affected by ADR-030: `owner-exit` may be a WireGuard peer or a SOCKS5/HTTP proxy (sing-box), and a `vpn` class (WARP) serves anonymous traffic only. |
 | OQ-33 | Signed-agent identity | Should `@jaari/http` and the browser sign requests per Web Bot Auth (RFC 9421, `Signature-Agent`, JWKS at `/.well-known/http-message-signatures-directory`)? Cloudflare's Signed Agents registry is per operator via the dashboard; it is unknown whether an individual self-hoster can register. | 4 | Implement signing with a per-install Ed25519 key; registration decided when the registry policy is known |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-16 | Voice notes in v1 via an `stt` role (local whisper.cpp default); spoken replies off by default, owner toggles them; spoken approvals hardened or bare yes, owner's choice; live calls after v1 | [ADR-037](adr/037-voice.md) |
 | OQ-17 | Content-addressed store outside git; parsing ladder in the sealed sandbox; sensitive documents read by local models only; owner files kept with no quota, disk watch notifies at 80/90/95%; drop folder on host and nodes | [ADR-038](adr/038-documents-and-files.md) |
 | OQ-18 | Calendar first (CalDAV, Google, Microsoft), free/busy, read, write split; own-calendar writes Allow once or 90-day grant, invitations always ask; direct requests added, passing mentions offered; contacts read-only sync; WebDAV and Drive native, others via MCP | [ADR-039](adr/039-personal-data.md) |
+| OQ-19 | No `pay` executor in v1; checkouts stop at the payment step and the owner enters the card in a takeover; card fields stay unresolvable; later: one-time virtual cards, spend check, Allow once | [ADR-040](adr/040-no-payments-in-v1.md) |

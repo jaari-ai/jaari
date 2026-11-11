@@ -27,7 +27,7 @@
 ## Non-goals for v1
 - Agent-to-agent networking (tiers, grants, A2A envelopes from the merge plan): reconsidered
   after Phase 8, behind the same gate.
-- Payments: OQ-19 says no payments in v1; Link one-time cards and the Visa/Mastercard agent
+- Payments: none in v1 (ADR-040); checkouts end at an owner takeover. Link one-time cards and the Visa/Mastercard agent
   directories are the rail to evaluate when that changes.
 - Multiple owners: OQ-23; the data model keeps a user id, the product serves one owner.
 
