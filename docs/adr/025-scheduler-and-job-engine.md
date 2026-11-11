@@ -12,7 +12,7 @@ Jaari runs its own small job engine in the daemon, shaped so `pi-durable` (`refs
   always be rebuilt from its events.
 - **Job kinds.** One-shot (at a time), cron in an IANA time zone, interval aligned to an
   anchor, and child task (background work spawned by the main session). Each job has an owner-
-  visible id and revision so routines (OQ-43) can list, pause, run now, and expire it.
+  visible id and revision so routines (ADR-064) can list, pause, run now, and expire it.
 - **Crash safety.** Every tool call records its intent before it runs, with a `replay: safe |
   unsafe` flag. After a crash, a safe step reruns once; an unsafe step that had started is
   never rerun: the job settles `ambiguous` and the owner is told (ADR-016 restart rule).

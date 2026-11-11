@@ -23,7 +23,7 @@ changes are visible and reversible in the panel. This meets the owner requiremen
 (important mail surfaced without naming senders).
 
 **Digests are the owner's.** Any number of digests, one per category the owner wants (for example
-news at 09:00, job offers at 10:00, money weekly on Monday), each a routine (OQ-43) with its own
+news at 09:00, job offers at 10:00, money weekly on Monday), each a routine (ADR-064) with its own
 time, source filter, and channel behaviour. When the owner names a digest without a time, Jaari
 proposes one from the owner's wake hours (learned from activity, bounded by quiet hours) or a
 sensible time for the category, and asks before scheduling it. Items not urgent and not covered by

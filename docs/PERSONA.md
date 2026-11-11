@@ -38,4 +38,4 @@ apply before the monitor scores anything:
   exact thread it is about.
 - After 7 days with no reply or reaction to proactive messages, they pause until the owner
   writes again, with one notice; configurable, can be turned off (ADR-031).
-- Schedule semantics (anchoring, overlap, catch-up) are OQ-43.
+- Schedule semantics (anchoring, overlap, catch-up) are ADR-064.
