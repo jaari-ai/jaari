@@ -35,7 +35,7 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
   ADR-016). Saved logins are filled by the executor; the model never sees the value, and
   screenshots stop while a filled secret is on the page.
 - A browser on a VPS may send an owner-set list of home sites through an owner node and
-  everything else direct (OQ-32 holds the remaining pool details).
+  everything else direct. Providers, baseline, rotation, health, and the home-sites list: ADR-053.
 - Search queries are sensitive: `curiosity` and `canonicalize` use SearXNG only.
 - AGPL/SSPL services (SearXNG, Firecrawl, CRW, Lightpanda, Browserless) run as separate
   processes; never vendor their code into Jaari packages.

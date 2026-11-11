@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **26**.
+Last updated: 2026-11-10. Open: **25**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -39,7 +39,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-32 | Egress pool details | ADR-017 fixes the shape: an egress pool of `owner-exit` (Tailscale, Headscale, WireGuard), `direct`, `mobile`, and `residential-proxy` providers; rotation for anonymous traffic only (owner exit nodes may join the rotation), owner accounts pinned to one owner node. Open: the provider interface, rotation and health-check policy, which residential providers pass the sourcing check, 4G dongle setup, and the home-sites list format. Background: [learning/08-egress-identity-and-takeover.md](learning/08-egress-identity-and-takeover.md) | 6 | Provider interface in `@jaari/http` with `owner-exit` and `direct` first (Phase 4 for fetch, Phase 6 for the browser); residential and mobile providers opt-in later. Home-sites split from OpenMausBot: a short owner-set list of the owner's accounts goes through an owner node, which re-checks each connection itself (ports 80 and 443, never its own LAN); everything else leaves direct. OpenMausBot measured routing all traffic home as 1.7 to 30 times slower (learning/09). Owner-account sessions refuse when no owner exit is up. Affected by ADR-030: `owner-exit` may be a WireGuard peer or a SOCKS5/HTTP proxy (sing-box), and a `vpn` class (WARP) serves anonymous traffic only. |
 | OQ-33 | Signed-agent identity | Should `@jaari/http` and the browser sign requests per Web Bot Auth (RFC 9421, `Signature-Agent`, JWKS at `/.well-known/http-message-signatures-directory`)? Cloudflare's Signed Agents registry is per operator via the dashboard; it is unknown whether an individual self-hoster can register. | 4 | Implement signing with a per-install Ed25519 key; registration decided when the registry policy is known |
 | OQ-34 | Takeover transport | How does the owner see and touch the agent's browser from a phone within seconds: CDP screencast in the web panel, noVNC over loopback, or a hosted live view? Takeover states, timeouts, and the rule that screenshots stop while the owner holds the session. | 6 | CDP screencast in `@jaari/channel-web` over Tailscale; a "Take over" link pushed through the active channel; states pending/active/completed/timeout/cancelled. Hold semantics are in ADR-016 (owner-held, drain then hand over, refuse rather than queue, 2-minute grace and 5-minute idle release); only the transport stays open |
 
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-29 | Verified: no paid tier needed; owner picks vault layout and Premium; one-time codes from vault, then owner's channels with a notice, then ask | [ADR-050](adr/050-vault-verification-and-one-time-codes.md) |
 | OQ-30 | Deterministic classifier over six commitment classes; commitments Allow once; LLM may only escalate; classifier-only rollout | [ADR-051](adr/051-consequential-browser-actions.md) |
 | OQ-31 | Browser driven by a worker child with task data only; strict task-scoped origins (review in Phase 6); fencing; screenshot redaction | [ADR-052](adr/052-browser-worker-and-untrusted-pages.md) |
+| OQ-32 | Pluggable egress providers; one connection baseline; sticky-per-task rotation; 5-minute health probes; home sites suggested from vault logins | [ADR-053](adr/053-egress-pool.md) |
