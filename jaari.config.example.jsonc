@@ -30,7 +30,9 @@
     },
     // ADR-019: `jaari init` sets this only if a local model passes `jaari llm eval`.
     "privacy": { "localOnly": ["canonicalize", "curiosity"] },
-    "budget": { "monthlyUsd": 30, "perRoleUsd": { "child": 10 }, "onExceeded": "downgrade" },
+    // ADR-046: `jaari init` suggests 30 (api-only), 20 (hybrid), or 0 (local-only).
+    // At the limit the owner chooses (raise, cheaper chat model, local only).
+    "budget": { "monthlyUsd": 30, "resetDay": 1, "perRoleUsd": { "child": 10 }, "warnAt": [0.5, 0.8], "graceOverrun": 0.1, "onExceeded": "ask", "explainTimes": 3 },
     "escalation": { "allowRequest": ["child"], "maxPerDay": 20 }
   },
 

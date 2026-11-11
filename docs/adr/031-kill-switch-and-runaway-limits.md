@@ -30,7 +30,7 @@ exactly what was cut.
 
 **Spend spikes.** An alert when spending in the last hour is more than 3 times the usual hourly
 rate, or when one job passes a set amount ($2); one notice per spike, offering a pause. Monthly
-budgets are OQ-25.
+budgets are ADR-046.
 
 **Repeated failures.** After 2 failed turns in a row, further failure notices go to the log only,
 with one line saying so; the next success resets it.

@@ -21,7 +21,7 @@ Jaari records spending but does not pay.
 - One-time or merchant-locked virtual cards (for example Stripe Link for agents, Privacy.com, a
   bank's disposable cards), never the owner's real card number.
 - A deterministic spend check summed from the audit log, per payment, per day, and per month,
-  with an ask-above threshold (OQ-25).
+  with an ask-above threshold, using the ADR-046 mechanism with its own money budget.
 - Every payment is Allow once with the amount and merchant in the digest; never a standing grant.
 - Recurring payments are approved per charge, or as a pinned job with a fixed amount and merchant
   (the ADR-036 model) up to a cap.
