@@ -29,7 +29,7 @@
   after Phase 8, behind the same gate.
 - Payments: none in v1 (ADR-040); checkouts end at an owner takeover. Link one-time cards and the Visa/Mastercard agent
   directories are the rail to evaluate when that changes.
-- Multiple owners: OQ-23; the data model keeps a user id, the product serves one owner.
+- Multiple owners: one owner per instance in v1 and one Jaari per person; every record carries an `ownerId` so multiple owners can come later (ADR-044).
 
 ## Packages
 | Package | Responsibility |

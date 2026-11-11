@@ -100,7 +100,7 @@ buys them.
 | Secrets in chat | A pasted key is removed and rotation suggested; a one-time secure page for typing a secret | Channel ingress scrubs a pasted secret before the transcript is stored and tells the owner to rotate it; secret entry happens in the panel, never in chat | ADR-007, OQ-46 |
 | External AI apps | An MCP server with two tools (send a message, collect a long job by handle), linked by a code typed in the owner's chat | The smallest useful MCP surface for Jaari; approvals never pass through it | OQ-55 |
 | Panel | "Knows", "People", and "what Pally decided for each message and why" | Three panel views: profile facts, people, and a decisions view over `audit.jsonl` | OQ-46 |
-| Groups (later) | Approvals, links, and codes only in the private chat; only your own message changes your permissions; stop answering a looping assistant | Already in ARCHITECTURE for approvals; add the loop breaker when groups ship | OQ-23 |
+| Groups (later) | Approvals, links, and codes only in the private chat; only your own message changes your permissions; stop answering a looping assistant | Already in ARCHITECTURE for approvals; add the loop breaker when groups ship | ADR-044 |
 
 **Alternative recommendations to learning/10.** Where Pally points somewhere else:
 

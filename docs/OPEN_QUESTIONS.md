@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **35**.
+Last updated: 2026-11-10. Open: **34**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -29,7 +29,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-23 | Multiple users | Strictly single owner, or household members with limited access? | 0 | Single owner; keep user id in data model |
 
 ## E. Carried over from ADR-011 to ADR-013
 
@@ -77,7 +76,7 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-51 | Standing grants | ADR-006 approves one action per digest. Daily use needs some "always allow": which capabilities may have a standing grant, what it is keyed on, how it expires, and how the owner lists and revokes them. OpenMausBot keys grants on the exact command plus working directory, and MCP read grants on a hash of the server config. | 3 | Standing grants only for read-shaped capabilities and exact-match actions; keyed on capability, target, and a fingerprint of the tool's config so any edit revokes; never for send, submit, publish, pay, or `repo.write`; every use is an `audit.jsonl` row naming the grant Affected by ADR-034: MCP grants are keyed on the server's config and tool-list fingerprint. Affected by ADR-036: code execution already has Allow once and 90-day per-target grants, plus pinned recurring jobs; this question extends or limits that model for other capabilities. Affected by ADR-039: own-calendar writes without attendees may have a 90-day grant; invitations never. |
+| OQ-51 | Standing grants | ADR-006 approves one action per digest. Daily use needs some "always allow": which capabilities may have a standing grant, what it is keyed on, how it expires, and how the owner lists and revokes them. OpenMausBot keys grants on the exact command plus working directory, and MCP read grants on a hash of the server config. | 3 | Standing grants only for read-shaped capabilities and exact-match actions; keyed on capability, target, and a fingerprint of the tool's config so any edit revokes; never for send, submit, publish, pay, or `repo.write`; every use is an `audit.jsonl` row naming the grant Affected by ADR-034: MCP grants are keyed on the server's config and tool-list fingerprint. Affected by ADR-036: code execution already has Allow once and 90-day per-target grants, plus pinned recurring jobs; this question extends or limits that model for other capabilities. Affected by ADR-039: own-calendar writes without attendees may have a 90-day grant; invitations never. Affected by ADR-044: grants are keyed per owner, and later cover another person's Jaari (per person, per capability). |
 | OQ-52 | Inbound triggers | Webhooks and app events that start work ("when this form posts", "when mail from X arrives"): receiver isolation, secret handling, dedup, rate limits, and how events reach a host with no public port. Routines (OQ-43) cover time; this covers events. | 5 | A separate loopback listener that serves only health and hook paths; a per-hook secret stored as a hash and compared in constant time, sent as a Bearer header; body cap, rate limit, dedup by delivery id; the payload is untrusted content for the reader role; exposure through the overlay network (Tailscale Funnel), with polling as the default for apps; no hosted broker |
 | OQ-53 | Memory capture evidence | What stops capture and canonicalize from writing an invented fact about the owner? OpenMausBot requires each captured fact to quote the person's words, and code checks that the quote exists and that every number, path, and URL in the fact comes from it. Also: how a memory commit records who caused it. | 1 | Capture emits fact plus quote; code verifies the quote against the owner's turns and rejects facts with unquoted numbers, paths, or URLs; questions, tasks, and hypotheticals are not facts; each memory commit carries trailers for actor (owner, agent, canonicalize, audit) and source session. Affected by ADR-023: typed records already require a source quote checked by code; this question now covers free-text facts and commit trailers. |
 | OQ-54 | Outside lineage | The reader role summarises untrusted content, but work started because of that content (a mail that leads to a child, a webhook that leads to a draft) still carries its influence. Does that origin stick to everything derived from it, and what does it restrict? | 4 | Sticky origin: a job caused by untrusted content is marked outside, and so is everything it spawns; outside jobs get a reduced capability set (read and draft, no send), cannot use standing grants, and their memory writes need an approval that shows the full text |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-20 | Tier 1 scripted scenarios on the real daemon in CI; tier 2 owner corrections offered once as local redacted fixtures; tier 3 opt-in live tests with an LLM judge for tone only; `jaari replay` in shadow mode | [ADR-041](adr/041-behaviour-evals.md) |
 | OQ-21 | Versioned prompt files; safety and system prompts locked; per-turn fingerprint; Jaari's persona edits are proposals | [ADR-042](adr/042-prompt-versioning.md) |
 | OQ-22 | hello@jaari.org for all contact; DCO, no CLA; lockstep SemVer releases; pinned, aged, script-free dependencies | [ADR-043](adr/043-project-process.md) |
+| OQ-23 | Single owner in v1; ownerId everywhere; one Jaari per person; multi-owner instance planned later; unknown-sender notice off by default | [ADR-044](adr/044-single-owner-multi-owner-later.md) |
