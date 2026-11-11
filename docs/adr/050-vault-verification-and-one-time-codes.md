@@ -1,6 +1,7 @@
 # ADR-050: Vault verification: no paid tier required, owner-chosen vault layout, one-time codes from the vault or the owner's channels
 
 - **Status:** Accepted
+- **Extended by:** [ADR-063](063-agent-mailbox.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -33,8 +34,8 @@ the account Jaari uses, and the owner decides. `jaari doctor` shows which mode a
 **One-time codes, in order.**
 1. Vault: if the item has a TOTP secret and the account can generate codes (Bitwarden Premium,
    1Password), the executor reads the code at fill time.
-2. The owner's channels: if Jaari can read the inbox or messages where the code arrives (email,
-   SMS through a node, a messenger), the executor takes it from a message that arrived after the
+2. The owner's channels: if Jaari can read the inbox or messages where the code arrives (email or a
+   messenger), the executor takes it from a message that arrived after the
    login step began, within 10 minutes, from a sender matching the site, with a deterministic
    pattern match (not the model). After using it, Jaari notifies the owner: "used the code from
    your email from example.com". The owner can turn this off per site or entirely.
@@ -50,6 +51,10 @@ Jaari account or collection exposes only the intended items, and that a 1Passwor
 reaches only the Jaari vault.
 
 ADR-013 is ready to accept with these amendments (OQ-64).
+
+## Amendments
+- **ADR-063:** no SMS gateway node is planned; codes come from email or messenger channels Jaari
+  already reads.
 
 ## Alternatives rejected
 Requiring Secrets Manager or a paid organization; one fixed vault layout; always handing over

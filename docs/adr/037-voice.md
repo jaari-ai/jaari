@@ -31,14 +31,14 @@ later:
 
 Voice-note transcripts are parsed by the same fixed grammar as text.
 
-**Live calls after v1.** Over the web panel first, then a phone number (OQ-42); half-duplex at
+**Live calls after v1.** Over the web panel first, then a phone number (ADR-063: not in v1); half-duplex at
 first, local turn detection, and narration of tool activity so silence never reads as a dropped
 call. An inbound call the owner places makes its channel active (ADR-022).
 
 **Retention.** Voice-note audio 30 days, then deleted; the transcript stays in the raw log
 (ADR-029). The owner's audio is never used to train or clone a voice.
 
-**Jaari calling others** (OQ-42, later): each call needs its own approval and never uses a
+**Jaari calling others** (ADR-063, later): each call needs its own approval and never uses a
 standing grant.
 
 Borrowed: speech text, half-duplex calls, narration, and the spoken-consent grammar from
