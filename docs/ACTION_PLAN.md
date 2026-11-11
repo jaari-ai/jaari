@@ -85,3 +85,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [061](adr/061-learning-from-outcomes.md) | Learning from outcomes: receipts, reflections, promotions the owner confirms, routing suggestions, a protected core that never learns | Accepted |
 | [062](adr/062-oauth-broker.md) | OAuth broker: bring-your-own client with a wizard, grouped consent per connection, tokens in the vault, no hosted broker | Accepted |
 | [063](adr/063-agent-mailbox.md) | The agent's mailbox: every mailbox option coded as an adapter, setup guides per option, inbound mail as data, no phone number in v1 | Accepted |
+| [064](adr/064-owner-routines.md) | Owner routines: visible routine objects, queued overlaps, cheap checks first, a 14-day check-in, stop by replying | Accepted |
