@@ -7,7 +7,7 @@
 **Order.** Calendar, then contacts, then file storage. Notes come through memory, files, and MCP.
 
 **Calendar.** One provider interface: CalDAV (iCloud, Fastmail, Nextcloud, Radicale, others)
-plus native Google and Microsoft adapters through the OAuth broker (OQ-41). The vocabulary
+plus native Google and Microsoft adapters through the OAuth broker (ADR-062). The vocabulary
 gains `calendar.freebusy` and `calendar.read` (read) and `calendar.write` (gated) (amends
 ADR-018). The calendar stays the source of truth: Jaari mirrors it into event records (ADR-023)
 for recall and the 12-month horizon (ADR-024), re-synced every 15 minutes and on change where the
@@ -42,7 +42,7 @@ preview.
 
 **Accounts and credentials.** Each account (work and personal calendars, for example) is
 configured separately and a write always names its account. App passwords (iCloud) are
-`secretRef`s; OAuth tokens stay in the vault and are never seen by the model (OQ-41).
+`secretRef`s; OAuth tokens stay in the vault and are never seen by the model (ADR-062).
 
 Borrowed: the free/busy, read, and write split and the stricter tag for tools that change a
 calendar from open-instinct `packages/apps/src/capabilities.ts`.

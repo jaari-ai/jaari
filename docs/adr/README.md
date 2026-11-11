@@ -63,3 +63,4 @@
 | [059](059-degraded-mode.md) | Degraded mode: hold only the broken part, a control surface without a model, queued messages answered automatically | Accepted |
 | [060](060-skills.md) | Skills: SKILL.md playbooks in the memory repo, loaded on demand, third-party skills scanned and pinned, procedures offered as skills | Accepted |
 | [061](061-learning-from-outcomes.md) | Learning from outcomes: receipts, reflections, promotions the owner confirms, routing suggestions, a protected core that never learns | Accepted |
+| [062](062-oauth-broker.md) | OAuth broker: bring-your-own client with a wizard, grouped consent per connection, tokens in the vault, no hosted broker | Accepted |

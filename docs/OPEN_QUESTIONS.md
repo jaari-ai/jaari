@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **17**.
+Last updated: 2026-11-10. Open: **16**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -44,7 +44,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-41 | OAuth broker | Connected apps (Google, Microsoft, Slack) need tokens the model never sees: storage, refresh, scope-to-capability mapping, revocation, admin consent. | 5 | Tokens in the vault (ADR-013), resolved per call like `secretRef`; one scope set per capability; revoke from CLI and panel. Tool grants per capability are enforced on the real tool name at call time and logged; with several accounts connected, the account is always chosen explicitly Affected by ADR-039: Google and Microsoft calendar, contacts, and Drive are the first broker users; each account is configured separately. |
 | OQ-42 | The agent's own mailbox and number | A mailbox for one-time codes, receipts, and confirmations (Grok Bot, Instinct), and later a phone number (Instinct phones businesses). Inbound mail stays data (reader role). | 5 | Mailbox on the owner's domain, IMAP, read by the reader role; telephony after voice (OQ-16) Affected by ADR-037: each outbound call needs its own approval and never uses a standing grant; live calls run half-duplex with narration. |
 | OQ-43 | Owner routines | "Every morning summarise X", "watch this price": routines as owner-visible objects (cron, watcher, webhook) with pause, history, and budgets; all output through the persona monitor. | 1 | Routines are rows the owner can list and pause; built on the job engine (ADR-025); children do the work. Schedule semantics from OpenMausBot: anchor-aligned intervals, overlap skip or queue, one catch-up run within 12 hours and a missed-run receipt otherwise; plain-code checks run before any model call, and a run with nothing new posts nothing (learning/09). Requirement from the owner (ADR-023): connecting email creates a default inbox-watch routine; dated mail becomes events and bills become draft ledger lines. Affected by ADR-033: each digest is a routine with its own time; a digest named without a time gets a proposed time the owner confirms. Affected by ADR-036: a routine that runs a script is approved at creation and pinned to its content; any change holds it. |
 | OQ-44 | Persistent session and context | One main session reopened over its transcript across restarts, steering, segment flushing, daemon-managed compaction, a stable prompt prefix for caching, and how 2026 API features (server compaction, threads) are used. | 0 | openinstinct's session semantics on Pi; compaction at ~50% of the window; stable prefix first. Keep the tool list byte-identical across a session's turns (pinned by a test); cache keep-warm only behind a cost guard (learning/09) Affected by ADR-042: the Stable layer fingerprint is logged per turn and the byte-identical test is required. |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-38 | Per-dependency holds; send stamp; code-run control surface when models are down; owner messages answered automatically when back; 24 h task expiry | [ADR-059](adr/059-degraded-mode.md) |
 | OQ-39 | SKILL.md in ops/skills with a lock file; index in prompt, body on demand; third-party scanned, disabled, hash-pinned; built-ins win; save-as-skill offered once | [ADR-060](adr/060-skills.md) |
 | OQ-40 | 1 KiB receipts; reflections; promotion after a repeat or one correction, via the digest; monthly routing suggestions; gate and grants never learn | [ADR-061](adr/061-learning-from-outcomes.md) |
+| OQ-41 | Own Google/Microsoft client via wizard; PKCE; one grouped consent for the chosen capabilities; tokens in the vault; revoke and admin-consent handling | [ADR-062](adr/062-oauth-broker.md) |

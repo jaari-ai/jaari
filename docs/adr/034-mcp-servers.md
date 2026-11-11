@@ -38,7 +38,7 @@ the MCP client, the first sandbox backend; OQ-15 later reuses it for code execut
   resolve-check-dial gate (ADR-016), the same pattern as the browser's SOCKS5 listener.
 - A per-server working directory, no host home directory, a read-only root.
 - Only the `secretRef`s declared for that server, resolved at start into its environment; OAuth
-  tokens stay in the vault (OQ-41).
+  tokens stay in the vault (ADR-062).
 - CPU, memory, and process limits; the server is stopped when idle.
 
 Where no backend exists (for example macOS without a container runtime), the owner can still
