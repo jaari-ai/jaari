@@ -51,7 +51,7 @@ separate manifest fields.
 | `llm.escalate` | policy-checked | Children only (ADR-011) |
 | `mcp.read`, `mcp.act` | read, gated | MCP tools that match no other name; unconfirmed or unreadable tools are `mcp.act` (ADR-034) |
 
-Login, 2FA, and CAPTCHA go to owner takeover.
+Login and CAPTCHA go to owner takeover. One-time codes come from the vault, then from a message on the owner's channels (read by the executor, never the model, with a notice), then from the owner (ADR-050).
 
 ## Approval card (ADR-006, ADR-018, ADR-035)
 The card is a typed prompt each channel renders as it can: buttons, quick replies, or a text

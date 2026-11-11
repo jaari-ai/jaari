@@ -14,7 +14,7 @@
 - **ADR-018:** Phase 0 ships the resolver and an `os-keychain` provider; `env` and `file` stay development-only with a `jaari doctor` warning.
 
 ## Flagged conflicts
-- [OQ-64](../OPEN_QUESTIONS.md): Still Proposed; accept once the OQ-29 verification is done.
+- [OQ-64](../OPEN_QUESTIONS.md): Still Proposed; the OQ-29 verification is done ([ADR-050](050-vault-verification-and-one-time-codes.md)), so it can be accepted with those amendments.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

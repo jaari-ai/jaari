@@ -15,7 +15,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 5. **Daemon and install.** `apps/daemon`, `jaari init` (target: VPS, remote server, home
    hardware, or laptop), `jaari doctor`, Compose, and the laptop sleep/wake rule (ADR-017).
 6. **Memory next**: structured records and FTS5 search (ADR-023) and context assembly (ADR-024), the job engine (ADR-025), and the single writer (ADR-026); then persona, then the real gate and the
-   vault (ADR-006, ADR-016, ADR-018; verify OQ-29 and accept ADR-013).
+   vault (ADR-006, ADR-016, ADR-018; vendor check done in ADR-050; accept ADR-013 via OQ-64).
 7. **Egress and browser.** `@jaari/http` to ADR-016 with `direct` and `owner-exit` (Tailscale)
    providers; the browser under the placement rule; pool details in OQ-32 (ADR-017).
 
@@ -71,3 +71,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [047](adr/047-canonicalize-privacy.md) | Canonicalize privacy: local-only by default, bounded passes, sensitive lines never sent to an API | Accepted |
 | [048](adr/048-browser-surface-and-adapters.md) | Browser surface: one neutral tool surface, pluggable browser adapters, any egress route, native toolsets mapped in Phase 6 | Accepted |
 | [049](adr/049-fetch-ladder-and-lightpanda.md) | Fetch ladder: pluggable rungs, Lightpanda optional and off by default, decided from usage data | Accepted |
+| [050](adr/050-vault-verification-and-one-time-codes.md) | Vault verification: no paid tier required, owner-chosen vault layout, one-time codes from the vault or the owner's channels | Accepted |
