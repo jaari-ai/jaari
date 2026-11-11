@@ -5,7 +5,7 @@
 
 ## Decision
 **Client.** Pi `pi-mcp` (stdio, HTTP, OAuth), used as a library. Tools are named
-`mcp__<server>__<tool>`. Third-party skills are a separate question (OQ-39).
+`mcp__<server>__<tool>`. Third-party skills are decided in ADR-060.
 
 **Adding a server.** The owner adds a server by address in chat, in the panel, or in config.
 The model may propose one; it arrives switched off, and enabling it is an approval bound to the
