@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **20**.
+Last updated: 2026-11-10. Open: **19**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -44,7 +44,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-38 | Degraded mode | Behaviour when the API tier is unreachable, the budget is spent, or a node is offline: what queues, what runs locally, what the owner is told. | 3 | Effectful work queues with expiry; local-only roles keep running; one notice per outage. Fall back only when the turn provably never started, and only to a model that has the same tools; remember provider limit-reset times instead of probing Affected by ADR-046: at the budget limit the owner chooses (raise, cheaper chat model, local only); until then background work queues and local-only roles run. |
 | OQ-39 | Skills and procedural memory | Skills as versioned Markdown playbooks (OpenClaw `SKILL.md`, open-instinct `skills/`, Anthropic Agent Skills): where they live, how they are installed, who approves them, how a skill becomes memory. | 2 | Playbooks in the memory repo under `ops/rules`, project `skills/` for built-ins; installing a third-party skill is a gated action; the reader role screens skill text. Scan skill text before install (base64 blobs, piped shell installs, invisible Unicode); third-party skills install disabled; exports scrub secrets (learning/09) Affected by ADR-034: MCP servers are decided; skills stay here, and like MCP text a skill's text is untrusted and pinned by hash. |
 | OQ-40 | Learning from outcomes | Failure receipts, `reflections → rules` promotion (gajae-way), router tuning from the outcome log. Today only the notification ledger learns. | 8 | Receipts write to `reflections`; the daily audit proposes promotions the owner confirms Affected by ADR-041: owner corrections already become local fixtures when the owner accepts the one-time offer. Affected by ADR-042: a promoted rule is a persona or rules edit, so it arrives as a diff for approval. |
 | OQ-41 | OAuth broker | Connected apps (Google, Microsoft, Slack) need tokens the model never sees: storage, refresh, scope-to-capability mapping, revocation, admin consent. | 5 | Tokens in the vault (ADR-013), resolved per call like `secretRef`; one scope set per capability; revoke from CLI and panel. Tool grants per capability are enforced on the real tool name at call time and logged; with several accounts connected, the account is always chosen explicitly Affected by ADR-039: Google and Microsoft calendar, contacts, and Drive are the first broker users; each account is configured separately. |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-35 | Compose, npm, brew, binary, or one-line installer; patches auto-install in quiet hours, minor and major notify; migrations on store open | [ADR-056](adr/056-install-update-migrate.md) |
 | OQ-36 | Clock-gap sleep detection; missed jobs run once (max 5); awake only while a job runs on mains; battery pause; macOS permission matrix | [ADR-057](adr/057-laptop-host-and-node.md) |
 | OQ-37 | Pinned TLS node link; 1-hour result outbox; migrate-host asks about pending approvals (cancel or carry over); generation fencing; signed node handoff | [ADR-058](adr/058-node-link-and-host-migration.md) |
+| OQ-38 | Per-dependency holds; send stamp; code-run control surface when models are down; owner messages answered automatically when back; 24 h task expiry | [ADR-059](adr/059-degraded-mode.md) |
