@@ -33,7 +33,7 @@ near approvals.
 
 **Shadow replay.** `jaari replay <turn>` reruns a recorded turn with another prompt version or
 model with the gate in dry-run: nothing is sent or written, and the two runs are shown side by
-side. Prompt versioning (OQ-21) uses it.
+side. Prompt versioning (ADR-042) uses it.
 
 **Phasing.** Tier 1 starts in Phase 0 with a smoke test that boots the daemon on the scripted
 engine and grows each phase; golden threads and replay in Phase 2; crash drills with the real
