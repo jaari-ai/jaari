@@ -36,4 +36,6 @@
   removes a fact and can always be undone; erase rewrites history and cannot. The owner asks in
   plain words and confirms a preview; every line carries a source id so forgetting a source
   cascades.
+- Files (ADR-038): attachments and dropped files live in a content-addressed store outside the
+  git repo; memory keeps a pointer and the extracted text, indexed with page numbers.
 - Open: capture evidence (OQ-53).

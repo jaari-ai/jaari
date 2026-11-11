@@ -39,3 +39,4 @@
 | [035](035-channel-neutral-prompts.md) | Channel-neutral prompts: Jaari asks in types, each channel renders what it can | Accepted |
 | [036](036-code-execution.md) | Code execution: sealed runs never ask, allow once or for 90 days, pinned recurring jobs | Accepted |
 | [037](037-voice.md) | Voice: voice notes in v1, local speech by default, owner-chosen approval strictness | Accepted |
+| [038](038-documents-and-files.md) | Documents and files: content-addressed store, sealed parsing, sensitive files local-only, disk watch | Accepted |

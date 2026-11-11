@@ -1,6 +1,7 @@
 # ADR-032: Observability: three records, opt-in traces, `jaari doctor`
 
 - **Status:** Accepted
+- **Extended by:** [ADR-038](038-documents-and-files.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -38,6 +39,10 @@ gajae-way (design only); the decisions view from Pally (learning/11).
 OpenTelemetry on by default (most owners run no collector); exporting prompts or arguments in
 traces (memory and secrets would leave the box); one log for everything (the audit record must
 stay small, chained, and authoritative); a raw provider tee left on permanently.
+
+## Amendments
+- **ADR-038:** `jaari doctor` and the panel also show disk use per volume and the largest
+  stored files; the daemon notifies at 80%, 90%, and 95% used.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
