@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **30**.
+Last updated: 2026-11-10. Open: **29**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -34,7 +34,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-28 | Lightpanda | Is Lightpanda worth running, or is http + Chromium enough? | 4 | Decide from fetch-ladder usage logs |
 | OQ-29 | Vault verification | Confirm against vendor docs before Phase 3: does Bitwarden Lite need a paid licence for anything ADR-013 uses (Secrets Manager is optional)? Exact 1Password SDK and service-account setup for a personal account? | 3 | Bitwarden password-manager API via `bw serve` is enough; Secrets Manager not required |
 
 ## F. Carried over from the computer-use research (learning/07-computer.md, 08-egress-identity-and-takeover.md)
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-25 | Budget suggested at init by preset ($30/$20/$0); 50% and 80% warnings; owner chooses at the limit, trade-offs explained the first 3 times | [ADR-046](adr/046-llm-budget.md) |
 | OQ-26 | Local-only by default (ADR-019); bounded passes; sensitive lines never in an API batch; sourced lines; 20% deletion hold | [ADR-047](adr/047-canonicalize-privacy.md) |
 | OQ-27 | Neutral browser.*/computer.* surface; pluggable adapters (remote desktop, MCP, providers, custom incl. spoofing); any egress route; native toolsets in Phase 6 | [ADR-048](adr/048-browser-surface-and-adapters.md) |
+| OQ-28 | Pluggable fetch rungs; Lightpanda off by default, offered on small hosts; monthly on/off suggestion from usage logs | [ADR-049](adr/049-fetch-ladder-and-lightpanda.md) |

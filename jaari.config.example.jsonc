@@ -48,7 +48,8 @@
       "localOnlyRoles": ["curiosity", "canonicalize"]
     },
     "fetch": {
-      "ladder": ["http-readability", "lightpanda", "chromium-local", "jina"],
+      // ADR-049: Lightpanda is optional and off by default; add it after http-readability.
+      "ladder": ["http-readability", "chromium-local", "jina"],
       "firecrawlCompatible": { "url": "http://localhost:3002", "enabled": false },
       "escalateOn": ["403", "429", "challenge-page", "text<500", "js-required"]
     },

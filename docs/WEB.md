@@ -6,7 +6,7 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
 | Tool | Self-hosted default | Hosted options |
 |---|---|---|
 | `web.search` | SearXNG (separate AGPL container, JSON enabled) | Brave (fallback), Serper, Tavily, Exa |
-| `web.fetch` | http + readability → Lightpanda → local Chromium | Jina Reader, Firecrawl Cloud |
+| `web.fetch` | http + readability → (Lightpanda, optional, off by default; ADR-049) → local Chromium | Jina Reader, Firecrawl Cloud |
 | `browser.*` | Pluggable adapters (ADR-048): headful on the host virtual desktop or an owner node, Playwright MCP or Stagehand on the local pinned profile | Any remote CDP: Steel, Kernel, Browser Use, Browserbase, Hyperbrowser; custom adapters, including anti-detect ones |
 
 ## Where the browser runs (ADR-017)
@@ -20,6 +20,9 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
 
 ## Rules
 - Fetch escalates on: 403, 429, challenge page, < ~500 chars of text, JS-required.
+- Rungs are pluggable adapters; a domain that keeps needing a higher rung starts there for 30
+  days; at most once a month Jaari suggests turning Lightpanda on or off from the usage log
+  (ADR-049).
 - Scraper contract is the Firecrawl API: self-hosted Firecrawl, CRW, or Firecrawl Cloud is
   a URL swap.
 - Browser runs inside Jaari's loop so the gate sees every action; browser-use (own loop)
@@ -41,8 +44,8 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
 ## Presets
 | Preset | Search | Fetch | Browser |
 |---|---|---|---|
-| local-only | SearXNG | http → Lightpanda → Chromium | pinned profile on the daemon host (home hardware or laptop) |
-| hybrid (default) | SearXNG → Brave | http → Lightpanda → Chromium → Jina | pinned profile where the owner's identity is (home box or owner node, or any host through an owner exit node); remote CDP or host browser for anonymous background work |
+| local-only | SearXNG | http → (Lightpanda) → Chromium | pinned profile on the daemon host (home hardware or laptop) |
+| hybrid (default) | SearXNG → Brave | http → (Lightpanda) → Chromium → Jina | pinned profile where the owner's identity is (home box or owner node, or any host through an owner exit node); remote CDP or host browser for anonymous background work |
 | api-only | Brave or Tavily | Jina or Firecrawl Cloud | hosted CDP (anonymous work only) |
 
 Config: see `jaari.config.example.jsonc`, section `web`.
