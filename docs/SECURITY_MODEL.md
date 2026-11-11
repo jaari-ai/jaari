@@ -98,7 +98,7 @@ refuse when none is up; they never fall back to a rotating or datacenter address
 ## Owner hold (ADR-005, ADR-016)
 Takeover is a hold owned by the owner, not by one window: accepted agent calls drain,
 new agent input is refused (never queued), and the hold ends on release, two minutes
-after the last view closes, or after five idle minutes. Transport: OQ-34.
+after the last view closes, or after five idle minutes. Transport and states: ADR-055.
 
 ## Pause, stop, and limits (ADR-031)
 Pause stops new work and survives restarts; emergency stop also aborts running work and cancels

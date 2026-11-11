@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **24**.
+Last updated: 2026-11-10. Open: **23**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -39,7 +39,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-34 | Takeover transport | How does the owner see and touch the agent's browser from a phone within seconds: CDP screencast in the web panel, noVNC over loopback, or a hosted live view? Takeover states, timeouts, and the rule that screenshots stop while the owner holds the session. | 6 | CDP screencast in `@jaari/channel-web` over Tailscale; a "Take over" link pushed through the active channel; states pending/active/completed/timeout/cancelled. Hold semantics are in ADR-016 (owner-held, drain then hand over, refuse rather than queue, 2-minute grace and 5-minute idle release); only the transport stays open |
 
 ## G. From the 2026 gap review (2026-11-09)
 
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-31 | Browser driven by a worker child with task data only; strict task-scoped origins (review in Phase 6); fencing; screenshot redaction | [ADR-052](adr/052-browser-worker-and-untrusted-pages.md) |
 | OQ-32 | Pluggable egress providers; one connection baseline; sticky-per-task rotation; 5-minute health probes; home sites suggested from vault logins | [ADR-053](adr/053-egress-pool.md) |
 | OQ-33 | Web Bot Auth signing built, off by default, chosen per site; key directory on the owner's own domain only; registration revisited | [ADR-054](adr/054-signed-agent-identity.md) |
+| OQ-34 | Per-adapter transport (CDP screencast, noVNC, provider live view) in one panel view; 10-minute wait then pause; pasted codes accepted and scrubbed | [ADR-055](adr/055-takeover-transport.md) |
