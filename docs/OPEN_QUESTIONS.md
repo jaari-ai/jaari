@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **21**.
+Last updated: 2026-11-10. Open: **20**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -44,7 +44,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-37 | Multi-device state | With ADR-015, how nodes and the daemon reconnect, and how the daemon moves between hosts (laptop, VPS, home server, in any direction). | 7 | The daemon host is authoritative (ADR-015); memory pushed to an encrypted git remote (ADR-027); nodes hold no state; `jaari migrate-host` exports and imports. Node link: a Noise handshake with a QR-pinned daemon key over the overlay network; a relay, if one is ever added, must see only ids, timing, and volume (learning/09) |
 | OQ-38 | Degraded mode | Behaviour when the API tier is unreachable, the budget is spent, or a node is offline: what queues, what runs locally, what the owner is told. | 3 | Effectful work queues with expiry; local-only roles keep running; one notice per outage. Fall back only when the turn provably never started, and only to a model that has the same tools; remember provider limit-reset times instead of probing Affected by ADR-046: at the budget limit the owner chooses (raise, cheaper chat model, local only); until then background work queues and local-only roles run. |
 | OQ-39 | Skills and procedural memory | Skills as versioned Markdown playbooks (OpenClaw `SKILL.md`, open-instinct `skills/`, Anthropic Agent Skills): where they live, how they are installed, who approves them, how a skill becomes memory. | 2 | Playbooks in the memory repo under `ops/rules`, project `skills/` for built-ins; installing a third-party skill is a gated action; the reader role screens skill text. Scan skill text before install (base64 blobs, piped shell installs, invisible Unicode); third-party skills install disabled; exports scrub secrets (learning/09) Affected by ADR-034: MCP servers are decided; skills stay here, and like MCP text a skill's text is untrusted and pinned by hash. |
 | OQ-40 | Learning from outcomes | Failure receipts, `reflections → rules` promotion (gajae-way), router tuning from the outcome log. Today only the notification ledger learns. | 8 | Receipts write to `reflections`; the daily audit proposes promotions the owner confirms Affected by ADR-041: owner corrections already become local fixtures when the owner accepts the one-time offer. Affected by ADR-042: a promoted rule is a persona or rules edit, so it arrives as a diff for approval. |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-34 | Per-adapter transport (CDP screencast, noVNC, provider live view) in one panel view; 10-minute wait then pause; pasted codes accepted and scrubbed | [ADR-055](adr/055-takeover-transport.md) |
 | OQ-35 | Compose, npm, brew, binary, or one-line installer; patches auto-install in quiet hours, minor and major notify; migrations on store open | [ADR-056](adr/056-install-update-migrate.md) |
 | OQ-36 | Clock-gap sleep detection; missed jobs run once (max 5); awake only while a job runs on mains; battery pause; macOS permission matrix | [ADR-057](adr/057-laptop-host-and-node.md) |
+| OQ-37 | Pinned TLS node link; 1-hour result outbox; migrate-host asks about pending approvals (cancel or carry over); generation fencing; signed node handoff | [ADR-058](adr/058-node-link-and-host-migration.md) |

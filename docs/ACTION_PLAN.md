@@ -79,3 +79,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [055](adr/055-takeover-transport.md) | Takeover transport: per-adapter live view behind one panel view, a non-blocking state protocol, codes from chat scrubbed before the model | Accepted |
 | [056](adr/056-install-update-migrate.md) | Install, update, migrate: owner-chosen install method, automatic patch updates, migrations when a store opens | Accepted |
 | [057](adr/057-laptop-host-and-node.md) | Laptop as host and node: sleep detection and capped catch-up, power and battery rules, a published macOS permission matrix | Accepted |
+| [058](adr/058-node-link-and-host-migration.md) | Node link and host moves: pinned TLS over the overlay, results that survive a disconnect, generation-fenced host migration | Accepted |

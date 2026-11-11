@@ -23,7 +23,7 @@ that cannot be recovered is quarantined, never deleted.
 - **The owner's edits.** Before each commit the writer checks for changes it did not make and
   commits them first as a separate commit with `actor: owner`. When the owner and Jaari change
   the same file, the owner's edit wins and Jaari's change is redone against it.
-- Pulls and pushes to the git remote go through the same writer (ADR-027; other devices in OQ-37).
+- Pulls and pushes to the git remote go through the same writer (ADR-027; other devices and host moves in ADR-058).
 
 Borrowed design: the closure ladder, mutation-id trailers, and quarantine from gajae-way
 (design only, `refs/gajae-way/packages/gateway/src/memory/closure.ts`).
