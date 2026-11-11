@@ -70,6 +70,7 @@ export interface ChannelManifest {
     groups?: boolean; readReceipts?: boolean; edits?: boolean;
   };
   identity: "carrier" | "account" | "device" | "none";  // see Identity binding
+  prompts: "buttons" | "quickReplies" | "text";          // how the host renders a Prompt (ADR-035)
   maxMessageChars: number;           // delivery splits long replies to fit
 }
 
@@ -79,11 +80,22 @@ export interface Attachment {
   ref: string;                       // host-side storage handle, never inline data
 }
 
+// What Jaari asks, independent of the channel (ADR-035). The host renders it for the
+// manifest's `prompts` level; for "text" it writes the reply grammar into the message.
+export type Prompt =
+  | { kind: "approval"; id: string; code: string; summary: string;
+      options: ("once" | "always" | "deny")[]; detailsUrl?: string; expiresAt: string }
+  | { kind: "choice"; id: string; question: string; options: { id: string; label: string }[] }
+  | { kind: "confirm"; id: string; question: string }
+  | { kind: "input"; id: string; question: string }
+  | { kind: "link"; id: string; label: string; url: string };  // panel, takeover, pairing
+
 export interface InboundMessage {
   channel: string; conversationId: string; messageId: string;
   senderHandle: string;              // raw transport identity (phone, user id, email)
   isGroup: boolean; participants?: string[];
   text?: string; attachments?: Attachment[];
+  answer?: { promptId: string; option: string };  // a tap on a rendered Prompt
   sentAt: string; receivedAt: string; // ISO 8601
 }
 
@@ -92,6 +104,7 @@ export interface OutboundMessage {
   text?: string; attachments?: Attachment[];
   idempotencyKey: string;            // from the outbox; the adapter must dedupe on it
   replyTo?: string;
+  prompt?: Prompt;                   // rendered by the host for this channel, never by the plugin
 }
 
 export type DeliveryReceipt =
@@ -124,6 +137,10 @@ export interface ChannelAdapter {
   never logged.
 - Every inbound message goes through principal resolution in the host before ingress.
   The plugin reports the raw `senderHandle` and never decides who the owner is.
+- Prompts (ADR-035): the host renders them and parses answers. A tap's `answer` and a text
+  reply in the fixed grammar (code plus option) reach the gate as the same answer, decided by
+  deterministic code. A bare "yes" counts only when exactly one prompt is open in that
+  conversation. Long details and secret entry are panel links.
 - Only the delivery outbox calls `send()`; nothing else imports an adapter. Proactive
   messages reach the outbox only through the persona monitor and notification ledger.
 - `send()` must be idempotent on `idempotencyKey`. An `ambiguous` receipt is never

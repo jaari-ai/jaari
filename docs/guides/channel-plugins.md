@@ -14,6 +14,7 @@ export const adapter: ChannelAdapter = {
     version: "0.1.0",
     capabilities: { text: true, groups: false },
     identity: "account",
+    prompts: "text",              // or "buttons" / "quickReplies" if the transport has them
     maxMessageChars: 4000,
   },
   async start(ctx: ChannelContext) {
@@ -35,6 +36,9 @@ export const adapter: ChannelAdapter = {
 - Report the raw `senderHandle`; do not decide who the owner is.
 - Make `send()` idempotent on `idempotencyKey`; the outbox retries. Return `ambiguous`
   when you can't tell whether a message went out.
+- Don't format approvals or questions yourself. With `prompts: "text"` the host has already
+  written the reply instructions into `msg.text`; with `buttons` or `quickReplies`, render
+  `msg.prompt.options` natively and report a tap as `answer: { promptId, option }` (ADR-035).
 - Use only `ctx.secrets.get` for credentials, and never log them.
 - Pass the shared contract tests: `pnpm test --filter @jaari/channels -- --adapter ./dist`.
 

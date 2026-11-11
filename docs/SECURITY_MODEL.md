@@ -41,7 +41,7 @@ separate manifest fields.
 | `browser.act` | gated by classifier | Ordinary clicks and typing; consequential ones escalate (OQ-30) |
 | `browser.submit` | gated | Forms, purchases, consent |
 | `computer.use` | gated per action | Desktop control on a node or the host virtual desktop |
-| `shell`, `files.write` | gated | Sandbox rules OQ-15 |
+| `shell`, `files.write` | gated | Sealed sandbox runs need no approval; otherwise Allow once or a 90-day target grant (ADR-036) |
 | `files.read` | read | |
 | `email.read` | read | Content is untrusted |
 | `email.send`, `publish`, `repo.write` | gated | Short approval expiry |
@@ -51,7 +51,9 @@ separate manifest fields.
 
 Login, 2FA, and CAPTCHA go to owner takeover.
 
-## Approval card (ADR-006, ADR-018)
+## Approval card (ADR-006, ADR-018, ADR-035)
+The card is a typed prompt each channel renders as it can: buttons, quick replies, or a text
+reply grammar.
 The short code the owner types or taps is only a lookup of the digest. There is no amount
 or parameter tolerance: a different action is a different digest. Default expiry 15
 minutes; 5 for `email.send` and `publish`; overridable per capability.
@@ -115,6 +117,13 @@ Server text is untrusted and results are capped at 20 KB. Local servers run in a
 only network is a loopback proxy into `@jaari/http`; without a backend they run only after a
 per-server "unsandboxed" warning the owner accepts.
 
+## Code execution (ADR-036)
+Sealed runs (no network, no secrets, owner files read-only) never ask. Otherwise Allow once,
+or Always allow for one host or folder for 90 days; host commands are always Allow once; files
+plus a host off the starter list always ask. Recurring jobs are approved once at creation,
+pinned to a digest of script, placement, secrets, hosts, and schedule; any change holds them.
+A boot self-check disables code execution if the sandbox is weakened.
+
 ## Open
-Code execution (OQ-15), standing grants (OQ-51), inbound triggers
+Standing grants (OQ-51), inbound triggers
 (OQ-52), outside lineage (OQ-54).
