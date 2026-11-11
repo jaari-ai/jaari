@@ -38,7 +38,7 @@ its lead time starts), independent of the 14-day window.
 - Automatic recall is skipped for very short acknowledgements ("ok", "thanks").
 - What must survive a compaction: decisions, commitments, and owner corrections. Structured
   records live outside the conversation (ADR-023), so compaction cannot lose them.
-  Compaction mechanics (thresholds, Pi reuse) are OQ-44.
+  Compaction mechanics (thresholds, Pi reuse) are ADR-065.
 - `jaari prompt --layers` shows every section, its size, its source, and what was cut, for
   any turn.
 

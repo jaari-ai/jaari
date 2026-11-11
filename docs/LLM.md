@@ -40,7 +40,8 @@ Owner override: "use the big model for this", `/model <tier>`.
   chain only when protocol state shows the provider never accepted the turn, and only to
   a model that supports the same tools; provider limit-reset times are remembered instead
   of probed; the system prompt is split into a stable and a volatile part and the tool
-  list stays byte-identical across a session so the cached prefix survives (OQ-44).
+  list stays byte-identical across a session on models that cannot change tools mid-conversation,
+  so the cached prefix survives (ADR-065).
 - Small-tier classification calls are typed questions (choice, score, yes/no) with a
   timeout and a calibrated acceptance threshold; below it, a deterministic rule decides.
   Local-only roles still fail closed.

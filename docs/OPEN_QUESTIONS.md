@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **14**.
+Last updated: 2026-11-10. Open: **13**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -44,7 +44,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-44 | Persistent session and context | One main session reopened over its transcript across restarts, steering, segment flushing, daemon-managed compaction, a stable prompt prefix for caching, and how 2026 API features (server compaction, threads) are used. | 0 | openinstinct's session semantics on Pi; compaction at ~50% of the window; stable prefix first. Keep the tool list byte-identical across a session's turns (pinned by a test); cache keep-warm only behind a cost guard (learning/09) Affected by ADR-042: the Stable layer fingerprint is logged per turn and the byte-identical test is required. |
 | OQ-45 | Multimodal memory | Photos, receipts, and screenshots as memory, and what the audit does with them. | later | Undecided Affected by ADR-037: voice-note audio is kept 30 days and its transcript in the raw log; photos and screenshots remain open here. Affected by ADR-038: photos and screenshots use the same store, OCR ladder, and retention. |
 | OQ-46 | Owner panel | `channel-web` as a PWA: approval cards showing the digest, live view (ADR-055), a memory browser and editor, audit viewer, budgets, pause and emergency stop (ADR-031), web push while the panel is the active channel (ADR-033). | 2 | One PWA over Tailscale; memory editing commits like any other write Affected by ADR-035: the panel renders prompts with buttons and hosts the details and secret-entry links other channels point to. |
 | OQ-47 | Shadow mode | Observe-and-propose only for the first weeks: drafts instead of sends, plans instead of actions; the owner lifts it per capability. | 3 | On by default for 14 days; per-capability lift recorded in `audit.jsonl` |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-41 | Own Google/Microsoft client via wizard; PKCE; one grouped consent for the chosen capabilities; tokens in the vault; revoke and admin-consent handling | [ADR-062](adr/062-oauth-broker.md) |
 | OQ-42 | Adapters for personal (scoped), own-domain, OAuth, and JMAP mailboxes with setup guides; inbound as data; email.send Allow once; no phone or SMS gateway in v1 | [ADR-063](adr/063-agent-mailbox.md) |
 | OQ-43 | Routine objects with budgets and history; overlaps queue (coalesced); code checks first; check-in at 14 and 30 days then never; reply to stop | [ADR-064](adr/064-owner-routines.md) |
+| OQ-44 | One persistent daemon-owned session on pi-agent-core; serial queue; Pi thresholds; no server-side state for the main session; keep transcripts, optional pruning | [ADR-065](adr/065-persistent-session.md) |

@@ -37,7 +37,7 @@ prompt) and is never applied silently. Learned settings that are data rather tha
 (ADR-033 urgency) stay visible and reversible in the panel.
 
 **Testing.** A test keeps the tool list and Stable layer byte-identical across a session's turns
-so the prompt cache is not broken by accident (OQ-44). Prompt changes can be compared on
+so the prompt cache is not broken by accident (ADR-065). Prompt changes can be compared on
 recorded turns with `jaari replay` (ADR-041) before they apply.
 
 Borrowed: per-run hashes of the prompt files in use from openinstinct `persona/soul.ts`

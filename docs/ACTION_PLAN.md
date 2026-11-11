@@ -4,7 +4,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 (ADR-020): pick up the next item whose needs are met.
 
 ## Workstreams
-1. **Decide the Phase 0 questions.** OQ-44 (session). Record
+1. **Decide the Phase 0 questions.** OQ-50 (capability packages). Record
    an ADR for each as it closes.
 2. **Scaffold the monorepo** from the config this script generates; add `@jaari/capabilities`,
    `@jaari/gate` (deny-all stub), and `@jaari/secrets` (resolver + `os-keychain`) with the
@@ -86,3 +86,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [062](adr/062-oauth-broker.md) | OAuth broker: bring-your-own client with a wizard, grouped consent per connection, tokens in the vault, no hosted broker | Accepted |
 | [063](adr/063-agent-mailbox.md) | The agent's mailbox: every mailbox option coded as an adapter, setup guides per option, inbound mail as data, no phone number in v1 | Accepted |
 | [064](adr/064-owner-routines.md) | Owner routines: visible routine objects, queued overlaps, cheap checks first, a 14-day check-in, stop by replying | Accepted |
+| [065](adr/065-persistent-session.md) | Persistent session: one daemon-owned main session on pi-agent-core, one serial queue, Pi's compaction thresholds, no server-side state for the main session | Accepted |
