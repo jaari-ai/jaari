@@ -38,7 +38,7 @@ separate manifest fields.
 |---|---|---|
 | `web.search`, `web.fetch` | read | Results are untrusted content (reader role) |
 | `browser.read` | read | Page content is untrusted; screenshots OQ-31 |
-| `browser.act` | gated by classifier | Ordinary clicks and typing; consequential ones escalate (OQ-30) |
+| `browser.act` | gated by classifier | Ordinary clicks and typing; commitments (pay or order, book, send, consent, account changes, upload) escalate to `browser.submit` (ADR-051) |
 | `browser.submit` | gated | Forms, purchases, consent |
 | `computer.use` | gated per action | Desktop control on a node or the host virtual desktop |
 | `shell`, `files.write` | gated | Sealed sandbox runs need no approval; otherwise Allow once or a 90-day target grant (ADR-036) |
