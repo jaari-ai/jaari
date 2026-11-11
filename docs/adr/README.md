@@ -44,3 +44,4 @@
 | [040](040-no-payments-in-v1.md) | No payments in v1; checkouts end at an owner takeover | Accepted |
 | [041](041-behaviour-evals.md) | Behaviour evals: scripted scenarios in CI, owner golden threads, opt-in live tests, shadow replay | Accepted |
 | [042](042-prompt-versioning.md) | Prompt versioning: versioned prompt files, locked safety prompts, a per-turn fingerprint, propose-and-approve persona edits | Accepted |
+| [043](043-project-process.md) | Project process: one contact address, DCO without a CLA, lockstep releases, hardened supply chain | Accepted |

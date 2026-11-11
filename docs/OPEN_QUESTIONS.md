@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **36**.
+Last updated: 2026-11-10. Open: **35**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -29,7 +29,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-22 | Project process | SECURITY.md and disclosure contact, release/versioning policy, contribution rules (DCO or CLA?). License decided: MIT (ADR-014) | 0 | security@jaari.org, changesets, DCO sign-off |
 | OQ-23 | Multiple users | Strictly single owner, or household members with limited access? | 0 | Single owner; keep user id in data model |
 
 ## E. Carried over from ADR-011 to ADR-013
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-19 | No `pay` executor in v1; checkouts stop at the payment step and the owner enters the card in a takeover; card fields stay unresolvable; later: one-time virtual cards, spend check, Allow once | [ADR-040](adr/040-no-payments-in-v1.md) |
 | OQ-20 | Tier 1 scripted scenarios on the real daemon in CI; tier 2 owner corrections offered once as local redacted fixtures; tier 3 opt-in live tests with an LLM judge for tone only; `jaari replay` in shadow mode | [ADR-041](adr/041-behaviour-evals.md) |
 | OQ-21 | Versioned prompt files; safety and system prompts locked; per-turn fingerprint; Jaari's persona edits are proposals | [ADR-042](adr/042-prompt-versioning.md) |
+| OQ-22 | hello@jaari.org for all contact; DCO, no CLA; lockstep SemVer releases; pinned, aged, script-free dependencies | [ADR-043](adr/043-project-process.md) |

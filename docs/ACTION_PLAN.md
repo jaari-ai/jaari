@@ -4,7 +4,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 (ADR-020): pick up the next item whose needs are met.
 
 ## Workstreams
-1. **Decide the Phase 0 questions.** OQ-22 (project process), OQ-23 (single owner), OQ-35 (install), OQ-44 (session). Record
+1. **Decide the Phase 0 questions.** OQ-23 (single owner), OQ-35 (install), OQ-44 (session). Record
    an ADR for each as it closes.
 2. **Scaffold the monorepo** from the config this script generates; add `@jaari/capabilities`,
    `@jaari/gate` (deny-all stub), and `@jaari/secrets` (resolver + `os-keychain`) with the
@@ -64,3 +64,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [040](adr/040-no-payments-in-v1.md) | No payments in v1; checkouts end at an owner takeover | Accepted |
 | [041](adr/041-behaviour-evals.md) | Behaviour evals: scripted scenarios in CI, owner golden threads, opt-in live tests, shadow replay | Accepted |
 | [042](adr/042-prompt-versioning.md) | Prompt versioning: versioned prompt files, locked safety prompts, a per-turn fingerprint, propose-and-approve persona edits | Accepted |
+| [043](adr/043-project-process.md) | Project process: one contact address, DCO without a CLA, lockstep releases, hardened supply chain | Accepted |
