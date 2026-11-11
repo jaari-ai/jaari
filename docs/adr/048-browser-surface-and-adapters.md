@@ -54,7 +54,7 @@ show a gain.
 
 **Cost.** The accessibility snapshot first; screenshots when needed; keep the last 3 and prune
 every 25 turns; 1280×720 by default, 1080p for small text. Whether snapshots and screenshots count
-as untrusted content under the reader rule is OQ-31.
+as untrusted content under the reader rule is ADR-052.
 
 Borrowed: the member set and the "not executed" rule from the Anthropic toolsets (learning/07);
 the action enum from open-instinct `computer/src/schema.ts`; adapter manifests from Jaari's
