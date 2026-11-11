@@ -37,7 +37,7 @@ separate manifest fields.
 | Capability | Class | Notes |
 |---|---|---|
 | `web.search`, `web.fetch` | read | Results are untrusted content (reader role) |
-| `browser.read` | read | Page content is untrusted; screenshots OQ-31 |
+| `browser.read` | read | Page content is untrusted; a browser worker child with task data only sees it (ADR-052) |
 | `browser.act` | gated by classifier | Ordinary clicks and typing; commitments (pay or order, book, send, consent, account changes, upload) escalate to `browser.submit` (ADR-051) |
 | `browser.submit` | gated | Forms, purchases, consent |
 | `computer.use` | gated per action | Desktop control on a node or the host virtual desktop |
