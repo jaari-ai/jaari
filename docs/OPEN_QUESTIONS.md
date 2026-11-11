@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **22**.
+Last updated: 2026-11-10. Open: **21**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -44,7 +44,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-36 | Laptop as host | The laptop as a daemon host (ADR-017 target 3) and as a node: sleep and wake, network changes, battery, and the macOS permission matrix per capability (Automation, Accessibility, Screen Recording, Full Disk Access). Meta publishes none of this for Muse. Sleep and wake is needed in Phase 0; the permission matrix with the desktop capability in Phase 6. | 0 | Published permission matrix per capability manifest; in laptop-only mode, jobs missed in sleep run once on wake, capped |
 | OQ-37 | Multi-device state | With ADR-015, how nodes and the daemon reconnect, and how the daemon moves between hosts (laptop, VPS, home server, in any direction). | 7 | The daemon host is authoritative (ADR-015); memory pushed to an encrypted git remote (ADR-027); nodes hold no state; `jaari migrate-host` exports and imports. Node link: a Noise handshake with a QR-pinned daemon key over the overlay network; a relay, if one is ever added, must see only ids, timing, and volume (learning/09) |
 | OQ-38 | Degraded mode | Behaviour when the API tier is unreachable, the budget is spent, or a node is offline: what queues, what runs locally, what the owner is told. | 3 | Effectful work queues with expiry; local-only roles keep running; one notice per outage. Fall back only when the turn provably never started, and only to a model that has the same tools; remember provider limit-reset times instead of probing Affected by ADR-046: at the budget limit the owner chooses (raise, cheaper chat model, local only); until then background work queues and local-only roles run. |
 | OQ-39 | Skills and procedural memory | Skills as versioned Markdown playbooks (OpenClaw `SKILL.md`, open-instinct `skills/`, Anthropic Agent Skills): where they live, how they are installed, who approves them, how a skill becomes memory. | 2 | Playbooks in the memory repo under `ops/rules`, project `skills/` for built-ins; installing a third-party skill is a gated action; the reader role screens skill text. Scan skill text before install (base64 blobs, piped shell installs, invisible Unicode); third-party skills install disabled; exports scrub secrets (learning/09) Affected by ADR-034: MCP servers are decided; skills stay here, and like MCP text a skill's text is untrusted and pinned by hash. |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-33 | Web Bot Auth signing built, off by default, chosen per site; key directory on the owner's own domain only; registration revisited | [ADR-054](adr/054-signed-agent-identity.md) |
 | OQ-34 | Per-adapter transport (CDP screencast, noVNC, provider live view) in one panel view; 10-minute wait then pause; pasted codes accepted and scrubbed | [ADR-055](adr/055-takeover-transport.md) |
 | OQ-35 | Compose, npm, brew, binary, or one-line installer; patches auto-install in quiet hours, minor and major notify; migrations on store open | [ADR-056](adr/056-install-update-migrate.md) |
+| OQ-36 | Clock-gap sleep detection; missed jobs run once (max 5); awake only while a job runs on mains; battery pause; macOS permission matrix | [ADR-057](adr/057-laptop-host-and-node.md) |
