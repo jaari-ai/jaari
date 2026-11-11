@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **34**.
+Last updated: 2026-11-10. Open: **33**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -34,7 +34,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-24 | Local model per target | Size classes per deployment target are set in [LLM.md](LLM.md#local-models-per-target). Open: which concrete open-weight model passes the `jaari llm eval` fixtures (tool calls, JSON validity, canonicalize golden set, injection resistance) for the small and medium tiers on each target, and which to suggest at `jaari init`. | 1 | Measure with `jaari llm eval` per target; ship a suggested-models list that is data, refreshed as models change, never hard-coded |
 | OQ-25 | LLM budget | Default monthly LLM budget? | 3 | $30/month placeholder Affected by ADR-040: the later payment spend check (per payment, day, month) shares these budgets. |
 | OQ-26 | Canonicalize privacy | Should canonicalize be local-only by default? | 1 | Yes, if a capable local model exists. Affected by ADR-023: canonicalize never edits append-only records such as ledgers. |
 | OQ-27 | Browser tool surface | Provider-neutral `browser.*` / `computer.*` members run by Jaari's own driver (Playwright/CDP, Stagehand), or the vendor-native toolsets (Anthropic `browser_toolset_20260801` / `computer_toolset_20260801`, Gemini `computer_use`) mapped per routed model? `pi-ai` has no toolset support today, and a native toolset reaches the gate only through the driver's `confirm` hook. Driver hygiene against automation markers (Patchright-level) is part of this; full anti-detect browsers are not (see learning/08). Background: [learning/07-computer.md](learning/07-computer.md) | 6 | Neutral surface shaped like the Anthropic member set; native toolsets as an `@jaari/llm` mapping where the routed model supports them |
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-21 | Versioned prompt files; safety and system prompts locked; per-turn fingerprint; Jaari's persona edits are proposals | [ADR-042](adr/042-prompt-versioning.md) |
 | OQ-22 | hello@jaari.org for all contact; DCO, no CLA; lockstep SemVer releases; pinned, aged, script-free dependencies | [ADR-043](adr/043-project-process.md) |
 | OQ-23 | Single owner in v1; ownerId everywhere; one Jaari per person; multi-owner instance planned later; unknown-sender notice off by default | [ADR-044](adr/044-single-owner-multi-owner-later.md) |
+| OQ-24 | suggested.json data file, no licence filter; qualification on the owner's machine; Ollama, llama.cpp, LM Studio, MLX | [ADR-045](adr/045-local-models.md) |

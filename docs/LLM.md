@@ -47,7 +47,9 @@ Owner override: "use the big model for this", `/model <tier>`.
 
 ## Local models per target
 Size guide, not a model list: models change monthly and a model qualifies for a tier only by
-passing `jaari llm eval`, never by its size (OQ-24). Memory rule of thumb at 4-bit
+passing `jaari llm eval`, never by its size (ADR-045). Suggestions ship as data in
+`models/suggested.json`; runtimes are any OpenAI-compatible local server (Ollama, llama.cpp,
+LM Studio, MLX), each a separate process on loopback. Memory rule of thumb at 4-bit
 quantization: about 0.6 GB per billion parameters, plus a few GB for context.
 
 | Target (ADR-017) | Typical hardware | Local model size | Local roles | API roles |
@@ -61,7 +63,8 @@ quantization: about 0.6 GB per billion parameters, plus a few GB for context.
 
 Rules:
 - `jaari init` detects memory and GPU, proposes the row, runs `jaari llm eval` on the
-  suggested models, and writes only the ones that pass into the tier chains.
+  suggested models, and writes only the ones that pass into the tier chains. A model under
+  8 tokens per second (configurable) qualifies for background roles only.
 - A role is local-only only if a local model qualified for it (ADR-019); otherwise `init` asks.
 - Tool-calling accuracy and JSON validity decide the small tier; the canonicalize golden set
   decides the medium tier; the main role needs long multi-turn tool use, which is why it
