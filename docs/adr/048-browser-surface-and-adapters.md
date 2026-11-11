@@ -10,7 +10,7 @@
   the ADR-038 store), `takeover`.
 - `computer.*`: `screenshot`, `zoom`, mouse actions, `key`, `type`, `scroll`, `wait`.
 - Capabilities (ADR-018): snapshot, screenshot, and navigate are `browser.read`; click, type,
-  key, scroll, and select are `browser.act`; an action the classifier flags (OQ-30) and every
+  key, scroll, and select are `browser.act`; an action the classifier flags (ADR-051) and every
   upload are `browser.submit`.
 - No `javascript_exec` or `browser_run_code_unsafe` member; console and network reading are off
   by default.
