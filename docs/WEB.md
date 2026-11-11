@@ -7,7 +7,7 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
 |---|---|---|
 | `web.search` | SearXNG (separate AGPL container, JSON enabled) | Brave (fallback), Serper, Tavily, Exa |
 | `web.fetch` | http + readability → Lightpanda → local Chromium | Jina Reader, Firecrawl Cloud |
-| `browser.*` | Playwright MCP or Stagehand on the local pinned profile | Any remote CDP: Steel, Kernel, Browser Use, Browserbase, Hyperbrowser |
+| `browser.*` | Pluggable adapters (ADR-048): headful on the host virtual desktop or an owner node, Playwright MCP or Stagehand on the local pinned profile | Any remote CDP: Steel, Kernel, Browser Use, Browserbase, Hyperbrowser; custom adapters, including anti-detect ones |
 
 ## Where the browser runs (ADR-017)
 - Placement rule: a browser signed in to the owner's accounts runs on home hardware, on an owner
@@ -25,6 +25,9 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
 - Browser runs inside Jaari's loop so the gate sees every action; browser-use (own loop)
   only as an isolated child, if ever.
 - Disable `browser_run_code_unsafe`. Enforce origins at the egress proxy, not in the tool.
+- Every browser adapter runs the same neutral surface and picks its exit from the egress pool;
+  fingerprint spoofing only in an owner-enabled adapter, with a warning before it is used on a
+  signed-in owner profile (ADR-048).
 - The browser's only route out is the `@jaari/http` SOCKS5 gate (resolve, check, dial;
   ADR-016). Saved logins are filled by the executor; the model never sees the value, and
   screenshots stop while a filled secret is on the page.
