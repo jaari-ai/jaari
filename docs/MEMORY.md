@@ -7,7 +7,7 @@
   summary, and rewrites the gap queue (ADR-004).
 - Daily audit: contradictions, stale facts, orphan files; results to the owner digest.
 - Canonicalize reads the most sensitive data, so its model tier is local-only by default
-  if a capable local model passes the fixtures (ADR-011, ADR-045, OQ-26).
+  if a capable local model passes the fixtures (ADR-011, ADR-045, ADR-047); passes are bounded, sensitive lines never go to an API model, and a pass deleting over 20% of a file is held for review.
 - Proposed line conventions, after OpenMausBot (learning/09): entries are dated and name
   their source; a superseded fact is struck through with the date instead of deleted; an
   `until YYYY-MM-DD` suffix stops a line loading after that day. Rules the owner stated
