@@ -20,6 +20,7 @@ Owner override: "use the big model for this", `/model <tier>`.
 | curiosity, classify, summarize, title | small | Local preferred |
 | reader | small | No tools |
 | vision | by capability | Any model accepting images |
+| stt, tts | speech | Local whisper.cpp and Piper or Kokoro by default; API optional (ADR-037) |
 | approvals, spend, digests | none | Deterministic code |
 
 ## Rules

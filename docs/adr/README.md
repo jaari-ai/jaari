@@ -38,3 +38,4 @@
 | [034](034-mcp-servers.md) | MCP servers: owner-added, pinned, classified in one step, sandboxed from Phase 4 | Accepted |
 | [035](035-channel-neutral-prompts.md) | Channel-neutral prompts: Jaari asks in types, each channel renders what it can | Accepted |
 | [036](036-code-execution.md) | Code execution: sealed runs never ask, allow once or for 90 days, pinned recurring jobs | Accepted |
+| [037](037-voice.md) | Voice: voice notes in v1, local speech by default, owner-chosen approval strictness | Accepted |
