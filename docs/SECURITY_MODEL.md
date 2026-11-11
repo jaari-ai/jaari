@@ -44,6 +44,8 @@ separate manifest fields.
 | `shell`, `files.write` | gated | Sealed sandbox runs need no approval; otherwise Allow once or a 90-day target grant (ADR-036) |
 | `files.read` | read | |
 | `email.read` | read | Content is untrusted |
+| `calendar.freebusy`, `calendar.read` | read | Mirrored into event records (ADR-039) |
+| `calendar.write` | gated | Own calendar without attendees: Allow once or a 90-day grant; invitations always ask (ADR-039) |
 | `email.send`, `publish`, `repo.write` | gated | Short approval expiry |
 | `pay` | reserved | No executor in v1 (OQ-19) |
 | `llm.escalate` | policy-checked | Children only (ADR-011) |

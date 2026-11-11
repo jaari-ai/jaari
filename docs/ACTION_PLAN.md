@@ -60,3 +60,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [036](adr/036-code-execution.md) | Code execution: sealed runs never ask, allow once or for 90 days, pinned recurring jobs | Accepted |
 | [037](adr/037-voice.md) | Voice: voice notes in v1, local speech by default, owner-chosen approval strictness | Accepted |
 | [038](adr/038-documents-and-files.md) | Documents and files: content-addressed store, sealed parsing, sensitive files local-only, disk watch | Accepted |
+| [039](adr/039-personal-data.md) | Personal data: calendar first, native for calendar, contacts, and files, MCP for the rest | Accepted |

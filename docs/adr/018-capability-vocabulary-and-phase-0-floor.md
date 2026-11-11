@@ -1,7 +1,7 @@
 # ADR-018: Capability vocabulary, `@jaari/capabilities`, and the Phase 0 safety floor
 
 - **Status:** Accepted
-- **Extended by:** [ADR-034](034-mcp-servers.md)
+- **Extended by:** [ADR-034](034-mcp-servers.md), [ADR-039](039-personal-data.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -13,6 +13,8 @@ Per-host capability names (`browser.local` as a gate class: the policy would dep
 ## Amendments
 - **ADR-034:** The vocabulary gains `mcp.read` (read) and `mcp.act` (gated) for MCP tools
   that match no other name; server and tool are manifest fields.
+- **ADR-039:** The vocabulary gains `calendar.freebusy` and `calendar.read` (read) and
+  `calendar.write` (gated).
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
