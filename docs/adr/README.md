@@ -86,3 +86,4 @@
 | [082](082-phase-split-update-and-catch-up.md) | Phase split for update and laptop catch-up | Accepted |
 | [083](083-pinned-reference-commits.md) | Reference repos are pinned in `scripts/refs.sh` and moved only with `bump` | Accepted |
 | [084](084-package-manifest-location-and-channel-section.md) | The package manifest lives in `package.json`; channels add a `channel` section; a shared contract suite | Accepted |
+| [085](085-refusal-in-the-pinned-main-session.md) | A provider refusal never moves the pinned main session; other roles move down the chain | Accepted |

@@ -1,7 +1,7 @@
 # ADR-019: Main session pin with outage failover; local-only canonicalize decided at init
 
 - **Status:** Accepted
-- **Extended by:** [ADR-050](050-vault-verification-and-one-time-codes.md)
+- **Extended by:** [ADR-050](050-vault-verification-and-one-time-codes.md), [ADR-085](085-refusal-in-the-pinned-main-session.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -12,6 +12,7 @@ A hard pin that stops the agent in an outage; free switching per turn (cache los
 
 ## Amendments
 - **ADR-050:** the vendor check that point 4 waited for is done; ADR-013 is Accepted (OQ-64), so "ADR-013 stays Proposed" no longer holds.
+- **ADR-085:** a refusal is an accepted turn and never a failover; the main model stays.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

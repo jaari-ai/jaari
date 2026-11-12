@@ -31,6 +31,10 @@ Owner override: "use the big model for this", `/model <tier>`.
 - The main session is pinned: no routine switching. On a provider outage it may move down its
   chain at a turn boundary, to a model with the same tools, with one notice, and stays there
   until restart or until the owner reverts (ADR-019).
+- A provider refusal never moves the main session: the turn ends with one notice and the
+  provider's explanation, and the owner may rephrase or use `/model <tier>`. Other roles move to
+  the next model; off-limits categories go to the owner, never to another model. Refusals are
+  read from the provider's raw stop reason, never retried as errors (ADR-085).
 - Every call logs role, model, tokens, cost, latency, escalation reason, outcome to SQLite;
   `jaari llm usage` reports it.
 - `jaari llm eval <model>` runs role fixtures (tool-call accuracy, JSON validity,

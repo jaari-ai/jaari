@@ -47,7 +47,7 @@ effect. Entry: none.
 | 0.4 | Namespaces and release: secure the npm and PyPI names, the `python/` pointer package, the release workflow ([guides/namespaces.md](guides/namespaces.md)). Placement | 010 | none | In progress (`release.yml` and `python/` exist; `python/` does not match the guide; names not secured) |
 | 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement | 001, 065 | 0.1, 0.7; OQ-69, OQ-86 | Planned |
 | 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship | 017, 019, 056 | 0.1 | Planned |
-| 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains | 011, 019 | 0.1, 0.15; OQ-86 | Planned |
+| 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains, refusal classification | 011, 019, 085 | 0.1, 0.15 | Planned |
 | 0.8 | `ChannelAdapter` contract and the shared contract suite, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081, 084 | 0.5, 0.9 | Planned |
 | 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084 | 0.1; OQ-90 | Planned |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Planned |
@@ -71,6 +71,8 @@ Exit criteria:
 - `SECURITY.md`, `CONTRIBUTING.md`, the DCO check, gitleaks, the licence check, and the pnpm
   settings are in the repo (ADR-043).
 - Every record carries an `ownerId` (ADR-044).
+- A scripted refusal in the main session ends the turn with one notice and no model change; in a
+  child it moves to the next model (ADR-085).
 - A clock gap over 2 minutes is detected as sleep (ADR-057).
 - A binary older than its data refuses to start (ADR-056).
 - `jaari update` takes a local snapshot before the swap and rolls back automatically when
@@ -82,7 +84,7 @@ Exit criteria:
   `node:http`, `node:https`, `node:net`, `node:tls`, or `undici` import elsewhere, and the
   address-class tests deny metadata, link-local, and the daemon's own ports (ADR-016, ADR-080).
 
-Open questions that block this phase: OQ-86, OQ-90.
+Open questions that block this phase: OQ-90.
 Gate status: not passed.
 
 ## Phase 1: Memory
