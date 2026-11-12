@@ -32,7 +32,6 @@ status and exit criteria live there.
    they land together.
 10. **Background work** (Phase 4): children, the `reader` role, the `owner-exit` provider and
     per-capability allowlists on `@jaari/http` (ADR-080), the sandbox, MCP, and code execution.
-    Decide OQ-80 first.
 11. **Integrations, then the browser** (Phases 5 and 6): OAuth broker, mailbox, calendar,
     documents; then the browser under the placement rule, with pool details in ADR-053
     (ADR-017).
@@ -136,3 +135,4 @@ status and exit criteria live there.
 | [093](adr/093-sensitive-content-follows-routing.md) | Sensitive content follows the owner's routing; privacy comes from local models, not withholding | Accepted |
 | [094](adr/094-sandbox-under-compose.md) | Under Compose the sandbox is bubblewrap inside a hardened daemon container | Accepted |
 | [095](adr/095-missing-capability-names.md) | Capability names for vault, contacts, storage, memory, skills, and takeover | Accepted |
+| [096](adr/096-per-process-secret-lifetime.md) | Separate long-running processes may hold their declared secrets while they run | Accepted |

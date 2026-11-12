@@ -97,3 +97,4 @@
 | [093](093-sensitive-content-follows-routing.md) | Sensitive content follows the owner's routing; privacy comes from local models, not withholding | Accepted |
 | [094](094-sandbox-under-compose.md) | Under Compose the sandbox is bubblewrap inside a hardened daemon container | Accepted |
 | [095](095-missing-capability-names.md) | Capability names for vault, contacts, storage, memory, skills, and takeover | Accepted |
+| [096](096-per-process-secret-lifetime.md) | Separate long-running processes may hold their declared secrets while they run | Accepted |

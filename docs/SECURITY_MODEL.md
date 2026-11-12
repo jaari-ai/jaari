@@ -37,6 +37,12 @@ encodings) from tool results and logs; the model names a credential by a typed t
 never a path or URL; a value sent to a node is for one action and is then discarded (ADR-015); while a filled secret is on a
 page, screenshots and page evaluation are refused.
 
+Secret lifetimes (ADR-096): in-process executors hold a value for one call. A separate
+long-running process (local MCP server, third-party package, channel plugin, vault client)
+holds only its declared secrets while it runs: in its own environment inside its sandbox or
+process, never the daemon's; its output is scrubbed; it is stopped when idle, restarted when a
+secret rotates, and stopped at once when disabled; each start is audited by secret name.
+
 Vault (ADR-013, ADR-050): Jaari reads only a dedicated vault or collection that the owner
 chooses at `jaari init`; the vault client runs as a separate process; secret zero stays in the
 OS keychain and is never in a backup. On a server or container without a keychain it comes from

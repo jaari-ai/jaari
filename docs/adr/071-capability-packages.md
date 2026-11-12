@@ -1,7 +1,7 @@
 # ADR-071: Capability packages: one package format for every pluggable part, a checked manifest, third-party packages in their own process, updates that notify
 
 - **Status:** Accepted
-- **Extended by:** [ADR-077](077-subscription-cli-engines.md), [ADR-084](084-package-manifest-location-and-channel-section.md)
+- **Extended by:** [ADR-077](077-subscription-cli-engines.md), [ADR-084](084-package-manifest-location-and-channel-section.md), [ADR-096](096-per-process-secret-lifetime.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -64,6 +64,8 @@ unpinned installs; git URLs as a package source.
 - **ADR-077:** adds the `CliEngine` package kind.
 - **ADR-084 (resolves OQ-85):** the manifest is the `jaari` key of `package.json`, read before
   any package code runs; kind-only fields go in a section named after the kind (`channel`).
+- **ADR-096:** a third-party package's declared secrets live for its process lifetime under the
+  ADR-096 conditions.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
