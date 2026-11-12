@@ -1,7 +1,7 @@
 # ADR-061: Learning from outcomes: receipts, reflections, promotions the owner confirms, routing suggestions, a protected core that never learns
 
 - **Status:** Accepted
-- **Extended by:** [ADR-089](089-routines-before-children.md)
+- **Extended by:** [ADR-089](089-routines-before-children.md), [ADR-097](097-receipts-and-action-log-retention.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -43,6 +43,8 @@ owner cannot see or undo.
 
 ## Amendments
 - **ADR-089:** job receipts ship with the job engine (Phase 1); child receipts stay Phase 4.
+- **ADR-097:** receipts live in a SQLite `receipts` table for 90 days, as well as in the event
+  log.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

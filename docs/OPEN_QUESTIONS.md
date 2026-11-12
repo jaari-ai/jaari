@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **7**.
+Last updated: 2026-11-12. Open: **6**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -30,7 +30,6 @@ leaning yet; the options listed are only the ones the docs already name.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-81 | Retention of receipts and logs | Receipts are "operational rows" kept 7 days (ADR-029) and also live in the 30-day event log (ADR-061, ADR-032); the browser action log is "kept forever" (ADR-052). Where do receipts and the action log live, and for how long? | 4 | None. On record: 7 days; 30 days; forever |
 | OQ-87 | File store in backup and erase | How are file-store blobs backed up (ADR-027 does not list them), and does "erase" also remove the blob, the transcript rows, and existing snapshots? | 3 | None. On record: "the store is part of backups" (ADR-038) |
 
 ### Phasing and dependencies
@@ -51,8 +50,6 @@ leaning yet; the options listed are only the ones the docs already name.
 Evidence is `ADR-NNN` or a file. "If delayed" is the cost of not deciding before the blocked
 phase starts.
 
-- **OQ-81.** Evidence: ADR-029, ADR-032, ADR-052, ADR-061, ADR-064. ADR-033 learns urgency from
-  the notification ledger, which a 7-day prune would shorten.
 - **OQ-82.** Evidence: ADR-048 ("unless the owner pins it"), ADR-017 (placement rule), ADR-005.
 - **OQ-83.** Evidence: ADR-051 ("During Phase 6 shadow mode every action in owner-account
   sessions is logged"), ADR-052, ADR-068, ADR-070 ("for the first 14 days it only proposes").
@@ -152,6 +149,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-78 | Sensitive content follows the routing of the role that reads it; the main session can answer about any owner data; nothing is withheld; privacy is making roles local-only; marking by record type, deterministic rules, local `classify`, or the owner; files read by `reader`, `vision`, `summarize`; ADR-047 unchanged | [ADR-093](adr/093-sensitive-content-follows-routing.md) |
 | OQ-79 | New names: `vault.write`, `contacts.read`/`write`, `storage.read`/`write`, `memory.read` (memory.search, records.query), `memory.erase`, `skill.read` (skill.load), and `takeover.request` (the takeover class); writes Allow once; none grantable | [ADR-095](adr/095-missing-capability-names.md) |
 | OQ-80 | Two named lifetimes: per call for in-process executors; per process for separate long-running processes (MCP servers, packages, channel plugins, vault client), with declared secrets only, kept out of the daemon, scrubbed output, stop when idle, restart on rotation, audit by name | [ADR-096](adr/096-per-process-secret-lifetime.md) |
+| OQ-81 | Receipts in a SQLite `receipts` table and the browser action log in the same store, 90 days (configurable); event log 30 days; screenshots 30 days; effects and decisions forever in `audit.jsonl`; other operational rows 7 days | [ADR-097](adr/097-receipts-and-action-log-retention.md) |
 | OQ-84 | Each reference pinned to a full sha in `scripts/refs.sh`; `sync` re-applies pins; `scripts/refs.sh bump` is the only way to move one, printing old and new commit and warning on a licence change; pins committed on their own | [ADR-083](adr/083-pinned-reference-commits.md) |
 | OQ-85 | One manifest per package under the `jaari` key of `package.json`, read before any code runs; channel fields in a `channel` section; `ChannelAdapter` has no manifest property; shared Vitest contract suite in `@jaari/channels/contract`, Phase 0 | [ADR-084](adr/084-package-manifest-location-and-channel-section.md) |
 | OQ-86 | A refusal never moves the pinned main session: the turn ends with one notice and the owner decides (rephrase or `/model`); other roles move down the chain; off-limits categories go to the owner; detected from `rawStopReason`, never retried as an error | [ADR-085](adr/085-refusal-in-the-pinned-main-session.md) |
@@ -241,3 +239,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-70 | Sandbox backend under Compose | With the daemon in a Compose container and no Docker socket, is the sandbox a rootless Podman sidecar or gVisor? How is the daemon's own container hardened? | 4 |
 | OQ-79 | Capability names that are missing | Which capability names cover the gated effects that have none (vault writes, address-book writes, file-storage uploads, memory erase), are internal read tools (`memory.search`, `records.query`, `skill.load`) capabilities, and which capability has the `takeover` class? | 3 |
 | OQ-80 | Secrets held by MCP servers | A local MCP server gets its secrets in its environment at start and keeps them while it runs. Is that an accepted exception to "resolved only inside executors, for the duration of the call"? | 4 |
+| OQ-81 | Retention of receipts and logs | Receipts are "operational rows" kept 7 days (ADR-029) and also live in the 30-day event log (ADR-061, ADR-032); the browser action log is "kept forever" (ADR-052). Where do receipts and the action log live, and for how long? | 4 |

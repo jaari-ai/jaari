@@ -215,7 +215,7 @@ and audit log.
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 4.1 | Children and receipts; child limits and child abort; routine model steps run as children | 011, 061, 031, 087, 089 | 1.4; OQ-81 | Planned |
+| 4.1 | Children and receipts; child limits and child abort; routine model steps run as children | 011, 061, 031, 087, 089, 097 | 1.4 | Planned |
 | 4.2 | `llm.escalate` | 011 | 4.1 | Planned |
 | 4.3 | `reader` role and outside lineage | 075 | 0.7 | Planned |
 | 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core | 016, 053, 080 | 0.15, 2.12 | Planned |
@@ -239,7 +239,7 @@ Exit criteria:
   (ADR-053).
 - Each CLI engine's provider terms are checked and recorded in a learning note (ADR-077).
 
-Open questions that block this phase: OQ-81.
+No open question blocks this phase.
 Gate status: not passed.
 
 ## Phase 5: Integrations

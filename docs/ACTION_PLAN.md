@@ -136,3 +136,4 @@ status and exit criteria live there.
 | [094](adr/094-sandbox-under-compose.md) | Under Compose the sandbox is bubblewrap inside a hardened daemon container | Accepted |
 | [095](adr/095-missing-capability-names.md) | Capability names for vault, contacts, storage, memory, skills, and takeover | Accepted |
 | [096](adr/096-per-process-secret-lifetime.md) | Separate long-running processes may hold their declared secrets while they run | Accepted |
+| [097](adr/097-receipts-and-action-log-retention.md) | Receipts and the browser action log are kept 90 days in SQLite; effects stay forever in the audit log | Accepted |

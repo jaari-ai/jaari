@@ -46,5 +46,8 @@
   removes a fact and can always be undone; erase rewrites history and cannot. The owner asks in
   plain words and confirms a preview; every line carries a source id so forgetting a source
   cascades.
+- Retention (ADR-029, ADR-097): raw daily logs forever; others' messages 30 days; receipts and
+  the browser action log 90 days in SQLite; delivered notifications and finished job rows 7
+  days; the audit log forever, with forgotten or erased items as a bare mark.
 - Files (ADR-038): attachments and dropped files live in a content-addressed store outside the
   git repo; memory keeps a pointer and the extracted text, indexed with page numbers.

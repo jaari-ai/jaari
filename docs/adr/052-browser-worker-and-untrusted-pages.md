@@ -1,6 +1,7 @@
 # ADR-052: Untrusted pages: a browser worker child with task data only, task-scoped origins, fencing as a floor
 
 - **Status:** Accepted
+- **Extended by:** [ADR-097](097-receipts-and-action-log-retention.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -45,6 +46,10 @@ Pally (learning/11).
 The main session driving the browser (raw page instructions in the owner's session); a reader
 pass on every screenshot (too slow for a click loop); relying on vendor classifiers; giving the
 worker memory or other tools; an unscoped worker that may send task data anywhere.
+
+## Amendments
+- **ADR-097:** the action log is kept 90 days in SQLite (configurable); decisions and effects,
+  browser commitments included, stay forever in `audit.jsonl`.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

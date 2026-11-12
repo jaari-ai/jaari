@@ -1,7 +1,7 @@
 # ADR-029: Forgetting and retention: correct, forget, or erase, by plain request
 
 - **Status:** Accepted
-- **Extended by:** [ADR-095](095-missing-capability-names.md)
+- **Extended by:** [ADR-095](095-missing-capability-names.md), [ADR-097](097-receipts-and-action-log-retention.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -49,6 +49,8 @@ timer.
 
 ## Amendments
 - **ADR-095:** erase is the capability `memory.erase`, Allow once and never grantable.
+- **ADR-097 (resolves OQ-81):** receipts leave the 7-day operational group; they and the
+  browser action log are kept 90 days in SQLite.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

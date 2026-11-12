@@ -1,7 +1,7 @@
 # ADR-032: Observability: three records, opt-in traces, `jaari doctor`
 
 - **Status:** Accepted
-- **Extended by:** [ADR-038](038-documents-and-files.md), [ADR-087](087-safety-pieces-ship-with-what-they-protect.md)
+- **Extended by:** [ADR-038](038-documents-and-files.md), [ADR-087](087-safety-pieces-ship-with-what-they-protect.md), [ADR-097](097-receipts-and-action-log-retention.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -44,6 +44,8 @@ stay small, chained, and authoritative); a raw provider tee left on permanently.
 - **ADR-038:** `jaari doctor` and the panel also show disk use per volume and the largest
   stored files; the daemon notifies at 80%, 90%, and 95% used.
 - **ADR-087:** the event log and the usage log ship in Phase 0.
+- **ADR-097:** receipts and the browser action log also live in SQLite for 90 days; the event
+  log stays 30 days.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -43,7 +43,7 @@ only with a pointer), **generated** (written by a script).
 | `docs/STATE.md` | Summary: what is decided, what is built, what is next, scheduled checks | current |
 | `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current |
 | `docs/ACTION_PLAN.md` | Ordered next steps; a copy of the ADR table | current |
-| `docs/OPEN_QUESTIONS.md` | 7 open (OQ-81 to OQ-91); 84 resolved with ADR links; original wording | current |
+| `docs/OPEN_QUESTIONS.md` | 6 open (OQ-82 to OQ-91); 85 resolved with ADR links; original wording | current |
 
 ## Subsystem designs
 
@@ -61,7 +61,7 @@ only with a pointer), **generated** (written by a script).
 
 ## Decisions
 
-`docs/adr/README.md` is the index of the 96 ADRs (all Accepted). By topic:
+`docs/adr/README.md` is the index of the 97 ADRs (all Accepted). By topic:
 
 | Topic | ADRs |
 |---|---|
@@ -73,14 +73,14 @@ only with a pointer), **generated** (written by a script).
 | Gate, secrets, safety | 006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075, 079, 081, 090, 092, 095, 096 |
 | Models | 011, 019, 045, 046, 065, 077, 085 |
 | Web, browser, egress | 005, 012, 048, 049, 051, 052, 053, 054, 055, 080 |
-| Operations | 025, 027, 028, 032, 059, 087 |
+| Operations | 025, 027, 028, 032, 059, 087, 097 |
 | Extension points and integrations | 034, 036, 039, 062, 063, 071, 073, 084, 091 |
 | Plan and evals | 020, 041 |
 
 ADRs whose text is changed in part by a later ADR (read the `Amendments` section first):
 001, 002, 005, 006, 007, 009, 011, 012, 013, 014, 015, 016, 017, 018, 019, 020, 021, 022, 023,
-024, 025, 027, 028, 029, 030, 031, 032, 034, 035, 036, 038, 039, 046, 048, 049, 050, 051, 053,
-055, 056, 057, 058, 060, 061, 062, 063, 064, 065, 066, 067, 071, 072, 074, 077, 078, 081. ADR-038's
+024, 025, 027, 028, 029, 030, 031, 032, 034, 035, 036, 038, 039, 046, 048, 049, 050, 051, 052,
+053, 055, 056, 057, 058, 060, 061, 062, 063, 064, 065, 066, 067, 071, 072, 074, 077, 078, 081. ADR-038's
 title still says "sensitive files local-only"; ADR-078 replaced that rule.
 
 ## Guides, learning notes, history
