@@ -52,8 +52,8 @@ effect. Entry: none.
 | 0.9 | `@jaari/capabilities`: manifest schema, built-in loader, daemon–node contract | 015, 018, 071 | 0.1; OQ-85, OQ-90 | Planned |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Planned |
 | 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079 | 0.1 | Planned |
-| 0.12 | Install, update, and migrations; `jaari doctor` (checks are added as their features ship) | 056, 032 | 0.5; OQ-74 | Planned |
-| 0.13 | Laptop sleep and wake rule | 057 | 0.5; OQ-74 | Planned |
+| 0.12 | Install, manual update with a local pre-update snapshot, rollback, and migrations; `jaari doctor` (checks are added as their features ship) | 056, 032, 082 | 0.5 | Planned |
+| 0.13 | Laptop sleep and wake: detection, power assertion, battery pause, network re-probe (catch-up is 1.4) | 057, 082 | 0.5 | Planned |
 | 0.14 | `ownerId` in the data model | 044 | 0.5 | Planned |
 | 0.15 | `@jaari/http` core: resolve, check, dial; the address-class table; the `direct` provider; the lint rule against other network clients | 016, 053, 080 | 0.1 | Planned |
 
@@ -71,6 +71,8 @@ Exit criteria:
 - Every record carries an `ownerId` (ADR-044).
 - A clock gap over 2 minutes is detected as sleep (ADR-057).
 - A binary older than its data refuses to start (ADR-056).
+- `jaari update` takes a local snapshot before the swap and rolls back automatically when
+  `jaari doctor` fails after it (ADR-056, ADR-082).
 - A key, token, labelled password, or Luhn-valid card number in an owner message is replaced
   with `[secret removed: <kind>]` before the transcript and the daily log are written, and a
   commit hash is left alone (ADR-081).
@@ -78,7 +80,7 @@ Exit criteria:
   `node:http`, `node:https`, `node:net`, `node:tls`, or `undici` import elsewhere, and the
   address-class tests deny metadata, link-local, and the daemon's own ports (ADR-016, ADR-080).
 
-Open questions that block this phase: OQ-74, OQ-85, OQ-86, OQ-90. OQ-84
+Open questions that block this phase: OQ-85, OQ-86, OQ-90. OQ-84
 (pinning the references) gates no item; decide it before the next `scripts/refs.sh` sync.
 Gate status: not passed.
 
@@ -91,7 +93,7 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 | 1.1 | Memory repo, single writer, write path | 003, 026 | 0.5 | Planned |
 | 1.2 | Structured records, `records.query`, FTS5 search | 023 | 1.1 | Planned |
 | 1.3 | Context assembly; session orientation and re-injection from state | 024, 065 | 1.2 | Planned |
-| 1.4 | Job engine; catch-up after sleep | 025, 057 | 0.5; OQ-74 | Planned |
+| 1.4 | Job engine; catch-up after sleep | 025, 057, 082 | 0.5, 0.13 | Planned |
 | 1.5 | Routines | 064 | 1.4; OQ-73 | Blocked (OQ-73: children, the notification ledger, and budgets come later) |
 | 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9; OQ-78 | Planned |
 | 1.7 | Daily audit | 004 | 1.1, 1.4 | Planned |
@@ -109,11 +111,12 @@ Exit criteria:
   deleted (ADR-026).
 - After a restart, a safe step reruns once and an unsafe step that had started is never rerun
   (ADR-025).
+- After sleep, each missed job runs once, at most 5 on wake, oldest first (ADR-057, ADR-082).
 - Qualification records pass rate, tokens per second, and time to first token per model
   (ADR-045).
 
 Open questions that block this phase: OQ-71 (until Phase 3 the loop has no pause,
-limits, usage log, pre-write scan of derived facts, or backup), OQ-73, OQ-74, OQ-78.
+limits, usage log, pre-write scan of derived facts, or backup), OQ-73, OQ-78.
 Gate status: not passed.
 
 ## Phase 2: Persona and owner surfaces
@@ -125,7 +128,7 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 |---|---|---|---|---|
 | 2.1 | Dials and monitor | 008 | 0.5 | Planned |
 | 2.2 | Curiosity from the gap queue | 008 | 1.6, 2.1 | Planned |
-| 2.3 | Quiet hours, notification ledger, digests, delivery | 033 | 2.1 | Planned |
+| 2.3 | Quiet hours, notification ledger, digests, delivery; automatic patch installs in quiet hours | 033, 056, 082 | 2.1, 0.12 | Planned |
 | 2.4 | Prompt versioning | 042 | 0.5 | Planned |
 | 2.5 | Replay harness and golden threads | 041 | 0.2 | Planned |
 | 2.6 | Skills: built-in and owner (third-party is 4.10) | 060 | 1.1 | Planned |
@@ -159,13 +162,13 @@ grants land together.
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 3.1 | Real gate: digests, approvals, expiry, re-check at dispatch, the "unreadable" rule | 006, 016, 018 | 0.10; OQ-79 | Planned |
+| 3.1 | Real gate: digests, approvals, expiry, re-check at dispatch, the "unreadable" rule; approvals that expired during sleep are asked again | 006, 016, 018, 057, 082 | 0.10; OQ-79 | Planned |
 | 3.2 | Hash-chained `audit.jsonl` | 016 | 3.1 | Planned |
 | 3.3 | Vault providers (Bitwarden, 1Password), the one-time-code ladder, and the 1Password check on a real account | 013, 050 | 0.11 | Planned |
 | 3.4 | LLM budget and usage log; web budget | 046, 032 | 0.7; OQ-89 | Planned |
 | 3.5 | Pause, emergency stop, and runaway limits | 031 | 0.5; OQ-71 | Planned |
 | 3.6 | Standing grants | 072 | 3.1 | Planned |
-| 3.7 | Backup, restore, and the monthly drill | 027 | 1.1, 3.2; OQ-87 | Planned |
+| 3.7 | Backup, restore, and the monthly drill; the ADR-027 bundle replaces the Phase 0 pre-update snapshot | 027, 082 | 1.1, 3.2; OQ-87 | Planned |
 | 3.8 | Encryption at rest: pre-write secret scan of derived facts and files (owner messages are scrubbed at ingress from Phase 0, ADR-081), encrypted remotes, `jaari memory purge` | 028 | 1.1 | Planned |
 | 3.9 | Erase. Placement | 029 | 3.1, 1.10; OQ-87 | Planned |
 | 3.10 | Shadow mode | 068 | 3.1 | Planned |
@@ -346,6 +349,7 @@ SOCKS5 listener, owner-account pinning, and the opt-in `vpn`, `mobile`, and
   Telegram (2.8), erase (3.9). Email input (5.2) follows ADR-021.
 - The threat model is marked Delivered (3.13).
 - Not moved, because an accepted ADR states the phase or the choice is the owner's: see
-  OQ-71, OQ-72, OQ-73, OQ-74.
+  OQ-71, OQ-72, OQ-73.
 - Decided since the audit: the egress core moved to Phase 0 as 0.15, and the container egress
-  proxy moved from 7.3 to 4.11 (ADR-080).
+  proxy moved from 7.3 to 4.11 (ADR-080). Catch-up moved from 0.13 to 1.4, and automatic patch
+  installs to 2.3 (ADR-082).

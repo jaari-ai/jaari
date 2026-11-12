@@ -1,7 +1,7 @@
 # ADR-056: Install, update, migrate: owner-chosen install method, automatic patch updates, migrations when a store opens
 
 - **Status:** Accepted
-- **Extended by:** [ADR-079](079-secret-zero-on-servers.md)
+- **Extended by:** [ADR-079](079-secret-zero-on-servers.md), [ADR-082](082-phase-split-update-and-catch-up.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -55,6 +55,9 @@ into the sandbox; migrations without a snapshot; letting an older binary open ne
 ## Amendments
 - **ADR-079:** the `compose.yaml` that `jaari init` writes has a `secrets:` entry for secret
   zero; `jaari service install` passes it with `LoadCredentialEncrypted=` (or `LoadCredential=`).
+- **ADR-082 (resolves OQ-74):** Phase 0 ships a manual `jaari update` with a local pre-update
+  snapshot (SQLite online backup, config copy, memory git tag; last two kept); the ADR-027
+  bundle replaces it in Phase 3; automatic patch installs start with quiet hours (Phase 2).
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

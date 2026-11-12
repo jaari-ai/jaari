@@ -41,9 +41,9 @@ only with a pointer), **generated** (written by a script).
 | Path | Purpose | Status |
 |---|---|---|
 | `docs/STATE.md` | Summary: what is decided, what is built, what is next, scheduled checks | current |
-| `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current, with open points (OQ-71 to 74) |
+| `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current, with open points (OQ-71 to 73) |
 | `docs/ACTION_PLAN.md` | Ordered next steps; a copy of the ADR table | current |
-| `docs/OPEN_QUESTIONS.md` | 22 open (OQ-70 to OQ-91); 69 resolved with ADR links; original wording | current |
+| `docs/OPEN_QUESTIONS.md` | 21 open (OQ-70 to OQ-91); 70 resolved with ADR links; original wording | current |
 
 ## Subsystem designs
 
@@ -61,12 +61,12 @@ only with a pointer), **generated** (written by a script).
 
 ## Decisions
 
-`docs/adr/README.md` is the index of the 81 ADRs (all Accepted). By topic:
+`docs/adr/README.md` is the index of the 82 ADRs (all Accepted). By topic:
 
 | Topic | ADRs |
 |---|---|
 | Core, licence, process | 001, 002, 009, 010, 014, 043, 044 |
-| Hosting, nodes, install | 015, 017, 030, 056, 057, 058 |
+| Hosting, nodes, install | 015, 017, 030, 056, 057, 058, 082 |
 | Channels, owner, panel | 021, 022, 035, 067, 070, 076 |
 | Memory | 003, 004, 023, 024, 026, 029, 038, 047, 066, 074, 078 |
 | Persona and proactive work | 008, 033, 037, 042, 060, 061, 064 |
@@ -79,7 +79,7 @@ only with a pointer), **generated** (written by a script).
 
 ADRs whose text is changed in part by a later ADR (read the `Amendments` section first):
 001, 005, 006, 007, 009, 011, 012, 013, 014, 015, 016, 017, 018, 019, 020, 021, 022, 025, 027,
-030, 032, 034, 035, 036, 038, 039, 048, 049, 050, 051, 053, 056, 060, 063, 071, 074. ADR-038's
+030, 032, 034, 035, 036, 038, 039, 048, 049, 050, 051, 053, 056, 057, 060, 063, 071, 074. ADR-038's
 title still says "sensitive files local-only"; ADR-078 replaced that rule.
 
 ## Guides, learning notes, history

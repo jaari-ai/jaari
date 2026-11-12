@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **22**.
+Last updated: 2026-11-12. Open: **21**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -47,7 +47,6 @@ leaning yet; the options listed are only the ones the docs already name.
 | OQ-71 | Safety pieces before Phase 3 | Pause, emergency stop, runaway limits, the usage and event logs, the pre-write secret scan of derived facts and files (owner messages are scrubbed at ingress from Phase 0, ADR-081), memory push, and snapshots are Phase 3 (or have no phase), but the agent loop, scheduler, canonicalize, and curiosity run from Phases 0 to 2. Which of them ship earlier? | 1 | None. On record: Phase 3 placement (ROADMAP); ADR-031, ADR-027, ADR-028, ADR-032 state no phase |
 | OQ-72 | Panel, overlay, and node link timing | The Phase 2 panel needs TLS over the overlay (Phase 7), and its Approvals, secret entry, Activity, and Usage views need Phase 3 parts. Remote nodes (Phase 6) need the node link (Phase 7). Which parts move, or which views wait? | 2 | None. On record: overlay in Phase 7 (ADR-020); panel views in Phase 2 (ADR-067) |
 | OQ-73 | Routines before children | Routines ship in Phase 1 and "children do the work", but children are Phase 4, the notification ledger is Phase 2, and budgets are Phase 3. What can a Phase 1 routine do, and how are its results delivered? | 1 | None. On record: Phase 1 (ADR-064); receipts with children in Phase 4 (ADR-061) |
-| OQ-74 | Phase 0 items that need later parts | `jaari update` snapshots the stores (backup is Phase 3), and laptop catch-up needs the job engine (Phase 1), but both are Phase 0 items (ADR-057 states Phase 0 for catch-up; the roadmap places install and update there). Split the items, or move the parts they need? | 0 | None. On record: Phase 0 for catch-up (ADR-057); snapshot before update (ADR-056, which states no phase) |
 | OQ-83 | Shadow mode and browser logs | ADR-051 and ADR-052 take fixtures and the origin review from "shadow-mode logs" of owner-account sessions, but ADR-068 never shadows what the owner asks for. Which log feeds them? Also: onboarding (Phase 2) promises shadow behaviour that ships in Phase 3 and that the owner may turn off. | 2 | None. On record: classification log of all owner-account actions (ADR-051); shadow only self-initiated effects (ADR-068) |
 
 ### Models, packages, and process
@@ -78,8 +77,6 @@ phase starts.
   the overlay in Phase 7 before these ADRs were written.
 - **OQ-73.** Settled: routine semantics (ADR-064) and the job engine (ADR-025). Watcher and
   webhook triggers arrive with Phases 4 and 5 in any case.
-- **OQ-74.** Settled: sleep detection, the power rule, install, and config migrations have no
-  later dependency and can ship in Phase 0.
 - **OQ-75.** Evidence: ADR-062 ("written back through the gated vault write"), ADR-013
   amendment from ADR-072, ADR-072 ("anything that handles credentials"). If delayed: calendar,
   mailbox, and file-storage connections prompt on every refresh or fail in the background.
@@ -195,6 +192,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-67 | On a host without an OS keychain, secret zero comes from the `host-credential` provider: a file supplied by systemd (`LoadCredentialEncrypted=` by default, TPM-sealed when present) or a Compose secret; owner-only, outside the data directory and backups; never an environment variable | [ADR-079](adr/079-secret-zero-on-servers.md) |
 | OQ-68 | The `@jaari/http` core (resolve, check, dial; address-class table; `direct`) ships in Phase 0 and every outbound call uses it; a lint rule refuses other network clients; adapters that cannot take the injected `fetch` stay off; owner-run local model servers reached only on their configured endpoint; container egress proxy ships with the first untrusted-input container | [ADR-080](adr/080-egress-core-in-phase-0.md) |
 | OQ-69 | Scrubbed at channel ingress before the transcript, daily log, or any model (known formats, labelled passwords, Luhn-valid cards, exact vault values); value never kept; message deleted where possible; rotation advised; secret-entry page offered; ADR-028 block-and-ask stays for other writes | [ADR-081](adr/081-secrets-pasted-in-chat.md) |
+| OQ-74 | Split by phase: Phase 0 keeps sleep detection, power, battery, and network re-probe, and a manual `jaari update` with a local pre-update snapshot; catch-up ships with the job engine (Phase 1), expired-approval re-asks with the real gate (Phase 3), automatic patch installs with quiet hours (Phase 2), the ADR-027 bundle with backup (Phase 3) | [ADR-082](adr/082-phase-split-update-and-catch-up.md) |
 
 ### Original questions
 
@@ -265,3 +263,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-67 | Secret zero on a server | On a headless Linux server or in a Compose container, which store holds secret zero, and how does the daemon get it after an unattended restart? | 0 |
 | OQ-68 | Egress before `@jaari/http` | The rule says all network egress goes through `@jaari/http`, but the roadmap ships it in Phase 4. How do model-provider, Telegram, speech, and model-download calls leave the host in Phases 0 to 3? | 0 |
 | OQ-69 | Secret pasted in chat | When an owner message contains a password, key, or card number, is the write blocked, is the value removed before the transcript and the raw log are stored, or is it kept verbatim? | 0 |
+| OQ-74 | Phase 0 items that need later parts | `jaari update` snapshots the stores (backup is Phase 3), and laptop catch-up needs the job engine (Phase 1), but both are Phase 0 items (ADR-057 states Phase 0 for catch-up; the roadmap places install and update there). Split the items, or move the parts they need? | 0 |
