@@ -132,4 +132,3 @@ or Always allow for one host or folder for 90 days; host commands are always All
 plus a host off the starter list always ask. Recurring jobs are approved once at creation,
 pinned to a digest of script, placement, secrets, hosts, and schedule; any change holds them.
 A boot self-check disables code execution if the sandbox is weakened.
-

@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **3**.
+Last updated: 2026-11-10. Open: **2**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -49,7 +49,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-55 | External control surface | Should other tools drive Jaari: a headless `jaari run` / `jaari wait` for scripts, and an MCP server for desktop clients? What must such a surface never expose? | 4 | `jaari run`, `wait`, and `export` with one JSON document and typed exit codes (needs input, timeout) in `apps/cli`; an MCP server later that can inspect and start work but never approves, changes credentials, deletes, or edits policy; long-poll waits, a paired token for anything that mutates Affected by ADR-067: the panel uses the same daemon API as the CLI, so any external surface builds on that API. Affected by ADR-069: the decision adds its rows to THREAT_MODEL.md. Affected by ADR-071: an MCP server surface or headless runner exposes only vocabulary names from manifests. Affected by ADR-072: an external surface can never create or widen a grant; grants come only from owner approvals. Affected by ADR-075: runs started through an external surface need an origin; a script or desktop client is not the owner's message unless paired as a device. |
 | OQ-56 | Subscription CLI engines | OpenMausBot runs bots on the owner's installed `claude`, `codex`, and other CLIs (27 drivers, including Pi over `pi --mode rpc`), so work is billed to an existing subscription. Should a Jaari child be able to delegate a task to such a CLI? The gate cannot see tool calls inside another loop, and provider terms differ. | 4 | Not for the main session (ADR-001). Possibly for isolated children on code tasks, inside a sandbox with no secrets and no effectful capabilities, with the CLI's permission requests answered by the gate; check each provider's terms first Affected by ADR-034: a delegated CLI could run in the Phase 4 sandbox. |
 
 ## I. Left over from the docs conflict audit (2026-11-10)
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-52 | Polling first; separate hook listener with opt-in public exposure offered at hook creation; HMAC or provider signatures, bearer with a warning; hooks start one bound routine | [ADR-073](adr/073-inbound-triggers.md) |
 | OQ-53 | Raw capture mechanical; every derived fact carries a code-checked quote and source id; others' content as 'according to'; inferred facts marked; commit trailers | [ADR-074](adr/074-memory-capture-evidence.md) |
 | OQ-54 | Code-set origin per run (owner, routine, event, outside); outside is sticky, cannot approve or use grants, effects ask with an origin line | [ADR-075](adr/075-outside-lineage.md) |
+| OQ-55 | jaari run/wait/status/export on the local socket with typed exit codes; two-tool MCP server for paired apps in v1, trusted as owner; never approves or changes policy | [ADR-076](adr/076-external-control-surface.md) |

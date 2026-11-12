@@ -96,3 +96,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [073](adr/073-inbound-triggers.md) | Inbound triggers: polling first, a separate hook listener with opt-in public exposure offered at hook creation, signed deliveries, hooks bound to one routine | Accepted |
 | [074](adr/074-memory-capture-evidence.md) | Memory capture evidence: mechanical raw capture, a code-checked quote and source id on every derived fact, inferred facts marked, commit trailers | Accepted |
 | [075](adr/075-outside-lineage.md) | Outside lineage: a code-set origin on every run, sticky across spawned work, outside effects always ask with the origin shown | Accepted |
+| [076](adr/076-external-control-surface.md) | External control surface: headless CLI commands on the local socket, a two-tool MCP server for paired desktop apps in v1, nothing that approves or changes policy | Accepted |
