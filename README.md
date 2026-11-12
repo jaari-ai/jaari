@@ -19,11 +19,11 @@ in v1.
 
 | Area | Approach | Details |
 |---|---|---|
-| Hosting | Self-hosted, single owner. One daemon on a VPS, remote server, home hardware, or laptop; capabilities installed where they run; Tailscale as the default overlay | [ARCHITECTURE](docs/ARCHITECTURE.md), ADR-015/017 |
-| Browser identity | Identity-bearing browsing runs on or through the owner's network (home box, owner device, Tailscale exit node); rotating proxies only for anonymous traffic | [WEB](docs/WEB.md), ADR-017 |
+| Hosting | Self-hosted, single owner. One daemon on a VPS, remote server, home hardware, or laptop; capabilities installed where they run; bring your own overlay (Tailscale by default, or WireGuard, Headscale, Cloudflare, sing-box) | [ARCHITECTURE](docs/ARCHITECTURE.md), ADR-015/017/030 |
+| Browser identity | Identity-bearing browsing runs on or through the owner's network (home box, owner device, or an owner exit node over the overlay); rotating proxies only for anonymous traffic | [WEB](docs/WEB.md), ADR-017 |
 | Memory | Separate git repo of Markdown (gajae-way axes), canonicalized every 6 h, audited daily | [MEMORY](docs/MEMORY.md), ADR-003/004 |
 | Personality | Curiosity and Proactivity dials (0 to 3) enforced by a monitor; proactive messages must earn the interruption | [PERSONA](docs/PERSONA.md), ADR-008 |
-| Safety | Every external effect needs owner approval bound to a SHA-256 digest; secrets are `secretRef:` handles the model never sees; untrusted content goes through a tool-less `reader` role; the gate exists from Phase 0 | [SECURITY_MODEL](docs/SECURITY_MODEL.md), ADR-006/007/016/018 |
+| Safety | Every external effect needs owner approval bound to a SHA-256 digest; secrets are `secretRef:` handles the model never sees; untrusted content goes through a tool-less `reader` role; the gate exists from Phase 0 | [SECURITY_MODEL](docs/SECURITY_MODEL.md), [THREAT_MODEL](docs/THREAT_MODEL.md), ADR-006/007/016/018 |
 | Models | Provider-agnostic via Pi; role → tier → fallback chain; budgets and local-only roles | [LLM](docs/LLM.md), ADR-001/011/019 |
 | Web | Pluggable `web.search`, `web.fetch` ladder, and browser via Playwright MCP or Stagehand | [WEB](docs/WEB.md), ADR-012 |
 | Channels | Plugins behind a `ChannelAdapter` contract | [guides/channel-plugins](docs/guides/channel-plugins.md) |
@@ -40,7 +40,7 @@ in v1.
 | [docs/adr/](docs/adr/README.md) | Architecture decision records (the authoritative ADR numbering) |
 | [docs/MEMORY.md](docs/MEMORY.md), [PERSONA.md](docs/PERSONA.md), [SECURITY_MODEL.md](docs/SECURITY_MODEL.md), [LLM.md](docs/LLM.md), [WEB.md](docs/WEB.md), [INTEGRATIONS.md](docs/INTEGRATIONS.md) | Subsystem designs |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Dev setup, `refs/`, commands |
-| [docs/guides/](docs/guides/channel-plugins.md) | [Writing a channel plugin](docs/guides/channel-plugins.md); [securing the npm and PyPI namespaces](docs/guides/namespaces.md) |
+| [docs/guides/](docs/guides/channel-plugins.md) | [Securing your install](docs/guides/securing-your-install.md) (owner-facing trade-offs); [writing a channel plugin](docs/guides/channel-plugins.md); [securing the npm and PyPI namespaces](docs/guides/namespaces.md) |
 | [docs/00-research.md](docs/00-research.md), [docs/01-merge-plan.md](docs/01-merge-plan.md) | Background research and the original merge reasoning (historical) |
 | [docs/learning/](docs/learning/README.md) | Learning log, one file per topic studied |
 

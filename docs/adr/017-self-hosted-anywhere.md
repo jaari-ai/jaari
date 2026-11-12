@@ -1,6 +1,7 @@
 # ADR-017: Self-hosted anywhere: VPS, remote server, or home hardware; placement rule and egress pool
 
 - **Status:** Accepted
+- **Extended by:** [ADR-030](030-overlay-network-and-sizing.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -8,6 +9,12 @@
 
 ## Alternatives rejected
 VPS as the only target (a datacenter browser meets the CAPTCHA and 2FA walls documented in learning/08); home hardware as the only target (not everyone has an always-on box or a stable uplink); rotating residential proxies for the owner's own accounts (fraud flags); a project-run cloud VM per owner (not self-hosted); one build per target.
+
+## Amendments
+- **ADR-030:** The overlay is the owner's choice (Tailscale, Headscale, WireGuard, Cloudflare
+  private network, custom) and can be changed later. `owner-exit` also accepts a SOCKS5 or HTTP
+  proxy (for example sing-box). New egress class `vpn` (for example Cloudflare WARP) serves
+  anonymous traffic only.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

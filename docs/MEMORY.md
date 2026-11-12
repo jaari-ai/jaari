@@ -7,14 +7,36 @@
   summary, and rewrites the gap queue (ADR-004).
 - Daily audit: contradictions, stale facts, orphan files; results to the owner digest.
 - Canonicalize reads the most sensitive data, so its model tier is local-only by default
-  if a capable local model passes the fixtures (ADR-011, OQ-24, OQ-26).
+  if a capable local model passes the fixtures (ADR-011, ADR-045, ADR-047); passes are bounded, sensitive lines never go to an API model, and a pass deleting over 20% of a file is held for review.
 - Proposed line conventions, after OpenMausBot (learning/09): entries are dated and name
   their source; a superseded fact is struck through with the date instead of deleted; an
   `until YYYY-MM-DD` suffix stops a line loading after that day. Rules the owner stated
   ("always", "never") and health or safety facts are never moved or archived by upkeep.
-- Proposed capture rule (OQ-53): a captured fact carries the owner's quoted words; code
-  checks the quote and rejects numbers, paths, and URLs that are not in it.
-- Recalled memory is placed in front of the owner's message inside a fenced data block,
-  within a fixed budget, never in the cached prompt prefix (OQ-04).
-- Open: retrieval (OQ-03), context assembly (OQ-04), concurrent writes (OQ-06),
-  encryption (OQ-08), forgetting (OQ-09), backup (OQ-07), capture evidence (OQ-53).
+- Capture evidence (ADR-074): raw capture is mechanical; every derived fact carries a quote and
+  source id that code checks, including every number, date, path, and URL; facts from others'
+  content are "according to" until confirmed; inferred facts are marked and never drive actions
+  until confirmed; commits carry actor and source trailers.
+- Context assembly (ADR-024): code builds each prompt in a fixed layout. Upcoming events (14
+  days), trackers, budget, commitments, and warnings go in front of the owner's message;
+  dates mentioned in a message pull in records from that window at any distance; a horizon
+  line points past 14 days. Recall is fenced as data and never in the cached prefix.
+- Structured records (ADR-023): typed records (ledger, event, task, commitment, tracker,
+  recurring bill, person, document and expiry, metric log, goal, list, trip, place, and custom
+  types) under schemas in `ops/schemas/`. The model fills fields; code computes totals, dates,
+  and run-out; ledgers are append-only and canonicalize never edits them. Capture is immediate.
+- Search (ADR-023): `memory.search` over SQLite FTS5, a cache rebuilt from the Markdown, with a
+  freshness check before each query; embeddings later, local-only.
+- Writes (ADR-026): one writer applies every change (intent, files, commit with mutation id,
+  actor, and session trailers, index update); the owner's hand edits are committed separately
+  and win any conflict.
+- Backup (ADR-027): memory pushed to owner-chosen git remotes within minutes; snapshots of
+  SQLite, audit log, and config on an owner-set schedule (nightly by default) to local disk,
+  a NAS, or S3-compatible storage; monthly restore drill.
+- Encryption (ADR-028): secrets are blocked before they reach memory; remotes not owned by the
+  owner are encrypted; `jaari memory purge` rewrites history.
+- Forgetting (ADR-029): corrections supersede and keep the old line struck through; forget
+  removes a fact and can always be undone; erase rewrites history and cannot. The owner asks in
+  plain words and confirms a preview; every line carries a source id so forgetting a source
+  cascades.
+- Files (ADR-038): attachments and dropped files live in a content-addressed store outside the
+  git repo; memory keeps a pointer and the extracted text, indexed with page numbers.

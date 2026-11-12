@@ -27,9 +27,9 @@
 ## Non-goals for v1
 - Agent-to-agent networking (tiers, grants, A2A envelopes from the merge plan): reconsidered
   after Phase 8, behind the same gate.
-- Payments: OQ-19 says no payments in v1; Link one-time cards and the Visa/Mastercard agent
+- Payments: none in v1 (ADR-040); checkouts end at an owner takeover. Link one-time cards and the Visa/Mastercard agent
   directories are the rail to evaluate when that changes.
-- Multiple owners: OQ-23; the data model keeps a user id, the product serves one owner.
+- Multiple owners: one owner per instance in v1 and one Jaari per person; every record carries an `ownerId` so multiple owners can come later (ADR-044).
 
 ## Packages
 | Package | Responsibility |
@@ -70,6 +70,7 @@ export interface ChannelManifest {
     groups?: boolean; readReceipts?: boolean; edits?: boolean;
   };
   identity: "carrier" | "account" | "device" | "none";  // see Identity binding
+  prompts: "buttons" | "quickReplies" | "text";          // how the host renders a Prompt (ADR-035)
   maxMessageChars: number;           // delivery splits long replies to fit
 }
 
@@ -79,11 +80,22 @@ export interface Attachment {
   ref: string;                       // host-side storage handle, never inline data
 }
 
+// What Jaari asks, independent of the channel (ADR-035). The host renders it for the
+// manifest's `prompts` level; for "text" it writes the reply grammar into the message.
+export type Prompt =
+  | { kind: "approval"; id: string; code: string; summary: string;
+      options: ("once" | "always" | "deny")[]; detailsUrl?: string; expiresAt: string }
+  | { kind: "choice"; id: string; question: string; options: { id: string; label: string }[] }
+  | { kind: "confirm"; id: string; question: string }
+  | { kind: "input"; id: string; question: string }
+  | { kind: "link"; id: string; label: string; url: string };  // panel, takeover, pairing
+
 export interface InboundMessage {
   channel: string; conversationId: string; messageId: string;
   senderHandle: string;              // raw transport identity (phone, user id, email)
   isGroup: boolean; participants?: string[];
   text?: string; attachments?: Attachment[];
+  answer?: { promptId: string; option: string };  // a tap on a rendered Prompt
   sentAt: string; receivedAt: string; // ISO 8601
 }
 
@@ -92,6 +104,7 @@ export interface OutboundMessage {
   text?: string; attachments?: Attachment[];
   idempotencyKey: string;            // from the outbox; the adapter must dedupe on it
   replyTo?: string;
+  prompt?: Prompt;                   // rendered by the host for this channel, never by the plugin
 }
 
 export type DeliveryReceipt =
@@ -124,6 +137,10 @@ export interface ChannelAdapter {
   never logged.
 - Every inbound message goes through principal resolution in the host before ingress.
   The plugin reports the raw `senderHandle` and never decides who the owner is.
+- Prompts (ADR-035): the host renders them and parses answers. A tap's `answer` and a text
+  reply in the fixed grammar (code plus option) reach the gate as the same answer, decided by
+  deterministic code. A bare "yes" counts only when exactly one prompt is open in that
+  conversation. Long details and secret entry are panel links.
 - Only the delivery outbox calls `send()`; nothing else imports an adapter. Proactive
   messages reach the outbox only through the persona monitor and notification ledger.
 - `send()` must be idempotent on `idempotencyKey`. An `ambiguous` receipt is never
@@ -135,8 +152,8 @@ export interface ChannelAdapter {
   first, like web pages and documents.
 
 ### Identity binding
-The manifest's `identity` says what the transport can prove. Proposed design, pending
-OQ-02 (owner authentication, pairing, revocation):
+The manifest's `identity` says what the transport can prove. Decided in ADR-022, which also
+sets pairing, revocation, and the single active channel:
 
 | `identity` | Transport proves | Can produce owner turns? | Pairing |
 |---|---|---|---|
@@ -145,12 +162,16 @@ OQ-02 (owner authentication, pairing, revocation):
 | `device` | A device key (web panel, WebCrypto P-256) | Yes, per enrolled device | QR / device enrolment |
 | `none` | Nothing (email: `From` is forgeable) | **No.** Mail from the owner's address is untrusted content, never authority | n/a |
 
-Unknown senders get nothing. In group threads each participant gets their own transcript,
+Unknown senders get nothing. Paired channels are equal; only the active channel (the one
+the owner's latest message came from) receives replies, approvals, and proactive messages,
+and switching channels continues the same session without replaying history (ADR-022).
+In group threads each participant gets their own transcript,
 owner turns run at the lowest trust level present, and a bare "yes" in a group never
 settles an approval (approvals bind to a digest, ADR-006).
 
 ### Candidate plugins
-Which ones ship in v1 is OQ-01; the CLI channel ships in Phase 0.
+v1 ships the CLI (Phase 0), the web panel, and Telegram; email is an input only (Phase 5).
+WhatsApp and iMessage come first after v1 (ADR-021).
 
 | Plugin | Backend (OSS first) | Identity | Notes |
 |---|---|---|---|
@@ -167,11 +188,11 @@ Hosted bridges (Inkbox, Sendblue, Linq) can exist as third-party plugins; none i
 dependency.
 
 ## Trust boundaries
-- Owner ↔ channels: authenticated owner only (see [Channels](#channels) and OQ-02).
+- Owner ↔ channels: authenticated owner only (see [Channels](#channels) and ADR-022).
 - Model ↔ tools: every tool maps to a capability; effectful capabilities go through the gate.
 - Tools ↔ internet: all egress through `@jaari/http` or the container egress proxy.
-- Untrusted content ↔ main session: `reader` summary only, never raw instructions. Whether
-  the outside origin sticks to derived work is OQ-54.
+- Untrusted content ↔ main session: `reader` summary only, never raw instructions. Every run
+  carries a code-set origin; `outside` sticks to derived work (ADR-075).
 
 ## Decisions
 See [adr/README.md](adr/README.md).

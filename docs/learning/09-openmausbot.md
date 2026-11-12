@@ -95,7 +95,7 @@ list (OQ-44); pinned sidecars and capability flags (OQ-50).
 - Defaults. Its default level is Full access (`shared/approval-mode.ts`,
   `DEFAULT_APPROVAL_MODE = "full"`), and "Approve for me" hands the decision to the
   provider's LLM reviewer. Jaari has no LLM in the approval path (principle 9) and
-  starts in shadow mode (OQ-47).
+  starts in shadow mode (ADR-068).
 - Outbound detection. It recognises sends by verbs in tool names (`shared/outbound.ts`).
   Jaari maps every tool to a declared capability.
 - Untrusted content. It defuses text with regexes and confines the run; it has no

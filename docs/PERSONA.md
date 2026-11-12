@@ -19,7 +19,11 @@ Two dials, 0 to 3, enforced by a monitor in code (ADR-008). Defaults below; tune
 - Below threshold → digest or dropped. Quiet hours block everything non-urgent.
 - Every proactive message and the owner's reaction go to the notification ledger, which
   tunes thresholds over time.
-- Delivery path is open (OQ-13).
+- Delivery (ADR-033): the active channel is the push (silent for digest items, alerting for
+  urgent ones). Urgent classes start from defaults (money, deadlines and appointments within
+  24 h, commitment changes, security, closest contacts) and learn from what the owner says and
+  does. Digests are the owner's: one per category at the owner's time; without a time, Jaari
+  proposes one from the owner's wake hours and asks.
 
 ## Routines and staying quiet
 Rules taken from OpenMausBot's routines and its notification QA list (learning/09); they
@@ -32,4 +36,6 @@ apply before the monitor scores anything:
 - A run that finds nothing posts nothing. A failure alerts once per routine and cause.
 - "Finished" is sent only with a non-empty result, and every notification links to the
   exact thread it is about.
-- Schedule semantics (anchoring, overlap, catch-up) are OQ-43.
+- After 7 days with no reply or reaction to proactive messages, they pause until the owner
+  writes again, with one notice; configurable, can be turned off (ADR-031).
+- Schedule semantics (anchoring, overlap, catch-up) are ADR-064.

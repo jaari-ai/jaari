@@ -10,3 +10,7 @@
 - Docs under `docs/` are hand-edited Markdown; follow `docs/DEVELOPMENT.md` (Docs). Run
   `python3 scripts/merge_docs.py --check` after changing them. `JAARI_CONTEXT.md` is an
   untracked build artifact: never edit it, regenerate it.
+
+## Ownership
+
+This codebase is yours: what it's for and how it's built are your call, and you'll keep building on it.

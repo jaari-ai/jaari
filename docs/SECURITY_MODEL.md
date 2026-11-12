@@ -1,5 +1,8 @@
 # Jaari: Security model
 
+This file designs the controls. Who attacks what, and which controls answer it, is in
+[THREAT_MODEL.md](THREAT_MODEL.md) (ADR-069).
+
 ## Approval gate (ADR-006)
 1. Model proposes an action: `{capability, target, params, amount?, expiresAt}`.
 2. Gate serializes it to canonical JSON and hashes it (SHA-256).
@@ -19,7 +22,9 @@ Additions from ADR-016 (accepted; from the OpenMausBot study):
   An action whose audit row cannot be written does not run.
 - After a crash, a cut turn reruns at most once and never if an effectful action had
   started in it.
-- Standing grants ("always allow") are OQ-51.
+- Standing grants ("always allow"): one grant model with exact-match keys, a 90-day expiry,
+  and a closed list of grantable capabilities; sends, `publish`, `pay`, and `repo.write` are
+  never grantable; each use is an audit row with its digest and grant id (ADR-072).
 
 ## Secrets (ADR-007)
 `secretRef:<name>` in config and tool args; resolved only inside executors.
@@ -37,20 +42,25 @@ separate manifest fields.
 | Capability | Class | Notes |
 |---|---|---|
 | `web.search`, `web.fetch` | read | Results are untrusted content (reader role) |
-| `browser.read` | read | Page content is untrusted; screenshots OQ-31 |
-| `browser.act` | gated by classifier | Ordinary clicks and typing; consequential ones escalate (OQ-30) |
+| `browser.read` | read | Page content is untrusted; a browser worker child with task data only sees it (ADR-052) |
+| `browser.act` | gated by classifier | Ordinary clicks and typing; commitments (pay or order, book, send, consent, account changes, upload) escalate to `browser.submit` (ADR-051) |
 | `browser.submit` | gated | Forms, purchases, consent |
 | `computer.use` | gated per action | Desktop control on a node or the host virtual desktop |
-| `shell`, `files.write` | gated | Sandbox rules OQ-15 |
+| `shell`, `files.write` | gated | Sealed sandbox runs need no approval; otherwise Allow once or a 90-day target grant (ADR-036) |
 | `files.read` | read | |
 | `email.read` | read | Content is untrusted |
+| `calendar.freebusy`, `calendar.read` | read | Mirrored into event records (ADR-039) |
+| `calendar.write` | gated | Own calendar without attendees: Allow once or a 90-day grant; invitations always ask (ADR-039) |
 | `email.send`, `publish`, `repo.write` | gated | Short approval expiry |
-| `pay` | reserved | No executor in v1 (OQ-19) |
+| `pay` | reserved | No executor in v1; checkouts end at an owner takeover (ADR-040) |
 | `llm.escalate` | policy-checked | Children only (ADR-011) |
+| `mcp.read`, `mcp.act` | read, gated | MCP tools that match no other name; unconfirmed or unreadable tools are `mcp.act` (ADR-034) |
 
-Login, 2FA, and CAPTCHA go to owner takeover.
+Login and CAPTCHA go to owner takeover. One-time codes come from the vault, then from a message on the owner's channels (read by the executor, never the model, with a notice), then from the owner (ADR-050).
 
-## Approval card (ADR-006, ADR-018)
+## Approval card (ADR-006, ADR-018, ADR-035)
+The card is a typed prompt each channel renders as it can: buttons, quick replies, or a text
+reply grammar.
 The short code the owner types or taps is only a lookup of the digest. There is no amount
 or parameter tolerance: a different action is a different digest. Default expiry 15
 minutes; 5 for `email.send` and `publish`; overridable per capability.
@@ -64,8 +74,10 @@ the `reader` role exists.
 ## Untrusted content
 Email, web pages, search snippets, and documents go through the tool-less `reader`
 role before the main session sees them. Webhook and app-event payloads are untrusted
-content too (OQ-52). Whether work caused by untrusted content stays restricted (sticky
-outside lineage) is OQ-54.
+content too (ADR-073). Every run carries a
+code-set origin (`owner`, `routine`, `event`, `outside`). `outside` sticks to everything it
+spawns, cannot settle approvals or use grants, and each of its effects is Allow once with an
+origin line on the card (ADR-075).
 
 ## Egress
 All network calls via `@jaari/http`; containers via an egress proxy that blocks private
@@ -84,7 +96,8 @@ Mechanism (ADR-016, accepted):
 
 Egress pool (ADR-017): the SOCKS5 listener and `@jaari/http` choose a provider per session:
 `owner-exit` (Tailscale, Headscale, or WireGuard exit node on owner hardware), `direct`,
-`mobile` (owner 4G dongle), `residential-proxy` (sourcing check). Rotation is for anonymous
+`mobile` (owner 4G dongle), `residential-proxy` (sourcing check), `vpn` (consumer VPN such as
+WARP; anonymous only). `owner-exit` may be a WireGuard peer or a SOCKS5/HTTP proxy (ADR-030). Rotation is for anonymous
 traffic only and may mix owner exit nodes with proxies. Owner-account sessions are pinned to
 one owner node (or direct from home hardware), fail over only to another owner node, and
 refuse when none is up; they never fall back to a rotating or datacenter address.
@@ -92,9 +105,30 @@ refuse when none is up; they never fall back to a rotating or datacenter address
 ## Owner hold (ADR-005, ADR-016)
 Takeover is a hold owned by the owner, not by one window: accepted agent calls drain,
 new agent input is refused (never queued), and the hold ends on release, two minutes
-after the last view closes, or after five idle minutes. Transport: OQ-34.
+after the last view closes, or after five idle minutes. Transport and states: ADR-055.
 
-## Open
-Owner auth (OQ-02), kill switch (OQ-11), encryption at rest (OQ-08), MCP plugin
-sandboxing (OQ-14), code execution (OQ-15), standing grants (OQ-51), inbound triggers
-(OQ-52), outside lineage (OQ-54).
+## Pause, stop, and limits (ADR-031)
+Pause stops new work and survives restarts; emergency stop also aborts running work and cancels
+pending approvals. Step, child, stall, watchdog, loop, and spend-spike limits are enforced in
+code, configurable, and logged when they fire.
+
+## Encryption at rest (ADR-028)
+Memory writes are scanned for secrets before they are stored. The host relies on full-disk
+encryption; remotes the owner does not control get age-encrypted bundles or `git-remote-gcrypt`;
+`jaari memory purge` rewrites history everywhere Jaari can reach. Owner-facing trade-offs:
+[guides/securing-your-install.md](guides/securing-your-install.md).
+
+## MCP servers (ADR-034)
+Servers are added by the owner; one the model proposes arrives switched off. Each tool is
+pre-classified and the owner confirms the mapping in one step; until then it is `mcp.act`.
+Config and tool list are pinned by SHA-256, and any change holds the server for re-approval.
+Server text is untrusted and results are capped at 20 KB. Local servers run in a sandbox whose
+only network is a loopback proxy into `@jaari/http`; without a backend they run only after a
+per-server "unsandboxed" warning the owner accepts.
+
+## Code execution (ADR-036)
+Sealed runs (no network, no secrets, owner files read-only) never ask. Otherwise Allow once,
+or Always allow for one host or folder for 90 days; host commands are always Allow once; files
+plus a host off the starter list always ask. Recurring jobs are approved once at creation,
+pinned to a digest of script, placement, secrets, hosts, and schedule; any change holds them.
+A boot self-check disables code execution if the sandbox is weakened.

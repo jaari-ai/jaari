@@ -35,6 +35,7 @@ After any change run `python3 scripts/merge_docs.py --check`.
 | Path | Holds |
 |---|---|
 | `docs/STATE.md` | What is decided and built, what is next; updated at the end of each session |
+| `docs/THREAT_MODEL.md` | Actors, attacks, controls, and what is left over (ADR-069) |
 | `docs/ARCHITECTURE.md`, `SECURITY_MODEL.md`, `LLM.md`, `WEB.md`, `MEMORY.md`, `PERSONA.md`, `INTEGRATIONS.md` | Subsystem designs |
 | `docs/ROADMAP.md`, `ACTION_PLAN.md` | Soft phases (ADR-020) and the ordered next steps; `ACTION_PLAN.md` also carries the ADR table |
 | `docs/OPEN_QUESTIONS.md` | Undecided questions |
@@ -71,6 +72,11 @@ _TODO: fill in as implementation reveals them._
   and an `Amendments` entry to the old one.
 - Add the row `| [NNN](NNN-slug.md) | Title | Status |` to `docs/adr/README.md` and
   `| [NNN](adr/NNN-slug.md) | Title | Status |` to the ADR table in `docs/ACTION_PLAN.md`.
+
+### Threat model
+- An ADR that adds or changes a capability, adapter, channel, provider, or input from outside
+  adds or updates its rows in `docs/THREAT_MODEL.md` in the same commit (ADR-069).
+- Review `docs/THREAT_MODEL.md` at each phase exit.
 
 ### Open questions
 - A row in a section table of `docs/OPEN_QUESTIONS.md`:
