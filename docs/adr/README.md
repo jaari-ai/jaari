@@ -75,3 +75,4 @@
 | [071](071-capability-packages.md) | Capability packages: one package format for every pluggable part, a checked manifest, third-party packages in their own process, updates that notify | Accepted |
 | [072](072-standing-grants.md) | Standing grants: one grant model, exact-match keys, a closed list of grantable capabilities, offered once after three identical approvals | Accepted |
 | [073](073-inbound-triggers.md) | Inbound triggers: polling first, a separate hook listener with opt-in public exposure offered at hook creation, signed deliveries, hooks bound to one routine | Accepted |
+| [074](074-memory-capture-evidence.md) | Memory capture evidence: mechanical raw capture, a code-checked quote and source id on every derived fact, inferred facts marked, commit trailers | Accepted |

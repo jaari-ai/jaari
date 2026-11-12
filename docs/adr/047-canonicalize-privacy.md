@@ -22,7 +22,7 @@ They wait for a local pass if a local model is available; otherwise they stay in
 searchable, and are not folded into `profile/`. This matches ADR-038 for sensitive files.
 
 **Checks after the pass.** Every changed `profile/` line must carry a source quote from a daily
-file (the capture rule, OQ-53); a fact without a source is rejected. A pass that would delete more
+file (the capture rule, ADR-074); a fact without a source is rejected. A pass that would delete more
 than 20% of a profile file is held for the owner's review instead of committed.
 
 **Visibility.** Each pass logs input size, model, and duration (ADR-032); the digest shows a line

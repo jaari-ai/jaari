@@ -87,8 +87,8 @@ buys them.
 | Node routing | Several Macs; picks the one that has what the task needs; the request names the device | The loader picks a node by capability and provider, and the approval card names the node | ADR-015, ADR-071 |
 | Node offline | Wait and run on reconnect; say "asleep" only when true | Already in ADR-015 (queue with expiry); add a real asleep or offline state to node health | OQ-36, OQ-37 |
 | Node removal | Disconnecting erases what was learned from its messages | Unpairing a node or disconnecting an account forgets everything derived from it | OQ-09, OQ-37 |
-| Forget by source | Deleting a conversation erases what was learned from it | Every canonical fact line carries a source id, so "forget this source" is mechanical, not a search | OQ-09, OQ-53 |
-| Evidence | Each fact carries its evidence; newer replaces older on the same topic | A second reference (after OpenMausBot) for the quote check; supersede by topic key | OQ-53, OQ-09 |
+| Forget by source | Deleting a conversation erases what was learned from it | Every canonical fact line carries a source id, so "forget this source" is mechanical, not a search | OQ-09, ADR-074 |
+| Evidence | Each fact carries its evidence; newer replaces older on the same topic | A second reference (after OpenMausBot) for the quote check; supersede by topic key | ADR-074, OQ-09 |
 | Commitment classes | Pause only before payment, order, booking, message | These four are the target list for the deterministic classifier; everything else in a session is ordinary `browser.act` | ADR-051 |
 | Takeover safety | A purchase never completes while the owner drives | While the owner holds the browser, the agent cannot submit; a commitment made by the owner is the owner's own act and is logged as such | OQ-34, ADR-016 |
 | Result honesty | Verify before saying done; separate "acknowledged" from "confirmed"; own claims are not the owner's confirmation | Receipts carry `confirmed`, `acknowledged`, or `ambiguous`, and the reply text is generated from the receipt | OQ-13, OQ-40 |

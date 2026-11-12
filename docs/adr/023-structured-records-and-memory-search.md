@@ -18,7 +18,7 @@ them. Rules that apply to every type:
   overdue flags are computed by code from the entries and never written by the model.
 - Capture is immediate: when the owner, or an email read by the `reader` role, says something
   that fits a type, the model proposes a typed record with a quote of its source; code checks
-  the fields and the quote (OQ-53) and writes it. Each entry is confirmed back to the owner
+  the fields and the quote (ADR-074) and writes it. Each entry is confirmed back to the owner
   with its computed effect (for example the new balance).
 - A type may declare: append-only (corrections are new lines, never rewrites, and canonicalize
   never edits it); always-in-context with a window (for example events in the next 14 days,

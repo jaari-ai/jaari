@@ -12,8 +12,10 @@
   their source; a superseded fact is struck through with the date instead of deleted; an
   `until YYYY-MM-DD` suffix stops a line loading after that day. Rules the owner stated
   ("always", "never") and health or safety facts are never moved or archived by upkeep.
-- Proposed capture rule (OQ-53): a captured fact carries the owner's quoted words; code
-  checks the quote and rejects numbers, paths, and URLs that are not in it.
+- Capture evidence (ADR-074): raw capture is mechanical; every derived fact carries a quote and
+  source id that code checks, including every number, date, path, and URL; facts from others'
+  content are "according to" until confirmed; inferred facts are marked and never drive actions
+  until confirmed; commits carry actor and source trailers.
 - Context assembly (ADR-024): code builds each prompt in a fixed layout. Upcoming events (14
   days), trackers, budget, commitments, and warnings go in front of the owner's message;
   dates mentioned in a message pull in records from that window at any distance; a horizon
@@ -38,4 +40,3 @@
   cascades.
 - Files (ADR-038): attachments and dropped files live in a content-addressed store outside the
   git repo; memory keeps a pointer and the extracted text, indexed with page numbers.
-- Open: capture evidence (OQ-53).
