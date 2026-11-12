@@ -13,7 +13,6 @@ One process with every capability built in (a VPS cannot reach the owner's lapto
 ## Amendments
 - **ADR-018:** Capability names in the examples follow the single vocabulary: `browser.local` is `browser.*` with provider `local-profile`, `desktop.macos` is `computer.use` with provider `macos`, `files` is `files.read` and `files.write`. `@jaari/capabilities` owns the manifest and loader.
 - **ADR-017:** The daemon host may be a VPS, a remote server, or home hardware; the placement rule decides where identity-bearing capabilities run.
-
 - **ADR-071:** capability packages share one npm package format and checked `jaari` manifest
   with every other pluggable part; third-party packages run in their own process.
 
