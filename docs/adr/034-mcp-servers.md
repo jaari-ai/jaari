@@ -23,7 +23,7 @@ server's own hints (`readOnlyHint` and the rest) are never trusted and never low
 
 **Pinning against silent changes.** Jaari stores a SHA-256 of the server's config and of its
 tool list with names, descriptions, and schemas. If either changes, the server is held until the
-owner re-approves; the card shows the difference. Standing grants (OQ-51) are keyed on the same
+owner re-approves; the card shows the difference. Standing grants (ADR-072) are keyed on the same
 fingerprint, so any edit revokes them.
 
 **Server text is untrusted.** Server instructions are not followed. Tool descriptions reach the

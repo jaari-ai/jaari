@@ -33,7 +33,7 @@ it at install. Owner-account browsing starts its period when Phase 6 ships.
 
 **What the shadow logs feed.** The end-of-period summary; the commitment classifier fixtures and
 classification log (ADR-051); the task-scoped origin review (ADR-052); and the evidence for any
-standing grant (OQ-51).
+standing grant (ADR-072).
 
 **Phase 3**, with the real gate.
 

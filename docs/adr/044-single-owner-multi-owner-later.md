@@ -16,7 +16,7 @@ multiple owners can be added without a data migration.
 **Households: one Jaari per person.** Each person runs their own instance with their own memory,
 vault, and gate. Sharing between instances follows the deferred open-instinct and Trusted Pals
 design (ADR-020): per person and per capability (for example "my partner's Jaari can see my
-free/busy"), through grants (OQ-51).
+free/busy"), through grants (ADR-072).
 
 **Multiple owners in one instance are planned for later.** The design must then keep each owner's
 memory repository, vault namespace, approvals, sessions, channels, and budgets separate, with no

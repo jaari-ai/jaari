@@ -51,7 +51,7 @@ no home directory, and working limits; a failure disables code execution and sho
 `jaari doctor`. CI mutation tests remove one protection at a time to prove the check catches it.
 
 Borrowed: the self-check, mutation tests, and broker tokens from OpenMausBot (learning/09);
-allow once or always from common chat assistants; grants and their limits feed OQ-51.
+allow once or always from common chat assistants; grants and their limits feed ADR-072.
 
 ## Alternatives rejected
 Approving every run (owners would approve calculations blindly); no approval for networked runs

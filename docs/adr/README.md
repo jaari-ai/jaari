@@ -73,3 +73,4 @@
 | [069](069-threat-model.md) | Threat model: an actor-by-attack-by-control table with what is left over, a "not protected against" list, kept current by an ADR checklist rule | Accepted |
 | [070](070-onboarding-conversation.md) | Onboarding conversation: a built-in skill after `jaari init`, one question at a time, optional people records, a first week of inference and one gap question a day | Accepted |
 | [071](071-capability-packages.md) | Capability packages: one package format for every pluggable part, a checked manifest, third-party packages in their own process, updates that notify | Accepted |
+| [072](072-standing-grants.md) | Standing grants: one grant model, exact-match keys, a closed list of grantable capabilities, offered once after three identical approvals | Accepted |

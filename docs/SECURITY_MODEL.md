@@ -22,7 +22,9 @@ Additions from ADR-016 (accepted; from the OpenMausBot study):
   An action whose audit row cannot be written does not run.
 - After a crash, a cut turn reruns at most once and never if an effectful action had
   started in it.
-- Standing grants ("always allow") are OQ-51.
+- Standing grants ("always allow"): one grant model with exact-match keys, a 90-day expiry,
+  and a closed list of grantable capabilities; sends, `publish`, `pay`, and `repo.write` are
+  never grantable; each use is an audit row with its digest and grant id (ADR-072).
 
 ## Secrets (ADR-007)
 `secretRef:<name>` in config and tool args; resolved only inside executors.
@@ -130,5 +132,4 @@ pinned to a digest of script, placement, secrets, hosts, and schedule; any chang
 A boot self-check disables code execution if the sandbox is weakened.
 
 ## Open
-Standing grants (OQ-51), inbound triggers
-(OQ-52), outside lineage (OQ-54).
+Inbound triggers (OQ-52), outside lineage (OQ-54).
