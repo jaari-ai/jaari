@@ -33,6 +33,11 @@
 - Backup (ADR-027): memory pushed to owner-chosen git remotes within minutes; snapshots of
   SQLite, audit log, and config on an owner-set schedule (nightly by default) to local disk,
   a NAS, or S3-compatible storage; monthly restore drill.
+- Sensitive content (ADR-093): records, files, photos, and lines at the `sensitive` level
+  follow the owner's routing like any other content, so the main session can answer about
+  them; privacy comes from making roles local-only. The level is set by record type,
+  deterministic rules, a local `classify` role, or the owner, and canonicalize still keeps
+  sensitive lines out of an API batch (ADR-047).
 - Encryption (ADR-028): secrets are blocked before they reach memory; a secret in an owner
   message is replaced with `[secret removed: <kind>]` at channel ingress, before the transcript
   and the daily log, and the owner is told to rotate it (ADR-081); remotes not owned by the

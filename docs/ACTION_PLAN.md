@@ -23,7 +23,7 @@ status and exit criteria live there.
    to the daemon, so this follows step 5.
 7. **Memory** (Phase 1): single writer (ADR-026), structured records and FTS5 search (ADR-023),
    context assembly (ADR-024), the job engine (ADR-025), canonicalize and capture evidence
-   (ADR-047, ADR-074). Decide OQ-78 first.
+   (ADR-047, ADR-074).
 8. **Persona and owner surfaces** (Phase 2): dials and notifications, pairing (ADR-022),
    Telegram, the overlay binding (ADR-088), then the panel (ADR-067).
 9. **The real gate and its companions** (Phase 3): gate and audit log (ADR-006, ADR-016,
@@ -133,3 +133,4 @@ status and exit criteria live there.
 | [090](adr/090-oauth-token-rotation.md) | Rotating an existing OAuth token is a bounded maintenance write, not an approval | Accepted |
 | [091](adr/091-engine-runs.md) | Subscription CLI runs are "engine runs", approved per workspace, with the child time limit | Accepted |
 | [092](adr/092-pinned-jobs.md) | A pinned job is its own repeating approval, managed with grants; host jobs expire | Accepted |
+| [093](adr/093-sensitive-content-follows-routing.md) | Sensitive content follows the owner's routing; privacy comes from local models, not withholding | Accepted |

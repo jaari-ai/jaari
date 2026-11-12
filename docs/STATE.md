@@ -5,7 +5,7 @@ Last updated: 2026-11-12
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (92 ADRs, all Accepted)
+## Decided (93 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain (ADR-010, 014, 043). npm and PyPI names are
@@ -20,7 +20,7 @@ The index is [adr/README.md](adr/README.md). By area:
   044, 067).
 - Memory: git-backed Markdown, canonicalize and daily audit, structured records and FTS5
   search, context assembly, single writer, capture evidence, forgetting, files and photos
-  (ADR-003, 004, 023, 024, 026, 029, 038, 047, 066, 074, 078).
+  (ADR-003, 004, 023, 024, 026, 029, 038, 047, 066, 074, 078, 093).
 - Persona and proactive work: two dials and a monitor, notifications and digests, routines,
   skills, onboarding, voice notes, prompt versioning, learning from outcomes (ADR-008, 033,
   037, 042, 060, 061, 064, 070).
@@ -80,4 +80,4 @@ No open question blocks Phase 0.
   leaving Experimental (ADR-025, ADR-065).
 
 ## Open questions
-11 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+10 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

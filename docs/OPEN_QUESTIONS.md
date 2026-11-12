@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **11**.
+Last updated: 2026-11-12. Open: **10**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -33,7 +33,6 @@ leaning yet; the options listed are only the ones the docs already name.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-78 | Sensitive data and routing | After ADR-078, does the ADR-023 sensitivity level still keep health and money data on local-only models outside canonicalize (context assembly sends budget and tracker values to the main model)? What marks a file, photo, or free-text line as sensitive, and which roles read files? | 1 | None. On record: per-type level (ADR-023); owner marking in config (ADR-066, ADR-078) |
 | OQ-81 | Retention of receipts and logs | Receipts are "operational rows" kept 7 days (ADR-029) and also live in the 30-day event log (ADR-061, ADR-032); the browser action log is "kept forever" (ADR-052). Where do receipts and the action log live, and for how long? | 4 | None. On record: 7 days; 30 days; forever |
 | OQ-87 | File store in backup and erase | How are file-store blobs backed up (ADR-027 does not list them), and does "erase" also remove the blob, the transcript rows, and existing snapshots? | 3 | None. On record: "the store is part of backups" (ADR-038) |
 
@@ -59,10 +58,6 @@ phase starts.
   disables code execution if the sandbox is weak (ADR-036). Reopens the Compose part of OQ-35.
   If delayed: MCP servers, code execution, document parsing, and CLI engines have no backend
   on the default install.
-- **OQ-78.** Settled: documents and photos follow the owner's routing (ADR-066, ADR-078);
-  canonicalize keeps sensitive lines out of an API batch (ADR-047). Gap: ADR-023's rule for
-  records, ADR-024's prompt layout, and the marking method ("recognised as sensitive" in
-  ADR-038, "marked sensitive" in ADR-066 and ADR-078).
 - **OQ-79.** Evidence: ADR-018 ("the only list of names the model can ask for"; classes read,
   gated, takeover), ADR-013 (vault writes gated), ADR-039 (address-book writes and uploads
   gated), ADR-029 (erase goes through the gate), ADR-023 and ADR-024 (`memory.search`,
@@ -165,6 +160,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-75 | Rotating an existing OAuth token is a bounded maintenance write with no approval (same item and account; value from the listed token endpoint in answer to a refresh; only token and expiry change); written before use; audited; every other credential write stays Allow once | [ADR-090](adr/090-oauth-token-rotation.md) |
 | OQ-76 | Called engine runs, not sealed; on owner files the first run per workspace asks Allow once or a 90-day `engine.run` grant (engine and workspace); scratch workspaces run without asking once enabled; web access on makes the run `outside`; 30-minute child limit | [ADR-091](adr/091-engine-runs.md) |
 | OQ-77 | A pinned job is its own repeating approval for one digest, not a grant; listed and revoked with the grants; host jobs expire after 90 days, sandboxed jobs get a 90-day check-in; owner-only creation; no `pay` | [ADR-092](adr/092-pinned-jobs.md) |
+| OQ-78 | Sensitive content follows the routing of the role that reads it; the main session can answer about any owner data; nothing is withheld; privacy is making roles local-only; marking by record type, deterministic rules, local `classify`, or the owner; files read by `reader`, `vision`, `summarize`; ADR-047 unchanged | [ADR-093](adr/093-sensitive-content-follows-routing.md) |
 | OQ-84 | Each reference pinned to a full sha in `scripts/refs.sh`; `sync` re-applies pins; `scripts/refs.sh bump` is the only way to move one, printing old and new commit and warning on a licence change; pins committed on their own | [ADR-083](adr/083-pinned-reference-commits.md) |
 | OQ-85 | One manifest per package under the `jaari` key of `package.json`, read before any code runs; channel fields in a `channel` section; `ChannelAdapter` has no manifest property; shared Vitest contract suite in `@jaari/channels/contract`, Phase 0 | [ADR-084](adr/084-package-manifest-location-and-channel-section.md) |
 | OQ-86 | A refusal never moves the pinned main session: the turn ends with one notice and the owner decides (rephrase or `/model`); other roles move down the chain; off-limits categories go to the owner; detected from `rawStopReason`, never retried as an error | [ADR-085](adr/085-refusal-in-the-pinned-main-session.md) |
@@ -250,3 +246,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-75 | OAuth token rotation | Rotated OAuth tokens are written back through the gated vault write, and every vault write is Allow once and never grantable. Does each token refresh ask the owner, or is rotation of an existing item exempt? | 5 |
 | OQ-76 | Subscription CLI runs called "sealed" | ADR-077 calls these runs sealed and approval-free, but they have network to the provider and the CLI's sign-in inside the sandbox, and ADR-036 limits a run to 5 minutes. Are they a named exception with their own limits, or do they ask like any networked run? | 4 |
 | OQ-77 | Pinned recurring jobs | A pinned job runs with no expiry and may run host commands. ADR-072 is "one grant model" with a 90-day expiry and lists host commands and `pay` as never grantable. Is a pinned job a separate approval kind, or does it follow ADR-072? | 4 |
+| OQ-78 | Sensitive data and routing | After ADR-078, does the ADR-023 sensitivity level still keep health and money data on local-only models outside canonicalize (context assembly sends budget and tracker values to the main model)? What marks a file, photo, or free-text line as sensitive, and which roles read files? | 1 |

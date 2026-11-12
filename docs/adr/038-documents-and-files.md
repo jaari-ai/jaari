@@ -1,7 +1,7 @@
 # ADR-038: Documents and files: content-addressed store, sealed parsing, sensitive files local-only, disk watch
 
 - **Status:** Accepted
-- **Extended by:** [ADR-037](037-voice.md), [ADR-066](066-photos-as-memory.md), [ADR-078](078-documents-follow-owner-routing.md)
+- **Extended by:** [ADR-037](037-voice.md), [ADR-066](066-photos-as-memory.md), [ADR-078](078-documents-follow-owner-routing.md), [ADR-093](093-sensitive-content-follows-routing.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -71,6 +71,8 @@ Storing binaries in the memory git repository (history bloat); a fixed storage q
 owns the disk; a watch is enough); parsing in the daemon process (a malformed file would run with
 the daemon's rights); sending sensitive documents to API models by default; dropping oversized
 files silently.
+- **ADR-093:** sensitivity is marked by record type, deterministic rules, a local `classify`
+  role, or the owner; files are read by `reader`, `vision`, and `summarize`.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

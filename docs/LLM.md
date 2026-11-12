@@ -25,6 +25,8 @@ Owner override: "use the big model for this", `/model <tier>`.
 
 ## Rules
 - Local-only roles never fall back to an API; they fail closed and notify once.
+- Sensitive content follows the routing of the role that reads it; nothing is withheld from a
+  prompt for being sensitive. Privacy is set by making roles local-only (ADR-093).
 - `canonicalize` and `curiosity` are local-only by default only if `jaari llm eval` qualifies
   a local model at `jaari init`; otherwise `init` asks the owner to install one or allow an
   API tier, and canonicalize does not run until they choose (ADR-019).

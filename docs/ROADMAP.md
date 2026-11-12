@@ -96,11 +96,11 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
 | 1.1 | Memory repo, single writer, write path; pre-write secret scan of derived facts and files | 003, 026, 028, 081, 087 | 0.5 | Planned |
-| 1.2 | Structured records, `records.query`, FTS5 search | 023 | 1.1 | Planned |
+| 1.2 | Structured records, `records.query`, FTS5 search; sensitivity marking by type and rules | 023, 093 | 1.1 | Planned |
 | 1.3 | Context assembly; session orientation and re-injection from state | 024, 065 | 1.2 | Planned |
 | 1.4 | Job engine; catch-up after sleep (in `@jaari/core`); job-tree abort | 025, 057, 082, 086, 031, 087 | 0.5, 0.13 | Planned |
 | 1.5 | Routines: object, schedule and one-shot triggers, `jaari routine`, run history with job receipts, caps; code steps and one tool-less model step; no proactive delivery (in `@jaari/core`) | 064, 086, 089 | 1.4, 1.11 | Planned |
-| 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9; OQ-78 | Planned |
+| 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9 | Planned |
 | 1.7 | Daily audit | 004 | 1.1, 1.4 | Planned |
 | 1.8 | Capture evidence | 074, 081 | 1.1, 0.8 | Planned |
 | 1.9 | Local-model qualification and the `jaari llm eval` qualification fixtures | 019, 045 | 0.7 | Planned |
@@ -127,7 +127,7 @@ Exit criteria:
 - Qualification records pass rate, tokens per second, and time to first token per model
   (ADR-045).
 
-Open questions that block this phase: OQ-78.
+No open question blocks this phase.
 Gate status: not passed.
 
 ## Phase 2: Persona and owner surfaces
@@ -255,7 +255,7 @@ sandbox (4.7).
 | 5.3 | OAuth broker, with bounded token rotation (in `@jaari/integrations`) | 062, 086, 090 | 3.3 | Planned |
 | 5.4 | The agent's mailbox (in `@jaari/integrations`); watcher triggers on the inbox | 063, 086, 064, 089 | 3.3, 4.3 | Planned |
 | 5.5 | Calendar, contacts, and file storage | 039 | 5.3; OQ-79 | Planned |
-| 5.6 | Documents (in file store in `@jaari/memory`) | 038, 078, 086 | 4.7; OQ-78, OQ-87 | Planned |
+| 5.6 | Documents (in file store in `@jaari/memory`) | 038, 078, 086, 093 | 4.7; OQ-87 | Planned |
 | 5.7 | Photo notes | 066 | 5.6 | Planned |
 | 5.8 | Inbound triggers (in `apps/hooks`) | 073, 086 | 1.5, 4.3 | Planned |
 | 5.9 | MCP server for paired desktop apps (in `@jaari/mcp`, `jaari mcp`) | 076, 086 | 2.7; OQ-88 | Planned |
@@ -267,7 +267,7 @@ Exit criteria:
   before the 2xx response (ADR-073).
 - The disk watch notifies at 80%, 90%, and 95% used (ADR-038).
 
-Open questions that block this phase: OQ-78, OQ-79, OQ-87, OQ-88, OQ-91.
+Open questions that block this phase: OQ-79, OQ-87, OQ-88, OQ-91.
 Gate status: not passed.
 
 ## Phase 6: Computer use

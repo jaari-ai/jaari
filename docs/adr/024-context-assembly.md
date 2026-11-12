@@ -1,6 +1,7 @@
 # ADR-024: Context assembly: a fixed layout built by code, automatic recall, time anchors
 
 - **Status:** Accepted
+- **Extended by:** [ADR-093](093-sensitive-content-follows-routing.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -48,6 +49,9 @@ appointment failure of ADR-023); a fixed window with nothing beyond it (a questi
 date 60 days out would miss it); putting all future records in every prompt (unbounded);
 rebuilding the whole system prompt every turn (open-instinct; no stable prefix, so no prompt
 caching).
+
+## Amendments
+- **ADR-093:** sensitive records are assembled like any other; privacy comes from routing.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
