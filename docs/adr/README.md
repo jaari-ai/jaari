@@ -70,3 +70,4 @@
 | [066](066-photos-as-memory.md) | Photos as memory: photo notes in the file store, the vision role as the owner routed it, location kept, face recognition planned for later | Accepted |
 | [067](067-owner-panel.md) | Owner panel: one PWA served by the daemon over the overlay, an optional passkey, untrusted content as text, views grown by phase | Accepted |
 | [068](068-shadow-mode.md) | Shadow mode: only what Jaari starts on its own, per capability, 14 days by default, each new capability shadowed in turn | Accepted |
+| [069](069-threat-model.md) | Threat model: an actor-by-attack-by-control table with what is left over, a "not protected against" list, kept current by an ADR checklist rule | Accepted |

@@ -1,5 +1,8 @@
 # Jaari: Security model
 
+This file designs the controls. Who attacks what, and which controls answer it, is in
+[THREAT_MODEL.md](THREAT_MODEL.md) (ADR-069).
+
 ## Approval gate (ADR-006)
 1. Model proposes an action: `{capability, target, params, amount?, expiresAt}`.
 2. Gate serializes it to canonical JSON and hashes it (SHA-256).

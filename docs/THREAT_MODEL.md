@@ -1,0 +1,53 @@
+# Jaari: Threat model
+
+Who could attack a Jaari install, what they might try, which controls stop them, and what is
+left over. The controls are designed in [SECURITY_MODEL.md](SECURITY_MODEL.md) and the ADRs;
+this file maps them to threats (ADR-069). It is kept current by the rule in
+[DEVELOPMENT.md](DEVELOPMENT.md) (Threat model) and reviewed at each phase exit.
+
+## What we protect
+- **Secrets:** vault items, OAuth tokens, device keys, the backup recovery key.
+- **Memory:** the owner's facts, records, files, photos, and transcripts.
+- **Owner accounts and sessions:** signed-in browser profiles, mailboxes, calendars.
+- **Money:** anything that can pay, order, or book.
+- **The owner's identity and reputation:** what is sent or published in the owner's name.
+- **The host and nodes:** the daemon machine and every paired device.
+- **The audit trail:** the record of what was approved and done.
+
+## Threats
+
+| Actor | What they might try | Controls | What is left over |
+|---|---|---|---|
+| Web page | Hidden instructions in page text, a screenshot, or the accessibility tree | `reader` role reads it first; fencing; browser worker child with task data only; task-scoped origins (ADR-052); no JS-exec member (ADR-048) | The model can still be misled about the page's content |
+| Web page | Push Jaari into a purchase, booking, send, or consent | Commitment classifier, Allow once for commitments, "unreadable" asks (ADR-051); no payments in v1 (ADR-040) | A commitment the classifier misses; fixtures must catch every known flow before it ships |
+| Web page | Point a fetch at internal services (SSRF, DNS rebinding) | DNS pinning, each redirect re-checked, size and time limits (ADR-053) | None known |
+| Email, document, photo | Hidden instructions in mail, attachments, or text read from images | `reader` role first (ADR-038, ADR-066); inbound mail is data, never authority (ADR-063); parsing in a sealed sandbox (ADR-038) | A parser exploit is contained by the sandbox, not prevented |
+| Email | A forged message that claims to be the owner | Email has the `none` identity and is never the owner (ADR-022); SPF, DKIM, DMARC checks (ADR-063) | None for authority; the content may still mislead the reader summary |
+| Email or message | Bait a one-time code to the wrong site | Code taken by the executor only, from a sender matching the site, after login began, within 10 minutes, never shown to the model; notice after use (ADR-050) | A sender address spoofed well enough to pass the match |
+| MCP server | Change its tool list, hide instructions in results, act beyond its class | Owner-added, pinned tool list, results as untrusted text, sandboxed, `mcp.act` gated (ADR-034); shadowed at first (ADR-068) | A pinned server that turns malicious within its approved tools |
+| Skill | Hidden instructions or unsafe steps in a third-party skill | Scanned, reader summary, installed disabled, hash-pinned; built-ins win name clashes (ADR-060); locked core prompts (ADR-042) | A skill the owner enables after reading a misleading summary |
+| Browser adapter or provider | A malicious adapter or a third-party browser that reads sessions | Adapter manifest; spoofing adapters warned before use on signed-in profiles (ADR-048); placement rule (ADR-017) | A third-party browser provider sees what it renders |
+| Egress provider | Read or alter traffic through a proxy or exit | TLS end to end; a secret bound to one origin (ADR-053); owner-account traffic only via owner exits (ADR-017) | The provider sees destinations and timing |
+| Node | A compromised laptop or desktop node acting for the daemon | Pinned TLS link, device-key challenge (ADR-058); nodes run only gate-approved actions and hold no memory or LLM keys (ADR-015); revocation (ADR-022) | What a compromised node can see on its own screen and files |
+| Stolen phone or paired device | Approve actions or read replies | Revocation from any trusted channel, cancelling pending approvals (ADR-022); optional panel passkey (ADR-067); approvals bound to a digest with expiry (ADR-006) | An unlocked phone before revocation |
+| Channel plugin | Forge the sender handle or alter messages | Plugins report the raw handle only; identity resolved in the daemon; unknown senders get nothing (ADR-022) | A compromised messenger account of the owner |
+| Group members | Change permissions, collect codes, or loop two assistants | Approvals, links, and codes only in the owner's private chat; only the owner's message changes permissions; loop breaker (ADR-044) | Group members can still mislead the conversation |
+| Poisoned memory | Plant a false fact or rule that later drives actions | Single writer (ADR-026); every profile change needs a source quote, large deletions held (ADR-047); learned rules need owner confirmation, protected core never learns (ADR-061); persona edits are proposals (ADR-042) | A false fact the owner confirms |
+| Panel | Script injection, cross-site requests, or a lookalike page | Own bundled code only, strict content policy, untrusted content as plain text, overlay only, paired device (ADR-067, ADR-030) | A browser exploit on the owner's device |
+| Supply chain | A malicious dependency or build step | Exact pins, 7-day minimum release age, build-script allowlist, gitleaks, licence check (ADR-043) | A malicious release older than the age gate |
+| Update channel | A tampered image or package | Signed multi-arch images, trusted publishing (ADR-056, ADR-010); doctor check and auto-rollback (ADR-056) | A compromised signing identity |
+| Someone with the data dir or a backup | Read memory, secrets, or transcripts | Secrets never in memory (ADR-007, ADR-028 scan); 0700 and 0600 modes; host full-disk encryption; encrypted remotes and backups (ADR-028, ADR-027) | Anyone who controls the running host |
+| OAuth token or vault theft | Use tokens beyond their scope | Owner's own client, grouped consent per capability, tokens in the vault, refreshed by the executor (ADR-062); dedicated vault or collection (ADR-050) | A token used within its granted scope |
+| Jaari itself | A runaway loop, budget drain, or an action it starts by itself | Runaway limits, pause, emergency stop in code (ADR-031); budget with the owner's choice at the limit (ADR-046); shadow mode for self-initiated effects (ADR-068); routines capped (ADR-064) | Waste within the limits the owner set |
+| A wrong or tampered model reply | Propose a harmful action | Every effect goes through the digest gate, with no LLM in the approval path (ADR-006); re-check at dispatch (ADR-016); the LLM may only escalate a commitment (ADR-051) | An action the owner approves after reading the card |
+
+## Not protected against
+| Gap | Why |
+|---|---|
+| Root on the host, or the host provider | The daemon holds its keys while it runs; whoever controls the machine controls Jaari (ADR-028). |
+| An API model provider | It sees every prompt sent to it. Local-only routing avoids this for the roles the owner chooses (ADR-045). |
+| The owner approving the wrong thing | The card shows the whole action (ADR-016); the decision is the owner's. Read before you approve. |
+| A compromised vault service | Jaari reads only its dedicated vault or collection (ADR-050), but the vault provider holds the secrets. |
+| An unlocked phone with a paired channel | A message from a paired channel is the owner until the device is revoked (ADR-022). |
+| The overlay's coordination server | The panel and nodes still check device tokens and the daemon's pinned key, so a misconfigured overlay alone grants nothing (ADR-030); traffic metadata is visible to it. |
+| Third-party services the owner connects | Messenger, mail, calendar, and browser providers see the data that passes through them. |
