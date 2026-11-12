@@ -25,7 +25,7 @@ dependencies up; a channel silent too long; jobs stuck or `ambiguous`; the memor
 the last backup too old or failing its drill (ADR-027); disk encryption and file permissions
 (ADR-028); budget status. The same checks show as a status strip in the panel.
 
-**Panel views** (detailed in OQ-46): a per-message timeline of what Jaari did and why, built from
+**Panel views** (detailed in ADR-067): a per-message timeline of what Jaari did and why, built from
 the event and audit logs; jobs and routines; usage and cost; errors that need attention.
 
 **CLI.** `jaari status`, `jaari events --follow`, `jaari llm usage`, `jaari prompt --layers`

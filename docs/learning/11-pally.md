@@ -97,9 +97,9 @@ buys them.
 | Budget | At the limit, chat moves to a cheaper model and background work waits; one check-in before a job exhausts it | `onExceeded`: main session downgrades within its chain, children and routines queue; warn once at a job-level threshold | ADR-046 (owner chooses instead of a downgrade), ADR-059 |
 | Rate limits | Hold only the limited part | Per-provider and per-connector holds, not a global pause | ADR-059 |
 | Routines | Show requested and effective cadence; cap live searches per hour; learn from approved, declined, and expired drafts | Each routine shows both cadences and a per-routine call cap; draft outcomes feed the notification ledger | OQ-43, OQ-40 |
-| Secrets in chat | A pasted key is removed and rotation suggested; a one-time secure page for typing a secret | Channel ingress scrubs a pasted secret before the transcript is stored and tells the owner to rotate it; secret entry happens in the panel, never in chat | ADR-007, OQ-46 |
+| Secrets in chat | A pasted key is removed and rotation suggested; a one-time secure page for typing a secret | Channel ingress scrubs a pasted secret before the transcript is stored and tells the owner to rotate it; secret entry happens in the panel, never in chat | ADR-007, ADR-067 |
 | External AI apps | An MCP server with two tools (send a message, collect a long job by handle), linked by a code typed in the owner's chat | The smallest useful MCP surface for Jaari; approvals never pass through it | OQ-55 |
-| Panel | "Knows", "People", and "what Pally decided for each message and why" | Three panel views: profile facts, people, and a decisions view over `audit.jsonl` | OQ-46 |
+| Panel | "Knows", "People", and "what Pally decided for each message and why" | Three panel views: profile facts, people, and a decisions view over `audit.jsonl` | ADR-067 |
 | Groups (later) | Approvals, links, and codes only in the private chat; only your own message changes your permissions; stop answering a looping assistant | Already in ARCHITECTURE for approvals; add the loop breaker when groups ship | ADR-044 |
 
 **Alternative recommendations to learning/10.** Where Pally points somewhere else:
