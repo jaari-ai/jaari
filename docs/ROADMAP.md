@@ -80,8 +80,7 @@ Exit criteria:
   `node:http`, `node:https`, `node:net`, `node:tls`, or `undici` import elsewhere, and the
   address-class tests deny metadata, link-local, and the daemon's own ports (ADR-016, ADR-080).
 
-Open questions that block this phase: OQ-85, OQ-86, OQ-90. OQ-84
-(pinning the references) gates no item; decide it before the next `scripts/refs.sh` sync.
+Open questions that block this phase: OQ-85, OQ-86, OQ-90.
 Gate status: not passed.
 
 ## Phase 1: Memory

@@ -1,15 +1,20 @@
 # Jaari: Development
 
 ## refs/ (read-only references, ADR-002)
-`scripts/refs.sh` manages them. The manifest (name, URL, pinned ref) is inline in the script.
+`scripts/refs.sh` manages them. The manifest (name, URL, pinned full sha) is inline in the
+script, and the pins are tracked there (ADR-083).
 ~~~bash
 scripts/refs.sh                  # sync: clone/update every ref to its pin, then lock
 scripts/refs.sh sync pi          # one ref only
+scripts/refs.sh bump [name...]   # move pins to the latest default-branch commit
 scripts/refs.sh status           # commit, date, lock state, license per ref
 scripts/refs.sh lock             # re-apply chmod -R a-w
 ~~~
 - `sync` adds `/refs/` to `.git/info/exclude`, refuses to run if `refs/` is tracked,
   disables pushes from each ref, and rewrites `refs/INDEX.md` (commit + license per ref).
+- `sync` never moves a pin. To move one, run `bump`, review `git diff scripts/refs.sh`, and
+  commit the new pins on their own. `bump` warns when a licence line changed; update the
+  licence table in `AGENTS.md` before using that reference.
 - Claude Code: `.claude/settings.json` denies edits under `refs/`.
 - Codex and other agents: `AGENTS.md` forbids writing to `refs/`; the chmod enforces it.
 - pnpm, TSConfig, ESLint, Vitest use allowlists (`packages/*`, `apps/*`), so `refs/` is

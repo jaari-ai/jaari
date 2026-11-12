@@ -84,3 +84,4 @@
 | [080](080-egress-core-in-phase-0.md) | Egress core in Phase 0: every outbound call goes through `@jaari/http` from the start | Accepted |
 | [081](081-secrets-pasted-in-chat.md) | Secrets pasted in chat: scrubbed at channel ingress, never kept, rotation advised | Accepted |
 | [082](082-phase-split-update-and-catch-up.md) | Phase split for update and laptop catch-up | Accepted |
+| [083](083-pinned-reference-commits.md) | Reference repos are pinned in `scripts/refs.sh` and moved only with `bump` | Accepted |

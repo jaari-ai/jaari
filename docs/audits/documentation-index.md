@@ -24,7 +24,7 @@ only with a pointer), **generated** (written by a script).
 
 | Path | Purpose | Status | Leans on |
 |---|---|---|---|
-| `README.md` | Overview, design table, docs list, contributor start, lineage | current, with open points (says "pin" for the references: OQ-84) | ADR-001 to 020, 030, 048, 049 |
+| `README.md` | Overview, design table, docs list, contributor start, lineage | current | ADR-001 to 020, 030, 048, 049 |
 | `AGENTS.md` | Rules for coding agents, layout, docs workflow, reference licences, architecture rules | current | ADR-002, 009, 014, 016, 071, 072, 075 |
 | `CLAUDE.md` | Claude Code specifics; imports `AGENTS.md` | current | ADR-002 |
 | `NOTICE`, `LICENSE` | Third-party notices (no derived files yet); MIT | current | ADR-014, 016 |
@@ -32,7 +32,7 @@ only with a pointer), **generated** (written by a script).
 | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts` | Allowlist placeholders for the build | placeholders; no root `package.json` | ADR-002 |
 | `.github/workflows/release.yml`, `CODEOWNERS`, `dependabot.yml` | Tag-triggered PyPI release; workflow owners; action updates | exists, never run; no CI workflow | ADR-010, 043 |
 | `python/` | PyPI name-holder package | does not match `docs/guides/namespaces.md` section 6.2 (report D-06) | ADR-010 |
-| `scripts/refs.sh` | Clones, locks, and indexes `refs/` | current; follows upstream default branches, not pins (OQ-84) | ADR-002 |
+| `scripts/refs.sh` | Clones, locks, and indexes `refs/` | current; pins each reference to a full sha; `bump` moves pins (ADR-083) | ADR-002 |
 | `scripts/merge_docs.py` | Builds `JAARI_CONTEXT.md`; `--check` validates links, ADR tables, OQ ids and counts | current | none |
 | `JAARI_CONTEXT.md` | Merged copy of the docs for AI discussions | generated, untracked; never edit | none |
 
@@ -43,7 +43,7 @@ only with a pointer), **generated** (written by a script).
 | `docs/STATE.md` | Summary: what is decided, what is built, what is next, scheduled checks | current |
 | `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current, with open points (OQ-71 to 73) |
 | `docs/ACTION_PLAN.md` | Ordered next steps; a copy of the ADR table | current |
-| `docs/OPEN_QUESTIONS.md` | 21 open (OQ-70 to OQ-91); 70 resolved with ADR links; original wording | current |
+| `docs/OPEN_QUESTIONS.md` | 20 open (OQ-70 to OQ-91); 71 resolved with ADR links; original wording | current |
 
 ## Subsystem designs
 
@@ -57,15 +57,15 @@ only with a pointer), **generated** (written by a script).
 | `docs/MEMORY.md` | Memory layout and lifecycle | current, with open points (OQ-78, 87) | 003, 004, 023, 024, 026 to 029, 038, 047, 074 |
 | `docs/PERSONA.md` | Dials, curiosity, interruption scoring, routine rules | current | 008, 031, 033, 064 |
 | `docs/INTEGRATIONS.md` | Project identity assets; integrations summary | current, with open points (OQ-91) | 010, 039, 062, 063 |
-| `docs/DEVELOPMENT.md` | `refs/` handling, commands, docs conventions, ADR template, threat-model rule | current, with open points (OQ-84) | 002, 020, 069 |
+| `docs/DEVELOPMENT.md` | `refs/` handling, commands, docs conventions, ADR template, threat-model rule | current | 002, 020, 069, 083 |
 
 ## Decisions
 
-`docs/adr/README.md` is the index of the 82 ADRs (all Accepted). By topic:
+`docs/adr/README.md` is the index of the 83 ADRs (all Accepted). By topic:
 
 | Topic | ADRs |
 |---|---|
-| Core, licence, process | 001, 002, 009, 010, 014, 043, 044 |
+| Core, licence, process | 001, 002, 009, 010, 014, 043, 044, 083 |
 | Hosting, nodes, install | 015, 017, 030, 056, 057, 058, 082 |
 | Channels, owner, panel | 021, 022, 035, 067, 070, 076 |
 | Memory | 003, 004, 023, 024, 026, 029, 038, 047, 066, 074, 078 |
@@ -78,7 +78,7 @@ only with a pointer), **generated** (written by a script).
 | Plan and evals | 020, 041 |
 
 ADRs whose text is changed in part by a later ADR (read the `Amendments` section first):
-001, 005, 006, 007, 009, 011, 012, 013, 014, 015, 016, 017, 018, 019, 020, 021, 022, 025, 027,
+001, 002, 005, 006, 007, 009, 011, 012, 013, 014, 015, 016, 017, 018, 019, 020, 021, 022, 025, 027,
 030, 032, 034, 035, 036, 038, 039, 048, 049, 050, 051, 053, 056, 057, 060, 063, 071, 074. ADR-038's
 title still says "sensitive files local-only"; ADR-078 replaced that rule.
 
@@ -120,5 +120,5 @@ that the docs cite exists.
 | `pi` | `469d865` | MIT | Agent loop; reuse with attribution |
 | `openmausbot` | `b802268` | Apache-2.0; `enterprise/` source-available | Design reference |
 
-These commits are not pinned in tracked files (OQ-84). No binary documents exist in the
+These commits are pinned in `scripts/refs.sh` (ADR-083). No binary documents exist in the
 project tree.

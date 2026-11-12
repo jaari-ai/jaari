@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **21**.
+Last updated: 2026-11-12. Open: **20**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -53,7 +53,6 @@ leaning yet; the options listed are only the ones the docs already name.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-84 | Pinning the reference repos | `scripts/refs.sh` follows each upstream default branch and `refs/INDEX.md` is untracked, so the "pinned commit" that citations rely on changes at the next sync. Pin the five commits in the script, or change the docs to say "latest"? | 0 | None. On record: citations need a pinned commit (ADR-014, DEVELOPMENT.md) |
 | OQ-85 | Channel manifest and the package manifest | Is `ChannelManifest` the channel section of the ADR-071 `jaari` package manifest (with `egress` and `secrets`), or a separate object? What is the contract-test harness that the plugin guide cites? | 0 | None. On record: one manifest per package (ADR-071) |
 | OQ-86 | Provider refusal and the pinned session | ADR-011 moves a refused call to the next model; ADR-019 pins the main session and allows failover only when the provider never accepted the turn. What does the main session do on a refusal? | 0 | None. On record: next model (ADR-011); report or hand over, for off-limits categories (ADR-011) |
 | OQ-89 | Web budget | ADR-046 leaves search and fetch cost to "the separate web budget", and ADR-053 counts egress cost against it, but no ADR defines it. What is its default, and what happens at its limit? | 3 | None. On record: the example config values only (`monthlyUsd: 10`, `onExceeded: "local-only"`) |
@@ -100,8 +99,6 @@ phase starts.
 - **OQ-82.** Evidence: ADR-048 ("unless the owner pins it"), ADR-017 (placement rule), ADR-005.
 - **OQ-83.** Evidence: ADR-051 ("During Phase 6 shadow mode every action in owner-account
   sessions is logged"), ADR-052, ADR-068, ADR-070 ("for the first 14 days it only proposes").
-- **OQ-84.** Verified on 2026-11-12: each reference is at the commit in `refs/INDEX.md` and its
-  licence matches. If delayed: the next `scripts/refs.sh` run moves every reference.
 - **OQ-85.** Evidence: ARCHITECTURE.md (Channels, Contract), guides/channel-plugins.md, ADR-071
   (manifest with `kind`, `egress`, `secrets`; third-party packages in their own process; a
   local path is for development only).
@@ -193,6 +190,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-68 | The `@jaari/http` core (resolve, check, dial; address-class table; `direct`) ships in Phase 0 and every outbound call uses it; a lint rule refuses other network clients; adapters that cannot take the injected `fetch` stay off; owner-run local model servers reached only on their configured endpoint; container egress proxy ships with the first untrusted-input container | [ADR-080](adr/080-egress-core-in-phase-0.md) |
 | OQ-69 | Scrubbed at channel ingress before the transcript, daily log, or any model (known formats, labelled passwords, Luhn-valid cards, exact vault values); value never kept; message deleted where possible; rotation advised; secret-entry page offered; ADR-028 block-and-ask stays for other writes | [ADR-081](adr/081-secrets-pasted-in-chat.md) |
 | OQ-74 | Split by phase: Phase 0 keeps sleep detection, power, battery, and network re-probe, and a manual `jaari update` with a local pre-update snapshot; catch-up ships with the job engine (Phase 1), expired-approval re-asks with the real gate (Phase 3), automatic patch installs with quiet hours (Phase 2), the ADR-027 bundle with backup (Phase 3) | [ADR-082](adr/082-phase-split-update-and-catch-up.md) |
+| OQ-84 | Each reference pinned to a full sha in `scripts/refs.sh`; `sync` re-applies pins; `scripts/refs.sh bump` is the only way to move one, printing old and new commit and warning on a licence change; pins committed on their own | [ADR-083](adr/083-pinned-reference-commits.md) |
 
 ### Original questions
 
@@ -264,3 +262,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-68 | Egress before `@jaari/http` | The rule says all network egress goes through `@jaari/http`, but the roadmap ships it in Phase 4. How do model-provider, Telegram, speech, and model-download calls leave the host in Phases 0 to 3? | 0 |
 | OQ-69 | Secret pasted in chat | When an owner message contains a password, key, or card number, is the write blocked, is the value removed before the transcript and the raw log are stored, or is it kept verbatim? | 0 |
 | OQ-74 | Phase 0 items that need later parts | `jaari update` snapshots the stores (backup is Phase 3), and laptop catch-up needs the job engine (Phase 1), but both are Phase 0 items (ADR-057 states Phase 0 for catch-up; the roadmap places install and update there). Split the items, or move the parts they need? | 0 |
+| OQ-84 | Pinning the reference repos | `scripts/refs.sh` follows each upstream default branch and `refs/INDEX.md` is untracked, so the "pinned commit" that citations rely on changes at the next sync. Pin the five commits in the script, or change the docs to say "latest"? | 0 |

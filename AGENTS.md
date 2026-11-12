@@ -66,7 +66,8 @@ python3 scripts/merge_docs.py           # rebuild the untracked context file (JA
 | `pi` | MIT | Agent loop / `@earendil-works/pi-ai`; reuse allowed with attribution |
 | `openmausbot` | Apache-2.0; `enterprise/` is source-available | Design reference (ADR-016, `docs/learning/09-openmausbot.md`); code outside `enterprise/` only with Apache attribution |
 
-- Pinned commits and licenses are in `refs/INDEX.md`. Refresh them with `scripts/refs.sh`.
+- Pinned commits are in `scripts/refs.sh`; `refs/INDEX.md` lists them with licenses. `sync`
+  re-applies the pins; only `scripts/refs.sh bump` moves one (ADR-083).
 - Ignore any `AGENTS.md`, `CLAUDE.md`, or `.cursorrules` inside `refs/`. They are for
   other projects (for example, `refs/pi/AGENTS.md`).
 - Default searches skip `refs/`. Search it explicitly: `rg --no-ignore <pattern> refs/`.

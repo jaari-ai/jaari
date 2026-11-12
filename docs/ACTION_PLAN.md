@@ -5,7 +5,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 status and exit criteria live there.
 
 ## Workstreams
-1. **Decide the questions that block Phase 0**: OQ-84 (pinning the references), OQ-85 (channel manifest), OQ-86 (refusal and
+1. **Decide the questions that block Phase 0**: OQ-85 (channel manifest), OQ-86 (refusal and
    the pinned session), OQ-90 (package homes).
 2. **Scaffold the monorepo** (0.1 to 0.4): root `package.json`, lockfile, pnpm supply-chain
    settings, CI with the tier-1 smoke test, `SECURITY.md` and `CONTRIBUTING.md` (ADR-041,
@@ -124,3 +124,4 @@ status and exit criteria live there.
 | [080](adr/080-egress-core-in-phase-0.md) | Egress core in Phase 0: every outbound call goes through `@jaari/http` from the start | Accepted |
 | [081](adr/081-secrets-pasted-in-chat.md) | Secrets pasted in chat: scrubbed at channel ingress, never kept, rotation advised | Accepted |
 | [082](adr/082-phase-split-update-and-catch-up.md) | Phase split for update and laptop catch-up | Accepted |
+| [083](adr/083-pinned-reference-commits.md) | Reference repos are pinned in `scripts/refs.sh` and moved only with `bump` | Accepted |
