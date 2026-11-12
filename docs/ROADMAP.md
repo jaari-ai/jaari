@@ -48,7 +48,7 @@ effect. Entry: none.
 | 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement | 001, 065 | 0.1, 0.7; OQ-69, OQ-86 | Planned |
 | 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship | 017, 019, 056 | 0.1 | Planned |
 | 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains | 011, 019 | 0.1, 0.15; OQ-86 | Planned |
-| 0.8 | `ChannelAdapter` contract, typed prompts, and the CLI channel | 021, 035 | 0.5; OQ-85 | Planned |
+| 0.8 | `ChannelAdapter` contract, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081 | 0.5; OQ-85 | Planned |
 | 0.9 | `@jaari/capabilities`: manifest schema, built-in loader, daemon–node contract | 015, 018, 071 | 0.1; OQ-85, OQ-90 | Planned |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Planned |
 | 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079 | 0.1 | Planned |
@@ -71,11 +71,14 @@ Exit criteria:
 - Every record carries an `ownerId` (ADR-044).
 - A clock gap over 2 minutes is detected as sleep (ADR-057).
 - A binary older than its data refuses to start (ADR-056).
+- A key, token, labelled password, or Luhn-valid card number in an owner message is replaced
+  with `[secret removed: <kind>]` before the transcript and the daily log are written, and a
+  commit hash is left alone (ADR-081).
 - Every outbound call goes through `@jaari/http`: the lint rule fails on a direct `fetch`,
   `node:http`, `node:https`, `node:net`, `node:tls`, or `undici` import elsewhere, and the
   address-class tests deny metadata, link-local, and the daemon's own ports (ADR-016, ADR-080).
 
-Open questions that block this phase: OQ-69, OQ-74, OQ-85, OQ-86, OQ-90. OQ-84
+Open questions that block this phase: OQ-74, OQ-85, OQ-86, OQ-90. OQ-84
 (pinning the references) gates no item; decide it before the next `scripts/refs.sh` sync.
 Gate status: not passed.
 
@@ -92,7 +95,7 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 | 1.5 | Routines | 064 | 1.4; OQ-73 | Blocked (OQ-73: children, the notification ledger, and budgets come later) |
 | 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9; OQ-78 | Planned |
 | 1.7 | Daily audit | 004 | 1.1, 1.4 | Planned |
-| 1.8 | Capture evidence | 074 | 1.1; OQ-69 | Planned |
+| 1.8 | Capture evidence | 074, 081 | 1.1, 0.8 | Planned |
 | 1.9 | Local-model qualification and the `jaari llm eval` qualification fixtures | 019, 045 | 0.7 | Planned |
 | 1.10 | Correct and forget (erase is 3.9). Placement | 029 | 1.1 | Planned |
 
@@ -109,8 +112,8 @@ Exit criteria:
 - Qualification records pass rate, tokens per second, and time to first token per model
   (ADR-045).
 
-Open questions that block this phase: OQ-69, OQ-71 (until Phase 3 the loop has no pause,
-limits, usage log, secret scan, or backup), OQ-73, OQ-74, OQ-78.
+Open questions that block this phase: OQ-71 (until Phase 3 the loop has no pause,
+limits, usage log, pre-write scan of derived facts, or backup), OQ-73, OQ-74, OQ-78.
 Gate status: not passed.
 
 ## Phase 2: Persona and owner surfaces
@@ -163,7 +166,7 @@ grants land together.
 | 3.5 | Pause, emergency stop, and runaway limits | 031 | 0.5; OQ-71 | Planned |
 | 3.6 | Standing grants | 072 | 3.1 | Planned |
 | 3.7 | Backup, restore, and the monthly drill | 027 | 1.1, 3.2; OQ-87 | Planned |
-| 3.8 | Encryption at rest: pre-write secret scan, encrypted remotes, `jaari memory purge` | 028 | 1.1 | Planned |
+| 3.8 | Encryption at rest: pre-write secret scan of derived facts and files (owner messages are scrubbed at ingress from Phase 0, ADR-081), encrypted remotes, `jaari memory purge` | 028 | 1.1 | Planned |
 | 3.9 | Erase. Placement | 029 | 3.1, 1.10; OQ-87 | Planned |
 | 3.10 | Shadow mode | 068 | 3.1 | Planned |
 | 3.11 | Degraded mode | 059 | 3.5 | Planned |

@@ -33,7 +33,9 @@
 - Backup (ADR-027): memory pushed to owner-chosen git remotes within minutes; snapshots of
   SQLite, audit log, and config on an owner-set schedule (nightly by default) to local disk,
   a NAS, or S3-compatible storage; monthly restore drill.
-- Encryption (ADR-028): secrets are blocked before they reach memory; remotes not owned by the
+- Encryption (ADR-028): secrets are blocked before they reach memory; a secret in an owner
+  message is replaced with `[secret removed: <kind>]` at channel ingress, before the transcript
+  and the daily log, and the owner is told to rotate it (ADR-081); remotes not owned by the
   owner are encrypted; `jaari memory purge` rewrites history.
 - Forgetting (ADR-029): corrections supersede and keep the old line struck through; forget
   removes a fact and can always be undone; erase rewrites history and cannot. The owner asks in

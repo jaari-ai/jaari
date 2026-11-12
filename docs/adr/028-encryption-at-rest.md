@@ -1,6 +1,7 @@
 # ADR-028: Encryption at rest: prevent secrets in memory, encrypt every remote you do not control, purge on demand
 
 - **Status:** Accepted
+- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -42,6 +43,11 @@ complexity without stopping a host compromise); a Jaari-managed passphrase-unloc
 (the owner can do it with standard tools; Jaari documents the trade-off instead); `git-crypt`
 for third-party hosts (metadata leaks); unencrypted pushes to third-party storage; no purge
 command (a leaked secret would stay in history and every remote).
+
+## Amendments
+- **ADR-081 (resolves OQ-69):** owner messages are scrubbed at channel ingress by the same
+  rules (known formats, labelled passwords, exact vault values) before any storage; block-and-ask
+  stays for every other memory write.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

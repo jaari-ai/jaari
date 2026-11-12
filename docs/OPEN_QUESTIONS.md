@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **23**.
+Last updated: 2026-11-12. Open: **22**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -18,7 +18,6 @@ leaning yet; the options listed are only the ones the docs already name.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-69 | Secret pasted in chat | When an owner message contains a password, key, or card number, is the write blocked, is the value removed before the transcript and the raw log are stored, or is it kept verbatim? | 0 | None. On record: block and ask (ADR-028); keep verbatim (ADR-074); scrub and advise rotation (learning/11, not adopted) |
 | OQ-70 | Sandbox backend under Compose | With the daemon in a Compose container and no Docker socket, is the sandbox a rootless Podman sidecar or gVisor? How is the daemon's own container hardened? | 4 | None. On record: rootless Podman sidecar or gVisor (ADR-056); Docker or Podman container, bubblewrap (ADR-034, ADR-036) |
 | OQ-79 | Capability names that are missing | Which capability names cover the gated effects that have none (vault writes, address-book writes, file-storage uploads, memory erase), are internal read tools (`memory.search`, `records.query`, `skill.load`) capabilities, and which capability has the `takeover` class? | 3 | None. On record: a new name takes an ADR (ADR-071) |
 | OQ-80 | Secrets held by MCP servers | A local MCP server gets its secrets in its environment at start and keeps them while it runs. Is that an accepted exception to "resolved only inside executors, for the duration of the call"? | 4 | None. On record: resolve at start (ADR-034); per-call only (ADR-007, ADR-013) |
@@ -45,7 +44,7 @@ leaning yet; the options listed are only the ones the docs already name.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-71 | Safety pieces before Phase 3 | Pause, emergency stop, runaway limits, the usage and event logs, the pre-write secret scan, memory push, and snapshots are Phase 3 (or have no phase), but the agent loop, scheduler, canonicalize, and curiosity run from Phases 0 to 2. Which of them ship earlier? | 1 | None. On record: Phase 3 placement (ROADMAP); ADR-031, ADR-027, ADR-028, ADR-032 state no phase |
+| OQ-71 | Safety pieces before Phase 3 | Pause, emergency stop, runaway limits, the usage and event logs, the pre-write secret scan of derived facts and files (owner messages are scrubbed at ingress from Phase 0, ADR-081), memory push, and snapshots are Phase 3 (or have no phase), but the agent loop, scheduler, canonicalize, and curiosity run from Phases 0 to 2. Which of them ship earlier? | 1 | None. On record: Phase 3 placement (ROADMAP); ADR-031, ADR-027, ADR-028, ADR-032 state no phase |
 | OQ-72 | Panel, overlay, and node link timing | The Phase 2 panel needs TLS over the overlay (Phase 7), and its Approvals, secret entry, Activity, and Usage views need Phase 3 parts. Remote nodes (Phase 6) need the node link (Phase 7). Which parts move, or which views wait? | 2 | None. On record: overlay in Phase 7 (ADR-020); panel views in Phase 2 (ADR-067) |
 | OQ-73 | Routines before children | Routines ship in Phase 1 and "children do the work", but children are Phase 4, the notification ledger is Phase 2, and budgets are Phase 3. What can a Phase 1 routine do, and how are its results delivered? | 1 | None. On record: Phase 1 (ADR-064); receipts with children in Phase 4 (ADR-061) |
 | OQ-74 | Phase 0 items that need later parts | `jaari update` snapshots the stores (backup is Phase 3), and laptop catch-up needs the job engine (Phase 1), but both are Phase 0 items (ADR-057 states Phase 0 for catch-up; the roadmap places install and update there). Split the items, or move the parts they need? | 0 | None. On record: Phase 0 for catch-up (ADR-057); snapshot before update (ADR-056, which states no phase) |
@@ -67,9 +66,6 @@ leaning yet; the options listed are only the ones the docs already name.
 Evidence is `ADR-NNN` or a file. "If delayed" is the cost of not deciding before the blocked
 phase starts.
 
-- **OQ-69.** Settled: one-time codes pasted during a code request are replaced in the transcript
-  (ADR-055). Gap: ADR-028 blocks a memory write that contains a secret; ADR-074 writes the
-  owner's turn verbatim; ADR-065 stores and backs up the transcript with no scan stated.
 - **OQ-70.** Settled: the sandbox never gets the Docker socket (ADR-056); a boot self-check
   disables code execution if the sandbox is weak (ADR-036). Reopens the Compose part of OQ-35.
   If delayed: MCP servers, code execution, document parsing, and CLI engines have no backend
@@ -198,6 +194,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-64 | ADR-013 accepted with the ADR-050 vendor check and amendments from ADR-050, ADR-063, ADR-071, and ADR-072 | [ADR-013](adr/013-vault-providers.md), [ADR-050](adr/050-vault-verification-and-one-time-codes.md) |
 | OQ-67 | On a host without an OS keychain, secret zero comes from the `host-credential` provider: a file supplied by systemd (`LoadCredentialEncrypted=` by default, TPM-sealed when present) or a Compose secret; owner-only, outside the data directory and backups; never an environment variable | [ADR-079](adr/079-secret-zero-on-servers.md) |
 | OQ-68 | The `@jaari/http` core (resolve, check, dial; address-class table; `direct`) ships in Phase 0 and every outbound call uses it; a lint rule refuses other network clients; adapters that cannot take the injected `fetch` stay off; owner-run local model servers reached only on their configured endpoint; container egress proxy ships with the first untrusted-input container | [ADR-080](adr/080-egress-core-in-phase-0.md) |
+| OQ-69 | Scrubbed at channel ingress before the transcript, daily log, or any model (known formats, labelled passwords, Luhn-valid cards, exact vault values); value never kept; message deleted where possible; rotation advised; secret-entry page offered; ADR-028 block-and-ask stays for other writes | [ADR-081](adr/081-secrets-pasted-in-chat.md) |
 
 ### Original questions
 
@@ -267,3 +264,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-64 | Accept ADR-013 | ADR-011 and ADR-012 were accepted (ADR-019). ADR-013 (vault providers) is still Proposed and depends on OQ-29: Bitwarden Lite licence needs and the 1Password service-account setup are unverified. | 3 |
 | OQ-67 | Secret zero on a server | On a headless Linux server or in a Compose container, which store holds secret zero, and how does the daemon get it after an unattended restart? | 0 |
 | OQ-68 | Egress before `@jaari/http` | The rule says all network egress goes through `@jaari/http`, but the roadmap ships it in Phase 4. How do model-provider, Telegram, speech, and model-download calls leave the host in Phases 0 to 3? | 0 |
+| OQ-69 | Secret pasted in chat | When an owner message contains a password, key, or card number, is the write blocked, is the value removed before the transcript and the raw log are stored, or is it kept verbatim? | 0 |

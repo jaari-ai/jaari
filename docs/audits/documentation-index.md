@@ -43,7 +43,7 @@ only with a pointer), **generated** (written by a script).
 | `docs/STATE.md` | Summary: what is decided, what is built, what is next, scheduled checks | current |
 | `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current, with open points (OQ-71 to 74) |
 | `docs/ACTION_PLAN.md` | Ordered next steps; a copy of the ADR table | current |
-| `docs/OPEN_QUESTIONS.md` | 23 open (OQ-69 to OQ-91); 68 resolved with ADR links; original wording | current |
+| `docs/OPEN_QUESTIONS.md` | 22 open (OQ-70 to OQ-91); 69 resolved with ADR links; original wording | current |
 
 ## Subsystem designs
 
@@ -54,14 +54,14 @@ only with a pointer), **generated** (written by a script).
 | `docs/THREAT_MODEL.md` | Actor, attack, control, left-over table; "not protected against" list | current | 069 and the ADRs each row cites |
 | `docs/LLM.md` | Routing layers, roles, local model sizing, presets | current, with open points (OQ-86) | 011, 019, 037, 045, 046, 065, 066, 078 |
 | `docs/WEB.md` | Search, fetch ladder, browser placement, presets | current (repeats the egress pool that SECURITY_MODEL.md owns) | 012, 016, 017, 030, 048, 049, 053 |
-| `docs/MEMORY.md` | Memory layout and lifecycle | current, with open points (OQ-69, 78, 87) | 003, 004, 023, 024, 026 to 029, 038, 047, 074 |
+| `docs/MEMORY.md` | Memory layout and lifecycle | current, with open points (OQ-78, 87) | 003, 004, 023, 024, 026 to 029, 038, 047, 074 |
 | `docs/PERSONA.md` | Dials, curiosity, interruption scoring, routine rules | current | 008, 031, 033, 064 |
 | `docs/INTEGRATIONS.md` | Project identity assets; integrations summary | current, with open points (OQ-91) | 010, 039, 062, 063 |
 | `docs/DEVELOPMENT.md` | `refs/` handling, commands, docs conventions, ADR template, threat-model rule | current, with open points (OQ-84) | 002, 020, 069 |
 
 ## Decisions
 
-`docs/adr/README.md` is the index of the 80 ADRs (all Accepted). By topic:
+`docs/adr/README.md` is the index of the 81 ADRs (all Accepted). By topic:
 
 | Topic | ADRs |
 |---|---|
@@ -70,7 +70,7 @@ only with a pointer), **generated** (written by a script).
 | Channels, owner, panel | 021, 022, 035, 067, 070, 076 |
 | Memory | 003, 004, 023, 024, 026, 029, 038, 047, 066, 074, 078 |
 | Persona and proactive work | 008, 033, 037, 042, 060, 061, 064 |
-| Gate, secrets, safety | 006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075, 079 |
+| Gate, secrets, safety | 006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075, 079, 081 |
 | Models | 011, 019, 045, 046, 065, 077 |
 | Web, browser, egress | 005, 012, 048, 049, 051, 052, 053, 054, 055, 080 |
 | Operations | 025, 027, 028, 032, 059 |

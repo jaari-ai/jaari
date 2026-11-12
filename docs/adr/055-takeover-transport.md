@@ -1,6 +1,7 @@
 # ADR-055: Takeover transport: per-adapter live view behind one panel view, a non-blocking state protocol, codes from chat scrubbed before the model
 
 - **Status:** Accepted
+- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -53,6 +54,10 @@ targeting from openinstinct `browser/enforce.ts` (behaviour only).
 One transport for every adapter (providers and desktops differ); a blocking takeover call; an
 unbounded wait; dropping the task at timeout; refusing codes pasted in chat (friction when the
 owner is in a hurry); letting the model read a pasted code.
+
+## Amendments
+- **ADR-081:** codes pasted in chat are one case of the general ingress scrub; "[code used]" is
+  kept for a pending code request.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -43,6 +43,12 @@ the backup set; never an environment variable (ADR-079). Vault
 writes go through the gate. OAuth tokens are vault items, refreshed by the executor (ADR-062;
 rotation and the gate: OQ-75). Payment-card fields are not resolvable in v1 (ADR-040).
 
+Secrets pasted in chat (ADR-081): every owner message is scrubbed at channel ingress, before
+the transcript, the daily log, or any model: known key and token formats, labelled passwords,
+Luhn-valid card numbers, and exact vault values become `[secret removed: <kind>]`. The value is
+never kept; Jaari deletes the message where the channel can, advises rotation, and offers the
+single-use secret-entry page. A bare unlabelled password is not recognised.
+
 ## Capabilities (ADR-018)
 The only names the model can ask for. A manifest's `provides` lists these and nothing else;
 host (`daemon` or `node`) and provider (`local-profile`, `remote-cdp`, `macos`, `xvfb`) are

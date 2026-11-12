@@ -5,7 +5,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 status and exit criteria live there.
 
 ## Workstreams
-1. **Decide the questions that block Phase 0**: OQ-69 (a secret pasted in chat), OQ-74 (update and catch-up
+1. **Decide the questions that block Phase 0**: OQ-74 (update and catch-up
    dependencies), OQ-84 (pinning the references), OQ-85 (channel manifest), OQ-86 (refusal and
    the pinned session), OQ-90 (package homes).
 2. **Scaffold the monorepo** (0.1 to 0.4): root `package.json`, lockfile, pnpm supply-chain
@@ -123,3 +123,4 @@ status and exit criteria live there.
 | [078](adr/078-documents-follow-owner-routing.md) | Documents follow the owner's model routing; no forced local-only path for sensitive files | Accepted |
 | [079](adr/079-secret-zero-on-servers.md) | Secret zero on a server: a `host-credential` provider fed by the service manager | Accepted |
 | [080](adr/080-egress-core-in-phase-0.md) | Egress core in Phase 0: every outbound call goes through `@jaari/http` from the start | Accepted |
+| [081](adr/081-secrets-pasted-in-chat.md) | Secrets pasted in chat: scrubbed at channel ingress, never kept, rotation advised | Accepted |

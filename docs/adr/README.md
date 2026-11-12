@@ -82,3 +82,4 @@
 | [078](078-documents-follow-owner-routing.md) | Documents follow the owner's model routing; no forced local-only path for sensitive files | Accepted |
 | [079](079-secret-zero-on-servers.md) | Secret zero on a server: a `host-credential` provider fed by the service manager | Accepted |
 | [080](080-egress-core-in-phase-0.md) | Egress core in Phase 0: every outbound call goes through `@jaari/http` from the start | Accepted |
+| [081](081-secrets-pasted-in-chat.md) | Secrets pasted in chat: scrubbed at channel ingress, never kept, rotation advised | Accepted |

@@ -5,7 +5,7 @@ Last updated: 2026-11-12
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (80 ADRs, all Accepted)
+## Decided (81 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain (ADR-010, 014, 043). npm and PyPI names are
@@ -27,7 +27,7 @@ The index is [adr/README.md](adr/README.md). By area:
 - Safety: digest-bound approvals, `secretRef` secrets and vault providers, OpenMausBot
   hardening, one capability vocabulary with a deny-all gate from Phase 0, standing grants,
   shadow mode, kill switch and limits, outside lineage, threat model, no payments in v1
-  (ADR-006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075, 079).
+  (ADR-006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075, 079, 081).
 - Models: role and tier routing, a pinned main session, local-only defaults decided at init,
   local-model qualification, a monthly budget (ADR-011, 019, 045, 046).
 - Web and computer use: search, fetch ladder, neutral browser surface with adapters,
@@ -68,8 +68,7 @@ Nothing runs yet. No package exists under `packages/` or `apps/`.
 ## Now
 Phase 0: Foundation, not started. Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
-Six open questions should be decided before Phase 0 work: OQ-69, OQ-74, OQ-84, OQ-85, OQ-86,
-OQ-90.
+Five open questions should be decided before Phase 0 work: OQ-74, OQ-84, OQ-85, OQ-86, OQ-90.
 
 ## Scheduled checks that ADRs defer
 - Phase 1: measure the candidate local models (ADR-045).
@@ -81,4 +80,4 @@ OQ-90.
   leaving Experimental (ADR-025, ADR-065).
 
 ## Open questions
-23 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+22 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
