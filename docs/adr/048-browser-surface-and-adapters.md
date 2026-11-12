@@ -1,6 +1,7 @@
 # ADR-048: Browser surface: one neutral tool surface, pluggable browser adapters, any egress route, native toolsets mapped in Phase 6
 
 - **Status:** Accepted
+- **Extended by:** [ADR-071](071-capability-packages.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -65,6 +66,9 @@ Vendor-native toolsets as the only surface (model lock-in; the SDK's driver woul
 gate); one built-in browser (no choice of host, provider, or anti-detect); fingerprint spoofing in
 core (it belongs to an owner choice, and it can get owner accounts flagged); a JavaScript
 execution member.
+
+## Amendments
+- **ADR-071:** browser adapters are capability packages with a checked manifest.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

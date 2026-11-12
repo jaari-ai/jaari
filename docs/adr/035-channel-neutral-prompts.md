@@ -1,6 +1,7 @@
 # ADR-035: Channel-neutral prompts: Jaari asks in types, each channel renders what it can
 
 - **Status:** Accepted
+- **Extended by:** [ADR-037](037-voice.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -39,6 +40,9 @@ Each plugin formatting approvals itself (inconsistent wording and a second parse
 model reading free-text replies to decide what was approved (puts an LLM in the approval path);
 accepting a bare "yes" with several prompts open (ambiguous binding); buttons only (excludes
 text-only channels such as iMessage and SMS).
+
+## Amendments
+- **ADR-037:** decides spoken answers (left here as OQ-16): a spoken approval is one rendering of the prompt.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

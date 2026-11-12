@@ -1,6 +1,7 @@
 # ADR-063: The agent's mailbox: every mailbox option coded as an adapter, setup guides per option, inbound mail as data, no phone number in v1
 
 - **Status:** Accepted
+- **Extended by:** [ADR-071](071-capability-packages.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -46,6 +47,9 @@ openinstinct `email/agent-email.ts` (docs only) and open-instinct `principal.ts`
 One supported mailbox type; a project-hosted mailbox; inbound mail as authority; reading the whole
 personal inbox when the agent mailbox is a scoped alias; standing grants for sending; an SMS
 gateway node.
+
+## Amendments
+- **ADR-071:** mailbox providers are capability packages with a checked manifest.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -1,6 +1,7 @@
 # ADR-016: Hardening borrowed from OpenMausBot: dispatch re-check, chained audit, resolve-check-dial egress, owner hold
 
 - **Status:** Accepted
+- **Extended by:** [ADR-055](055-takeover-transport.md), [ADR-077](077-subscription-cli-engines.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -8,6 +9,10 @@
 
 ## Alternatives rejected
 Adopting its approval model (approval bound to a request id, cards truncated at 400 characters, Full access as the default, the provider's LLM reviewer deciding at Approve-for-me: all weaker than ADR-006 and against principle 9); detecting outbound actions from verbs in tool names (Jaari maps every tool to a declared capability); its roster of bots, rooms, and Chief of Staff (multi-agent product shape, a v1 non-goal); driving vendor CLIs as the main loop (ADR-001; allowed only for sandboxed children, ADR-077); a hosted relay, hosted Composio broker, and vendor cloud desktop (not self-hosted); its event log as an audit record (lossy by design: drops on overflow, fire-and-forget writes); a decision model that fails open (Jaari's local-only roles fail closed, ADR-011); amending ADR-005, 006, 007 in place (they are accepted; this ADR records the additions so the owner can accept or reject them as a set).
+
+## Amendments
+- **ADR-055:** decides the takeover transport that point 7 left open ("Transport stays OQ-34"); the hold rules are unchanged.
+- **ADR-077:** own-loop coding CLIs are allowed only as sandboxed children.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

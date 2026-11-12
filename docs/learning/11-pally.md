@@ -8,6 +8,11 @@ Trusted Pals pages, and its Pally-vs-Instinct comparison. Reference table and li
 taken; the proposals below sit next to those in
 [10-open-questions-review.md](10-open-questions-review.md).
 
+> Since decided (2026-11-12): the questions this note touches have ADRs (see the *Resolved* table
+> in OPEN_QUESTIONS.md). Borrowed items were adopted in part; the standing send grant, verb
+> gating in shadow mode, and automatic downgrade at the budget limit were rejected (ADR-072,
+> ADR-051, ADR-046).
+
 ## 1. What Pally does
 
 **Product.** A personal assistant you text. Made by Pally Technologies, Inc. (Y

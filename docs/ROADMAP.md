@@ -6,22 +6,333 @@ by the owner on a VPS, a remote server, home hardware, or a laptop (ADR-017).
 
 **Phases are a soft plan (ADR-020).** They say what to build roughly first, not what is
 forbidden before. An item can start in any phase once its *needs* are met, and a phase is
-never "closed" by a calendar. *Needs* are questions or decisions required **before that item
-ships**, not before the phase starts. Per-item status lives in [STATE.md](STATE.md).
+never "closed" by a calendar. This file carries the per-item status;
+[STATE.md](STATE.md) gives the summary.
 
-| Phase | Scope | Needs before the item ships |
-|---|---|---|
-| 0 Foundation | Monorepo scaffolding; config loader and `jaari init` (asks for the target); `@jaari/llm` providers, tiers, roles, fallback chains; `ChannelAdapter` contract + CLI channel; `@jaari/capabilities` (manifest, loader, daemon–node contract, ADR-015/018); deny-all `@jaari/gate` stub; `@jaari/secrets` resolver with the `os-keychain` provider; laptop sleep/wake rule (ADR-057); install, update, and migrations (ADR-056) and `jaari doctor`; project process files (ADR-043); `ownerId` in the data model (ADR-044); persistent main session (ADR-065); capability package manifest and built-in loader (ADR-071) | None open |
-| 1 Memory | Memory repo and write path; retrieval and context assembly; scheduler and routines (ADR-064); canonicalize (6h); daily audit; local-model qualification (ADR-045); capture evidence (ADR-074) | None open |
-| 2 Persona | Dials and monitor; curiosity from gap queue; quiet hours; notification ledger; prompt versioning (ADR-042); replay harness and golden threads (ADR-041); skills (ADR-060; third-party ones in Phase 4 once the reader role exists); owner panel (ADR-067); onboarding (ADR-070); voice notes and optional spoken replies (ADR-037) | None open |
-| 3 Safety | Real gate (digests, approvals, 15-minute expiry) + hash-chained `audit.jsonl`; vault providers (Bitwarden, 1Password; ADR-050); LLM/web budgets (ADR-046) + usage log; kill switch; standing grants (ADR-072); backup and encryption; shadow mode (ADR-068); threat model (ADR-069); degraded mode (ADR-059) | None open |
-| 4 Background work | Children; `llm.escalate`; `reader` role and outside lineage (ADR-075); `web.search`, `web.fetch` with pluggable rungs (ADR-049); optional Web Bot Auth signing (ADR-054); `@jaari/http` resolve-check-dial egress with `direct` and `owner-exit` providers; MCP client with the first sandbox backend for local servers (ADR-034); third-party skills (ADR-060); code execution (ADR-036); headless CLI commands (ADR-076); subscription CLI engines for sandboxed children (ADR-077) | None open |
-| 5 Integrations | GitHub, npm, PyPI, email; OAuth broker (ADR-062); the agent's mailbox (ADR-063); calendar, contacts, and file storage (ADR-039); documents (ADR-038); photo notes (ADR-066); inbound triggers (ADR-073); MCP server for paired desktop apps (ADR-076) | None open |
-| 6 Computer use | Neutral `browser.*`/`computer.*` surface and pluggable browser adapters (ADR-048) under the placement rule (ADR-017); native Anthropic and Gemini toolsets as an `@jaari/llm` mapping; local profile or owner exit node; remote CDP; takeover (ADR-055); commitment classifier (ADR-051); browser worker child and task-scoped origins, with the scope rule reviewed from shadow-mode logs (ADR-052); `computer.use` on a host virtual desktop; remote nodes via `jaari capability install`; macOS permission matrix (ADR-057) | None open |
-| 7 Hardening | Firecracker backend; container egress proxy; overlay and sizing per target; multi-device state and host migration (ADR-058); observability; mobile and residential egress providers | None open |
-| 8 Evals | `jaari llm eval` fixtures and live behaviour tests (ADR-041); learned router experiment; learning from outcomes (ADR-061) | None open |
-| Later | Live calls (ADR-037); payments rail (`pay` is reserved, ADR-040); face recognition, image similarity search, and albums (ADR-066); trust tiers, agent network (non-goals for v1) | None open |
+## How to read this file
 
-Egress arrives in steps: the address-class gate with `direct` and `owner-exit` for fetch in
-Phase 4; the browser's SOCKS5 listener and owner-account pinning in Phase 6; `mobile` and
-`residential-proxy` providers (anonymous traffic only) in Phase 7.
+- **Item IDs** (`0.1`, `3.4`) are stable. Do not renumber; add the next number.
+- **Needs** are what must be true **before that item ships**: an earlier item, or an open
+  question from [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+- **Status** is one of:
+
+  | Status | Meaning |
+  |---|---|
+  | Planned | Designed in the ADRs; no code |
+  | In progress | Some of the work exists in the repo |
+  | Implemented | Code exists; the exit criteria are not yet shown to pass |
+  | Verified | The exit criteria that cover it pass, with the evidence linked |
+  | Blocked | Cannot ship as placed until the named open question is decided |
+  | Delivered | A document deliverable that exists |
+
+  A written design is never "Implemented", and "Verified" needs a passing check.
+- **Exit criteria** are the pass conditions that the ADRs already state for the phase's items.
+  A phase exits when every item in it is Verified and every exit criterion passes. Review
+  [THREAT_MODEL.md](THREAT_MODEL.md) at each phase exit (ADR-069).
+- **Placement** marks an item whose ADR states no phase; it is placed where its dependencies
+  put it.
+
+Current position: **Phase 0, not started.** No package exists; no gate has passed.
+
+## Phase 0: Foundation
+
+Purpose: a daemon that starts, talks on the CLI, calls a model, and refuses every gated
+effect. Entry: none.
+
+| ID | Item | ADRs | Needs | Status |
+|---|---|---|---|---|
+| 0.1 | Monorepo scaffolding: root `package.json`, lockfile, pnpm supply-chain settings | 002, 043 | none | In progress (root config files exist as placeholders; no `package.json`) |
+| 0.2 | CI on every pull request: lint, typecheck, tests, tier-1 smoke test, DCO check, gitleaks, licence check | 041, 043 | 0.1 | Planned |
+| 0.3 | Project process files: `SECURITY.md`, `CONTRIBUTING.md` | 043 | none | Planned |
+| 0.4 | Namespaces and release: secure the npm and PyPI names, the `python/` pointer package, the release workflow ([guides/namespaces.md](guides/namespaces.md)). Placement | 010 | none | In progress (`release.yml` and `python/` exist; `python/` does not match the guide; names not secured) |
+| 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement | 001, 065 | 0.1, 0.7; OQ-69, OQ-86 | Planned |
+| 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship | 017, 019, 056 | 0.1 | Planned |
+| 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains | 011, 019 | 0.1; OQ-68, OQ-86 | Planned |
+| 0.8 | `ChannelAdapter` contract, typed prompts, and the CLI channel | 021, 035 | 0.5; OQ-85 | Planned |
+| 0.9 | `@jaari/capabilities`: manifest schema, built-in loader, daemon–node contract | 015, 018, 071 | 0.1; OQ-85, OQ-90 | Planned |
+| 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Planned |
+| 0.11 | `@jaari/secrets` resolver with the `os-keychain` provider | 007, 013, 018 | 0.1; OQ-67 | Blocked (OQ-67, for server targets) |
+| 0.12 | Install, update, and migrations; `jaari doctor` (checks are added as their features ship) | 056, 032 | 0.5; OQ-74 | Planned |
+| 0.13 | Laptop sleep and wake rule | 057 | 0.5; OQ-74 | Planned |
+| 0.14 | `ownerId` in the data model | 044 | 0.5 | Planned |
+
+Exit criteria:
+- The tier-1 smoke test boots the daemon on the scripted engine in CI on every pull request,
+  with no API calls (ADR-041).
+- Through the gate stub, every gated capability refuses and read-class ones run (ADR-018).
+- A manifest with an unknown name or kind fails closed (ADR-071).
+- `jaari doctor` warns when an `env` or `file` secret provider is in use (ADR-018).
+- `SECURITY.md`, `CONTRIBUTING.md`, the DCO check, gitleaks, the licence check, and the pnpm
+  settings are in the repo (ADR-043).
+- Every record carries an `ownerId` (ADR-044).
+- A clock gap over 2 minutes is detected as sleep (ADR-057).
+- A binary older than its data refuses to start (ADR-056).
+
+Open questions that block this phase: OQ-67, OQ-68, OQ-69, OQ-74, OQ-85, OQ-86, OQ-90. OQ-84
+(pinning the references) gates no item; decide it before the next `scripts/refs.sh` sync.
+Gate status: not passed.
+
+## Phase 1: Memory
+
+Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0.5, 0.7.
+
+| ID | Item | ADRs | Needs | Status |
+|---|---|---|---|---|
+| 1.1 | Memory repo, single writer, write path | 003, 026 | 0.5 | Planned |
+| 1.2 | Structured records, `records.query`, FTS5 search | 023 | 1.1 | Planned |
+| 1.3 | Context assembly; session orientation and re-injection from state | 024, 065 | 1.2 | Planned |
+| 1.4 | Job engine; catch-up after sleep | 025, 057 | 0.5; OQ-74 | Planned |
+| 1.5 | Routines | 064 | 1.4; OQ-73 | Blocked (OQ-73: children, the notification ledger, and budgets come later) |
+| 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9; OQ-78 | Planned |
+| 1.7 | Daily audit | 004 | 1.1, 1.4 | Planned |
+| 1.8 | Capture evidence | 074 | 1.1; OQ-69 | Planned |
+| 1.9 | Local-model qualification and the `jaari llm eval` qualification fixtures | 019, 045 | 0.7 | Planned |
+| 1.10 | Correct and forget (erase is 3.9). Placement | 029 | 1.1 | Planned |
+
+Exit criteria:
+- The three ADR-023 fixtures pass: the exact balance of a budget with 20 expenses; an
+  appointment found from a related question seven days later; the bill, the appointment
+  change, and the frequent contact's reply surfaced from 200 mixed messages.
+- Invented-fact cases are rejected by the capture checks (ADR-074).
+- A canonicalize pass that would delete more than 20% of a profile file is held (ADR-047).
+- A half-done write intent is completed, found by its mutation id, or quarantined, never
+  deleted (ADR-026).
+- After a restart, a safe step reruns once and an unsafe step that had started is never rerun
+  (ADR-025).
+- Qualification records pass rate, tokens per second, and time to first token per model
+  (ADR-045).
+
+Open questions that block this phase: OQ-69, OQ-71 (until Phase 3 the loop has no pause,
+limits, usage log, secret scan, or backup), OQ-73, OQ-74, OQ-78.
+Gate status: not passed.
+
+## Phase 2: Persona and owner surfaces
+
+Purpose: the dials, proactive messages that earn the interruption, and the first channels
+beyond the CLI. Entry: Phase 1 memory and the job engine.
+
+| ID | Item | ADRs | Needs | Status |
+|---|---|---|---|---|
+| 2.1 | Dials and monitor | 008 | 0.5 | Planned |
+| 2.2 | Curiosity from the gap queue | 008 | 1.6, 2.1 | Planned |
+| 2.3 | Quiet hours, notification ledger, digests, delivery | 033 | 2.1 | Planned |
+| 2.4 | Prompt versioning | 042 | 0.5 | Planned |
+| 2.5 | Replay harness and golden threads | 041 | 0.2 | Planned |
+| 2.6 | Skills: built-in and owner (third-party is 4.10) | 060 | 1.1 | Planned |
+| 2.7 | Owner authentication: device registry, `jaari pair`, `jaari devices`. Placement | 022 | 0.8 | Planned |
+| 2.8 | Telegram channel. Placement | 021 | 0.8, 2.7 | Planned |
+| 2.9 | Owner panel | 067 | 2.7; OQ-72 | Blocked (OQ-72: needs TLS over the overlay, item 7.4, and Phase 3 parts for four of its views) |
+| 2.10 | Onboarding | 070 | 2.6; OQ-83 | Planned |
+| 2.11 | Voice notes and optional spoken replies | 037 | 0.8 | Planned |
+
+Exit criteria:
+- Tier-1 "quiet" scenarios pass: quiet hours, the 7-day rule, the outbox duplicate window, only
+  the main session speaks (ADR-041).
+- An override file for a locked prompt is refused at load, with a line in `jaari doctor`
+  (ADR-042).
+- The tool list and the stable prompt layer stay byte-identical across a session's turns
+  (ADR-042).
+- Pairing codes are single use, last 10 minutes, and lock out after 5 wrong tries (ADR-022).
+- The panel loads no third-party scripts and shows untrusted content as plain text (ADR-067).
+- Onboarding asks at most one gap question a day (ADR-070).
+- A conditional spoken answer to an approval is refused and asked again (ADR-037).
+
+Open questions that block this phase: OQ-72, OQ-83.
+Gate status: not passed.
+
+## Phase 3: Safety
+
+Purpose: replace the deny-all stub with the real gate, and add the controls that make
+effects and long-running work safe. Entry: Phase 0 gate stub; the threat model exists.
+These items check each other at dispatch, so the gate, audit log, pause, shadow mode, and
+grants land together.
+
+| ID | Item | ADRs | Needs | Status |
+|---|---|---|---|---|
+| 3.1 | Real gate: digests, approvals, expiry, re-check at dispatch, the "unreadable" rule | 006, 016, 018 | 0.10; OQ-79 | Planned |
+| 3.2 | Hash-chained `audit.jsonl` | 016 | 3.1 | Planned |
+| 3.3 | Vault providers (Bitwarden, 1Password), the one-time-code ladder, and the 1Password check on a real account | 013, 050 | 0.11 | Planned |
+| 3.4 | LLM budget and usage log; web budget | 046, 032 | 0.7; OQ-89 | Planned |
+| 3.5 | Pause, emergency stop, and runaway limits | 031 | 0.5; OQ-71 | Planned |
+| 3.6 | Standing grants | 072 | 3.1 | Planned |
+| 3.7 | Backup, restore, and the monthly drill | 027 | 1.1, 3.2; OQ-87 | Planned |
+| 3.8 | Encryption at rest: pre-write secret scan, encrypted remotes, `jaari memory purge` | 028 | 1.1 | Planned |
+| 3.9 | Erase. Placement | 029 | 3.1, 1.10; OQ-87 | Planned |
+| 3.10 | Shadow mode | 068 | 3.1 | Planned |
+| 3.11 | Degraded mode | 059 | 3.5 | Planned |
+| 3.12 | Crash drills with the real gate | 041 | 3.1, 0.2 | Planned |
+| 3.13 | Threat model document | 069 | none | Delivered ([THREAT_MODEL.md](THREAT_MODEL.md)); reviewed at each phase exit |
+
+Exit criteria:
+- No effect runs without a matching digest; sealed runs do not ask (ADR-041 tier 1).
+- An action whose audit row cannot be written does not run (ADR-016).
+- Crash drills: kill and restart at seven points; no possibly accepted action is submitted
+  twice (ADR-041).
+- The restore drill restores the latest snapshot into a temporary folder, checks `git fsck`,
+  SQLite `integrity_check`, and the audit hash chain, and reports "backup verified" (ADR-027).
+- `jaari doctor` exits non-zero when any check fails (ADR-032).
+- Each degraded state is a tier-1 scenario: provider down, node down, disk full, vault
+  unreachable (ADR-059).
+- Budget warnings fire at 50% and 80% (ADR-046).
+- 1Password plan eligibility and limits are checked on a real account (ADR-050).
+
+Open questions that block this phase: OQ-71, OQ-79, OQ-87, OQ-89.
+Gate status: not passed.
+
+## Phase 4: Background work
+
+Purpose: children, the web, untrusted content, and sandboxed code. Entry: the Phase 3 gate
+and audit log.
+
+| ID | Item | ADRs | Needs | Status |
+|---|---|---|---|---|
+| 4.1 | Children and receipts | 011, 061 | 3.5; OQ-81 | Planned |
+| 4.2 | `llm.escalate` | 011 | 4.1 | Planned |
+| 4.3 | `reader` role and outside lineage | 075 | 0.7 | Planned |
+| 4.4 | `@jaari/http` resolve-check-dial egress with the `direct` and `owner-exit` providers | 016, 053 | OQ-68; `owner-exit` needs an overlay route (7.4, OQ-72) | Planned |
+| 4.5 | `web.search` and `web.fetch` with pluggable rungs | 012, 049 | 4.3, 4.4 | Planned |
+| 4.6 | Optional Web Bot Auth signing for HTTP | 054 | 4.4 | Planned |
+| 4.7 | First sandbox backend | 034, 036 | OQ-70 | Blocked (OQ-70: backend under Compose not chosen) |
+| 4.8 | MCP client, local servers sandboxed | 034 | 4.3, 4.7; OQ-80 | Planned |
+| 4.9 | Code execution | 036 | 3.6, 4.7; OQ-77 | Planned |
+| 4.10 | Third-party skills and third-party packages | 060, 071 | 4.3 | Planned |
+| 4.11 | Headless CLI commands | 076 | 0.5 | Planned |
+| 4.12 | Subscription CLI engines for sandboxed children | 077 | 4.1, 4.7; OQ-76 | Planned |
+
+Exit criteria:
+- The sandbox self-check verifies no network, a read-only root, no home directory, and working
+  limits; CI mutation tests remove one protection at a time and the check catches each
+  (ADR-036).
+- An `outside` run cannot settle approvals or use standing grants (ADR-075).
+- MCP config and tool list are pinned; results are capped at 20 KB (ADR-034).
+- The connection baseline holds: 15 s timeout, 64 KiB default and 1 MiB maximum response
+  (ADR-053).
+- Each CLI engine's provider terms are checked and recorded in a learning note (ADR-077).
+
+Open questions that block this phase: OQ-68, OQ-70, OQ-72 (for `owner-exit`), OQ-76, OQ-77,
+OQ-80, OQ-81.
+Gate status: not passed.
+
+## Phase 5: Integrations
+
+Purpose: the owner's accounts and data sources. Entry: vault (3.3), `reader` role (4.3),
+sandbox (4.7).
+
+| ID | Item | ADRs | Needs | Status |
+|---|---|---|---|---|
+| 5.1 | GitHub, npm, and PyPI integrations | none (INTEGRATIONS.md) | 3.1; OQ-91 | Planned |
+| 5.2 | Email as an input channel | 021 | 4.3 | Planned |
+| 5.3 | OAuth broker | 062 | 3.3; OQ-75 | Planned |
+| 5.4 | The agent's mailbox | 063 | 3.3, 4.3 | Planned |
+| 5.5 | Calendar, contacts, and file storage | 039 | 5.3; OQ-79 | Planned |
+| 5.6 | Documents | 038, 078 | 4.7; OQ-78, OQ-87 | Planned |
+| 5.7 | Photo notes | 066 | 5.6 | Planned |
+| 5.8 | Inbound triggers | 073 | 1.5, 4.3 | Planned |
+| 5.9 | MCP server for paired desktop apps | 076 | 2.7; OQ-88 | Planned |
+
+Exit criteria:
+- Each provider's OAuth redirect and device-flow rules are verified (ADR-062).
+- `jaari doctor` checks SPF, DKIM, and DMARC for the agent's address (ADR-063).
+- Hook deliveries: 256 KiB body cap, 10 requests a minute per hook, receipt written to disk
+  before the 2xx response (ADR-073).
+- The disk watch notifies at 80%, 90%, and 95% used (ADR-038).
+
+Open questions that block this phase: OQ-75, OQ-78, OQ-79, OQ-87, OQ-88, OQ-91.
+Gate status: not passed.
+
+## Phase 6: Computer use
+
+Purpose: Jaari drives a browser and a desktop under the placement rule. Entry: children
+(4.1), egress (4.4), shadow mode (3.10), pairing (2.7).
+
+| ID | Item | ADRs | Needs | Status |
+|---|---|---|---|---|
+| 6.1 | Neutral `browser.*`/`computer.*` surface and pluggable adapters, under the placement rule; local profile, owner exit node, remote CDP | 005, 017, 048 | 4.1; OQ-82 | Planned |
+| 6.2 | Native Anthropic and Gemini toolsets as an `@jaari/llm` mapping | 048 | 6.1 | Planned |
+| 6.3 | Browser SOCKS5 listener and owner-account pinning; opt-in `vpn`, `mobile`, and `residential-proxy` providers | 016, 017, 053 | 4.4; `owner-exit` needs an overlay route (7.4, OQ-72) | Planned |
+| 6.4 | Takeover | 055 | 6.1, 2.9; the link opens over the overlay (7.4, OQ-72) | Planned |
+| 6.5 | Commitment classifier | 051 | 6.1; OQ-83 | Planned |
+| 6.6 | Browser worker child and task-scoped origins; the scope rule is reviewed from logs last | 052 | 6.1; OQ-83 | Planned |
+| 6.7 | `computer.use` on a host virtual desktop | 015 | 6.1 | Planned |
+| 6.8 | Remote nodes via `jaari capability install`; packages on nodes | 015, 071 | 2.7, 7.5 (node link); OQ-72 | Blocked (OQ-72: the node link is placed in Phase 7) |
+| 6.9 | macOS permission matrix | 057 | 6.8 | Planned |
+| 6.10 | Web Bot Auth signing in the browser | 054 | 6.1, 4.6 | Planned |
+
+Exit criteria:
+- The classifier ships only when it catches every commitment in the recorded real-flow pages
+  (ADR-051).
+- A takeover link is single use and expires in 10 minutes; after 3 failed takeovers on the
+  same step Jaari stops and tells the owner (ADR-055).
+- Native toolsets are enabled per route only when the Phase 6 fixtures show a gain (ADR-048).
+- The task-scope origin review is done from the logs (ADR-052).
+
+Open questions that block this phase: OQ-72, OQ-82, OQ-83.
+Gate status: not passed.
+
+## Phase 7: Hardening
+
+Purpose: stronger isolation, more network modes, and moving hosts. Entry: Phase 4 sandbox.
+
+| ID | Item | ADRs | Needs | Status |
+|---|---|---|---|---|
+| 7.1 | Firecracker sandbox backend | 036 | 4.7 | Planned |
+| 7.2 | Container isolation of host capabilities and third-party packages | 015, 071 | 4.10 | Planned |
+| 7.3 | Container egress proxy (no ADR defines it apart from the Phase 4 loopback proxy) | none | 4.4 | Planned |
+| 7.4 | Overlay modes and sizing per target | 030 | OQ-72 | Planned |
+| 7.5 | Node link, multi-device state, and host migration ("multi-device state" has no ADR) | 058 | 7.4; OQ-72 | Planned |
+| 7.6 | Observability: opt-in traces and the raw tee | 032 | 3.4 | Planned |
+
+Exit criteria: none documented in the ADRs. Define them before this phase starts.
+
+Open questions that block this phase: OQ-72.
+Gate status: not passed.
+
+## Phase 8: Evals
+
+Purpose: measure behaviour and learn from outcomes. Entry: receipts (4.1), usage log (3.4).
+
+| ID | Item | ADRs | Needs | Status |
+|---|---|---|---|---|
+| 8.1 | Live behaviour tests (tier 3, opt-in) | 041 | 2.5 | Planned |
+| 8.2 | Remaining `jaari llm eval` fixtures beyond qualification (1.9) | 045 | 1.9 | Planned |
+| 8.3 | Learned router experiment | none (LLM.md) | 3.4 | Planned |
+| 8.4 | Learning from outcomes: reflections and promotions | 061 | 4.1 | Planned |
+
+Exit criteria:
+- An LLM judge is used only for tone and never gates CI (ADR-041).
+- The gate, approval rules, grants, security settings, and locked prompts never learn from
+  outcomes (ADR-061).
+- None documented for the learned router experiment.
+
+Gate status: not passed.
+
+## Later (after v1)
+
+Live calls and a phone number (ADR-037, ADR-063); payments rail (`pay` is reserved, ADR-040);
+face recognition, image similarity search, and albums (ADR-066); WhatsApp and iMessage
+channels (ADR-021); a multi-owner instance (ADR-044); embeddings (ADR-023); Windows
+(ADR-057); a node relay (ADR-058); trust tiers and the agent network (non-goals for v1,
+ADR-020).
+
+## Egress in steps
+
+The address-class gate with `direct` and `owner-exit` for fetch in Phase 4; the browser's
+SOCKS5 listener, owner-account pinning, and the opt-in `vpn`, `mobile`, and
+`residential-proxy` providers (anonymous traffic only) in Phase 6 (ADR-053). How calls leave
+the host before Phase 4 is OQ-68.
+
+## Changes from the earlier roadmap (2026-11-12 audit)
+
+- The one-row-per-phase table became one section per phase with item IDs, needs, status, and
+  exit criteria. Phase numbers are unchanged.
+- Moved to match an ADR: `jaari llm eval` qualification fixtures from Phase 8 to Phase 1
+  (ADR-019, ADR-045); `mobile` and `residential-proxy` providers from Phase 7 to Phase 6, with
+  `vpn` added (ADR-053).
+- Added, with the phase the ADR states: CI and the tier-1 smoke test (0.2), crash drills (3.12),
+  receipts (4.1), third-party packages (4.10), browser signing (6.10), container isolation (7.2).
+- Added where no ADR states a phase (marked *Placement*): `apps/daemon` and `@jaari/core`
+  (0.5), namespaces and release (0.4), correct and forget (1.10), owner authentication (2.7),
+  Telegram (2.8), erase (3.9). Email input (5.2) follows ADR-021.
+- The threat model is marked Delivered (3.13).
+- Not moved, because an accepted ADR states the phase or the choice is the owner's: see
+  OQ-68, OQ-71, OQ-72, OQ-73, OQ-74.

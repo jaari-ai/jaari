@@ -1,6 +1,7 @@
 # ADR-049: Fetch ladder: pluggable rungs, Lightpanda optional and off by default, decided from usage data
 
 - **Status:** Accepted
+- **Extended by:** [ADR-071](071-capability-packages.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -28,6 +29,9 @@ likely handle, or off when it often falls through to Chromium.
 Lightpanda on by default (incomplete Web API coverage breaks some sites); dropping it (cheap
 JavaScript rendering matters on small hosts); a fixed ladder in code; asking more than once a
 month.
+
+## Amendments
+- **ADR-071:** fetch rungs are capability packages with a checked manifest.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

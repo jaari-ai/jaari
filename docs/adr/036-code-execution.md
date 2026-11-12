@@ -1,6 +1,7 @@
 # ADR-036: Code execution: sealed runs never ask, allow once or for 90 days, pinned recurring jobs
 
 - **Status:** Accepted
+- **Extended by:** [ADR-056](056-install-update-migrate.md), [ADR-072](072-standing-grants.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -58,6 +59,10 @@ Approving every run (owners would approve calculations blindly); no approval for
 (code could send mounted files anywhere); standing grants keyed on code (code differs every run,
 so they would never match); grants without expiry for one-off targets; Always allow for host
 commands; code execution only in Phase 7 (the sandbox exists in Phase 4).
+
+## Amendments
+- **ADR-056:** the sandbox never gets the Docker socket; under Compose it uses a rootless Podman sidecar or gVisor, settled at implementation.
+- **ADR-072:** the 90-day target grants follow the one grant model; host commands outside the sandbox are never grantable.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

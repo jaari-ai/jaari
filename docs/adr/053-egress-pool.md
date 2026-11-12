@@ -1,6 +1,7 @@
 # ADR-053: Egress pool: pluggable providers, one connection baseline, sticky anonymous rotation, home sites suggested from the vault
 
 - **Status:** Accepted
+- **Extended by:** [ADR-071](071-capability-packages.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -60,6 +61,9 @@ Routing all traffic through the owner's home (1.7 to 30 times slower, learning/0
 rotation (breaks site sessions); residential proxies for owner accounts (logins from strange
 places trip fraud checks); vendor-specific proxy integrations in v1; a hand-written home-sites
 list with no suggestions.
+
+## Amendments
+- **ADR-071:** egress providers are capability packages with a checked manifest.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

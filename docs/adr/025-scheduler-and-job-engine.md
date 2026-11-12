@@ -1,6 +1,7 @@
 # ADR-025: Scheduler and job engine: a small SQLite queue built to pi-durable's contract
 
 - **Status:** Accepted
+- **Extended by:** [ADR-057](057-laptop-host-and-node.md), [ADR-064](064-owner-routines.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -38,6 +39,10 @@ the agent loop; still no cron, time zones, or missed-run policy); a generic queu
 as BullMQ or Agenda (needs Redis or MongoDB, too heavy for a home box, and knows nothing about
 effects or replay); at-most-once firing with no retries (open-instinct; a transient failure
 loses the run); replaying every missed slot (a burst of stale runs after downtime).
+
+## Amendments
+- **ADR-057:** on wake from sleep, each missed job runs once, at most 5, oldest first.
+- **ADR-064:** routines queue an overlapping run by default (queued runs coalesce); other jobs keep `skip`.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

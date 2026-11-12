@@ -1,6 +1,7 @@
 # ADR-051: Consequential browser actions: a deterministic commitment classifier, Allow once for commitments, unreadable asks
 
 - **Status:** Accepted
+- **Extended by:** [ADR-072](072-standing-grants.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -51,6 +52,9 @@ verb gating as the shadow-mode baseline from openinstinct `browser/enforce.ts` (
 Approval on every click in owner-account sessions (constant prompts); an LLM classifier alone
 (principle 9); standing grants for sending, paying, consent, or account changes; assuming a
 commitment succeeded.
+
+## Amendments
+- **ADR-072:** grants for low-risk commitments follow the one grant model (key: site and form kind).
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

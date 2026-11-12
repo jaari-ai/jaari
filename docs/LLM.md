@@ -36,7 +36,7 @@ Owner override: "use the big model for this", `/model <tier>`.
 - `jaari llm eval <model>` runs role fixtures (tool-call accuracy, JSON validity,
   canonicalize golden set, injection resistance); models qualify per tier.
 - Later: learned router trained on Jaari's own outcome log; static rules stay as fallback.
-- After OpenMausBot (learning/09; retry rule accepted in ADR-016, caching points are OQ-44 leanings): a call is retried or moved down the
+- After OpenMausBot (learning/09; retry rule accepted in ADR-016, caching points decided in ADR-065): a call is retried or moved down the
   chain only when protocol state shows the provider never accepted the turn, and only to
   a model that supports the same tools; provider limit-reset times are remembered instead
   of probed; the system prompt is split into a stable and a volatile part and the tool

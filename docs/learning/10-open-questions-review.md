@@ -6,6 +6,11 @@ the code and docs of the five references at their pinned commits (`refs/INDEX.md
 only), `refs/gajae-way` (`34cbd15`, AGPL, design only), `refs/pi` (`469d865`, MIT), and
 `refs/openmausbot` (`b802268`, already covered in [09-openmausbot.md](09-openmausbot.md)).
 
+> Since decided (2026-11-12): every question reviewed here has an ADR (ADR-021 to ADR-078; see
+> the *Resolved* table in OPEN_QUESTIONS.md). Most recommendations were adopted or sharpened;
+> some were changed or rejected by the ADR (for example OQ-03, OQ-15, OQ-30, OQ-51). The text
+> below is the record of the proposals as written.
+
 **Status: proposals.** Nothing here is decided. The *Leaning* column in OPEN_QUESTIONS.md is
 unchanged; each row below says whether the recommendation keeps, sharpens, or changes it.
 Mechanisms from openinstinct and gajae-way are described in Jaari's own words and must be

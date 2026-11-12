@@ -8,10 +8,11 @@
 - Daily audit: contradictions, stale facts, orphan files; results to the owner digest.
 - Canonicalize reads the most sensitive data, so its model tier is local-only by default
   if a capable local model passes the fixtures (ADR-011, ADR-045, ADR-047); passes are bounded, sensitive lines never go to an API model, and a pass deleting over 20% of a file is held for review.
-- Proposed line conventions, after OpenMausBot (learning/09): entries are dated and name
-  their source; a superseded fact is struck through with the date instead of deleted; an
-  `until YYYY-MM-DD` suffix stops a line loading after that day. Rules the owner stated
-  ("always", "never") and health or safety facts are never moved or archived by upkeep.
+- Line conventions (ADR-029, ADR-074; after OpenMausBot, learning/09): entries are dated and
+  name their source; a superseded fact is struck through with the date instead of deleted.
+  Rules the owner stated ("always", "never") and health or safety facts are never moved or
+  archived by upkeep. Proposed, not decided: an `until YYYY-MM-DD` suffix that stops a line
+  loading after that day.
 - Capture evidence (ADR-074): raw capture is mechanical; every derived fact carries a quote and
   source id that code checks, including every number, date, path, and URL; facts from others'
   content are "according to" until confirmed; inferred facts are marked and never drive actions

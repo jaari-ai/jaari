@@ -1,6 +1,7 @@
 # ADR-071: Capability packages: one package format for every pluggable part, a checked manifest, third-party packages in their own process, updates that notify
 
 - **Status:** Accepted
+- **Extended by:** [ADR-077](077-subscription-cli-engines.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -58,6 +59,9 @@ failing closed from gajae-way `subsession/src/skills.ts` (design only).
 A separate package format per adapter kind; manifests that can add vocabulary names; policy keyed
 on package names; third-party packages in the daemon process; automatic third-party updates;
 unpinned installs; git URLs as a package source.
+
+## Amendments
+- **ADR-077:** adds the `CliEngine` package kind.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

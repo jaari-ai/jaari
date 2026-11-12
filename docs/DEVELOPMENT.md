@@ -34,15 +34,16 @@ After any change run `python3 scripts/merge_docs.py --check`.
 ### Layout
 | Path | Holds |
 |---|---|
-| `docs/STATE.md` | What is decided and built, what is next; updated at the end of each session |
+| `docs/STATE.md` | Summary of what is decided and built, what is next; updated at the end of each session |
 | `docs/THREAT_MODEL.md` | Actors, attacks, controls, and what is left over (ADR-069) |
 | `docs/ARCHITECTURE.md`, `SECURITY_MODEL.md`, `LLM.md`, `WEB.md`, `MEMORY.md`, `PERSONA.md`, `INTEGRATIONS.md` | Subsystem designs |
-| `docs/ROADMAP.md`, `ACTION_PLAN.md` | Soft phases (ADR-020) and the ordered next steps; `ACTION_PLAN.md` also carries the ADR table |
-| `docs/OPEN_QUESTIONS.md` | Undecided questions |
+| `docs/ROADMAP.md`, `ACTION_PLAN.md` | Soft phases (ADR-020) with per-item status, needs, and exit criteria; the ordered next steps. `ACTION_PLAN.md` also carries the ADR table (a deliberate copy of `docs/adr/README.md`, kept equal by the check) |
+| `docs/OPEN_QUESTIONS.md` | Undecided questions, resolved ones with their ADR, and the original wording |
 | `docs/adr/` | One file per decision, plus `README.md` index |
 | `docs/guides/` | How-to guides |
 | `docs/learning/` | One note per topic studied, plus `README.md` |
 | `docs/00-research.md`, `01-merge-plan.md` | Historical captures; do not rewrite, correct with a pointer |
+| `docs/audits/` | Documentation index and dated audit reports; navigation and evidence aids, never an authority over the ADRs |
 
 ### ADRs
 - File: `docs/adr/NNN-slug.md`, next free number, kebab-case slug.
@@ -69,22 +70,27 @@ _TODO: fill in as implementation reveals them._
 ~~~
 
 - An Accepted ADR is not rewritten. Change it with a new ADR, then add an `Extended by` line
-  and an `Amendments` entry to the old one.
+  and an `Amendments` entry to the old one. Do this for every ADR the new one changes, not
+  only the main one.
 - Add the row `| [NNN](NNN-slug.md) | Title | Status |` to `docs/adr/README.md` and
   `| [NNN](adr/NNN-slug.md) | Title | Status |` to the ADR table in `docs/ACTION_PLAN.md`.
 
 ### Threat model
 - An ADR that adds or changes a capability, adapter, channel, provider, or input from outside
   adds or updates its rows in `docs/THREAT_MODEL.md` in the same commit (ADR-069).
-- Review `docs/THREAT_MODEL.md` at each phase exit.
+- Review `docs/THREAT_MODEL.md` at each phase exit (a phase exits when its exit criteria in
+  `docs/ROADMAP.md` pass).
 
 ### Open questions
 - A row in a section table of `docs/OPEN_QUESTIONS.md`:
   `| OQ-NN | Topic | Question | Blocks phase | Leaning |`. IDs are never reused; take the next
   number. "Blocks phase" is the phase of the item that needs the answer (ADR-020).
 - Resolve it: decide, write or amend an ADR, delete the row, add `| OQ-NN | Decision | [ADR-NNN](adr/NNN-slug.md) |` to
-  *Resolved*, and update the "Open: N" count there and the count in `docs/STATE.md`.
-- Mention the ID in `docs/ROADMAP.md` (Needs column) for the item it gates.
+  *Resolved*, copy its `| OQ-NN | Topic | Question | Blocked phase |` wording to *Original questions*, remove
+  its entry under *Context for each open question*, and update the "Open: N" count there and the count in
+  `docs/STATE.md`.
+- When a later ADR changes a resolved answer, update the *Resolved* row and name both ADRs.
+- Mention the ID in `docs/ROADMAP.md` (Needs column, and the phase's blocking list) for the item it gates.
 
 ### Learning notes
 `docs/learning/NN-topic.md`, answering the three questions in `docs/learning/README.md`; add

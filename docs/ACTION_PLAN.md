@@ -1,22 +1,44 @@
 # Jaari: Action plan
 
 Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are a soft plan
-(ADR-020): pick up the next item whose needs are met.
+(ADR-020): pick up the next item whose needs are met. Item numbers (`0.1`) are roadmap IDs;
+status and exit criteria live there.
 
 ## Workstreams
-1. **Phase 0 questions are decided.** The last one, capability packages, is ADR-071.
-2. **Scaffold the monorepo** from the config this script generates; add `@jaari/capabilities`,
-   `@jaari/gate` (deny-all stub), and `@jaari/secrets` (resolver + `os-keychain`) with the
-   first package (ADR-018).
-3. **Build `@jaari/llm`** on `@earendil-works/pi-ai` with the tier/role config; add the
-   `jaari llm eval` hook that `jaari init` uses to decide local-only roles (ADR-019).
-4. **Define `ChannelAdapter` and ship the CLI channel**; then the web panel and Telegram (ADR-021).
-5. **Daemon and install.** `apps/daemon`, `jaari init` (target: VPS, remote server, home
-   hardware, or laptop), `jaari doctor`, Compose, and the laptop sleep/wake rule (ADR-017).
-6. **Memory next**: structured records and FTS5 search (ADR-023) and context assembly (ADR-024), the job engine (ADR-025), and the single writer (ADR-026); then persona, then the real gate and the
-   vault (ADR-006, ADR-016, ADR-018; ADR-013 vault providers, ADR-050).
-7. **Egress and browser.** `@jaari/http` to ADR-016 with `direct` and `owner-exit` (Tailscale)
-   providers; the browser under the placement rule; pool details in ADR-053 (ADR-017).
+1. **Decide the questions that block Phase 0**: OQ-67 (secret zero on a server), OQ-68 (egress
+   before `@jaari/http`), OQ-69 (a secret pasted in chat), OQ-74 (update and catch-up
+   dependencies), OQ-84 (pinning the references), OQ-85 (channel manifest), OQ-86 (refusal and
+   the pinned session), OQ-90 (package homes).
+2. **Scaffold the monorepo** (0.1 to 0.4): root `package.json`, lockfile, pnpm supply-chain
+   settings, CI with the tier-1 smoke test, `SECURITY.md` and `CONTRIBUTING.md` (ADR-041,
+   ADR-043); fix `python/` to match [guides/namespaces.md](guides/namespaces.md) and secure
+   the names (ADR-010).
+3. **Safety floor first** (0.9 to 0.11): `@jaari/capabilities`, `@jaari/gate` (deny-all stub),
+   and `@jaari/secrets` (resolver + `os-keychain`) with the first package (ADR-018).
+4. **Build `@jaari/llm`** (0.7) on `@earendil-works/pi-ai` with the tier/role config; the
+   `jaari llm eval` qualification fixtures that `jaari init` uses arrive with Phase 1 (1.9;
+   ADR-019, ADR-045).
+5. **Daemon and install** (0.5, 0.6, 0.12 to 0.14): `apps/daemon` with the persistent session,
+   `jaari init` (target: VPS, remote server, home hardware, or laptop), `jaari doctor`,
+   Compose, and the laptop sleep rule (ADR-017, ADR-056, ADR-057, ADR-065).
+6. **Define `ChannelAdapter` and ship the CLI channel** (0.8; ADR-021, ADR-035). The CLI talks
+   to the daemon, so this follows step 5.
+7. **Memory** (Phase 1): single writer (ADR-026), structured records and FTS5 search (ADR-023),
+   context assembly (ADR-024), the job engine (ADR-025), canonicalize and capture evidence
+   (ADR-047, ADR-074). Decide OQ-71, OQ-73, and OQ-78 first.
+8. **Persona and owner surfaces** (Phase 2): dials and notifications, pairing (ADR-022),
+   Telegram, then the panel (ADR-067). Decide OQ-72 before the panel.
+9. **The real gate and its companions** (Phase 3): gate and audit log (ADR-006, ADR-016,
+   ADR-018), vault (ADR-013, ADR-050), pause and limits (ADR-031), grants (ADR-072), backup and
+   encryption (ADR-027, ADR-028), shadow mode (ADR-068). They check each other at dispatch, so
+   they land together.
+10. **Background work** (Phase 4): children, the `reader` role, `@jaari/http` to ADR-016 with
+    `direct` and `owner-exit` providers, the sandbox, MCP, and code execution. Decide OQ-70,
+    OQ-76, OQ-77, and OQ-80 first.
+11. **Integrations, then the browser** (Phases 5 and 6): OAuth broker, mailbox, calendar,
+    documents; then the browser under the placement rule, with pool details in ADR-053
+    (ADR-017).
+12. **Hardening and evals** (Phases 7 and 8).
 
 ## ADRs
 | ADR | Title | Status |

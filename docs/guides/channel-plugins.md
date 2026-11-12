@@ -1,7 +1,9 @@
 # Writing a channel plugin
 
 A channel plugin is an npm package that exports a `ChannelAdapter` (full contract, host rules, and identity binding in
-[../ARCHITECTURE.md](../ARCHITECTURE.md#channels)).
+[../ARCHITECTURE.md](../ARCHITECTURE.md#channels)). It is a capability package (ADR-071): it declares a `jaari`
+manifest with `kind: channel`, is installed and pinned like any package, and, when third-party, runs in its own
+process with only its declared egress and secrets. The exact manifest shape is OQ-85.
 
 ## Minimal skeleton
 
@@ -40,9 +42,12 @@ export const adapter: ChannelAdapter = {
   written the reply instructions into `msg.text`; with `buttons` or `quickReplies`, render
   `msg.prompt.options` natively and report a tap as `answer: { promptId, option }` (ADR-035).
 - Use only `ctx.secrets.get` for credentials, and never log them.
-- Pass the shared contract tests: `pnpm test --filter @jaari/channels -- --adapter ./dist`.
+- Pass the shared contract tests (planned; the harness is not designed yet, OQ-85):
+  `pnpm test --filter @jaari/channels -- --adapter ./dist`.
 
 ## Registering
+A local path, as in the last entry below, is for development only and makes `jaari doctor`
+warn (ADR-071).
 ~~~jsonc
 // jaari.config.jsonc
 { "channels": ["@jaari/channel-web", "@jaari/channel-telegram", "./plugins/example"] }

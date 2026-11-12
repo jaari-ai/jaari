@@ -31,8 +31,14 @@ Additions from ADR-016 (accepted; from the OpenMausBot study):
 
 Additions from ADR-016 (accepted): resolved values are scrubbed by exact value (and common
 encodings) from tool results and logs; the model names a credential by a typed target id,
-never a path or URL; a value sent to a node is single-use; while a filled secret is on a
+never a path or URL; a value sent to a node is for one action and is then discarded (ADR-015); while a filled secret is on a
 page, screenshots and page evaluation are refused.
+
+Vault (ADR-013, ADR-050): Jaari reads only a dedicated vault or collection that the owner
+chooses at `jaari init`; the vault client runs as a separate process; secret zero stays in the
+OS keychain and is never in a backup (where it lives on a headless server is OQ-67). Vault
+writes go through the gate. OAuth tokens are vault items, refreshed by the executor (ADR-062;
+rotation and the gate: OQ-75). Payment-card fields are not resolvable in v1 (ADR-040).
 
 ## Capabilities (ADR-018)
 The only names the model can ask for. A manifest's `provides` lists these and nothing else;
@@ -51,10 +57,14 @@ separate manifest fields.
 | `email.read` | read | Content is untrusted |
 | `calendar.freebusy`, `calendar.read` | read | Mirrored into event records (ADR-039) |
 | `calendar.write` | gated | Own calendar without attendees: Allow once or a 90-day grant; invitations always ask (ADR-039) |
-| `email.send`, `publish`, `repo.write` | gated | Short approval expiry |
+| `email.send`, `publish`, `repo.write` | gated | Never grantable (ADR-072); 5-minute approval expiry for `email.send` and `publish` |
 | `pay` | reserved | No executor in v1; checkouts end at an owner takeover (ADR-040) |
 | `llm.escalate` | policy-checked | Children only (ADR-011) |
 | `mcp.read`, `mcp.act` | read, gated | MCP tools that match no other name; unconfirmed or unreadable tools are `mcp.act` (ADR-034) |
+
+Gated effects that have no name in this table yet (vault writes, address-book writes,
+file-storage uploads, memory erase), the internal read tools, and the `takeover` class of
+ADR-018 are OQ-79.
 
 Login and CAPTCHA go to owner takeover. One-time codes come from the vault, then from a message on the owner's channels (read by the executor, never the model, with a notice), then from the owner (ADR-050).
 
@@ -81,7 +91,7 @@ origin line on the card (ADR-075).
 
 ## Egress
 All network calls via `@jaari/http`; containers via an egress proxy that blocks private
-ranges and cloud metadata. Tool-level origin allowlists are not a security boundary.
+ranges and cloud metadata. `@jaari/http` ships in Phase 4; the route for earlier calls is OQ-68. Tool-level origin allowlists are not a security boundary.
 
 Mechanism (ADR-016, accepted):
 - Resolve, check, dial: the gate resolves the name, classifies every address, and

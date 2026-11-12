@@ -5,6 +5,8 @@ computer and browser toolsets, Gemini `computer_use`, and `refs/pi` (for toolset
 Reference table and sources: [00-research.md §9](../00-research.md). No decision was taken;
 the open questions are OQ-27, OQ-30, OQ-31.
 
+> Since decided: OQ-27 → ADR-048; OQ-30 → ADR-051; OQ-31 → ADR-052.
+
 ## 1. What the sources do
 
 **Cloud computer per user (Muse, Grok Bot, the retired ChatGPT agent, Instinct).** Each user

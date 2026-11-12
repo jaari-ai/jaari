@@ -377,7 +377,8 @@ date, that environments still require a reviewer, and that actions are SHA-pinne
    security keys.
 3. Check recent versions on npm and PyPI; deprecate (npm) or yank (PyPI) anything you
    didn't release, and publish a fixed version.
-4. Write down what happened in `SECURITY.md` advisories once OQ-22 sets up disclosure.
+4. Publish a GitHub security advisory and follow `SECURITY.md` (ADR-043; the file lands with
+   the Phase 0 scaffolding).
 
 ## Jaari itself
 Publishing is the `publish` capability and goes through `@jaari/gate` (ADR-006). The

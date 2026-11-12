@@ -3,7 +3,8 @@
 @AGENTS.md
 
 ## Claude Code specifics
-- `.claude/settings.json` denies `Edit(./refs/**)`, and `refs/` is `chmod -R a-w`. A
+- `.claude/settings.json` denies `Edit(./refs/**)`, and each repo under `refs/` is
+  `chmod -R a-w` (`refs/INDEX.md` is rewritten by `scripts/refs.sh`). A
   denied or failed write under `refs/` is intended; do not work around it.
 - Searches that honour git excludes (ripgrep-based Grep) can skip `refs/`. Pass a
   `refs/...` path explicitly when you need to search a reference.

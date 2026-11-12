@@ -35,20 +35,25 @@
 | Package | Responsibility |
 |---|---|
 | `@jaari/core` | Agent loop on Pi, sessions, children, tool registry |
-| `@jaari/capabilities` | Capability manifest schema, loader, and the daemon–node contract; the single capability vocabulary lives in SECURITY_MODEL.md (ADR-015, ADR-018) |
+| `@jaari/capabilities` | Capability and package manifest schema, loader, and the daemon–node contract; the single capability vocabulary lives in SECURITY_MODEL.md (ADR-015, ADR-018, ADR-071) |
 | `@jaari/llm` | Wraps `@earendil-works/pi-ai`; tiers + fallback chains, role routing, escalation, budgets, local-only privacy, usage log, `jaari llm eval` (ADR-011) |
 | `@jaari/memory` | Git-backed memory repo, write path, canonicalize, daily audit, gap queue |
 | `@jaari/persona` | Curiosity/Proactivity dials, monitor, quiet hours, notification ledger |
 | `@jaari/gate` | Action digests, approvals, re-check at dispatch, hash-chained `audit.jsonl` (ADR-006, ADR-016) |
-| `@jaari/secrets` | `secretRef` resolution for executors only, through pluggable vault providers (Bitwarden, 1Password; ADR-013); exact-value scrubbing of resolved secrets (ADR-016) |
-| `@jaari/http` | Egress gate: resolve, classify every address against one address-class table, dial only checked addresses; SOCKS5 listener for the browser; per-capability allowlists (ADR-016); egress providers `owner-exit`, `direct`, `mobile`, `residential-proxy` (ADR-017) |
+| `@jaari/secrets` | `secretRef` resolution for executors only, through pluggable providers: `os-keychain` from Phase 0 (ADR-018), then the vault providers (Bitwarden, 1Password; ADR-013, ADR-050); exact-value scrubbing of resolved secrets (ADR-016) |
+| `@jaari/http` | Egress gate: resolve, classify every address against one address-class table, dial only checked addresses; SOCKS5 listener for the browser; per-capability allowlists (ADR-016); egress providers `owner-exit`, `direct`, `mobile`, `residential-proxy`, `vpn` (ADR-017, ADR-030, ADR-053) |
 | `@jaari/web` | `web.search`, `web.fetch`, fetch escalation ladder (ADR-012) |
-| `@jaari/computer` | Browser/desktop control via Playwright MCP or Stagehand, local profile or remote CDP, takeover (ADR-005, ADR-012) |
+| `@jaari/computer` | Browser/desktop control behind one neutral surface with pluggable adapters (Playwright MCP, Stagehand, remote CDP, remote desktop), local profile, takeover (ADR-005, ADR-048, ADR-055) |
 | `@jaari/channels` | `ChannelAdapter` contract, ingress (principal resolution), delivery outbox, built-in adapters |
 | `@jaari/integrations` | GitHub, npm, PyPI, email |
 | `apps/daemon` | Long-running process: scheduler, channels, jobs |
-| `apps/cli` | `jaari init`, `jaari llm eval`, `jaari llm usage`, admin commands |
+| `apps/cli` | `jaari init`, `jaari doctor`, `jaari llm eval`, `jaari llm usage`, `jaari pair` and `jaari devices` (ADR-022), `jaari run`, `wait`, `status`, `export`, and `mcp` (ADR-076), admin commands |
 | `apps/node` | Capability host on an owner device: `jaari capability install <name>` pairs it as a `device`, it advertises installed capabilities, runs gate-approved actions, hosts takeover and live view. Capabilities on the daemon host run through the same contract in-process (ADR-015) |
+
+Not yet assigned to a package: the job engine (ADR-025), file store (ADR-038), skills
+(ADR-060), routines (ADR-064), hook listener (ADR-073), MCP client and server (ADR-034,
+ADR-076), CLI engines (ADR-077), speech (ADR-037), OAuth broker (ADR-062), mailbox adapters
+(ADR-063), and observability (ADR-032). This is OQ-90.
 
 ## Channels
 Every way of talking to Jaari (CLI, web panel, messengers, email) is a plugin behind one
@@ -59,6 +64,12 @@ everything else. Plugin authors: see [guides/channel-plugins.md](guides/channel-
 ### Contract
 A channel is an npm package (or local path) exporting an adapter. The daemon loads it by
 name from config: `"channels": ["@jaari/channel-web", "./plugins/example"]`.
+
+Packaging (ADR-071): a channel is a capability package with a checked `jaari` manifest
+(`kind: channel`), installed and pinned like any other package. A third-party channel runs in
+its own process with only its declared egress and secrets; a local path is for development
+only and makes `jaari doctor` warn. How `ChannelManifest` below maps onto that manifest is
+OQ-85.
 
 ~~~ts
 export interface ChannelManifest {
@@ -158,16 +169,18 @@ sets pairing, revocation, and the single active channel:
 | `identity` | Transport proves | Can produce owner turns? | Pairing |
 |---|---|---|---|
 | `carrier` | A phone number (iMessage, WhatsApp, Signal, SMS) | Yes, if the number matches `owner.phones` | Number in config |
-| `account` | A platform account (Telegram user id, Discord id) | Yes, after a one-time pairing code issued from the CLI | `jaari channels pair <id>` |
+| `account` | A platform account (Telegram user id, Discord id) | Yes, after a one-time pairing code issued from the CLI | `jaari pair` code, or another ADR-022 method |
 | `device` | A device key (web panel, WebCrypto P-256) | Yes, per enrolled device | QR / device enrolment |
 | `none` | Nothing (email: `From` is forgeable) | **No.** Mail from the owner's address is untrusted content, never authority | n/a |
 
 Unknown senders get nothing. Paired channels are equal; only the active channel (the one
 the owner's latest message came from) receives replies, approvals, and proactive messages,
 and switching channels continues the same session without replaying history (ADR-022).
-In group threads each participant gets their own transcript,
-owner turns run at the lowest trust level present, and a bare "yes" in a group never
-settles an approval (approvals bind to a digest, ADR-006).
+Revocation: `jaari devices revoke <id>` or the panel (ADR-022).
+In group threads other participants' messages are `outside` content (ADR-075); approvals,
+links, and codes go only to the owner's private chat, only the owner's own message changes
+permissions (ADR-044), and a bare "yes" in a group never settles an approval (approvals bind
+to a digest, ADR-006).
 
 ### Candidate plugins
 v1 ships the CLI (Phase 0), the web panel, and Telegram; email is an input only (Phase 5).
@@ -190,9 +203,22 @@ dependency.
 ## Trust boundaries
 - Owner ↔ channels: authenticated owner only (see [Channels](#channels) and ADR-022).
 - Model ↔ tools: every tool maps to a capability; effectful capabilities go through the gate.
-- Tools ↔ internet: all egress through `@jaari/http` or the container egress proxy.
+- Tools ↔ internet: all egress through `@jaari/http` or the container egress proxy (the route
+  before `@jaari/http` ships in Phase 4 is OQ-68).
 - Untrusted content ↔ main session: `reader` summary only, never raw instructions. Every run
   carries a code-set origin; `outside` sticks to derived work (ADR-075).
+- Internet ↔ hook listener: a separate process that serves only hook paths, with signed
+  deliveries; public exposure is opt-in (ADR-073).
+- Scripts and paired desktop apps ↔ daemon: the local socket and the two-tool MCP server; they
+  never approve or change policy (ADR-076).
+- Daemon ↔ nodes: a pinned TLS link across the overlay; nodes run only gate-approved actions
+  (ADR-015, ADR-058).
+- Daemon ↔ third-party packages: their own process, with only declared egress and secrets
+  (ADR-071).
+- Daemon ↔ vault: a separate vault process or service; Jaari reads only its dedicated vault or
+  collection (ADR-013, ADR-050).
+- Panel ↔ owner's browser: bundled code only, untrusted content as plain text, overlay only
+  (ADR-067).
 
 ## Decisions
 See [adr/README.md](adr/README.md).

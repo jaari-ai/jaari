@@ -10,5 +10,8 @@ Config and tools carry `secretRef:<name>` handles. Only executors resolve them, 
 ## Alternatives rejected
 Env vars passed to tools the model controls; secrets in the prompt.
 
+## Amendments
+- **ADR-016:** secret hygiene (point 6): resolved values are scrubbed by exact value and credentials are named by typed target ids.
+
 ## Consequences
 _TODO: fill in as implementation reveals them._

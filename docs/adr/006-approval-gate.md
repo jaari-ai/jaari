@@ -14,6 +14,7 @@ Model self-approval; approval by free-text summary (summary can differ from acti
 - **ADR-018:** Approvals expire after 15 minutes by default (5 for `email.send` and `publish`); the short code is only a lookup of the digest; no amount tolerance.
 - **ADR-072:** standing grants are pre-approved exact-match keys checked by code; each action
   still has its own digest and audit row naming the grant. Resolves the single-use conflict.
+- **ADR-016:** re-check at dispatch and a hash-chained audit log (points 1 and 3).
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

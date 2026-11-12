@@ -1,6 +1,7 @@
 # ADR-021: v1 channels: CLI, web panel, Telegram; email as input only
 
 - **Status:** Accepted
+- **Extended by:** [ADR-071](071-capability-packages.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -24,6 +25,9 @@ Signal first (needs a dedicated number and a fragile Java sidecar); WhatsApp fir
 is unofficial with a ban risk, the Meta Cloud API needs a Business account and template
 approval for agent-initiated messages); iMessage first (Mac only, and on a VPS it waits for
 Phase 6 nodes); two messengers in v1 (more scope before the contract is proven).
+
+## Amendments
+- **ADR-071:** channel plugins are capability packages with a checked `jaari` manifest (`kind: channel`).
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

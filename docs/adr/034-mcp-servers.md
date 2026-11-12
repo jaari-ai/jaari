@@ -1,6 +1,7 @@
 # ADR-034: MCP servers: owner-added, pinned, classified in one step, sandboxed from Phase 4
 
 - **Status:** Accepted
+- **Extended by:** [ADR-071](071-capability-packages.md), [ADR-072](072-standing-grants.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -59,6 +60,10 @@ text); unknown tools defaulting to read; asking per tool call until each tool is
 description or add tools without a config change); forbidding local servers until Phase 7 (many
 useful servers are local); running local servers unsandboxed with no warning (they bypass the
 egress gate); a marketplace with auto-install.
+
+## Amendments
+- **ADR-071:** an MCP server stays MCP config and gets a generated package manifest, so the same install and trust rules apply.
+- **ADR-072:** `mcp.act` grants follow the one grant model: server and tool key with the config and tool-list fingerprint, 90 days, never for tools classified as send, publish, or pay.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

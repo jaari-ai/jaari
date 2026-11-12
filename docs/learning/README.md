@@ -19,7 +19,7 @@ Written:
 - [11-pally.md](11-pally.md) — Pally, a second commercial reference: cloud plus a Mac companion
   app, what Jaari borrows, and alternatives to the note-10 recommendations (2026-11-10)
 
-Planned:
+Planned (optional, not scheduled; ADRs have since decided these topics):
 - 01-session.md — persistent session, steering, segments, compaction
 - 02-ingress-and-channels.md — OwnerTurnIngress, ChannelAdapter, identity binding, cursors
 - 03-memory.md — axes, capture, canonicalize, audit, closure ladder
