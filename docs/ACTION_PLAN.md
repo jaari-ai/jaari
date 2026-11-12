@@ -25,7 +25,7 @@ status and exit criteria live there.
    context assembly (ADR-024), the job engine (ADR-025), canonicalize and capture evidence
    (ADR-047, ADR-074). Decide OQ-73 and OQ-78 first.
 8. **Persona and owner surfaces** (Phase 2): dials and notifications, pairing (ADR-022),
-   Telegram, then the panel (ADR-067). Decide OQ-72 before the panel.
+   Telegram, the overlay binding (ADR-088), then the panel (ADR-067).
 9. **The real gate and its companions** (Phase 3): gate and audit log (ADR-006, ADR-016,
    ADR-018), vault (ADR-013, ADR-050), pause and limits (ADR-031), grants (ADR-072), backup and
    encryption (ADR-027, ADR-028), shadow mode (ADR-068). They check each other at dispatch, so
@@ -128,3 +128,4 @@ status and exit criteria live there.
 | [085](adr/085-refusal-in-the-pinned-main-session.md) | A provider refusal never moves the pinned main session; other roles move down the chain | Accepted |
 | [086](adr/086-package-homes.md) | Package homes for eleven subsystems; two new homes, `@jaari/mcp` and `apps/hooks` | Accepted |
 | [087](adr/087-safety-pieces-ship-with-what-they-protect.md) | Safety pieces ship in the phase of the first thing they protect | Accepted |
+| [088](adr/088-overlay-panel-and-node-link-phasing.md) | Overlay binding and panel TLS in Phase 2, node link in Phase 6, panel views with their features | Accepted |

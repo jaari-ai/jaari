@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **16**.
+Last updated: 2026-11-12. Open: **15**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -44,7 +44,6 @@ leaning yet; the options listed are only the ones the docs already name.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-72 | Panel, overlay, and node link timing | The Phase 2 panel needs TLS over the overlay (Phase 7), and its Approvals, secret entry, Activity, and Usage views need Phase 3 parts. Remote nodes (Phase 6) need the node link (Phase 7). Which parts move, or which views wait? | 2 | None. On record: overlay in Phase 7 (ADR-020); panel views in Phase 2 (ADR-067) |
 | OQ-73 | Routines before children | Routines ship in Phase 1 and "children do the work", but children are Phase 4, the notification ledger is Phase 2, and budgets are Phase 1 (ADR-087). What can a Phase 1 routine do, and how are its results delivered? | 1 | None. On record: Phase 1 (ADR-064); receipts with children in Phase 4 (ADR-061) |
 | OQ-83 | Shadow mode and browser logs | ADR-051 and ADR-052 take fixtures and the origin review from "shadow-mode logs" of owner-account sessions, but ADR-068 never shadows what the owner asks for. Which log feeds them? Also: onboarding (Phase 2) promises shadow behaviour that ships in Phase 3 and that the owner may turn off. | 2 | None. On record: classification log of all owner-account actions (ADR-051); shadow only self-initiated effects (ADR-068) |
 
@@ -64,9 +63,6 @@ phase starts.
   disables code execution if the sandbox is weak (ADR-036). Reopens the Compose part of OQ-35.
   If delayed: MCP servers, code execution, document parsing, and CLI engines have no backend
   on the default install.
-- **OQ-72.** Settled: the panel is a paired device served only over the overlay with TLS
-  (ADR-067, ADR-030); the node link is a WebSocket across the overlay (ADR-058). ADR-020 placed
-  the overlay in Phase 7 before these ADRs were written.
 - **OQ-73.** Settled: routine semantics (ADR-064) and the job engine (ADR-025). Watcher and
   webhook triggers arrive with Phases 4 and 5 in any case.
 - **OQ-75.** Evidence: ADR-062 ("written back through the gated vault write"), ADR-013
@@ -178,6 +174,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-68 | The `@jaari/http` core (resolve, check, dial; address-class table; `direct`) ships in Phase 0 and every outbound call uses it; a lint rule refuses other network clients; adapters that cannot take the injected `fetch` stay off; owner-run local model servers reached only on their configured endpoint; container egress proxy ships with the first untrusted-input container | [ADR-080](adr/080-egress-core-in-phase-0.md) |
 | OQ-69 | Scrubbed at channel ingress before the transcript, daily log, or any model (known formats, labelled passwords, Luhn-valid cards, exact vault values); value never kept; message deleted where possible; rotation advised; secret-entry page offered; ADR-028 block-and-ask stays for other writes | [ADR-081](adr/081-secrets-pasted-in-chat.md) |
 | OQ-71 | Each safety piece ships in the phase of the first thing it protects: pause, stop, step limits, watchdog, event and usage logs in Phase 0; budget, spike alerts, derived-fact scan, nightly local snapshot in Phase 1; budget warnings, loop breaker, persona rules in Phase 2; remotes and permission lowering in Phase 3; child limits in Phase 4 | [ADR-087](adr/087-safety-pieces-ship-with-what-they-protect.md) |
+| OQ-72 | Overlay binding and panel TLS (Tailscale, Headscale, Custom) in Phase 2; other modes and sizing in Phase 7; panel views ship with their features (Approvals and audit with the gate, secret entry with the vault; `jaari secret set` until then); node link in Phase 6 | [ADR-088](adr/088-overlay-panel-and-node-link-phasing.md) |
 | OQ-74 | Split by phase: Phase 0 keeps sleep detection, power, battery, and network re-probe, and a manual `jaari update` with a local pre-update snapshot; catch-up ships with the job engine (Phase 1), expired-approval re-asks with the real gate (Phase 3), automatic patch installs with quiet hours (Phase 2), the ADR-027 bundle with backup (Phase 3) | [ADR-082](adr/082-phase-split-update-and-catch-up.md) |
 | OQ-84 | Each reference pinned to a full sha in `scripts/refs.sh`; `sync` re-applies pins; `scripts/refs.sh bump` is the only way to move one, printing old and new commit and warning on a licence change; pins committed on their own | [ADR-083](adr/083-pinned-reference-commits.md) |
 | OQ-85 | One manifest per package under the `jaari` key of `package.json`, read before any code runs; channel fields in a `channel` section; `ChannelAdapter` has no manifest property; shared Vitest contract suite in `@jaari/channels/contract`, Phase 0 | [ADR-084](adr/084-package-manifest-location-and-channel-section.md) |
@@ -259,3 +256,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-86 | Provider refusal and the pinned session | ADR-011 moves a refused call to the next model; ADR-019 pins the main session and allows failover only when the provider never accepted the turn. What does the main session do on a refusal? | 0 |
 | OQ-90 | Package homes | Which package or app owns the job engine, file store, skills, routines, hook listener, MCP client and server, CLI engines, speech, OAuth broker, mailbox adapters, and observability? | 0 |
 | OQ-71 | Safety pieces before Phase 3 | Pause, emergency stop, runaway limits, the usage and event logs, the pre-write secret scan of derived facts and files (owner messages are scrubbed at ingress from Phase 0, ADR-081), memory push, and snapshots are Phase 3 (or have no phase), but the agent loop, scheduler, canonicalize, and curiosity run from Phases 0 to 2. Which of them ship earlier? | 1 |
+| OQ-72 | Panel, overlay, and node link timing | The Phase 2 panel needs TLS over the overlay (Phase 7), and its Approvals, secret entry, Activity, and Usage views need Phase 3 parts. Remote nodes (Phase 6) need the node link (Phase 7). Which parts move, or which views wait? | 2 |

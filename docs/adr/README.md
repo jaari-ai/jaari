@@ -89,3 +89,4 @@
 | [085](085-refusal-in-the-pinned-main-session.md) | A provider refusal never moves the pinned main session; other roles move down the chain | Accepted |
 | [086](086-package-homes.md) | Package homes for eleven subsystems; two new homes, `@jaari/mcp` and `apps/hooks` | Accepted |
 | [087](087-safety-pieces-ship-with-what-they-protect.md) | Safety pieces ship in the phase of the first thing they protect | Accepted |
+| [088](088-overlay-panel-and-node-link-phasing.md) | Overlay binding and panel TLS in Phase 2, node link in Phase 6, panel views with their features | Accepted |

@@ -47,7 +47,8 @@ Secrets pasted in chat (ADR-081): every owner message is scrubbed at channel ing
 the transcript, the daily log, or any model: known key and token formats, labelled passwords,
 Luhn-valid card numbers, and exact vault values become `[secret removed: <kind>]`. The value is
 never kept; Jaari deletes the message where the channel can, advises rotation, and offers the
-single-use secret-entry page. A bare unlabelled password is not recognised.
+single-use secret-entry page (until Phase 3, `jaari secret set <name>`, ADR-088). A bare
+unlabelled password is not recognised.
 
 ## Capabilities (ADR-018)
 The only names the model can ask for. A manifest's `provides` lists these and nothing else;

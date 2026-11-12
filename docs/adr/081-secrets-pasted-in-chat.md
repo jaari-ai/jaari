@@ -1,6 +1,7 @@
 # ADR-081: Secrets pasted in chat: scrubbed at channel ingress, never kept, rotation advised
 
 - **Status:** Accepted
+- **Extended by:** [ADR-088](088-overlay-panel-and-node-link-phasing.md)
 - **Date:** 2026-11-12
 
 ## Context
@@ -43,6 +44,9 @@ Blocking the message and asking (the value is already in the transcript path and
 app); keeping it verbatim; holding the value briefly to offer "save to vault" (it has already
 leaked through the chat app, so a fresh one is safer); generic entropy rules (remove hashes and
 ids).
+
+## Amendments
+- **ADR-088:** until the secret-entry page exists, the notice points to `jaari secret set <name>`.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

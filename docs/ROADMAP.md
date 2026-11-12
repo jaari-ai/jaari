@@ -143,9 +143,10 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 | 2.6 | Skills: built-in and owner (third-party is 4.10) (in `@jaari/core`) | 060, 086 | 1.1 | Planned |
 | 2.7 | Owner authentication: device registry, `jaari pair`, `jaari devices`. Placement | 022 | 0.8 | Planned |
 | 2.8 | Telegram channel. Placement; loop breaker for other bots | 021, 031, 087 | 0.8, 2.7 | Planned |
-| 2.9 | Owner panel | 067 | 2.7; OQ-72 | Blocked (OQ-72: needs TLS over the overlay, item 7.4, and Phase 3 parts for four of its views) |
+| 2.9 | Owner panel: Home, Memory, Settings, Usage, Activity from the event log (Approvals, audit, and secret entry with 3.1 and 3.3) | 067, 088 | 2.7, 2.12 | Planned |
 | 2.10 | Onboarding | 070 | 2.6; OQ-83 | Planned |
 | 2.11 | Voice notes and optional spoken replies (in `@jaari/llm`) | 037, 086 | 0.8 | Planned |
+| 2.12 | Overlay binding and panel TLS: loopback plus one private interface; Tailscale, Headscale, and Custom modes; `jaari doctor` check | 030, 088 | 0.5 | Planned |
 
 Exit criteria:
 - Tier-1 "quiet" scenarios pass: quiet hours, the 7-day rule, the outbox duplicate window, only
@@ -156,10 +157,12 @@ Exit criteria:
   (ADR-042).
 - Pairing codes are single use, last 10 minutes, and lock out after 5 wrong tries (ADR-022).
 - The panel loads no third-party scripts and shows untrusted content as plain text (ADR-067).
+- The daemon listens only on loopback and the chosen private interface, never `0.0.0.0`, and
+  serves the panel only over TLS (ADR-030, ADR-088).
 - Onboarding asks at most one gap question a day (ADR-070).
 - A conditional spoken answer to an approval is refused and asked again (ADR-037).
 
-Open questions that block this phase: OQ-72, OQ-83.
+Open questions that block this phase: OQ-83.
 Gate status: not passed.
 
 ## Phase 3: Safety
@@ -171,9 +174,9 @@ grants land together.
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 3.1 | Real gate: digests, approvals, expiry, re-check at dispatch, the "unreadable" rule; approvals that expired during sleep are asked again | 006, 016, 018, 057, 082 | 0.10; OQ-79 | Planned |
+| 3.1 | Real gate: digests, approvals, expiry, re-check at dispatch, the "unreadable" rule; approvals that expired during sleep are asked again; the Approvals view and the audit part of Activity | 006, 016, 018, 057, 082, 088 | 0.10; OQ-79 | Planned |
 | 3.2 | Hash-chained `audit.jsonl` | 016 | 3.1 | Planned |
-| 3.3 | Vault providers (Bitwarden, 1Password), the one-time-code ladder, and the 1Password check on a real account | 013, 050 | 0.11 | Planned |
+| 3.3 | Vault providers (Bitwarden, 1Password), the one-time-code ladder, the panel's secret-entry page, and the 1Password check on a real account | 013, 050, 088 | 0.11 | Planned |
 | 3.4 | Web budget (the LLM budget is 1.11, the usage log 0.7) | 046 | 1.11; OQ-89 | Planned |
 | 3.5 | Lowering a capability's permission stops the turn using it (the other ADR-031 limits ship with 0.5, 1.4, 2.x, and 4.1) | 031, 087 | 3.1 | Planned |
 | 3.6 | Standing grants | 072 | 3.1 | Planned |
@@ -211,7 +214,7 @@ and audit log.
 | 4.1 | Children and receipts; child limits and child abort | 011, 061, 031, 087 | 1.4; OQ-81 | Planned |
 | 4.2 | `llm.escalate` | 011 | 4.1 | Planned |
 | 4.3 | `reader` role and outside lineage | 075 | 0.7 | Planned |
-| 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core | 016, 053, 080 | 0.15; `owner-exit` needs an overlay route (7.4, OQ-72) | Planned |
+| 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core | 016, 053, 080 | 0.15, 2.12 | Planned |
 | 4.5 | `web.search` and `web.fetch` with pluggable rungs | 012, 049 | 4.3, 4.4, 4.13 | Planned |
 | 4.6 | Optional Web Bot Auth signing for HTTP | 054 | 4.4 | Planned |
 | 4.7 | First sandbox backend | 034, 036 | OQ-70 | Blocked (OQ-70: backend under Compose not chosen) |
@@ -232,7 +235,7 @@ Exit criteria:
   (ADR-053).
 - Each CLI engine's provider terms are checked and recorded in a learning note (ADR-077).
 
-Open questions that block this phase: OQ-70, OQ-72 (for `owner-exit`), OQ-76, OQ-77,
+Open questions that block this phase: OQ-70, OQ-76, OQ-77,
 OQ-80, OQ-81.
 Gate status: not passed.
 
@@ -272,12 +275,12 @@ Purpose: Jaari drives a browser and a desktop under the placement rule. Entry: c
 |---|---|---|---|---|
 | 6.1 | Neutral `browser.*`/`computer.*` surface and pluggable adapters, under the placement rule; local profile, owner exit node, remote CDP | 005, 017, 048 | 4.1; OQ-82 | Planned |
 | 6.2 | Native Anthropic and Gemini toolsets as an `@jaari/llm` mapping | 048 | 6.1 | Planned |
-| 6.3 | Browser SOCKS5 listener and owner-account pinning; opt-in `vpn`, `mobile`, and `residential-proxy` providers | 016, 017, 053 | 4.4; `owner-exit` needs an overlay route (7.4, OQ-72) | Planned |
-| 6.4 | Takeover | 055 | 6.1, 2.9; the link opens over the overlay (7.4, OQ-72) | Planned |
+| 6.3 | Browser SOCKS5 listener and owner-account pinning; opt-in `vpn`, `mobile`, and `residential-proxy` providers | 016, 017, 053 | 4.4 | Planned |
+| 6.4 | Takeover | 055 | 6.1, 2.9, 2.12 | Planned |
 | 6.5 | Commitment classifier | 051 | 6.1; OQ-83 | Planned |
 | 6.6 | Browser worker child and task-scoped origins; the scope rule is reviewed from logs last | 052 | 6.1; OQ-83 | Planned |
 | 6.7 | `computer.use` on a host virtual desktop | 015 | 6.1 | Planned |
-| 6.8 | Remote nodes via `jaari capability install`; packages on nodes | 015, 071 | 2.7, 7.5 (node link); OQ-72 | Blocked (OQ-72: the node link is placed in Phase 7) |
+| 6.8 | Remote nodes via `jaari capability install`; packages on nodes; the node link | 015, 058, 071, 088 | 2.7, 2.12 | Planned |
 | 6.9 | macOS permission matrix | 057 | 6.8 | Planned |
 | 6.10 | Web Bot Auth signing in the browser | 054 | 6.1, 4.6 | Planned |
 
@@ -289,7 +292,7 @@ Exit criteria:
 - Native toolsets are enabled per route only when the Phase 6 fixtures show a gain (ADR-048).
 - The task-scope origin review is done from the logs (ADR-052).
 
-Open questions that block this phase: OQ-72, OQ-82, OQ-83.
+Open questions that block this phase: OQ-82, OQ-83.
 Gate status: not passed.
 
 ## Phase 7: Hardening
@@ -300,13 +303,13 @@ Purpose: stronger isolation, more network modes, and moving hosts. Entry: Phase 
 |---|---|---|---|---|
 | 7.1 | Firecracker sandbox backend | 036 | 4.7 | Planned |
 | 7.2 | Container isolation of host capabilities and third-party packages | 015, 071 | 4.10 | Planned |
-| 7.4 | Overlay modes and sizing per target | 030 | OQ-72 | Planned |
-| 7.5 | Node link, multi-device state, and host migration ("multi-device state" has no ADR) | 058 | 7.4; OQ-72 | Planned |
+| 7.4 | WireGuard peer-config generation, Cloudflare Zero Trust, and sizing per target | 030, 088 | 2.12 | Planned |
+| 7.5 | Multi-device state and host migration ("multi-device state" has no ADR; the node link is 6.8) | 058, 088 | 6.8 | Planned |
 | 7.6 | Observability: opt-in traces and the raw tee (in `@jaari/core`) | 032, 086 | 3.4 | Planned |
 
 Exit criteria: none documented in the ADRs. Define them before this phase starts.
 
-Open questions that block this phase: OQ-72.
+No open question blocks this phase.
 Gate status: not passed.
 
 ## Phase 8: Evals
@@ -358,7 +361,9 @@ SOCKS5 listener, owner-account pinning, and the opt-in `vpn`, `mobile`, and
   Telegram (2.8), erase (3.9). Email input (5.2) follows ADR-021.
 - The threat model is marked Delivered (3.13).
 - Not moved, because an accepted ADR states the phase or the choice is the owner's: see
-  OQ-72, OQ-73.
+  OQ-73.
 - Decided since the audit: the egress core moved to Phase 0 as 0.15, and the container egress
   proxy moved from 7.3 to 4.13 (ADR-080). Catch-up moved from 0.13 to 1.4, and automatic patch
   installs to 2.3 (ADR-082). Safety pieces moved to the phase of what they protect (ADR-087).
+  The overlay binding moved to 2.12 and the node link to 6.8; panel views ship with their
+  features (ADR-088).
