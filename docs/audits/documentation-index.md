@@ -41,9 +41,9 @@ only with a pointer), **generated** (written by a script).
 | Path | Purpose | Status |
 |---|---|---|
 | `docs/STATE.md` | Summary: what is decided, what is built, what is next, scheduled checks | current |
-| `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current, with open points (OQ-71 to 73) |
+| `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current, with open points (OQ-72, 73) |
 | `docs/ACTION_PLAN.md` | Ordered next steps; a copy of the ADR table | current |
-| `docs/OPEN_QUESTIONS.md` | 17 open (OQ-70 to OQ-91); 74 resolved with ADR links; original wording | current |
+| `docs/OPEN_QUESTIONS.md` | 16 open (OQ-70 to OQ-91); 75 resolved with ADR links; original wording | current |
 
 ## Subsystem designs
 
@@ -61,7 +61,7 @@ only with a pointer), **generated** (written by a script).
 
 ## Decisions
 
-`docs/adr/README.md` is the index of the 86 ADRs (all Accepted). By topic:
+`docs/adr/README.md` is the index of the 87 ADRs (all Accepted). By topic:
 
 | Topic | ADRs |
 |---|---|
@@ -73,13 +73,14 @@ only with a pointer), **generated** (written by a script).
 | Gate, secrets, safety | 006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075, 079, 081 |
 | Models | 011, 019, 045, 046, 065, 077, 085 |
 | Web, browser, egress | 005, 012, 048, 049, 051, 052, 053, 054, 055, 080 |
-| Operations | 025, 027, 028, 032, 059 |
+| Operations | 025, 027, 028, 032, 059, 087 |
 | Extension points and integrations | 034, 036, 039, 062, 063, 071, 073, 084 |
 | Plan and evals | 020, 041 |
 
 ADRs whose text is changed in part by a later ADR (read the `Amendments` section first):
-001, 002, 005, 006, 007, 009, 011, 012, 013, 014, 015, 016, 017, 018, 019, 020, 021, 022, 025, 027,
-030, 032, 034, 035, 036, 038, 039, 048, 049, 050, 051, 053, 056, 057, 060, 063, 071, 074. ADR-038's
+001, 002, 005, 006, 007, 009, 011, 012, 013, 014, 015, 016, 017, 018, 019, 020, 021, 022, 025,
+027, 028, 030, 031, 032, 034, 035, 036, 038, 039, 046, 048, 049, 050, 051, 053, 055, 056, 057,
+060, 063, 065, 071, 074. ADR-038's
 title still says "sensitive files local-only"; ADR-078 replaced that rule.
 
 ## Guides, learning notes, history

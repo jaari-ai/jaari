@@ -45,9 +45,9 @@ effect. Entry: none.
 | 0.2 | CI on every pull request: lint, typecheck, tests, tier-1 smoke test, DCO check, gitleaks, licence check | 041, 043 | 0.1 | Planned |
 | 0.3 | Project process files: `SECURITY.md`, `CONTRIBUTING.md` | 043 | none | Planned |
 | 0.4 | Namespaces and release: secure the npm and PyPI names, the `python/` pointer package, the release workflow ([guides/namespaces.md](guides/namespaces.md)). Placement | 010 | none | In progress (`release.yml` and `python/` exist; `python/` does not match the guide; names not secured) |
-| 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement | 001, 065 | 0.1, 0.7; OQ-69, OQ-86 | Planned |
+| 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement; pause, emergency stop, steps per turn, stall guard, watchdog, event log | 001, 065, 031, 032, 087 | 0.1, 0.7, 0.8 | Planned |
 | 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship | 017, 019, 056 | 0.1 | Planned |
-| 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains, refusal classification | 011, 019, 085 | 0.1, 0.15 | Planned |
+| 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains, refusal classification, usage log | 011, 019, 085, 032, 087 | 0.1, 0.15 | Planned |
 | 0.8 | `ChannelAdapter` contract and the shared contract suite, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081, 084 | 0.5, 0.9 | Planned |
 | 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084 | 0.1 | Planned |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Planned |
@@ -75,6 +75,8 @@ Exit criteria:
   child it moves to the next model (ADR-085).
 - A clock gap over 2 minutes is detected as sleep (ADR-057).
 - A binary older than its data refuses to start (ADR-056).
+- "stop now" aborts the running turn and "pause" survives a restart; a turn stops at 25 steps
+  (ADR-031, ADR-087).
 - `jaari update` takes a local snapshot before the swap and rolls back automatically when
   `jaari doctor` fails after it (ADR-056, ADR-082).
 - A key, token, labelled password, or Luhn-valid card number in an owner message is replaced
@@ -93,16 +95,18 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 1.1 | Memory repo, single writer, write path | 003, 026 | 0.5 | Planned |
+| 1.1 | Memory repo, single writer, write path; pre-write secret scan of derived facts and files | 003, 026, 028, 081, 087 | 0.5 | Planned |
 | 1.2 | Structured records, `records.query`, FTS5 search | 023 | 1.1 | Planned |
 | 1.3 | Context assembly; session orientation and re-injection from state | 024, 065 | 1.2 | Planned |
-| 1.4 | Job engine; catch-up after sleep (in `@jaari/core`) | 025, 057, 082, 086 | 0.5, 0.13 | Planned |
+| 1.4 | Job engine; catch-up after sleep (in `@jaari/core`); job-tree abort | 025, 057, 082, 086, 031, 087 | 0.5, 0.13 | Planned |
 | 1.5 | Routines (in `@jaari/core`) | 064, 086 | 1.4; OQ-73 | Blocked (OQ-73: children, the notification ledger, and budgets come later) |
 | 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9; OQ-78 | Planned |
 | 1.7 | Daily audit | 004 | 1.1, 1.4 | Planned |
 | 1.8 | Capture evidence | 074, 081 | 1.1, 0.8 | Planned |
 | 1.9 | Local-model qualification and the `jaari llm eval` qualification fixtures | 019, 045 | 0.7 | Planned |
 | 1.10 | Correct and forget (erase is 3.9). Placement | 029 | 1.1 | Planned |
+| 1.11 | Monthly LLM budget with the 100% prompt; spike alerts | 046, 031, 087 | 0.7, 0.8 | Planned |
+| 1.12 | Nightly local snapshot of memory, SQLite, and config (last 7) | 027, 082, 087 | 1.1, 0.12 | Planned |
 
 Exit criteria:
 - The three ADR-023 fixtures pass: the exact balance of a budget with 20 expenses; an
@@ -114,12 +118,14 @@ Exit criteria:
   deleted (ADR-026).
 - After a restart, a safe step reruns once and an unsafe step that had started is never rerun
   (ADR-025).
+- At 100% of the monthly budget, one prompt offers the three choices, and background roles wait
+  until the owner answers (ADR-046, ADR-087).
+- A derived fact that contains a secret is blocked before the write (ADR-028, ADR-087).
 - After sleep, each missed job runs once, at most 5 on wake, oldest first (ADR-057, ADR-082).
 - Qualification records pass rate, tokens per second, and time to first token per model
   (ADR-045).
 
-Open questions that block this phase: OQ-71 (until Phase 3 the loop has no pause,
-limits, usage log, pre-write scan of derived facts, or backup), OQ-73, OQ-78.
+Open questions that block this phase: OQ-73, OQ-78.
 Gate status: not passed.
 
 ## Phase 2: Persona and owner surfaces
@@ -129,14 +135,14 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 2.1 | Dials and monitor | 008 | 0.5 | Planned |
+| 2.1 | Dials and monitor; repeated-failure and 7-day quiet rules | 008, 031, 087 | 0.5 | Planned |
 | 2.2 | Curiosity from the gap queue | 008 | 1.6, 2.1 | Planned |
-| 2.3 | Quiet hours, notification ledger, digests, delivery; automatic patch installs in quiet hours | 033, 056, 082 | 2.1, 0.12 | Planned |
+| 2.3 | Quiet hours, notification ledger, digests, delivery; automatic patch installs in quiet hours; 50% and 80% budget lines | 033, 056, 082, 046, 087 | 2.1, 0.12 | Planned |
 | 2.4 | Prompt versioning | 042 | 0.5 | Planned |
 | 2.5 | Replay harness and golden threads | 041 | 0.2 | Planned |
 | 2.6 | Skills: built-in and owner (third-party is 4.10) (in `@jaari/core`) | 060, 086 | 1.1 | Planned |
 | 2.7 | Owner authentication: device registry, `jaari pair`, `jaari devices`. Placement | 022 | 0.8 | Planned |
-| 2.8 | Telegram channel. Placement | 021 | 0.8, 2.7 | Planned |
+| 2.8 | Telegram channel. Placement; loop breaker for other bots | 021, 031, 087 | 0.8, 2.7 | Planned |
 | 2.9 | Owner panel | 067 | 2.7; OQ-72 | Blocked (OQ-72: needs TLS over the overlay, item 7.4, and Phase 3 parts for four of its views) |
 | 2.10 | Onboarding | 070 | 2.6; OQ-83 | Planned |
 | 2.11 | Voice notes and optional spoken replies (in `@jaari/llm`) | 037, 086 | 0.8 | Planned |
@@ -168,11 +174,11 @@ grants land together.
 | 3.1 | Real gate: digests, approvals, expiry, re-check at dispatch, the "unreadable" rule; approvals that expired during sleep are asked again | 006, 016, 018, 057, 082 | 0.10; OQ-79 | Planned |
 | 3.2 | Hash-chained `audit.jsonl` | 016 | 3.1 | Planned |
 | 3.3 | Vault providers (Bitwarden, 1Password), the one-time-code ladder, and the 1Password check on a real account | 013, 050 | 0.11 | Planned |
-| 3.4 | LLM budget and usage log; web budget | 046, 032 | 0.7; OQ-89 | Planned |
-| 3.5 | Pause, emergency stop, and runaway limits | 031 | 0.5; OQ-71 | Planned |
+| 3.4 | Web budget (the LLM budget is 1.11, the usage log 0.7) | 046 | 1.11; OQ-89 | Planned |
+| 3.5 | Lowering a capability's permission stops the turn using it (the other ADR-031 limits ship with 0.5, 1.4, 2.x, and 4.1) | 031, 087 | 3.1 | Planned |
 | 3.6 | Standing grants | 072 | 3.1 | Planned |
-| 3.7 | Backup, restore, and the monthly drill; the ADR-027 bundle replaces the Phase 0 pre-update snapshot | 027, 082 | 1.1, 3.2; OQ-87 | Planned |
-| 3.8 | Encryption at rest: pre-write secret scan of derived facts and files (owner messages are scrubbed at ingress from Phase 0, ADR-081), encrypted remotes, `jaari memory purge` | 028 | 1.1 | Planned |
+| 3.7 | Backup, restore, and the monthly drill; the ADR-027 bundle replaces the local pre-update and nightly snapshots | 027, 082, 087 | 1.1, 3.2; OQ-87 | Planned |
+| 3.8 | Encryption at rest: encrypted remotes, `jaari memory purge` (the pre-write scan is 1.1, the ingress scrub 0.8) | 028, 087 | 1.1 | Planned |
 | 3.9 | Erase. Placement | 029 | 3.1, 1.10; OQ-87 | Planned |
 | 3.10 | Shadow mode | 068 | 3.1 | Planned |
 | 3.11 | Degraded mode | 059 | 3.5 | Planned |
@@ -192,7 +198,7 @@ Exit criteria:
 - Budget warnings fire at 50% and 80% (ADR-046).
 - 1Password plan eligibility and limits are checked on a real account (ADR-050).
 
-Open questions that block this phase: OQ-71, OQ-79, OQ-87, OQ-89.
+Open questions that block this phase: OQ-79, OQ-87, OQ-89.
 Gate status: not passed.
 
 ## Phase 4: Background work
@@ -202,19 +208,19 @@ and audit log.
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 4.1 | Children and receipts | 011, 061 | 3.5; OQ-81 | Planned |
+| 4.1 | Children and receipts; child limits and child abort | 011, 061, 031, 087 | 1.4; OQ-81 | Planned |
 | 4.2 | `llm.escalate` | 011 | 4.1 | Planned |
 | 4.3 | `reader` role and outside lineage | 075 | 0.7 | Planned |
 | 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core | 016, 053, 080 | 0.15; `owner-exit` needs an overlay route (7.4, OQ-72) | Planned |
-| 4.5 | `web.search` and `web.fetch` with pluggable rungs | 012, 049 | 4.3, 4.4, 4.11 | Planned |
+| 4.5 | `web.search` and `web.fetch` with pluggable rungs | 012, 049 | 4.3, 4.4, 4.13 | Planned |
 | 4.6 | Optional Web Bot Auth signing for HTTP | 054 | 4.4 | Planned |
 | 4.7 | First sandbox backend | 034, 036 | OQ-70 | Blocked (OQ-70: backend under Compose not chosen) |
 | 4.8 | MCP client, local servers sandboxed (in `@jaari/mcp`) | 034, 086 | 4.3, 4.7; OQ-80 | Planned |
 | 4.9 | Code execution | 036 | 3.6, 4.7; OQ-77 | Planned |
 | 4.10 | Third-party skills and third-party packages | 060, 071 | 4.3 | Planned |
-| 4.11 | Container egress proxy on the same address-class table, shipped with the first container that works on untrusted input (SearXNG, browser, sandbox) | 053, 080 | 0.15 | Planned |
 | 4.11 | Headless CLI commands | 076 | 0.5 | Planned |
 | 4.12 | Subscription CLI engines for sandboxed children (interface in `@jaari/core`; each engine is a package) | 077, 086 | 4.1, 4.7; OQ-76 | Planned |
+| 4.13 | Container egress proxy on the same address-class table, shipped with the first container that works on untrusted input (SearXNG, browser, sandbox) | 053, 080 | 0.15 | Planned |
 
 Exit criteria:
 - The sandbox self-check verifies no network, a read-only root, no home directory, and working
@@ -352,7 +358,7 @@ SOCKS5 listener, owner-account pinning, and the opt-in `vpn`, `mobile`, and
   Telegram (2.8), erase (3.9). Email input (5.2) follows ADR-021.
 - The threat model is marked Delivered (3.13).
 - Not moved, because an accepted ADR states the phase or the choice is the owner's: see
-  OQ-71, OQ-72, OQ-73.
+  OQ-72, OQ-73.
 - Decided since the audit: the egress core moved to Phase 0 as 0.15, and the container egress
-  proxy moved from 7.3 to 4.11 (ADR-080). Catch-up moved from 0.13 to 1.4, and automatic patch
-  installs to 2.3 (ADR-082).
+  proxy moved from 7.3 to 4.13 (ADR-080). Catch-up moved from 0.13 to 1.4, and automatic patch
+  installs to 2.3 (ADR-082). Safety pieces moved to the phase of what they protect (ADR-087).

@@ -1,6 +1,7 @@
 # ADR-046: LLM budget: a monthly budget set at init, early warnings, and the owner's choice at the limit
 
 - **Status:** Accepted
+- **Extended by:** [ADR-087](087-safety-pieces-ship-with-what-they-protect.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -49,6 +50,10 @@ accounting from Pi `ai/src/types.ts` (`Usage`).
 A fixed default for every install; an automatic downgrade of the main session at the limit
 (cost-driven switching, against ADR-019); a hard stop that silences Jaari; explaining the
 trade-offs every time (nagging); counting web APIs and payments against the LLM budget.
+
+## Amendments
+- **ADR-087:** the monthly budget and the 100% prompt ship in Phase 1; the 50% and 80% digest
+  lines in Phase 2.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

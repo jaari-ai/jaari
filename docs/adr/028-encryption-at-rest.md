@@ -1,7 +1,7 @@
 # ADR-028: Encryption at rest: prevent secrets in memory, encrypt every remote you do not control, purge on demand
 
 - **Status:** Accepted
-- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md)
+- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md), [ADR-087](087-safety-pieces-ship-with-what-they-protect.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -48,6 +48,8 @@ command (a leaked secret would stay in history and every remote).
 - **ADR-081 (resolves OQ-69):** owner messages are scrubbed at channel ingress by the same
   rules (known formats, labelled passwords, exact vault values) before any storage; block-and-ask
   stays for every other memory write.
+- **ADR-087:** the pre-write scan of derived facts and files ships with the memory write path
+  (Phase 1).
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

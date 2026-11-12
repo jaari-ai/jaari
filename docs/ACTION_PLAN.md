@@ -23,7 +23,7 @@ status and exit criteria live there.
    to the daemon, so this follows step 5.
 7. **Memory** (Phase 1): single writer (ADR-026), structured records and FTS5 search (ADR-023),
    context assembly (ADR-024), the job engine (ADR-025), canonicalize and capture evidence
-   (ADR-047, ADR-074). Decide OQ-71, OQ-73, and OQ-78 first.
+   (ADR-047, ADR-074). Decide OQ-73 and OQ-78 first.
 8. **Persona and owner surfaces** (Phase 2): dials and notifications, pairing (ADR-022),
    Telegram, then the panel (ADR-067). Decide OQ-72 before the panel.
 9. **The real gate and its companions** (Phase 3): gate and audit log (ADR-006, ADR-016,
@@ -127,3 +127,4 @@ status and exit criteria live there.
 | [084](adr/084-package-manifest-location-and-channel-section.md) | The package manifest lives in `package.json`; channels add a `channel` section; a shared contract suite | Accepted |
 | [085](adr/085-refusal-in-the-pinned-main-session.md) | A provider refusal never moves the pinned main session; other roles move down the chain | Accepted |
 | [086](adr/086-package-homes.md) | Package homes for eleven subsystems; two new homes, `@jaari/mcp` and `apps/hooks` | Accepted |
+| [087](adr/087-safety-pieces-ship-with-what-they-protect.md) | Safety pieces ship in the phase of the first thing they protect | Accepted |
