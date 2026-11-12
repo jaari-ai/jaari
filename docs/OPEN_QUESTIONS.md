@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **9**.
+Last updated: 2026-11-10. Open: **8**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -44,7 +44,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-49 | Onboarding conversation | The first conversation and first week: profile bootstrap, what is asked and what is inferred, when dials are explained. | 2 | An onboarding skill; ask only what the next task needs Affected by ADR-067: onboarding can run in the panel as well as the CLI and Telegram. |
 | OQ-50 | Capability packages | ADR-015 makes capabilities installable units with a manifest. Open: manifest schema, where packages come from (npm `@jaari/capability-*`, local path), signing and update, how a capability declares and checks its OS permissions and sidecars (Xvfb or a desktop container for `computer.use` on a VPS), and how this relates to MCP servers (OQ-14) and skills (OQ-39). The owning package is `@jaari/capabilities` and the names come from one vocabulary (ADR-018). | 0 | Manifest schema and the in-process loader in Phase 0; npm packages with provenance, installed by `jaari capability install`; an MCP server can back a capability but never bypasses its manifest. Native sidecars pinned by SHA-256 and size with an SBOM and no runtime self-update; policy reads capability flags from the manifest, never package names (learning/09) Affected by ADR-034: MCP tools map to vocabulary names, `mcp.read` or `mcp.act` when none fits; the server-and-tool mapping is a manifest. Affected by ADR-069: the decision adds its rows to THREAT_MODEL.md. |
 
 ## H. From the OpenMausBot study (learning/09-openmausbot.md, 2026-11-10)
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-46 | One PWA over the overlay on the CLI's API; optional passkey for secret entry and takeover; untrusted content as text; Phase 2 core views | [ADR-067](adr/067-owner-panel.md) |
 | OQ-47 | Shadow only self-initiated effects, per capability, 14 days by default with Do it now; direct requests skip it; new capabilities start shadowed | [ADR-068](adr/068-shadow-mode.md) |
 | OQ-48 | THREAT_MODEL.md written now: actor/attack/control/left-over table and a not-protected list; kept current by a DEVELOPMENT.md checklist rule | [ADR-069](adr/069-threat-model.md) |
+| OQ-49 | Built-in onboarding skill after init; one question per message; optional people records; first week inferred with one gap question a day and a day-7 summary | [ADR-070](adr/070-onboarding-conversation.md) |

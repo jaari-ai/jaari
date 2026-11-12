@@ -71,3 +71,4 @@
 | [067](067-owner-panel.md) | Owner panel: one PWA served by the daemon over the overlay, an optional passkey, untrusted content as text, views grown by phase | Accepted |
 | [068](068-shadow-mode.md) | Shadow mode: only what Jaari starts on its own, per capability, 14 days by default, each new capability shadowed in turn | Accepted |
 | [069](069-threat-model.md) | Threat model: an actor-by-attack-by-control table with what is left over, a "not protected against" list, kept current by an ADR checklist rule | Accepted |
+| [070](070-onboarding-conversation.md) | Onboarding conversation: a built-in skill after `jaari init`, one question at a time, optional people records, a first week of inference and one gap question a day | Accepted |
