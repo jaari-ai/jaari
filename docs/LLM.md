@@ -19,7 +19,7 @@ Owner override: "use the big model for this", `/model <tier>`.
 | canonicalize | medium | Local-only if possible |
 | curiosity, classify, summarize, title | small | Local preferred |
 | reader | small | No tools |
-| vision | by capability | Any model accepting images; follows the owner's routing, including for photos (ADR-066) |
+| vision | by capability | Any model accepting images; follows the owner's routing, including for photos and documents (ADR-066, ADR-078) |
 | stt, tts | speech | Local whisper.cpp and Piper or Kokoro by default; API optional (ADR-037) |
 | approvals, spend, digests | none | Deterministic code |
 

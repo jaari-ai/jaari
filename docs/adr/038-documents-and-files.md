@@ -1,7 +1,7 @@
 # ADR-038: Documents and files: content-addressed store, sealed parsing, sensitive files local-only, disk watch
 
 - **Status:** Accepted
-- **Extended by:** [ADR-066](066-photos-as-memory.md)
+- **Extended by:** [ADR-066](066-photos-as-memory.md), [ADR-078](078-documents-follow-owner-routing.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -61,6 +61,9 @@ files from gajae-way `packages/adapter-telegram/src/attachments.ts` (design only
 - **ADR-066:** photos and screenshots are read by the `vision` role as the owner routed it
   (local-only, hybrid, or API); the sensitive-documents local-only rule does not force local
   models for photos.
+- **ADR-078:** documents, sensitive ones included, are read by the models the owner routed
+  (local-only, hybrid, or API); "Sensitive documents stay local" is no longer forced, and the
+  owner can still make those roles local-only.
 
 ## Alternatives rejected
 Storing binaries in the memory git repository (history bloat); a fixed storage quota (the owner

@@ -19,7 +19,7 @@ they do.
 **Sensitive lines stay local.** When the owner allows an API model for canonicalize, lines at the
 `sensitive` level (ADR-023: health, identity numbers, finances) are left out of the API batch.
 They wait for a local pass if a local model is available; otherwise they stay in the daily log,
-searchable, and are not folded into `profile/`. This matches ADR-038 for sensitive files.
+searchable, and are not folded into `profile/`. (ADR-038 originally did the same for sensitive files; ADR-078 changed that for files.)
 
 **Checks after the pass.** Every changed `profile/` line must carry a source quote from a daily
 file (the capture rule, ADR-074); a fact without a source is rejected. A pass that would delete more

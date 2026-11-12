@@ -5,7 +5,7 @@ Last updated: 2026-11-10
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (77 ADRs)
+## Decided (78 ADRs)
 - Identity and publishing: `jaari.org`, GitHub org `jaari-ai`, MIT licence (ADR-010, 014). npm
   and PyPI names are not yet secured; checklist in [guides/namespaces.md](guides/namespaces.md).
 - Core design: Pi agent loop, pnpm monorepo, git-backed Markdown memory, canonicalize and

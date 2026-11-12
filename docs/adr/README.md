@@ -79,3 +79,4 @@
 | [075](075-outside-lineage.md) | Outside lineage: a code-set origin on every run, sticky across spawned work, outside effects always ask with the origin shown | Accepted |
 | [076](076-external-control-surface.md) | External control surface: headless CLI commands on the local socket, a two-tool MCP server for paired desktop apps in v1, nothing that approves or changes policy | Accepted |
 | [077](077-subscription-cli-engines.md) | Subscription CLI engines: pluggable CliEngine adapters for sandboxed children only, Pi first, the gate answering the CLI's permission requests, off until the owner enables each engine | Accepted |
+| [078](078-documents-follow-owner-routing.md) | Documents follow the owner's model routing; no forced local-only path for sensitive files | Accepted |
