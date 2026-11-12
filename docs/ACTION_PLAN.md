@@ -95,3 +95,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [072](adr/072-standing-grants.md) | Standing grants: one grant model, exact-match keys, a closed list of grantable capabilities, offered once after three identical approvals | Accepted |
 | [073](adr/073-inbound-triggers.md) | Inbound triggers: polling first, a separate hook listener with opt-in public exposure offered at hook creation, signed deliveries, hooks bound to one routine | Accepted |
 | [074](adr/074-memory-capture-evidence.md) | Memory capture evidence: mechanical raw capture, a code-checked quote and source id on every derived fact, inferred facts marked, commit trailers | Accepted |
+| [075](adr/075-outside-lineage.md) | Outside lineage: a code-set origin on every run, sticky across spawned work, outside effects always ask with the origin shown | Accepted |

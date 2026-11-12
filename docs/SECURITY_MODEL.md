@@ -74,8 +74,10 @@ the `reader` role exists.
 ## Untrusted content
 Email, web pages, search snippets, and documents go through the tool-less `reader`
 role before the main session sees them. Webhook and app-event payloads are untrusted
-content too (ADR-073). Whether work caused by untrusted content stays restricted (sticky
-outside lineage) is OQ-54.
+content too (ADR-073). Every run carries a
+code-set origin (`owner`, `routine`, `event`, `outside`). `outside` sticks to everything it
+spawns, cannot settle approvals or use grants, and each of its effects is Allow once with an
+origin line on the card (ADR-075).
 
 ## Egress
 All network calls via `@jaari/http`; containers via an egress proxy that blocks private
@@ -131,5 +133,3 @@ plus a host off the starter list always ask. Recurring jobs are approved once at
 pinned to a digest of script, placement, secrets, hosts, and schedule; any change holds them.
 A boot self-check disables code execution if the sandbox is weakened.
 
-## Open
-Outside lineage (OQ-54).

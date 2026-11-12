@@ -191,8 +191,8 @@ dependency.
 - Owner ↔ channels: authenticated owner only (see [Channels](#channels) and ADR-022).
 - Model ↔ tools: every tool maps to a capability; effectful capabilities go through the gate.
 - Tools ↔ internet: all egress through `@jaari/http` or the container egress proxy.
-- Untrusted content ↔ main session: `reader` summary only, never raw instructions. Whether
-  the outside origin sticks to derived work is OQ-54.
+- Untrusted content ↔ main session: `reader` summary only, never raw instructions. Every run
+  carries a code-set origin; `outside` sticks to derived work (ADR-075).
 
 ## Decisions
 See [adr/README.md](adr/README.md).
