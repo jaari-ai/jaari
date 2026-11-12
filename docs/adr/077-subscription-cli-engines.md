@@ -1,6 +1,7 @@
 # ADR-077: Subscription CLI engines: pluggable CliEngine adapters for sandboxed children only, Pi first, the gate answering the CLI's permission requests, off until the owner enables each engine
 
 - **Status:** Accepted
+- **Extended by:** [ADR-091](091-engine-runs.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -39,6 +40,11 @@ mode as the first engine from Pi `coding-agent/docs/rpc.md` (docs only).
 A CLI engine for the main session; CLI engines with secrets or effectful capabilities; letting the
 CLI push, publish, or send itself; web access on by default; enabled by default without a terms
 note.
+
+## Amendments
+- **ADR-091 (resolves OQ-76):** these are engine runs, not sealed runs; on owner files the first
+  run per workspace asks Allow once or a 90-day `engine.run` grant; scratch workspaces run without
+  asking once enabled; web access on makes the run `outside`; the child time limit applies.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

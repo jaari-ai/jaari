@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **13**.
+Last updated: 2026-11-12. Open: **12**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -27,7 +27,6 @@ leaning yet; the options listed are only the ones the docs already name.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-76 | Subscription CLI runs called "sealed" | ADR-077 calls these runs sealed and approval-free, but they have network to the provider and the CLI's sign-in inside the sandbox, and ADR-036 limits a run to 5 minutes. Are they a named exception with their own limits, or do they ask like any networked run? | 4 | None. On record: sealed means no network and no secrets (ADR-036) |
 | OQ-77 | Pinned recurring jobs | A pinned job runs with no expiry and may run host commands. ADR-072 is "one grant model" with a 90-day expiry and lists host commands and `pay` as never grantable. Is a pinned job a separate approval kind, or does it follow ADR-072? | 4 | None. On record: no expiry (ADR-036); closed list (ADR-072) |
 | OQ-88 | MCP client and the active channel | Does a message from a paired MCP client make that client the active channel? If not, is `collect` a second output stream next to the one active channel? | 5 | None. On record: no fan-out (ADR-022); approvals stay on the active channel (ADR-076) |
 
@@ -61,9 +60,6 @@ phase starts.
   disables code execution if the sandbox is weak (ADR-036). Reopens the Compose part of OQ-35.
   If delayed: MCP servers, code execution, document parsing, and CLI engines have no backend
   on the default install.
-- **OQ-76.** Evidence: ADR-036 ("A run with no network and no secrets is sealed"; provider keys
-  never inside the sandbox; 5-minute limit), ADR-077 ("inside the sealed sandbox", the CLI's own
-  sign-in, provider API hosts), ADR-031 (children 30 minutes).
 - **OQ-77.** Evidence: ADR-036 ("with no expiry"; "Host jobs are allowed this way"), ADR-072
   ("One grant model"; closed list), ADR-006 ("Approvals are single-use and expire"), ADR-040
   (a pinned job as the later model for recurring payments).
@@ -171,6 +167,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-73 | Phase 1 routines run plain code and one tool-less model step, keep results in run history with job receipts, and deliver nothing; delivery and reminders start with the ledger (Phase 2); children, scripts, and watchers in Phases 4 and 5 | [ADR-089](adr/089-routines-before-children.md) |
 | OQ-74 | Split by phase: Phase 0 keeps sleep detection, power, battery, and network re-probe, and a manual `jaari update` with a local pre-update snapshot; catch-up ships with the job engine (Phase 1), expired-approval re-asks with the real gate (Phase 3), automatic patch installs with quiet hours (Phase 2), the ADR-027 bundle with backup (Phase 3) | [ADR-082](adr/082-phase-split-update-and-catch-up.md) |
 | OQ-75 | Rotating an existing OAuth token is a bounded maintenance write with no approval (same item and account; value from the listed token endpoint in answer to a refresh; only token and expiry change); written before use; audited; every other credential write stays Allow once | [ADR-090](adr/090-oauth-token-rotation.md) |
+| OQ-76 | Called engine runs, not sealed; on owner files the first run per workspace asks Allow once or a 90-day `engine.run` grant (engine and workspace); scratch workspaces run without asking once enabled; web access on makes the run `outside`; 30-minute child limit | [ADR-091](adr/091-engine-runs.md) |
 | OQ-84 | Each reference pinned to a full sha in `scripts/refs.sh`; `sync` re-applies pins; `scripts/refs.sh bump` is the only way to move one, printing old and new commit and warning on a licence change; pins committed on their own | [ADR-083](adr/083-pinned-reference-commits.md) |
 | OQ-85 | One manifest per package under the `jaari` key of `package.json`, read before any code runs; channel fields in a `channel` section; `ChannelAdapter` has no manifest property; shared Vitest contract suite in `@jaari/channels/contract`, Phase 0 | [ADR-084](adr/084-package-manifest-location-and-channel-section.md) |
 | OQ-86 | A refusal never moves the pinned main session: the turn ends with one notice and the owner decides (rephrase or `/model`); other roles move down the chain; off-limits categories go to the owner; detected from `rawStopReason`, never retried as an error | [ADR-085](adr/085-refusal-in-the-pinned-main-session.md) |
@@ -254,3 +251,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-72 | Panel, overlay, and node link timing | The Phase 2 panel needs TLS over the overlay (Phase 7), and its Approvals, secret entry, Activity, and Usage views need Phase 3 parts. Remote nodes (Phase 6) need the node link (Phase 7). Which parts move, or which views wait? | 2 |
 | OQ-73 | Routines before children | Routines ship in Phase 1 and "children do the work", but children are Phase 4, the notification ledger is Phase 2, and budgets are Phase 1 (ADR-087). What can a Phase 1 routine do, and how are its results delivered? | 1 |
 | OQ-75 | OAuth token rotation | Rotated OAuth tokens are written back through the gated vault write, and every vault write is Allow once and never grantable. Does each token refresh ask the owner, or is rotation of an existing item exempt? | 5 |
+| OQ-76 | Subscription CLI runs called "sealed" | ADR-077 calls these runs sealed and approval-free, but they have network to the provider and the CLI's sign-in inside the sandbox, and ADR-036 limits a run to 5 minutes. Are they a named exception with their own limits, or do they ask like any networked run? | 4 |

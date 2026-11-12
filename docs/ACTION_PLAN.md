@@ -30,9 +30,9 @@ status and exit criteria live there.
    ADR-018), vault (ADR-013, ADR-050), pause and limits (ADR-031), grants (ADR-072), backup and
    encryption (ADR-027, ADR-028), shadow mode (ADR-068). They check each other at dispatch, so
    they land together.
-10. **Background work** (Phase 4): children, the `reader` role, `@jaari/http` to ADR-016 with
-    `direct` and `owner-exit` providers, the sandbox, MCP, and code execution. Decide OQ-70,
-    OQ-76, OQ-77, and OQ-80 first.
+10. **Background work** (Phase 4): children, the `reader` role, the `owner-exit` provider and
+    per-capability allowlists on `@jaari/http` (ADR-080), the sandbox, MCP, and code execution.
+    Decide OQ-70, OQ-77, and OQ-80 first.
 11. **Integrations, then the browser** (Phases 5 and 6): OAuth broker, mailbox, calendar,
     documents; then the browser under the placement rule, with pool details in ADR-053
     (ADR-017).
@@ -131,3 +131,4 @@ status and exit criteria live there.
 | [088](adr/088-overlay-panel-and-node-link-phasing.md) | Overlay binding and panel TLS in Phase 2, node link in Phase 6, panel views with their features | Accepted |
 | [089](adr/089-routines-before-children.md) | Routines in Phase 1 run code and one tool-less model step; delivery starts with the ledger | Accepted |
 | [090](adr/090-oauth-token-rotation.md) | Rotating an existing OAuth token is a bounded maintenance write, not an approval | Accepted |
+| [091](adr/091-engine-runs.md) | Subscription CLI runs are "engine runs", approved per workspace, with the child time limit | Accepted |

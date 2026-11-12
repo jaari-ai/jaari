@@ -1,7 +1,7 @@
 # ADR-072: Standing grants: one grant model, exact-match keys, a closed list of grantable capabilities, offered once after three identical approvals
 
 - **Status:** Accepted
-- **Extended by:** [ADR-090](090-oauth-token-rotation.md)
+- **Extended by:** [ADR-090](090-oauth-token-rotation.md), [ADR-091](091-engine-runs.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -60,6 +60,7 @@ shadow mode.
 ## Amendments
 - **ADR-090:** a code-initiated OAuth rotation within its bounds is not a grant and needs no
   approval; every other credential write stays Allow once.
+- **ADR-091:** the closed list gains `engine.run`, keyed on engine id and workspace path.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

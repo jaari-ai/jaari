@@ -92,3 +92,4 @@
 | [088](088-overlay-panel-and-node-link-phasing.md) | Overlay binding and panel TLS in Phase 2, node link in Phase 6, panel views with their features | Accepted |
 | [089](089-routines-before-children.md) | Routines in Phase 1 run code and one tool-less model step; delivery starts with the ledger | Accepted |
 | [090](090-oauth-token-rotation.md) | Rotating an existing OAuth token is a bounded maintenance write, not an approval | Accepted |
+| [091](091-engine-runs.md) | Subscription CLI runs are "engine runs", approved per workspace, with the child time limit | Accepted |

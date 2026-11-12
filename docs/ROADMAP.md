@@ -226,7 +226,7 @@ and audit log.
 | 4.9 | Code execution; routine script steps | 036, 064, 089 | 3.6, 4.7; OQ-77 | Planned |
 | 4.10 | Third-party skills and third-party packages | 060, 071 | 4.3 | Planned |
 | 4.11 | Headless CLI commands | 076 | 0.5 | Planned |
-| 4.12 | Subscription CLI engines for sandboxed children (interface in `@jaari/core`; each engine is a package) | 077, 086 | 4.1, 4.7; OQ-76 | Planned |
+| 4.12 | Subscription CLI engines for sandboxed children (interface in `@jaari/core`; each engine is a package) | 077, 086, 091 | 4.1, 4.7 | Planned |
 | 4.13 | Container egress proxy on the same address-class table, shipped with the first container that works on untrusted input (SearXNG, browser, sandbox) | 053, 080 | 0.15 | Planned |
 
 Exit criteria:
@@ -239,7 +239,7 @@ Exit criteria:
   (ADR-053).
 - Each CLI engine's provider terms are checked and recorded in a learning note (ADR-077).
 
-Open questions that block this phase: OQ-70, OQ-76, OQ-77,
+Open questions that block this phase: OQ-70, OQ-77,
 OQ-80, OQ-81.
 Gate status: not passed.
 

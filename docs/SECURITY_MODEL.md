@@ -157,3 +157,8 @@ or Always allow for one host or folder for 90 days; host commands are always All
 plus a host off the starter list always ask. Recurring jobs are approved once at creation,
 pinned to a digest of script, placement, secrets, hosts, and schedule; any change holds them.
 A boot self-check disables code execution if the sandbox is weakened.
+Engine runs (subscription CLIs, ADR-077) are not sealed: they reach the provider's declared hosts
+with the CLI's sign-in. On owner files the first run per workspace asks Allow once or a 90-day
+`engine.run` grant, and the card says the workspace goes to the provider; a scratch workspace
+runs without asking once the engine is enabled; web access on makes the run `outside`; 30-minute
+limit (ADR-091).
