@@ -13,7 +13,7 @@ home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
   persona dials, open-instinct as shell and openinstinct as spec (ADR-001 to 009).
 - Models and web: role/tier routing with a pinned main session, outage failover, and
   local-only defaults decided at init; web search, fetch ladder, and browser (ADR-011, 012,
-  019). Vault providers are Proposed until OQ-64 accepts them (ADR-013); the vendor check is done (ADR-050).
+  019). Vault providers are accepted (ADR-013), with the vendor check and owner-chosen layout of ADR-050.
 - Hosting: one daemon on a VPS, remote server, home hardware, or laptop; capabilities
   installed where they run; placement rule and egress pool with owner exit nodes; the
   overlay network is the owner's choice (ADR-030)
@@ -40,4 +40,4 @@ home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 Phase 0: Foundation. Nothing is built; the first items are in [ACTION_PLAN.md](ACTION_PLAN.md).
 
 ## Open questions
-1 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+0 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

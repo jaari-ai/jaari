@@ -50,7 +50,7 @@ role.
 Jaari account or collection exposes only the intended items, and that a 1Password service account
 reaches only the Jaari vault.
 
-ADR-013 is ready to accept with these amendments (OQ-64).
+ADR-013 is accepted with these amendments (OQ-64, resolved 2026-11-12).
 
 ## Amendments
 - **ADR-063:** no SMS gateway node is planned; codes come from email or messenger channels Jaari

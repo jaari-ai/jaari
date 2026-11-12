@@ -14,7 +14,7 @@
 | [010](010-identity-and-publishing.md) | Project identity and trusted publishing | Accepted |
 | [011](011-llm-routing.md) | LLM routing: owner policy, role-based tiers, request-only escalation | Accepted |
 | [012](012-web-and-browser.md) | Web search, fetch, and browser as separate pluggable tools | Accepted |
-| [013](013-vault-providers.md) | Pluggable vault providers: Bitwarden first, 1Password second | Proposed |
+| [013](013-vault-providers.md) | Pluggable vault providers: Bitwarden first, 1Password second | Accepted |
 | [014](014-license-mit.md) | License: MIT | Accepted |
 | [015](015-control-plane-and-nodes.md) | One daemon on an always-on host; capabilities installed where they run | Accepted |
 | [016](016-openmausbot-hardening.md) | Hardening borrowed from OpenMausBot: dispatch re-check, chained audit, resolve-check-dial egress, owner hold | Accepted |

@@ -1,7 +1,7 @@
 # ADR-013: Pluggable vault providers: Bitwarden first, 1Password second
 
-- **Status:** Proposed
-- **Extended by:** [ADR-018](018-capability-vocabulary-and-phase-0-floor.md)
+- **Status:** Accepted
+- **Extended by:** [ADR-018](018-capability-vocabulary-and-phase-0-floor.md), [ADR-050](050-vault-verification-and-one-time-codes.md), [ADR-063](063-agent-mailbox.md), [ADR-071](071-capability-packages.md), [ADR-072](072-standing-grants.md)
 - **Date:** 2026-11-05
 
 ## Decision
@@ -12,9 +12,14 @@
 
 ## Amendments
 - **ADR-018:** Phase 0 ships the resolver and an `os-keychain` provider; `env` and `file` stay development-only with a `jaari doctor` warning.
-
-## Flagged conflicts
-- [OQ-64](../OPEN_QUESTIONS.md): Still Proposed; the OQ-29 verification is done ([ADR-050](050-vault-verification-and-one-time-codes.md)), so it can be accepted with those amendments.
+- **ADR-050 (accepted 2026-11-12, resolves OQ-64):** vendor docs checked; no paid tier is required.
+  The owner chooses the vault layout at `jaari init` (a separate Bitwarden account, an organization
+  collection, or a 1Password vault with a service account); Bitwarden Lite is one option, not the
+  recommended default. TOTP from a Bitwarden vault needs Premium, which is the owner's call.
+  One-time codes come from the vault, then the owner's channels, then the owner.
+- **ADR-063:** no SMS gateway node.
+- **ADR-071:** vault providers are a package kind with a checked manifest.
+- **ADR-072:** vault writes are never grantable; each is Allow once.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

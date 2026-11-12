@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **1**.
+Last updated: 2026-11-12. Open: **0**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -10,51 +10,12 @@ A recommendation per question, with the reference it is borrowed from, is in
 leanings below are unchanged until the owner accepts them).
 
 
-## A. Blocking soon (Phase 0 to 2)
+## Open
+
+None. Add a new question as a row here.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-
-## B. Before daily use
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-
-## C. Tools and plugins
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-
-## D. Quality and process
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-
-## E. Carried over from ADR-011 to ADR-013
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-
-## F. Carried over from the computer-use research (learning/07-computer.md, 08-egress-identity-and-takeover.md)
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-
-## G. From the 2026 gap review (2026-11-09)
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-
-## H. From the OpenMausBot study (learning/09-openmausbot.md, 2026-11-10)
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-
-## I. Left over from the docs conflict audit (2026-11-10)
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-| OQ-64 | Accept ADR-013 | ADR-011 and ADR-012 were accepted (ADR-019). ADR-013 (vault providers) is still Proposed and depends on OQ-29: Bitwarden Lite licence needs and the 1Password service-account setup are unverified. | 3 | Verify OQ-29 against vendor docs, then accept ADR-013 before the vault providers ship; the Phase 0 `os-keychain` provider does not depend on it (ADR-018) Affected by ADR-050: the vendor check is done; no paid tier is required and the owner picks the vault layout. |
 
 ## Resolved
 
@@ -128,3 +89,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-54 | Code-set origin per run (owner, routine, event, outside); outside is sticky, cannot approve or use grants, effects ask with an origin line | [ADR-075](adr/075-outside-lineage.md) |
 | OQ-55 | jaari run/wait/status/export on the local socket with typed exit codes; two-tool MCP server for paired apps in v1, trusted as owner; never approves or changes policy | [ADR-076](adr/076-external-control-surface.md) |
 | OQ-56 | CliEngine adapters (Pi first) for sandboxed children only; gate answers the CLI's permission requests; results applied by Jaari's gated capabilities; off until enabled per engine | [ADR-077](adr/077-subscription-cli-engines.md) |
+| OQ-64 | ADR-013 accepted with the ADR-050 vendor check and amendments from ADR-050, ADR-063, ADR-071, and ADR-072 | [ADR-013](adr/013-vault-providers.md), [ADR-050](adr/050-vault-verification-and-one-time-codes.md) |

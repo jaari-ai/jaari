@@ -14,7 +14,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 5. **Daemon and install.** `apps/daemon`, `jaari init` (target: VPS, remote server, home
    hardware, or laptop), `jaari doctor`, Compose, and the laptop sleep/wake rule (ADR-017).
 6. **Memory next**: structured records and FTS5 search (ADR-023) and context assembly (ADR-024), the job engine (ADR-025), and the single writer (ADR-026); then persona, then the real gate and the
-   vault (ADR-006, ADR-016, ADR-018; vendor check done in ADR-050; accept ADR-013 via OQ-64).
+   vault (ADR-006, ADR-016, ADR-018; ADR-013 vault providers, ADR-050).
 7. **Egress and browser.** `@jaari/http` to ADR-016 with `direct` and `owner-exit` (Tailscale)
    providers; the browser under the placement rule; pool details in ADR-053 (ADR-017).
 
@@ -33,7 +33,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [010](adr/010-identity-and-publishing.md) | Project identity and trusted publishing | Accepted |
 | [011](adr/011-llm-routing.md) | LLM routing: owner policy, role-based tiers, request-only escalation | Accepted |
 | [012](adr/012-web-and-browser.md) | Web search, fetch, and browser as separate pluggable tools | Accepted |
-| [013](adr/013-vault-providers.md) | Pluggable vault providers: Bitwarden first, 1Password second | Proposed |
+| [013](adr/013-vault-providers.md) | Pluggable vault providers: Bitwarden first, 1Password second | Accepted |
 | [014](adr/014-license-mit.md) | License: MIT | Accepted |
 | [015](adr/015-control-plane-and-nodes.md) | One daemon on an always-on host; capabilities installed where they run | Accepted |
 | [016](adr/016-openmausbot-hardening.md) | Hardening borrowed from OpenMausBot: dispatch re-check, chained audit, resolve-check-dial egress, owner hold | Accepted |
