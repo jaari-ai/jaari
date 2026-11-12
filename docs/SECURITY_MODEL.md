@@ -74,7 +74,7 @@ the `reader` role exists.
 ## Untrusted content
 Email, web pages, search snippets, and documents go through the tool-less `reader`
 role before the main session sees them. Webhook and app-event payloads are untrusted
-content too (OQ-52). Whether work caused by untrusted content stays restricted (sticky
+content too (ADR-073). Whether work caused by untrusted content stays restricted (sticky
 outside lineage) is OQ-54.
 
 ## Egress
@@ -132,4 +132,4 @@ pinned to a digest of script, placement, secrets, hosts, and schedule; any chang
 A boot self-check disables code execution if the sandbox is weakened.
 
 ## Open
-Inbound triggers (OQ-52), outside lineage (OQ-54).
+Outside lineage (OQ-54).

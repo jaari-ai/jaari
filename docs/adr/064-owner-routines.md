@@ -12,7 +12,7 @@ Built on the job engine (ADR-025); children do the work.
 
 **Triggers.** A schedule (cron in the owner's timezone, or an interval aligned to its anchor so
 "every 2 h" runs on the hour); a watcher (a condition on a source: a price, a page change, a feed,
-the inbox); a webhook (OQ-52); one-shot ("remind me", "watch until under €100"), which ends itself
+the inbox); a webhook (ADR-073); one-shot ("remind me", "watch until under €100"), which ends itself
 when done.
 
 **Creating one in plain words.** Jaari drafts the routine and shows one confirm prompt with the
