@@ -4,8 +4,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 (ADR-020): pick up the next item whose needs are met.
 
 ## Workstreams
-1. **Decide the Phase 0 questions.** OQ-50 (capability packages). Record
-   an ADR for each as it closes.
+1. **Phase 0 questions are decided.** The last one, capability packages, is ADR-071.
 2. **Scaffold the monorepo** from the config this script generates; add `@jaari/capabilities`,
    `@jaari/gate` (deny-all stub), and `@jaari/secrets` (resolver + `os-keychain`) with the
    first package (ADR-018).
@@ -92,3 +91,4 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [068](adr/068-shadow-mode.md) | Shadow mode: only what Jaari starts on its own, per capability, 14 days by default, each new capability shadowed in turn | Accepted |
 | [069](adr/069-threat-model.md) | Threat model: an actor-by-attack-by-control table with what is left over, a "not protected against" list, kept current by an ADR checklist rule | Accepted |
 | [070](adr/070-onboarding-conversation.md) | Onboarding conversation: a built-in skill after `jaari init`, one question at a time, optional people records, a first week of inference and one gap question a day | Accepted |
+| [071](adr/071-capability-packages.md) | Capability packages: one package format for every pluggable part, a checked manifest, third-party packages in their own process, updates that notify | Accepted |

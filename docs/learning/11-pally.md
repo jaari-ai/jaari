@@ -84,7 +84,7 @@ buys them.
 
 | Topic | From Pally | Proposal for Jaari | Affects |
 |---|---|---|---|
-| Node routing | Several Macs; picks the one that has what the task needs; the request names the device | The loader picks a node by capability and provider, and the approval card names the node | ADR-015, OQ-50 |
+| Node routing | Several Macs; picks the one that has what the task needs; the request names the device | The loader picks a node by capability and provider, and the approval card names the node | ADR-015, ADR-071 |
 | Node offline | Wait and run on reconnect; say "asleep" only when true | Already in ADR-015 (queue with expiry); add a real asleep or offline state to node health | OQ-36, OQ-37 |
 | Node removal | Disconnecting erases what was learned from its messages | Unpairing a node or disconnecting an account forgets everything derived from it | OQ-09, OQ-37 |
 | Forget by source | Deleting a conversation erases what was learned from it | Every canonical fact line carries a source id, so "forget this source" is mechanical, not a search | OQ-09, OQ-53 |
