@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **2**.
+Last updated: 2026-11-10. Open: **1**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -49,7 +49,6 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-56 | Subscription CLI engines | OpenMausBot runs bots on the owner's installed `claude`, `codex`, and other CLIs (27 drivers, including Pi over `pi --mode rpc`), so work is billed to an existing subscription. Should a Jaari child be able to delegate a task to such a CLI? The gate cannot see tool calls inside another loop, and provider terms differ. | 4 | Not for the main session (ADR-001). Possibly for isolated children on code tasks, inside a sandbox with no secrets and no effectful capabilities, with the CLI's permission requests answered by the gate; check each provider's terms first Affected by ADR-034: a delegated CLI could run in the Phase 4 sandbox. |
 
 ## I. Left over from the docs conflict audit (2026-11-10)
 
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-53 | Raw capture mechanical; every derived fact carries a code-checked quote and source id; others' content as 'according to'; inferred facts marked; commit trailers | [ADR-074](adr/074-memory-capture-evidence.md) |
 | OQ-54 | Code-set origin per run (owner, routine, event, outside); outside is sticky, cannot approve or use grants, effects ask with an origin line | [ADR-075](adr/075-outside-lineage.md) |
 | OQ-55 | jaari run/wait/status/export on the local socket with typed exit codes; two-tool MCP server for paired apps in v1, trusted as owner; never approves or changes policy | [ADR-076](adr/076-external-control-surface.md) |
+| OQ-56 | CliEngine adapters (Pi first) for sandboxed children only; gate answers the CLI's permission requests; results applied by Jaari's gated capabilities; off until enabled per engine | [ADR-077](adr/077-subscription-cli-engines.md) |
