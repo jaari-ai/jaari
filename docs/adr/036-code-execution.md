@@ -1,7 +1,7 @@
 # ADR-036: Code execution: sealed runs never ask, allow once or for 90 days, pinned recurring jobs
 
 - **Status:** Accepted
-- **Extended by:** [ADR-056](056-install-update-migrate.md), [ADR-072](072-standing-grants.md), [ADR-091](091-engine-runs.md), [ADR-092](092-pinned-jobs.md)
+- **Extended by:** [ADR-056](056-install-update-migrate.md), [ADR-072](072-standing-grants.md), [ADR-091](091-engine-runs.md), [ADR-092](092-pinned-jobs.md), [ADR-094](094-sandbox-under-compose.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -68,6 +68,8 @@ commands; code execution only in Phase 7 (the sandbox exists in Phase 4).
 - **ADR-092 (resolves OQ-77):** a pinned job is its own repeating approval; host jobs expire
   after 90 days with one reminder; sandboxed jobs get a 90-day check-in; listed and revoked with
   `jaari grants`.
+- **ADR-094:** under Compose the backend is bubblewrap inside the daemon container; gVisor joins
+  Firecracker as a Phase 7 option.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **10**.
+Last updated: 2026-11-12. Open: **9**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -18,7 +18,6 @@ leaning yet; the options listed are only the ones the docs already name.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-70 | Sandbox backend under Compose | With the daemon in a Compose container and no Docker socket, is the sandbox a rootless Podman sidecar or gVisor? How is the daemon's own container hardened? | 4 | None. On record: rootless Podman sidecar or gVisor (ADR-056); Docker or Podman container, bubblewrap (ADR-034, ADR-036) |
 | OQ-79 | Capability names that are missing | Which capability names cover the gated effects that have none (vault writes, address-book writes, file-storage uploads, memory erase), are internal read tools (`memory.search`, `records.query`, `skill.load`) capabilities, and which capability has the `takeover` class? | 3 | None. On record: a new name takes an ADR (ADR-071) |
 | OQ-80 | Secrets held by MCP servers | A local MCP server gets its secrets in its environment at start and keeps them while it runs. Is that an accepted exception to "resolved only inside executors, for the duration of the call"? | 4 | None. On record: resolve at start (ADR-034); per-call only (ADR-007, ADR-013) |
 | OQ-82 | Hosted browser with owner accounts | ADR-048 says a third-party browser provider is for anonymous work "unless the owner pins it". May a hosted browser carry owner-account sessions, and under which egress rule? | 6 | None. On record: placement rule (ADR-017); "cloud browser by default" rejected (ADR-005) |
@@ -54,10 +53,6 @@ leaning yet; the options listed are only the ones the docs already name.
 Evidence is `ADR-NNN` or a file. "If delayed" is the cost of not deciding before the blocked
 phase starts.
 
-- **OQ-70.** Settled: the sandbox never gets the Docker socket (ADR-056); a boot self-check
-  disables code execution if the sandbox is weak (ADR-036). Reopens the Compose part of OQ-35.
-  If delayed: MCP servers, code execution, document parsing, and CLI engines have no backend
-  on the default install.
 - **OQ-79.** Evidence: ADR-018 ("the only list of names the model can ask for"; classes read,
   gated, takeover), ADR-013 (vault writes gated), ADR-039 (address-book writes and uploads
   gated), ADR-029 (erase goes through the gate), ADR-023 and ADR-024 (`memory.search`,
@@ -153,6 +148,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-67 | On a host without an OS keychain, secret zero comes from the `host-credential` provider: a file supplied by systemd (`LoadCredentialEncrypted=` by default, TPM-sealed when present) or a Compose secret; owner-only, outside the data directory and backups; never an environment variable | [ADR-079](adr/079-secret-zero-on-servers.md) |
 | OQ-68 | The `@jaari/http` core (resolve, check, dial; address-class table; `direct`) ships in Phase 0 and every outbound call uses it; a lint rule refuses other network clients; adapters that cannot take the injected `fetch` stay off; owner-run local model servers reached only on their configured endpoint; container egress proxy ships with the first untrusted-input container | [ADR-080](adr/080-egress-core-in-phase-0.md) |
 | OQ-69 | Scrubbed at channel ingress before the transcript, daily log, or any model (known formats, labelled passwords, Luhn-valid cards, exact vault values); value never kept; message deleted where possible; rotation advised; secret-entry page offered; ADR-028 block-and-ask stays for other writes | [ADR-081](adr/081-secrets-pasted-in-chat.md) |
+| OQ-70 | Under Compose, bubblewrap inside the daemon container, hardened by the generated `compose.yaml` (seccomp, AppArmor, `cap_drop: ALL`, `no-new-privileges`, read-only root, non-root, no Docker socket); install probe and boot self-check; gVisor an option with Firecracker in Phase 7 | [ADR-094](adr/094-sandbox-under-compose.md) |
 | OQ-71 | Each safety piece ships in the phase of the first thing it protects: pause, stop, step limits, watchdog, event and usage logs in Phase 0; budget, spike alerts, derived-fact scan, nightly local snapshot in Phase 1; budget warnings, loop breaker, persona rules in Phase 2; remotes and permission lowering in Phase 3; child limits in Phase 4 | [ADR-087](adr/087-safety-pieces-ship-with-what-they-protect.md) |
 | OQ-72 | Overlay binding and panel TLS (Tailscale, Headscale, Custom) in Phase 2; other modes and sizing in Phase 7; panel views ship with their features (Approvals and audit with the gate, secret entry with the vault; `jaari secret set` until then); node link in Phase 6 | [ADR-088](adr/088-overlay-panel-and-node-link-phasing.md) |
 | OQ-73 | Phase 1 routines run plain code and one tool-less model step, keep results in run history with job receipts, and deliver nothing; delivery and reminders start with the ledger (Phase 2); children, scripts, and watchers in Phases 4 and 5 | [ADR-089](adr/089-routines-before-children.md) |
@@ -247,3 +243,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-76 | Subscription CLI runs called "sealed" | ADR-077 calls these runs sealed and approval-free, but they have network to the provider and the CLI's sign-in inside the sandbox, and ADR-036 limits a run to 5 minutes. Are they a named exception with their own limits, or do they ask like any networked run? | 4 |
 | OQ-77 | Pinned recurring jobs | A pinned job runs with no expiry and may run host commands. ADR-072 is "one grant model" with a 90-day expiry and lists host commands and `pay` as never grantable. Is a pinned job a separate approval kind, or does it follow ADR-072? | 4 |
 | OQ-78 | Sensitive data and routing | After ADR-078, does the ADR-023 sensitivity level still keep health and money data on local-only models outside canonicalize (context assembly sends budget and tracker values to the main model)? What marks a file, photo, or free-text line as sensitive, and which roles read files? | 1 |
+| OQ-70 | Sandbox backend under Compose | With the daemon in a Compose container and no Docker socket, is the sandbox a rootless Podman sidecar or gVisor? How is the daemon's own container hardened? | 4 |

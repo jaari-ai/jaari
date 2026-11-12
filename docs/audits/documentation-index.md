@@ -43,7 +43,7 @@ only with a pointer), **generated** (written by a script).
 | `docs/STATE.md` | Summary: what is decided, what is built, what is next, scheduled checks | current |
 | `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current |
 | `docs/ACTION_PLAN.md` | Ordered next steps; a copy of the ADR table | current |
-| `docs/OPEN_QUESTIONS.md` | 10 open (OQ-70 to OQ-91); 81 resolved with ADR links; original wording | current |
+| `docs/OPEN_QUESTIONS.md` | 9 open (OQ-79 to OQ-91); 82 resolved with ADR links; original wording | current |
 
 ## Subsystem designs
 
@@ -61,12 +61,12 @@ only with a pointer), **generated** (written by a script).
 
 ## Decisions
 
-`docs/adr/README.md` is the index of the 93 ADRs (all Accepted). By topic:
+`docs/adr/README.md` is the index of the 94 ADRs (all Accepted). By topic:
 
 | Topic | ADRs |
 |---|---|
 | Core, licence, process | 001, 002, 009, 010, 014, 043, 044, 083, 086 |
-| Hosting, nodes, install | 015, 017, 030, 056, 057, 058, 082, 088 |
+| Hosting, nodes, install | 015, 017, 030, 056, 057, 058, 082, 088, 094 |
 | Channels, owner, panel | 021, 022, 035, 067, 070, 076 |
 | Memory | 003, 004, 023, 024, 026, 029, 038, 047, 066, 074, 078, 093 |
 | Persona and proactive work | 008, 033, 037, 042, 060, 061, 064, 089 |

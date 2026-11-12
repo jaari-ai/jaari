@@ -1,7 +1,7 @@
 # ADR-034: MCP servers: owner-added, pinned, classified in one step, sandboxed from Phase 4
 
 - **Status:** Accepted
-- **Extended by:** [ADR-071](071-capability-packages.md), [ADR-072](072-standing-grants.md)
+- **Extended by:** [ADR-071](071-capability-packages.md), [ADR-072](072-standing-grants.md), [ADR-094](094-sandbox-under-compose.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -64,6 +64,8 @@ egress gate); a marketplace with auto-install.
 ## Amendments
 - **ADR-071:** an MCP server stays MCP config and gets a generated package manifest, so the same install and trust rules apply.
 - **ADR-072:** `mcp.act` grants follow the one grant model: server and tool key with the config and tool-list fingerprint, 90 days, never for tools classified as send, publish, or pay.
+- **ADR-094:** under Compose, local MCP servers run in bubblewrap boxes inside the daemon
+  container.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

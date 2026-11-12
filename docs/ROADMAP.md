@@ -221,7 +221,7 @@ and audit log.
 | 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core | 016, 053, 080 | 0.15, 2.12 | Planned |
 | 4.5 | `web.search` and `web.fetch` with pluggable rungs; watcher triggers on web pages | 012, 049, 064, 089 | 4.3, 4.4, 4.13 | Planned |
 | 4.6 | Optional Web Bot Auth signing for HTTP | 054 | 4.4 | Planned |
-| 4.7 | First sandbox backend | 034, 036 | OQ-70 | Blocked (OQ-70: backend under Compose not chosen) |
+| 4.7 | First sandbox backend: container or bubblewrap; under Compose, bubblewrap in the hardened daemon container with the install probe | 034, 036, 094 | 0.12 | Planned |
 | 4.8 | MCP client, local servers sandboxed (in `@jaari/mcp`) | 034, 086 | 4.3, 4.7; OQ-80 | Planned |
 | 4.9 | Code execution; routine script steps; pinned jobs | 036, 064, 089, 092 | 3.6, 4.7 | Planned |
 | 4.10 | Third-party skills and third-party packages | 060, 071 | 4.3 | Planned |
@@ -239,8 +239,7 @@ Exit criteria:
   (ADR-053).
 - Each CLI engine's provider terms are checked and recorded in a learning note (ADR-077).
 
-Open questions that block this phase: OQ-70,
-OQ-80, OQ-81.
+Open questions that block this phase: OQ-80, OQ-81.
 Gate status: not passed.
 
 ## Phase 5: Integrations
@@ -305,7 +304,7 @@ Purpose: stronger isolation, more network modes, and moving hosts. Entry: Phase 
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 7.1 | Firecracker sandbox backend | 036 | 4.7 | Planned |
+| 7.1 | Stronger sandbox backends: Firecracker, and gVisor as an option | 036, 094 | 4.7 | Planned |
 | 7.2 | Container isolation of host capabilities and third-party packages | 015, 071 | 4.10 | Planned |
 | 7.4 | WireGuard peer-config generation, Cloudflare Zero Trust, and sizing per target | 030, 088 | 2.12 | Planned |
 | 7.5 | Multi-device state and host migration ("multi-device state" has no ADR; the node link is 6.8) | 058, 088 | 6.8 | Planned |
