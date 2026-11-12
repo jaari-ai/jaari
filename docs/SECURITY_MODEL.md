@@ -95,7 +95,10 @@ origin line on the card (ADR-075).
 
 ## Egress
 All network calls via `@jaari/http`; containers via an egress proxy that blocks private
-ranges and cloud metadata. `@jaari/http` ships in Phase 4; the route for earlier calls is OQ-68. Tool-level origin allowlists are not a security boundary.
+ranges and cloud metadata. The `@jaari/http` core (resolve, check, dial; `direct`) ships in Phase 0 and every outbound
+call uses it; a lint rule refuses other network clients, and an adapter that cannot take the
+injected `fetch` stays off. Local model servers the owner runs are reached only on their
+configured endpoint; their downloads are their own traffic (ADR-080). Tool-level origin allowlists are not a security boundary.
 
 Mechanism (ADR-016, accepted):
 - Resolve, check, dial: the gate resolves the name, classifies every address, and

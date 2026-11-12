@@ -1,7 +1,7 @@
 # ADR-016: Hardening borrowed from OpenMausBot: dispatch re-check, chained audit, resolve-check-dial egress, owner hold
 
 - **Status:** Accepted
-- **Extended by:** [ADR-055](055-takeover-transport.md), [ADR-077](077-subscription-cli-engines.md)
+- **Extended by:** [ADR-055](055-takeover-transport.md), [ADR-077](077-subscription-cli-engines.md), [ADR-080](080-egress-core-in-phase-0.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -13,6 +13,9 @@ Adopting its approval model (approval bound to a request id, cards truncated at 
 ## Amendments
 - **ADR-055:** decides the takeover transport that point 7 left open ("Transport stays OQ-34"); the hold rules are unchanged.
 - **ADR-077:** own-loop coding CLIs are allowed only as sandboxed children.
+- **ADR-080 (resolves OQ-68):** the resolve-check-dial core and the address-class table ship in
+  Phase 0, and every outbound call uses them from the start; a lint rule refuses other network
+  clients.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

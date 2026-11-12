@@ -81,3 +81,4 @@
 | [077](077-subscription-cli-engines.md) | Subscription CLI engines: pluggable CliEngine adapters for sandboxed children only, Pi first, the gate answering the CLI's permission requests, off until the owner enables each engine | Accepted |
 | [078](078-documents-follow-owner-routing.md) | Documents follow the owner's model routing; no forced local-only path for sensitive files | Accepted |
 | [079](079-secret-zero-on-servers.md) | Secret zero on a server: a `host-credential` provider fed by the service manager | Accepted |
+| [080](080-egress-core-in-phase-0.md) | Egress core in Phase 0: every outbound call goes through `@jaari/http` from the start | Accepted |

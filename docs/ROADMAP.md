@@ -47,7 +47,7 @@ effect. Entry: none.
 | 0.4 | Namespaces and release: secure the npm and PyPI names, the `python/` pointer package, the release workflow ([guides/namespaces.md](guides/namespaces.md)). Placement | 010 | none | In progress (`release.yml` and `python/` exist; `python/` does not match the guide; names not secured) |
 | 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement | 001, 065 | 0.1, 0.7; OQ-69, OQ-86 | Planned |
 | 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship | 017, 019, 056 | 0.1 | Planned |
-| 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains | 011, 019 | 0.1; OQ-68, OQ-86 | Planned |
+| 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains | 011, 019 | 0.1, 0.15; OQ-86 | Planned |
 | 0.8 | `ChannelAdapter` contract, typed prompts, and the CLI channel | 021, 035 | 0.5; OQ-85 | Planned |
 | 0.9 | `@jaari/capabilities`: manifest schema, built-in loader, daemon–node contract | 015, 018, 071 | 0.1; OQ-85, OQ-90 | Planned |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Planned |
@@ -55,6 +55,7 @@ effect. Entry: none.
 | 0.12 | Install, update, and migrations; `jaari doctor` (checks are added as their features ship) | 056, 032 | 0.5; OQ-74 | Planned |
 | 0.13 | Laptop sleep and wake rule | 057 | 0.5; OQ-74 | Planned |
 | 0.14 | `ownerId` in the data model | 044 | 0.5 | Planned |
+| 0.15 | `@jaari/http` core: resolve, check, dial; the address-class table; the `direct` provider; the lint rule against other network clients | 016, 053, 080 | 0.1 | Planned |
 
 Exit criteria:
 - The tier-1 smoke test boots the daemon on the scripted engine in CI on every pull request,
@@ -70,8 +71,11 @@ Exit criteria:
 - Every record carries an `ownerId` (ADR-044).
 - A clock gap over 2 minutes is detected as sleep (ADR-057).
 - A binary older than its data refuses to start (ADR-056).
+- Every outbound call goes through `@jaari/http`: the lint rule fails on a direct `fetch`,
+  `node:http`, `node:https`, `node:net`, `node:tls`, or `undici` import elsewhere, and the
+  address-class tests deny metadata, link-local, and the daemon's own ports (ADR-016, ADR-080).
 
-Open questions that block this phase: OQ-68, OQ-69, OQ-74, OQ-85, OQ-86, OQ-90. OQ-84
+Open questions that block this phase: OQ-69, OQ-74, OQ-85, OQ-86, OQ-90. OQ-84
 (pinning the references) gates no item; decide it before the next `scripts/refs.sh` sync.
 Gate status: not passed.
 
@@ -192,13 +196,14 @@ and audit log.
 | 4.1 | Children and receipts | 011, 061 | 3.5; OQ-81 | Planned |
 | 4.2 | `llm.escalate` | 011 | 4.1 | Planned |
 | 4.3 | `reader` role and outside lineage | 075 | 0.7 | Planned |
-| 4.4 | `@jaari/http` resolve-check-dial egress with the `direct` and `owner-exit` providers | 016, 053 | OQ-68; `owner-exit` needs an overlay route (7.4, OQ-72) | Planned |
-| 4.5 | `web.search` and `web.fetch` with pluggable rungs | 012, 049 | 4.3, 4.4 | Planned |
+| 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core | 016, 053, 080 | 0.15; `owner-exit` needs an overlay route (7.4, OQ-72) | Planned |
+| 4.5 | `web.search` and `web.fetch` with pluggable rungs | 012, 049 | 4.3, 4.4, 4.11 | Planned |
 | 4.6 | Optional Web Bot Auth signing for HTTP | 054 | 4.4 | Planned |
 | 4.7 | First sandbox backend | 034, 036 | OQ-70 | Blocked (OQ-70: backend under Compose not chosen) |
 | 4.8 | MCP client, local servers sandboxed | 034 | 4.3, 4.7; OQ-80 | Planned |
 | 4.9 | Code execution | 036 | 3.6, 4.7; OQ-77 | Planned |
 | 4.10 | Third-party skills and third-party packages | 060, 071 | 4.3 | Planned |
+| 4.11 | Container egress proxy on the same address-class table, shipped with the first container that works on untrusted input (SearXNG, browser, sandbox) | 053, 080 | 0.15 | Planned |
 | 4.11 | Headless CLI commands | 076 | 0.5 | Planned |
 | 4.12 | Subscription CLI engines for sandboxed children | 077 | 4.1, 4.7; OQ-76 | Planned |
 
@@ -212,7 +217,7 @@ Exit criteria:
   (ADR-053).
 - Each CLI engine's provider terms are checked and recorded in a learning note (ADR-077).
 
-Open questions that block this phase: OQ-68, OQ-70, OQ-72 (for `owner-exit`), OQ-76, OQ-77,
+Open questions that block this phase: OQ-70, OQ-72 (for `owner-exit`), OQ-76, OQ-77,
 OQ-80, OQ-81.
 Gate status: not passed.
 
@@ -280,7 +285,6 @@ Purpose: stronger isolation, more network modes, and moving hosts. Entry: Phase 
 |---|---|---|---|---|
 | 7.1 | Firecracker sandbox backend | 036 | 4.7 | Planned |
 | 7.2 | Container isolation of host capabilities and third-party packages | 015, 071 | 4.10 | Planned |
-| 7.3 | Container egress proxy (no ADR defines it apart from the Phase 4 loopback proxy) | none | 4.4 | Planned |
 | 7.4 | Overlay modes and sizing per target | 030 | OQ-72 | Planned |
 | 7.5 | Node link, multi-device state, and host migration ("multi-device state" has no ADR) | 058 | 7.4; OQ-72 | Planned |
 | 7.6 | Observability: opt-in traces and the raw tee | 032 | 3.4 | Planned |
@@ -319,10 +323,11 @@ ADR-020).
 
 ## Egress in steps
 
-The address-class gate with `direct` and `owner-exit` for fetch in Phase 4; the browser's
+The `@jaari/http` core with the address-class table and `direct` in Phase 0, used by every
+outbound call (ADR-080); `owner-exit`, per-capability allowlists, and the container egress proxy
+in Phase 4; the browser's
 SOCKS5 listener, owner-account pinning, and the opt-in `vpn`, `mobile`, and
-`residential-proxy` providers (anonymous traffic only) in Phase 6 (ADR-053). How calls leave
-the host before Phase 4 is OQ-68.
+`residential-proxy` providers (anonymous traffic only) in Phase 6 (ADR-053).
 
 ## Changes from the earlier roadmap (2026-11-12 audit)
 
@@ -338,4 +343,6 @@ the host before Phase 4 is OQ-68.
   Telegram (2.8), erase (3.9). Email input (5.2) follows ADR-021.
 - The threat model is marked Delivered (3.13).
 - Not moved, because an accepted ADR states the phase or the choice is the owner's: see
-  OQ-68, OQ-71, OQ-72, OQ-73, OQ-74.
+  OQ-71, OQ-72, OQ-73, OQ-74.
+- Decided since the audit: the egress core moved to Phase 0 as 0.15, and the container egress
+  proxy moved from 7.3 to 4.11 (ADR-080).

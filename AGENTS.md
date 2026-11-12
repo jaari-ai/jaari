@@ -86,8 +86,9 @@ python3 scripts/merge_docs.py           # rebuild the untracked context file (JA
   grantable (ADR-072).
 - Third-party packages run in their own process with only their declared egress and secrets
   (ADR-071).
-- All network egress goes through `@jaari/http` (or the container egress proxy). The roadmap
-  ships `@jaari/http` in Phase 4; the route for earlier phases is OQ-68, so surface it.
+- All network egress goes through `@jaari/http` (or the container egress proxy). Its core
+  (resolve, check, dial; `direct`) ships in Phase 0, and a lint rule refuses any other
+  network client (ADR-080).
 - Proactive output (curiosity, suggestions, monitor results) passes the persona monitor
   and notification ledger. Never message the owner from library code.
 - Model choice is routing config (role → tier → fallback chain). Local-only roles fail

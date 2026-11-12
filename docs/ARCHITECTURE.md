@@ -203,8 +203,8 @@ dependency.
 ## Trust boundaries
 - Owner ↔ channels: authenticated owner only (see [Channels](#channels) and ADR-022).
 - Model ↔ tools: every tool maps to a capability; effectful capabilities go through the gate.
-- Tools ↔ internet: all egress through `@jaari/http` or the container egress proxy (the route
-  before `@jaari/http` ships in Phase 4 is OQ-68).
+- Tools ↔ internet: all egress through `@jaari/http` or the container egress proxy (the core
+  ships in Phase 0; ADR-080).
 - Untrusted content ↔ main session: `reader` summary only, never raw instructions. Every run
   carries a code-set origin; `outside` sticks to derived work (ADR-075).
 - Internet ↔ hook listener: a separate process that serves only hook paths, with signed
