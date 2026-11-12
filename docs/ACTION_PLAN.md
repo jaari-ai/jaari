@@ -5,7 +5,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 status and exit criteria live there.
 
 ## Workstreams
-1. **Decide the questions that block Phase 0**: OQ-90 (package homes).
+1. **Questions that block Phase 0**: all decided (ADR-079 to ADR-086).
 2. **Scaffold the monorepo** (0.1 to 0.4): root `package.json`, lockfile, pnpm supply-chain
    settings, CI with the tier-1 smoke test, `SECURITY.md` and `CONTRIBUTING.md` (ADR-041,
    ADR-043); fix `python/` to match [guides/namespaces.md](guides/namespaces.md) and secure
@@ -126,3 +126,4 @@ status and exit criteria live there.
 | [083](adr/083-pinned-reference-commits.md) | Reference repos are pinned in `scripts/refs.sh` and moved only with `bump` | Accepted |
 | [084](adr/084-package-manifest-location-and-channel-section.md) | The package manifest lives in `package.json`; channels add a `channel` section; a shared contract suite | Accepted |
 | [085](adr/085-refusal-in-the-pinned-main-session.md) | A provider refusal never moves the pinned main session; other roles move down the chain | Accepted |
+| [086](adr/086-package-homes.md) | Package homes for eleven subsystems; two new homes, `@jaari/mcp` and `apps/hooks` | Accepted |

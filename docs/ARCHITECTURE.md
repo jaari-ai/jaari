@@ -34,10 +34,10 @@
 ## Packages
 | Package | Responsibility |
 |---|---|
-| `@jaari/core` | Agent loop on Pi, sessions, children, tool registry |
+| `@jaari/core` | Agent loop on Pi, sessions, children, tool registry; job engine (ADR-025), routines (ADR-064), skills (ADR-060), the `CliEngine` interface (ADR-077), the event log and the OpenTelemetry adapter (ADR-032) (ADR-086) |
 | `@jaari/capabilities` | Capability and package manifest schema, loader, and the daemon–node contract; the single capability vocabulary lives in SECURITY_MODEL.md (ADR-015, ADR-018, ADR-071) |
-| `@jaari/llm` | Wraps `@earendil-works/pi-ai`; tiers + fallback chains, role routing, escalation, budgets, local-only privacy, usage log, `jaari llm eval` (ADR-011) |
-| `@jaari/memory` | Git-backed memory repo, write path, canonicalize, daily audit, gap queue |
+| `@jaari/llm` | Wraps `@earendil-works/pi-ai`; tiers + fallback chains, role routing, escalation, budgets, local-only privacy, usage log, `jaari llm eval` (ADR-011); speech roles `stt` and `tts` (ADR-037, ADR-086) |
+| `@jaari/memory` | Git-backed memory repo, write path, canonicalize, daily audit, gap queue; file store (ADR-038, ADR-086) |
 | `@jaari/persona` | Curiosity/Proactivity dials, monitor, quiet hours, notification ledger |
 | `@jaari/gate` | Action digests, approvals, re-check at dispatch, hash-chained `audit.jsonl` (ADR-006, ADR-016) |
 | `@jaari/secrets` | `secretRef` resolution for executors only, through pluggable providers: `os-keychain` and `host-credential` from Phase 0 (ADR-018, ADR-079), then the vault providers (Bitwarden, 1Password; ADR-013, ADR-050); exact-value scrubbing of resolved secrets (ADR-016) |
@@ -45,15 +45,12 @@
 | `@jaari/web` | `web.search`, `web.fetch`, fetch escalation ladder (ADR-012) |
 | `@jaari/computer` | Browser/desktop control behind one neutral surface with pluggable adapters (Playwright MCP, Stagehand, remote CDP, remote desktop), local profile, takeover (ADR-005, ADR-048, ADR-055) |
 | `@jaari/channels` | `ChannelAdapter` contract and its shared contract suite (`@jaari/channels/contract`, ADR-084), ingress (principal resolution), delivery outbox, built-in adapters |
-| `@jaari/integrations` | GitHub, npm, PyPI, email |
-| `apps/daemon` | Long-running process: scheduler, channels, jobs |
-| `apps/cli` | `jaari init`, `jaari doctor`, `jaari llm eval`, `jaari llm usage`, `jaari pair` and `jaari devices` (ADR-022), `jaari run`, `wait`, `status`, `export`, and `mcp` (ADR-076), admin commands |
+| `@jaari/integrations` | GitHub, npm, PyPI, email; mailbox adapters (ADR-063); OAuth broker, with tokens written through the gated vault write (ADR-062) (ADR-086) |
+| `@jaari/mcp` | MCP client for configured servers, with generated manifests (ADR-034); the two-tool MCP server for paired apps (ADR-076); served by `jaari mcp` (ADR-086) |
+| `apps/daemon` | Long-running process: scheduler tick, channels, jobs |
+| `apps/hooks` | Separate hook listener: the only optionally public port; checks signatures and hands verified events to the daemon over the local socket (ADR-073, ADR-086) |
+| `apps/cli` | `jaari init`, `jaari doctor`, `jaari llm eval`, `jaari llm usage`, `jaari pair` and `jaari devices` (ADR-022), `jaari run`, `wait`, `status`, `export`, and `mcp` (ADR-076), admin commands; `jaari doctor` collects each package's `health` (ADR-032, ADR-086) |
 | `apps/node` | Capability host on an owner device: `jaari capability install <name>` pairs it as a `device`, it advertises installed capabilities, runs gate-approved actions, hosts takeover and live view. Capabilities on the daemon host run through the same contract in-process (ADR-015) |
-
-Not yet assigned to a package: the job engine (ADR-025), file store (ADR-038), skills
-(ADR-060), routines (ADR-064), hook listener (ADR-073), MCP client and server (ADR-034,
-ADR-076), CLI engines (ADR-077), speech (ADR-037), OAuth broker (ADR-062), mailbox adapters
-(ADR-063), and observability (ADR-032). This is OQ-90.
 
 ## Channels
 Every way of talking to Jaari (CLI, web panel, messengers, email) is a plugin behind one

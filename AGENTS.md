@@ -34,7 +34,7 @@ exist yet.
 | `scripts/refs.sh` | Manages `refs/` (sync to pinned commits, lock, status, `refs/INDEX.md`) | Yes |
 | `scripts/merge_docs.py` | Merges README, AGENTS, docs, and config into one untracked context file for AI discussions; `--check` validates doc links and IDs | Yes |
 | `docs/` | Hand-maintained docs. `docs/adr/` is the authoritative ADR set. `docs/audits/` holds audit reports and the documentation index, which are navigation aids, not authoritative. | Yes, per conventions |
-| `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon`, `cli`, `node`); not created yet | Yes |
+| `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon`, `cli`, `node`, `hooks`); not created yet | Yes |
 | Root config | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.claude/settings.json` | Yes |
 | `jaari.config.example.jsonc` | Example owner config (`owner`, `deployment`, `persona`, `memory`, `llm`, `egress`, `web`) | Yes |
 | `python/` | PyPI name-holder package (ADR-010, `docs/guides/namespaces.md`) | Yes |

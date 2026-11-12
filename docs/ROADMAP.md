@@ -49,7 +49,7 @@ effect. Entry: none.
 | 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship | 017, 019, 056 | 0.1 | Planned |
 | 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains, refusal classification | 011, 019, 085 | 0.1, 0.15 | Planned |
 | 0.8 | `ChannelAdapter` contract and the shared contract suite, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081, 084 | 0.5, 0.9 | Planned |
-| 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084 | 0.1; OQ-90 | Planned |
+| 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084 | 0.1 | Planned |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Planned |
 | 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079 | 0.1 | Planned |
 | 0.12 | Install, manual update with a local pre-update snapshot, rollback, and migrations; `jaari doctor` (checks are added as their features ship) | 056, 032, 082 | 0.5 | Planned |
@@ -84,7 +84,7 @@ Exit criteria:
   `node:http`, `node:https`, `node:net`, `node:tls`, or `undici` import elsewhere, and the
   address-class tests deny metadata, link-local, and the daemon's own ports (ADR-016, ADR-080).
 
-Open questions that block this phase: OQ-90.
+No open question blocks this phase.
 Gate status: not passed.
 
 ## Phase 1: Memory
@@ -96,8 +96,8 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 | 1.1 | Memory repo, single writer, write path | 003, 026 | 0.5 | Planned |
 | 1.2 | Structured records, `records.query`, FTS5 search | 023 | 1.1 | Planned |
 | 1.3 | Context assembly; session orientation and re-injection from state | 024, 065 | 1.2 | Planned |
-| 1.4 | Job engine; catch-up after sleep | 025, 057, 082 | 0.5, 0.13 | Planned |
-| 1.5 | Routines | 064 | 1.4; OQ-73 | Blocked (OQ-73: children, the notification ledger, and budgets come later) |
+| 1.4 | Job engine; catch-up after sleep (in `@jaari/core`) | 025, 057, 082, 086 | 0.5, 0.13 | Planned |
+| 1.5 | Routines (in `@jaari/core`) | 064, 086 | 1.4; OQ-73 | Blocked (OQ-73: children, the notification ledger, and budgets come later) |
 | 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9; OQ-78 | Planned |
 | 1.7 | Daily audit | 004 | 1.1, 1.4 | Planned |
 | 1.8 | Capture evidence | 074, 081 | 1.1, 0.8 | Planned |
@@ -134,12 +134,12 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 | 2.3 | Quiet hours, notification ledger, digests, delivery; automatic patch installs in quiet hours | 033, 056, 082 | 2.1, 0.12 | Planned |
 | 2.4 | Prompt versioning | 042 | 0.5 | Planned |
 | 2.5 | Replay harness and golden threads | 041 | 0.2 | Planned |
-| 2.6 | Skills: built-in and owner (third-party is 4.10) | 060 | 1.1 | Planned |
+| 2.6 | Skills: built-in and owner (third-party is 4.10) (in `@jaari/core`) | 060, 086 | 1.1 | Planned |
 | 2.7 | Owner authentication: device registry, `jaari pair`, `jaari devices`. Placement | 022 | 0.8 | Planned |
 | 2.8 | Telegram channel. Placement | 021 | 0.8, 2.7 | Planned |
 | 2.9 | Owner panel | 067 | 2.7; OQ-72 | Blocked (OQ-72: needs TLS over the overlay, item 7.4, and Phase 3 parts for four of its views) |
 | 2.10 | Onboarding | 070 | 2.6; OQ-83 | Planned |
-| 2.11 | Voice notes and optional spoken replies | 037 | 0.8 | Planned |
+| 2.11 | Voice notes and optional spoken replies (in `@jaari/llm`) | 037, 086 | 0.8 | Planned |
 
 Exit criteria:
 - Tier-1 "quiet" scenarios pass: quiet hours, the 7-day rule, the outbox duplicate window, only
@@ -209,12 +209,12 @@ and audit log.
 | 4.5 | `web.search` and `web.fetch` with pluggable rungs | 012, 049 | 4.3, 4.4, 4.11 | Planned |
 | 4.6 | Optional Web Bot Auth signing for HTTP | 054 | 4.4 | Planned |
 | 4.7 | First sandbox backend | 034, 036 | OQ-70 | Blocked (OQ-70: backend under Compose not chosen) |
-| 4.8 | MCP client, local servers sandboxed | 034 | 4.3, 4.7; OQ-80 | Planned |
+| 4.8 | MCP client, local servers sandboxed (in `@jaari/mcp`) | 034, 086 | 4.3, 4.7; OQ-80 | Planned |
 | 4.9 | Code execution | 036 | 3.6, 4.7; OQ-77 | Planned |
 | 4.10 | Third-party skills and third-party packages | 060, 071 | 4.3 | Planned |
 | 4.11 | Container egress proxy on the same address-class table, shipped with the first container that works on untrusted input (SearXNG, browser, sandbox) | 053, 080 | 0.15 | Planned |
 | 4.11 | Headless CLI commands | 076 | 0.5 | Planned |
-| 4.12 | Subscription CLI engines for sandboxed children | 077 | 4.1, 4.7; OQ-76 | Planned |
+| 4.12 | Subscription CLI engines for sandboxed children (interface in `@jaari/core`; each engine is a package) | 077, 086 | 4.1, 4.7; OQ-76 | Planned |
 
 Exit criteria:
 - The sandbox self-check verifies no network, a read-only root, no home directory, and working
@@ -239,13 +239,13 @@ sandbox (4.7).
 |---|---|---|---|---|
 | 5.1 | GitHub, npm, and PyPI integrations | none (INTEGRATIONS.md) | 3.1; OQ-91 | Planned |
 | 5.2 | Email as an input channel | 021 | 4.3 | Planned |
-| 5.3 | OAuth broker | 062 | 3.3; OQ-75 | Planned |
-| 5.4 | The agent's mailbox | 063 | 3.3, 4.3 | Planned |
+| 5.3 | OAuth broker (in `@jaari/integrations`) | 062, 086 | 3.3; OQ-75 | Planned |
+| 5.4 | The agent's mailbox (in `@jaari/integrations`) | 063, 086 | 3.3, 4.3 | Planned |
 | 5.5 | Calendar, contacts, and file storage | 039 | 5.3; OQ-79 | Planned |
-| 5.6 | Documents | 038, 078 | 4.7; OQ-78, OQ-87 | Planned |
+| 5.6 | Documents (in file store in `@jaari/memory`) | 038, 078, 086 | 4.7; OQ-78, OQ-87 | Planned |
 | 5.7 | Photo notes | 066 | 5.6 | Planned |
-| 5.8 | Inbound triggers | 073 | 1.5, 4.3 | Planned |
-| 5.9 | MCP server for paired desktop apps | 076 | 2.7; OQ-88 | Planned |
+| 5.8 | Inbound triggers (in `apps/hooks`) | 073, 086 | 1.5, 4.3 | Planned |
+| 5.9 | MCP server for paired desktop apps (in `@jaari/mcp`, `jaari mcp`) | 076, 086 | 2.7; OQ-88 | Planned |
 
 Exit criteria:
 - Each provider's OAuth redirect and device-flow rules are verified (ADR-062).
@@ -296,7 +296,7 @@ Purpose: stronger isolation, more network modes, and moving hosts. Entry: Phase 
 | 7.2 | Container isolation of host capabilities and third-party packages | 015, 071 | 4.10 | Planned |
 | 7.4 | Overlay modes and sizing per target | 030 | OQ-72 | Planned |
 | 7.5 | Node link, multi-device state, and host migration ("multi-device state" has no ADR) | 058 | 7.4; OQ-72 | Planned |
-| 7.6 | Observability: opt-in traces and the raw tee | 032 | 3.4 | Planned |
+| 7.6 | Observability: opt-in traces and the raw tee (in `@jaari/core`) | 032, 086 | 3.4 | Planned |
 
 Exit criteria: none documented in the ADRs. Define them before this phase starts.
 

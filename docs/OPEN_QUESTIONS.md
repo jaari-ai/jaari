@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **18**.
+Last updated: 2026-11-12. Open: **17**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -54,7 +54,6 @@ leaning yet; the options listed are only the ones the docs already name.
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
 | OQ-89 | Web budget | ADR-046 leaves search and fetch cost to "the separate web budget", and ADR-053 counts egress cost against it, but no ADR defines it. What is its default, and what happens at its limit? | 3 | None. On record: the example config values only (`monthlyUsd: 10`, `onExceeded: "local-only"`) |
-| OQ-90 | Package homes | Which package or app owns the job engine, file store, skills, routines, hook listener, MCP client and server, CLI engines, speech, OAuth broker, mailbox adapters, and observability? | 0 | None. On record: no package in the ARCHITECTURE.md table owns them (`apps/daemon` mentions the scheduler and jobs; `apps/cli` names `jaari mcp`) |
 | OQ-91 | Scope of `repo.write` and `publish` | No ADR decides what Jaari may push or publish (which repos, registries, and how) through the GitHub, npm, and PyPI integrations. | 5 | None. On record: gated, never grantable (ADR-072) |
 
 ### Context for each open question
@@ -101,7 +100,6 @@ phase starts.
   includes the store), ADR-029, ADR-028.
 - **OQ-88.** Evidence: ADR-022, ADR-076.
 - **OQ-89.** Evidence: ADR-046, ADR-053 (egress cost counts against it), `jaari.config.example.jsonc`.
-- **OQ-90.** Evidence: ARCHITECTURE.md (Packages); AGENTS.md asks to keep that table current.
 - **OQ-91.** Evidence: ARCHITECTURE.md (`@jaari/integrations`), INTEGRATIONS.md, ROADMAP.md
   (Phase 5), ADR-072.
 
@@ -187,6 +185,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-84 | Each reference pinned to a full sha in `scripts/refs.sh`; `sync` re-applies pins; `scripts/refs.sh bump` is the only way to move one, printing old and new commit and warning on a licence change; pins committed on their own | [ADR-083](adr/083-pinned-reference-commits.md) |
 | OQ-85 | One manifest per package under the `jaari` key of `package.json`, read before any code runs; channel fields in a `channel` section; `ChannelAdapter` has no manifest property; shared Vitest contract suite in `@jaari/channels/contract`, Phase 0 | [ADR-084](adr/084-package-manifest-location-and-channel-section.md) |
 | OQ-86 | A refusal never moves the pinned main session: the turn ends with one notice and the owner decides (rephrase or `/model`); other roles move down the chain; off-limits categories go to the owner; detected from `rawStopReason`, never retried as an error | [ADR-085](adr/085-refusal-in-the-pinned-main-session.md) |
+| OQ-90 | Job engine, routines, skills, `CliEngine` interface, event log in `@jaari/core`; file store in `@jaari/memory`; speech in `@jaari/llm`; OAuth broker and mailbox adapters in `@jaari/integrations`; new `@jaari/mcp` (client and server) and `apps/hooks` (hook listener) | [ADR-086](adr/086-package-homes.md) |
 
 ### Original questions
 
@@ -261,3 +260,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-84 | Pinning the reference repos | `scripts/refs.sh` follows each upstream default branch and `refs/INDEX.md` is untracked, so the "pinned commit" that citations rely on changes at the next sync. Pin the five commits in the script, or change the docs to say "latest"? | 0 |
 | OQ-85 | Channel manifest and the package manifest | Is `ChannelManifest` the channel section of the ADR-071 `jaari` package manifest (with `egress` and `secrets`), or a separate object? What is the contract-test harness that the plugin guide cites? | 0 |
 | OQ-86 | Provider refusal and the pinned session | ADR-011 moves a refused call to the next model; ADR-019 pins the main session and allows failover only when the provider never accepted the turn. What does the main session do on a refusal? | 0 |
+| OQ-90 | Package homes | Which package or app owns the job engine, file store, skills, routines, hook listener, MCP client and server, CLI engines, speech, OAuth broker, mailbox adapters, and observability? | 0 |

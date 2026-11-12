@@ -43,13 +43,13 @@ only with a pointer), **generated** (written by a script).
 | `docs/STATE.md` | Summary: what is decided, what is built, what is next, scheduled checks | current |
 | `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current, with open points (OQ-71 to 73) |
 | `docs/ACTION_PLAN.md` | Ordered next steps; a copy of the ADR table | current |
-| `docs/OPEN_QUESTIONS.md` | 18 open (OQ-70 to OQ-91); 73 resolved with ADR links; original wording | current |
+| `docs/OPEN_QUESTIONS.md` | 17 open (OQ-70 to OQ-91); 74 resolved with ADR links; original wording | current |
 
 ## Subsystem designs
 
 | Path | Topic it is the home of | Status | Main ADRs |
 |---|---|---|---|
-| `docs/ARCHITECTURE.md` | Principles, v1 non-goals, package table, channel contract, identity binding, trust boundaries | current, with open points (OQ-90) | 003, 005 to 008, 011, 015 to 018, 021, 022, 035, 044, 071, 075 |
+| `docs/ARCHITECTURE.md` | Principles, v1 non-goals, package table, channel contract, identity binding, trust boundaries | current | 003, 005 to 008, 011, 015 to 018, 021, 022, 035, 044, 071, 075 |
 | `docs/SECURITY_MODEL.md` | Approval gate, secrets and vault, capability vocabulary, approval card, Phase 0 floor, untrusted content, egress, owner hold, pause and limits, encryption, MCP, code execution | current, with open points (OQ-75, 79) | 006, 007, 013, 016, 018, 028, 031, 034, 036, 050, 072, 075, 079 |
 | `docs/THREAT_MODEL.md` | Actor, attack, control, left-over table; "not protected against" list | current | 069 and the ADRs each row cites |
 | `docs/LLM.md` | Routing layers, roles, local model sizing, presets | current | 011, 019, 037, 045, 046, 065, 066, 078, 085 |
@@ -61,11 +61,11 @@ only with a pointer), **generated** (written by a script).
 
 ## Decisions
 
-`docs/adr/README.md` is the index of the 85 ADRs (all Accepted). By topic:
+`docs/adr/README.md` is the index of the 86 ADRs (all Accepted). By topic:
 
 | Topic | ADRs |
 |---|---|
-| Core, licence, process | 001, 002, 009, 010, 014, 043, 044, 083 |
+| Core, licence, process | 001, 002, 009, 010, 014, 043, 044, 083, 086 |
 | Hosting, nodes, install | 015, 017, 030, 056, 057, 058, 082 |
 | Channels, owner, panel | 021, 022, 035, 067, 070, 076 |
 | Memory | 003, 004, 023, 024, 026, 029, 038, 047, 066, 074, 078 |
