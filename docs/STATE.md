@@ -5,7 +5,7 @@ Last updated: 2026-11-12
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (83 ADRs, all Accepted)
+## Decided (84 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain (ADR-010, 014, 043). npm and PyPI names are
@@ -68,7 +68,7 @@ Nothing runs yet. No package exists under `packages/` or `apps/`.
 ## Now
 Phase 0: Foundation, not started. Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
-Three open questions should be decided before Phase 0 work: OQ-85, OQ-86, OQ-90.
+Two open questions should be decided before Phase 0 work: OQ-86, OQ-90.
 
 ## Scheduled checks that ADRs defer
 - Phase 1: measure the candidate local models (ADR-045).
@@ -80,4 +80,4 @@ Three open questions should be decided before Phase 0 work: OQ-85, OQ-86, OQ-90.
   leaving Experimental (ADR-025, ADR-065).
 
 ## Open questions
-20 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+19 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

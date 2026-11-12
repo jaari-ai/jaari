@@ -43,13 +43,13 @@ only with a pointer), **generated** (written by a script).
 | `docs/STATE.md` | Summary: what is decided, what is built, what is next, scheduled checks | current |
 | `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current, with open points (OQ-71 to 73) |
 | `docs/ACTION_PLAN.md` | Ordered next steps; a copy of the ADR table | current |
-| `docs/OPEN_QUESTIONS.md` | 20 open (OQ-70 to OQ-91); 71 resolved with ADR links; original wording | current |
+| `docs/OPEN_QUESTIONS.md` | 19 open (OQ-70 to OQ-91); 72 resolved with ADR links; original wording | current |
 
 ## Subsystem designs
 
 | Path | Topic it is the home of | Status | Main ADRs |
 |---|---|---|---|
-| `docs/ARCHITECTURE.md` | Principles, v1 non-goals, package table, channel contract, identity binding, trust boundaries | current, with open points (OQ-85, OQ-90) | 003, 005 to 008, 011, 015 to 018, 021, 022, 035, 044, 071, 075 |
+| `docs/ARCHITECTURE.md` | Principles, v1 non-goals, package table, channel contract, identity binding, trust boundaries | current, with open points (OQ-90) | 003, 005 to 008, 011, 015 to 018, 021, 022, 035, 044, 071, 075 |
 | `docs/SECURITY_MODEL.md` | Approval gate, secrets and vault, capability vocabulary, approval card, Phase 0 floor, untrusted content, egress, owner hold, pause and limits, encryption, MCP, code execution | current, with open points (OQ-75, 79) | 006, 007, 013, 016, 018, 028, 031, 034, 036, 050, 072, 075, 079 |
 | `docs/THREAT_MODEL.md` | Actor, attack, control, left-over table; "not protected against" list | current | 069 and the ADRs each row cites |
 | `docs/LLM.md` | Routing layers, roles, local model sizing, presets | current, with open points (OQ-86) | 011, 019, 037, 045, 046, 065, 066, 078 |
@@ -61,7 +61,7 @@ only with a pointer), **generated** (written by a script).
 
 ## Decisions
 
-`docs/adr/README.md` is the index of the 83 ADRs (all Accepted). By topic:
+`docs/adr/README.md` is the index of the 84 ADRs (all Accepted). By topic:
 
 | Topic | ADRs |
 |---|---|
@@ -74,7 +74,7 @@ only with a pointer), **generated** (written by a script).
 | Models | 011, 019, 045, 046, 065, 077 |
 | Web, browser, egress | 005, 012, 048, 049, 051, 052, 053, 054, 055, 080 |
 | Operations | 025, 027, 028, 032, 059 |
-| Extension points and integrations | 034, 036, 039, 062, 063, 071, 073 |
+| Extension points and integrations | 034, 036, 039, 062, 063, 071, 073, 084 |
 | Plan and evals | 020, 041 |
 
 ADRs whose text is changed in part by a later ADR (read the `Amendments` section first):
@@ -88,7 +88,7 @@ title still says "sensitive files local-only"; ADR-078 replaced that rule.
 |---|---|---|
 | `docs/guides/namespaces.md` | Owner runbook: secure npm and PyPI names, GitHub hardening, release | current; `python/` and private vulnerability reporting are follow-ups (report D-06, D-08) |
 | `docs/guides/securing-your-install.md` | Owner-facing storage and encryption trade-offs | current; does not yet cover revocation, the panel passkey, or document routing |
-| `docs/guides/channel-plugins.md` | Plugin author guide | current, with open points (OQ-85) |
+| `docs/guides/channel-plugins.md` | Plugin author guide | current |
 | `docs/learning/07-computer.md`, `08-egress-identity-and-takeover.md` | Studies of 2026-11-09 | historical, with a "since decided" pointer |
 | `docs/learning/09-openmausbot.md` | OpenMausBot study at commit `b802268` | historical; basis of ADR-016 |
 | `docs/learning/10-open-questions-review.md`, `11-pally.md` | Recommendations per question; Pally study | historical, with a "since decided" pointer; some items have no ADR position (report section 6) |

@@ -44,7 +44,7 @@
 | `@jaari/http` | Egress gate: resolve, classify every address against one address-class table, dial only checked addresses; SOCKS5 listener for the browser; per-capability allowlists (ADR-016); egress providers `owner-exit`, `direct`, `mobile`, `residential-proxy`, `vpn` (ADR-017, ADR-030, ADR-053) |
 | `@jaari/web` | `web.search`, `web.fetch`, fetch escalation ladder (ADR-012) |
 | `@jaari/computer` | Browser/desktop control behind one neutral surface with pluggable adapters (Playwright MCP, Stagehand, remote CDP, remote desktop), local profile, takeover (ADR-005, ADR-048, ADR-055) |
-| `@jaari/channels` | `ChannelAdapter` contract, ingress (principal resolution), delivery outbox, built-in adapters |
+| `@jaari/channels` | `ChannelAdapter` contract and its shared contract suite (`@jaari/channels/contract`, ADR-084), ingress (principal resolution), delivery outbox, built-in adapters |
 | `@jaari/integrations` | GitHub, npm, PyPI, email |
 | `apps/daemon` | Long-running process: scheduler, channels, jobs |
 | `apps/cli` | `jaari init`, `jaari doctor`, `jaari llm eval`, `jaari llm usage`, `jaari pair` and `jaari devices` (ADR-022), `jaari run`, `wait`, `status`, `export`, and `mcp` (ADR-076), admin commands |
@@ -68,17 +68,30 @@ name from config: `"channels": ["@jaari/channel-web", "./plugins/example"]`.
 Packaging (ADR-071): a channel is a capability package with a checked `jaari` manifest
 (`kind: channel`), installed and pinned like any other package. A third-party channel runs in
 its own process with only its declared egress and secrets; a local path is for development
-only and makes `jaari doctor` warn. How `ChannelManifest` below maps onto that manifest is
-OQ-85.
+only and makes `jaari doctor` warn. The manifest is the `jaari` key of the package's
+`package.json`; the channel's own fields are its `channel` section (ADR-084):
+
+~~~jsonc
+"jaari": {
+  "id": "telegram", "version": "1.2.0", "kind": "channel",
+  "interfaceVersion": 1, "minJaari": "0.3.0", "hosts": ["daemon"],
+  "egress": ["api.telegram.org"], "secrets": ["telegram.token"],
+  "channel": { "capabilities": { "text": true, "media": true },
+               "identity": "account", "prompts": "buttons", "maxMessageChars": 4096 }
+}
+~~~
+
+The host checks it before loading any plugin code and passes it to the adapter. Every plugin
+passes the shared suite in `@jaari/channels/contract` (ADR-084).
 
 ~~~ts
+// The `channel` section of the package manifest (ADR-084); id and version are in the shared part.
 export interface ChannelManifest {
-  id: string;                        // "telegram"
-  version: string;
   capabilities: {
     text: true;
     media?: boolean; reactions?: boolean; typing?: boolean;
     groups?: boolean; readReceipts?: boolean; edits?: boolean;
+    deletes?: boolean;               // can delete the owner's message (ADR-055, ADR-081)
   };
   identity: "carrier" | "account" | "device" | "none";  // see Identity binding
   prompts: "buttons" | "quickReplies" | "text";          // how the host renders a Prompt (ADR-035)
@@ -126,6 +139,7 @@ export type DeliveryReceipt =
 export interface ChannelHealth { ok: boolean; detail?: string }
 
 export interface ChannelContext {
+  manifest: ChannelManifest;         // checked by the host before the plugin loads
   emit(msg: InboundMessage): Promise<void>;   // hand a message to ingress
   secrets: { get(ref: string): Promise<string> };  // this plugin's own secretRefs only
   log: { info(msg: string): void; warn(msg: string): void; error(msg: string): void };
@@ -133,7 +147,6 @@ export interface ChannelContext {
 }
 
 export interface ChannelAdapter {
-  manifest: ChannelManifest;
   start(ctx: ChannelContext): Promise<void>;
   stop(): Promise<void>;
   send(msg: OutboundMessage): Promise<DeliveryReceipt>;

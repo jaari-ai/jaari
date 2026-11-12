@@ -48,8 +48,8 @@ effect. Entry: none.
 | 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement | 001, 065 | 0.1, 0.7; OQ-69, OQ-86 | Planned |
 | 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship | 017, 019, 056 | 0.1 | Planned |
 | 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains | 011, 019 | 0.1, 0.15; OQ-86 | Planned |
-| 0.8 | `ChannelAdapter` contract, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081 | 0.5; OQ-85 | Planned |
-| 0.9 | `@jaari/capabilities`: manifest schema, built-in loader, daemon–node contract | 015, 018, 071 | 0.1; OQ-85, OQ-90 | Planned |
+| 0.8 | `ChannelAdapter` contract and the shared contract suite, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081, 084 | 0.5, 0.9 | Planned |
+| 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084 | 0.1; OQ-90 | Planned |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Planned |
 | 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079 | 0.1 | Planned |
 | 0.12 | Install, manual update with a local pre-update snapshot, rollback, and migrations; `jaari doctor` (checks are added as their features ship) | 056, 032, 082 | 0.5 | Planned |
@@ -61,7 +61,9 @@ Exit criteria:
 - The tier-1 smoke test boots the daemon on the scripted engine in CI on every pull request,
   with no API calls (ADR-041).
 - Through the gate stub, every gated capability refuses and read-class ones run (ADR-018).
-- A manifest with an unknown name or kind fails closed (ADR-071).
+- A manifest with an unknown name or kind fails closed (ADR-071), and is checked before any
+  package code runs (ADR-084).
+- The CLI channel passes the shared channel contract suite (ADR-084).
 - `jaari doctor` warns when an `env` or `file` secret provider is in use (ADR-018).
 - On a host without a keychain, the daemon starts unattended with `host-credential`, and refuses
   to start when the credential file is readable by others, in the data directory, or in the
@@ -80,7 +82,7 @@ Exit criteria:
   `node:http`, `node:https`, `node:net`, `node:tls`, or `undici` import elsewhere, and the
   address-class tests deny metadata, link-local, and the daemon's own ports (ADR-016, ADR-080).
 
-Open questions that block this phase: OQ-85, OQ-86, OQ-90.
+Open questions that block this phase: OQ-86, OQ-90.
 Gate status: not passed.
 
 ## Phase 1: Memory
