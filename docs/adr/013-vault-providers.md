@@ -1,7 +1,7 @@
 # ADR-013: Pluggable vault providers: Bitwarden first, 1Password second
 
 - **Status:** Accepted
-- **Extended by:** [ADR-018](018-capability-vocabulary-and-phase-0-floor.md), [ADR-040](040-no-payments-in-v1.md), [ADR-050](050-vault-verification-and-one-time-codes.md), [ADR-063](063-agent-mailbox.md), [ADR-071](071-capability-packages.md), [ADR-072](072-standing-grants.md), [ADR-079](079-secret-zero-on-servers.md)
+- **Extended by:** [ADR-018](018-capability-vocabulary-and-phase-0-floor.md), [ADR-040](040-no-payments-in-v1.md), [ADR-050](050-vault-verification-and-one-time-codes.md), [ADR-063](063-agent-mailbox.md), [ADR-071](071-capability-packages.md), [ADR-072](072-standing-grants.md), [ADR-079](079-secret-zero-on-servers.md), [ADR-090](090-oauth-token-rotation.md)
 - **Date:** 2026-11-05
 
 ## Decision
@@ -25,6 +25,8 @@
   `host-credential` provider: a file supplied by systemd (`LoadCredentialEncrypted=` by default)
   or by a Compose secret, checked for owner-only access and kept out of the data directory and
   backups.
+- **ADR-090:** OAuth token rotation within the ADR-090 bounds skips the gate; other vault writes
+  do not.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

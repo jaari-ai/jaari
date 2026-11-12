@@ -252,7 +252,7 @@ sandbox (4.7).
 |---|---|---|---|---|
 | 5.1 | GitHub, npm, and PyPI integrations | none (INTEGRATIONS.md) | 3.1; OQ-91 | Planned |
 | 5.2 | Email as an input channel | 021 | 4.3 | Planned |
-| 5.3 | OAuth broker (in `@jaari/integrations`) | 062, 086 | 3.3; OQ-75 | Planned |
+| 5.3 | OAuth broker, with bounded token rotation (in `@jaari/integrations`) | 062, 086, 090 | 3.3 | Planned |
 | 5.4 | The agent's mailbox (in `@jaari/integrations`); watcher triggers on the inbox | 063, 086, 064, 089 | 3.3, 4.3 | Planned |
 | 5.5 | Calendar, contacts, and file storage | 039 | 5.3; OQ-79 | Planned |
 | 5.6 | Documents (in file store in `@jaari/memory`) | 038, 078, 086 | 4.7; OQ-78, OQ-87 | Planned |
@@ -267,7 +267,7 @@ Exit criteria:
   before the 2xx response (ADR-073).
 - The disk watch notifies at 80%, 90%, and 95% used (ADR-038).
 
-Open questions that block this phase: OQ-75, OQ-78, OQ-79, OQ-87, OQ-88, OQ-91.
+Open questions that block this phase: OQ-78, OQ-79, OQ-87, OQ-88, OQ-91.
 Gate status: not passed.
 
 ## Phase 6: Computer use

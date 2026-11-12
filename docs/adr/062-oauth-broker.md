@@ -1,6 +1,7 @@
 # ADR-062: OAuth broker: bring-your-own client with a wizard, grouped consent per connection, tokens in the vault, no hosted broker
 
 - **Status:** Accepted
+- **Extended by:** [ADR-090](090-oauth-token-rotation.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -50,6 +51,11 @@ Borrowed: PKCE, early refresh, pending-flow expiry, and revoke on disconnect fro
 A hosted broker (tokens leave the box); a shared project client in v1; requesting every scope a
 service offers; one consent screen per capability (more prompts than the owner wants); tokens in
 config or model context.
+
+## Amendments
+- **ADR-090 (resolves OQ-75):** rotating an existing token is a bounded maintenance write with
+  no approval (same item and account, value from the listed token endpoint, only the refresh
+  token and expiry change); written before use and audited.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

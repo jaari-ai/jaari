@@ -130,3 +130,4 @@ status and exit criteria live there.
 | [087](adr/087-safety-pieces-ship-with-what-they-protect.md) | Safety pieces ship in the phase of the first thing they protect | Accepted |
 | [088](adr/088-overlay-panel-and-node-link-phasing.md) | Overlay binding and panel TLS in Phase 2, node link in Phase 6, panel views with their features | Accepted |
 | [089](adr/089-routines-before-children.md) | Routines in Phase 1 run code and one tool-less model step; delivery starts with the ledger | Accepted |
+| [090](adr/090-oauth-token-rotation.md) | Rotating an existing OAuth token is a bounded maintenance write, not an approval | Accepted |

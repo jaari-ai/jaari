@@ -40,8 +40,9 @@ OS keychain and is never in a backup. On a server or container without a keychai
 the `host-credential` provider: a file supplied by systemd (`LoadCredentialEncrypted=` by
 default) or a Compose secret, refused if others can read it or it is in the data directory or
 the backup set; never an environment variable (ADR-079). Vault
-writes go through the gate. OAuth tokens are vault items, refreshed by the executor (ADR-062;
-rotation and the gate: OQ-75). Payment-card fields are not resolvable in v1 (ADR-040).
+writes go through the gate. OAuth tokens are vault items, refreshed by the executor (ADR-062);
+rotating an existing token skips the gate only within the ADR-090 bounds (same item and
+account, value from the listed token endpoint), is written before use, and is audited. Payment-card fields are not resolvable in v1 (ADR-040).
 
 Secrets pasted in chat (ADR-081): every owner message is scrubbed at channel ingress, before
 the transcript, the daily log, or any model: known key and token formats, labelled passwords,
