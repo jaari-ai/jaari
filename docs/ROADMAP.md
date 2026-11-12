@@ -99,7 +99,7 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 | 1.2 | Structured records, `records.query`, FTS5 search | 023 | 1.1 | Planned |
 | 1.3 | Context assembly; session orientation and re-injection from state | 024, 065 | 1.2 | Planned |
 | 1.4 | Job engine; catch-up after sleep (in `@jaari/core`); job-tree abort | 025, 057, 082, 086, 031, 087 | 0.5, 0.13 | Planned |
-| 1.5 | Routines (in `@jaari/core`) | 064, 086 | 1.4; OQ-73 | Blocked (OQ-73: children, the notification ledger, and budgets come later) |
+| 1.5 | Routines: object, schedule and one-shot triggers, `jaari routine`, run history with job receipts, caps; code steps and one tool-less model step; no proactive delivery (in `@jaari/core`) | 064, 086, 089 | 1.4, 1.11 | Planned |
 | 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9; OQ-78 | Planned |
 | 1.7 | Daily audit | 004 | 1.1, 1.4 | Planned |
 | 1.8 | Capture evidence | 074, 081 | 1.1, 0.8 | Planned |
@@ -109,6 +109,8 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 | 1.12 | Nightly local snapshot of memory, SQLite, and config (last 7) | 027, 082, 087 | 1.1, 0.12 | Planned |
 
 Exit criteria:
+- A scheduled routine with nothing new makes no model call and posts nothing; a run with a
+  change writes one job receipt to its run history (ADR-064, ADR-089).
 - The three ADR-023 fixtures pass: the exact balance of a budget with 20 expenses; an
   appointment found from a related question seven days later; the bill, the appointment
   change, and the frequent contact's reply surfaced from 200 mixed messages.
@@ -125,7 +127,7 @@ Exit criteria:
 - Qualification records pass rate, tokens per second, and time to first token per model
   (ADR-045).
 
-Open questions that block this phase: OQ-73, OQ-78.
+Open questions that block this phase: OQ-78.
 Gate status: not passed.
 
 ## Phase 2: Persona and owner surfaces
@@ -137,7 +139,7 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 |---|---|---|---|---|
 | 2.1 | Dials and monitor; repeated-failure and 7-day quiet rules | 008, 031, 087 | 0.5 | Planned |
 | 2.2 | Curiosity from the gap queue | 008 | 1.6, 2.1 | Planned |
-| 2.3 | Quiet hours, notification ledger, digests, delivery; automatic patch installs in quiet hours; 50% and 80% budget lines | 033, 056, 082, 046, 087 | 2.1, 0.12 | Planned |
+| 2.3 | Quiet hours, notification ledger, digests, delivery; automatic patch installs in quiet hours; 50% and 80% budget lines; routine delivery and reminders, marked late after sleep | 033, 056, 082, 046, 087, 064, 089 | 2.1, 0.12, 1.5 | Planned |
 | 2.4 | Prompt versioning | 042 | 0.5 | Planned |
 | 2.5 | Replay harness and golden threads | 041 | 0.2 | Planned |
 | 2.6 | Skills: built-in and owner (third-party is 4.10) (in `@jaari/core`) | 060, 086 | 1.1 | Planned |
@@ -149,6 +151,8 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 | 2.12 | Overlay binding and panel TLS: loopback plus one private interface; Tailscale, Headscale, and Custom modes; `jaari doctor` check | 030, 088 | 0.5 | Planned |
 
 Exit criteria:
+- A routine result reaches the owner only through the ledger: in the digest by default, at once
+  when urgent or asked for (ADR-064, ADR-089).
 - Tier-1 "quiet" scenarios pass: quiet hours, the 7-day rule, the outbox duplicate window, only
   the main session speaks (ADR-041).
 - An override file for a locked prompt is refused at load, with a line in `jaari doctor`
@@ -211,15 +215,15 @@ and audit log.
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 4.1 | Children and receipts; child limits and child abort | 011, 061, 031, 087 | 1.4; OQ-81 | Planned |
+| 4.1 | Children and receipts; child limits and child abort; routine model steps run as children | 011, 061, 031, 087, 089 | 1.4; OQ-81 | Planned |
 | 4.2 | `llm.escalate` | 011 | 4.1 | Planned |
 | 4.3 | `reader` role and outside lineage | 075 | 0.7 | Planned |
 | 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core | 016, 053, 080 | 0.15, 2.12 | Planned |
-| 4.5 | `web.search` and `web.fetch` with pluggable rungs | 012, 049 | 4.3, 4.4, 4.13 | Planned |
+| 4.5 | `web.search` and `web.fetch` with pluggable rungs; watcher triggers on web pages | 012, 049, 064, 089 | 4.3, 4.4, 4.13 | Planned |
 | 4.6 | Optional Web Bot Auth signing for HTTP | 054 | 4.4 | Planned |
 | 4.7 | First sandbox backend | 034, 036 | OQ-70 | Blocked (OQ-70: backend under Compose not chosen) |
 | 4.8 | MCP client, local servers sandboxed (in `@jaari/mcp`) | 034, 086 | 4.3, 4.7; OQ-80 | Planned |
-| 4.9 | Code execution | 036 | 3.6, 4.7; OQ-77 | Planned |
+| 4.9 | Code execution; routine script steps | 036, 064, 089 | 3.6, 4.7; OQ-77 | Planned |
 | 4.10 | Third-party skills and third-party packages | 060, 071 | 4.3 | Planned |
 | 4.11 | Headless CLI commands | 076 | 0.5 | Planned |
 | 4.12 | Subscription CLI engines for sandboxed children (interface in `@jaari/core`; each engine is a package) | 077, 086 | 4.1, 4.7; OQ-76 | Planned |
@@ -249,7 +253,7 @@ sandbox (4.7).
 | 5.1 | GitHub, npm, and PyPI integrations | none (INTEGRATIONS.md) | 3.1; OQ-91 | Planned |
 | 5.2 | Email as an input channel | 021 | 4.3 | Planned |
 | 5.3 | OAuth broker (in `@jaari/integrations`) | 062, 086 | 3.3; OQ-75 | Planned |
-| 5.4 | The agent's mailbox (in `@jaari/integrations`) | 063, 086 | 3.3, 4.3 | Planned |
+| 5.4 | The agent's mailbox (in `@jaari/integrations`); watcher triggers on the inbox | 063, 086, 064, 089 | 3.3, 4.3 | Planned |
 | 5.5 | Calendar, contacts, and file storage | 039 | 5.3; OQ-79 | Planned |
 | 5.6 | Documents (in file store in `@jaari/memory`) | 038, 078, 086 | 4.7; OQ-78, OQ-87 | Planned |
 | 5.7 | Photo notes | 066 | 5.6 | Planned |
@@ -360,10 +364,9 @@ SOCKS5 listener, owner-account pinning, and the opt-in `vpn`, `mobile`, and
   (0.5), namespaces and release (0.4), correct and forget (1.10), owner authentication (2.7),
   Telegram (2.8), erase (3.9). Email input (5.2) follows ADR-021.
 - The threat model is marked Delivered (3.13).
-- Not moved, because an accepted ADR states the phase or the choice is the owner's: see
-  OQ-73.
+- The phase conflicts the audit left open are all decided since (ADR-080 to ADR-089).
 - Decided since the audit: the egress core moved to Phase 0 as 0.15, and the container egress
   proxy moved from 7.3 to 4.13 (ADR-080). Catch-up moved from 0.13 to 1.4, and automatic patch
   installs to 2.3 (ADR-082). Safety pieces moved to the phase of what they protect (ADR-087).
   The overlay binding moved to 2.12 and the node link to 6.8; panel views ship with their
-  features (ADR-088).
+  features (ADR-088). Routine delivery and reminders moved to 2.3 (ADR-089).
