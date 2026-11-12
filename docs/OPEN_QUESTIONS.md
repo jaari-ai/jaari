@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-10. Open: **13**.
+Last updated: 2026-11-10. Open: **12**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link. "Leaning" is a suggestion, not a decision.
@@ -44,10 +44,9 @@ leanings below are unchanged until the owner accepts them).
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-45 | Multimodal memory | Photos, receipts, and screenshots as memory, and what the audit does with them. | later | Undecided Affected by ADR-037: voice-note audio is kept 30 days and its transcript in the raw log; photos and screenshots remain open here. Affected by ADR-038: photos and screenshots use the same store, OCR ladder, and retention. |
 | OQ-46 | Owner panel | `channel-web` as a PWA: approval cards showing the digest, live view (ADR-055), a memory browser and editor, audit viewer, budgets, pause and emergency stop (ADR-031), web push while the panel is the active channel (ADR-033). | 2 | One PWA over Tailscale; memory editing commits like any other write Affected by ADR-035: the panel renders prompts with buttons and hosts the details and secret-entry links other channels point to. |
 | OQ-47 | Shadow mode | Observe-and-propose only for the first weeks: drafts instead of sends, plans instead of actions; the owner lifts it per capability. | 3 | On by default for 14 days; per-capability lift recorded in `audit.jsonl` |
-| OQ-48 | Threat model | An enumerated `THREAT_MODEL.md`: injection via pages and screenshots, malicious MCP server or skill, compromised node, stolen phone, malicious channel plugin, poisoned memory. | 3 | Write it before Phase 3 code; one mitigation column per threat Affected by ADR-034: the malicious-MCP-server row lists its mitigations (pinned tool list, untrusted text, sandbox, `mcp.act` default). |
+| OQ-48 | Threat model | An enumerated `THREAT_MODEL.md`: injection via pages and screenshots, malicious MCP server or skill, compromised node, stolen phone, malicious channel plugin, poisoned memory. | 3 | Write it before Phase 3 code; one mitigation column per threat Affected by ADR-034: the malicious-MCP-server row lists its mitigations (pinned tool list, untrusted text, sandbox, `mcp.act` default). Affected by ADR-066: text read from photos goes through the reader role; photo notes keep GPS location, and images sent out keep metadata unless the owner turns on removal. |
 | OQ-49 | Onboarding conversation | The first conversation and first week: profile bootstrap, what is asked and what is inferred, when dials are explained. | 2 | An onboarding skill; ask only what the next task needs |
 | OQ-50 | Capability packages | ADR-015 makes capabilities installable units with a manifest. Open: manifest schema, where packages come from (npm `@jaari/capability-*`, local path), signing and update, how a capability declares and checks its OS permissions and sidecars (Xvfb or a desktop container for `computer.use` on a VPS), and how this relates to MCP servers (OQ-14) and skills (OQ-39). The owning package is `@jaari/capabilities` and the names come from one vocabulary (ADR-018). | 0 | Manifest schema and the in-process loader in Phase 0; npm packages with provenance, installed by `jaari capability install`; an MCP server can back a capability but never bypasses its manifest. Native sidecars pinned by SHA-256 and size with an SBOM and no runtime self-update; policy reads capability flags from the manifest, never package names (learning/09) Affected by ADR-034: MCP tools map to vocabulary names, `mcp.read` or `mcp.act` when none fits; the server-and-tool mapping is a manifest. |
 
@@ -128,3 +127,4 @@ leanings below are unchanged until the owner accepts them).
 | OQ-42 | Adapters for personal (scoped), own-domain, OAuth, and JMAP mailboxes with setup guides; inbound as data; email.send Allow once; no phone or SMS gateway in v1 | [ADR-063](adr/063-agent-mailbox.md) |
 | OQ-43 | Routine objects with budgets and history; overlaps queue (coalesced); code checks first; check-in at 14 and 30 days then never; reply to stop | [ADR-064](adr/064-owner-routines.md) |
 | OQ-44 | One persistent daemon-owned session on pi-agent-core; serial queue; Pi thresholds; no server-side state for the main session; keep transcripts, optional pruning | [ADR-065](adr/065-persistent-session.md) |
+| OQ-45 | Photo notes with description, text, date, and location; vision role follows the owner's routing; face recognition planned for later | [ADR-066](adr/066-photos-as-memory.md) |

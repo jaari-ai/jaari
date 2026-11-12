@@ -67,3 +67,4 @@
 | [063](063-agent-mailbox.md) | The agent's mailbox: every mailbox option coded as an adapter, setup guides per option, inbound mail as data, no phone number in v1 | Accepted |
 | [064](064-owner-routines.md) | Owner routines: visible routine objects, queued overlaps, cheap checks first, a 14-day check-in, stop by replying | Accepted |
 | [065](065-persistent-session.md) | Persistent session: one daemon-owned main session on pi-agent-core, one serial queue, Pi's compaction thresholds, no server-side state for the main session | Accepted |
+| [066](066-photos-as-memory.md) | Photos as memory: photo notes in the file store, the vision role as the owner routed it, location kept, face recognition planned for later | Accepted |

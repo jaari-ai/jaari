@@ -1,6 +1,7 @@
 # ADR-038: Documents and files: content-addressed store, sealed parsing, sensitive files local-only, disk watch
 
 - **Status:** Accepted
+- **Extended by:** [ADR-066](066-photos-as-memory.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -55,6 +56,11 @@ attachments.
 Borrowed: attachment limits, hashed names, and the over-limit line from open-instinct
 `packages/inkbox/src/hydration.ts`; "the message arrives even when the bytes do not" and 0600
 files from gajae-way `packages/adapter-telegram/src/attachments.ts` (design only).
+
+## Amendments
+- **ADR-066:** photos and screenshots are read by the `vision` role as the owner routed it
+  (local-only, hybrid, or API); the sensitive-documents local-only rule does not force local
+  models for photos.
 
 ## Alternatives rejected
 Storing binaries in the memory git repository (history bloat); a fixed storage quota (the owner
