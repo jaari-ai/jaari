@@ -36,7 +36,10 @@ page, screenshots and page evaluation are refused.
 
 Vault (ADR-013, ADR-050): Jaari reads only a dedicated vault or collection that the owner
 chooses at `jaari init`; the vault client runs as a separate process; secret zero stays in the
-OS keychain and is never in a backup (where it lives on a headless server is OQ-67). Vault
+OS keychain and is never in a backup. On a server or container without a keychain it comes from
+the `host-credential` provider: a file supplied by systemd (`LoadCredentialEncrypted=` by
+default) or a Compose secret, refused if others can read it or it is in the data directory or
+the backup set; never an environment variable (ADR-079). Vault
 writes go through the gate. OAuth tokens are vault items, refreshed by the executor (ADR-062;
 rotation and the gate: OQ-75). Payment-card fields are not resolvable in v1 (ADR-040).
 
@@ -77,7 +80,8 @@ minutes; 5 for `email.send` and `publish`; overridable per capability.
 
 ## Phase 0 floor (ADR-018)
 `@jaari/gate` ships as a deny-all stub: gated capabilities refuse, read ones run. The
-`secretRef` resolver and an `os-keychain` provider ship in Phase 0; `env` and `file` are
+`secretRef` resolver and the `os-keychain` and `host-credential` providers (ADR-079) ship in
+Phase 0; `env` and `file` are
 for development and make `jaari doctor` warn. Third-party skills install disabled until
 the `reader` role exists.
 

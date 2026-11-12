@@ -1,7 +1,7 @@
 # ADR-027: Backup and restore: owner-chosen destinations and schedule, encrypted archives, monthly drill
 
 - **Status:** Accepted
-- **Extended by:** [ADR-038](038-documents-and-files.md)
+- **Extended by:** [ADR-038](038-documents-and-files.md), [ADR-079](079-secret-zero-on-servers.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -56,6 +56,8 @@ party bucket.
 
 ## Amendments
 - **ADR-038:** the file store is part of backups.
+- **ADR-079:** on a server, secret zero is a `host-credential` file; it is never in a backup,
+  and the provider refuses to start if the file is in the backup set.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

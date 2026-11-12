@@ -1,7 +1,7 @@
 # ADR-013: Pluggable vault providers: Bitwarden first, 1Password second
 
 - **Status:** Accepted
-- **Extended by:** [ADR-018](018-capability-vocabulary-and-phase-0-floor.md), [ADR-040](040-no-payments-in-v1.md), [ADR-050](050-vault-verification-and-one-time-codes.md), [ADR-063](063-agent-mailbox.md), [ADR-071](071-capability-packages.md), [ADR-072](072-standing-grants.md)
+- **Extended by:** [ADR-018](018-capability-vocabulary-and-phase-0-floor.md), [ADR-040](040-no-payments-in-v1.md), [ADR-050](050-vault-verification-and-one-time-codes.md), [ADR-063](063-agent-mailbox.md), [ADR-071](071-capability-packages.md), [ADR-072](072-standing-grants.md), [ADR-079](079-secret-zero-on-servers.md)
 - **Date:** 2026-11-05
 
 ## Decision
@@ -21,6 +21,10 @@
 - **ADR-071:** vault providers are a package kind with a checked manifest.
 - **ADR-072:** vault writes are never grantable; each is Allow once.
 - **ADR-040:** the payment-card flag stays off and is not offered in v1.
+- **ADR-079 (resolves OQ-67):** on a host without an OS keychain, secret zero comes from the
+  `host-credential` provider: a file supplied by systemd (`LoadCredentialEncrypted=` by default)
+  or by a Compose secret, checked for owner-only access and kept out of the data directory and
+  backups.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

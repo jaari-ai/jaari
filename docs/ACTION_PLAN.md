@@ -5,7 +5,7 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 status and exit criteria live there.
 
 ## Workstreams
-1. **Decide the questions that block Phase 0**: OQ-67 (secret zero on a server), OQ-68 (egress
+1. **Decide the questions that block Phase 0**: OQ-68 (egress
    before `@jaari/http`), OQ-69 (a secret pasted in chat), OQ-74 (update and catch-up
    dependencies), OQ-84 (pinning the references), OQ-85 (channel manifest), OQ-86 (refusal and
    the pinned session), OQ-90 (package homes).
@@ -14,7 +14,8 @@ status and exit criteria live there.
    ADR-043); fix `python/` to match [guides/namespaces.md](guides/namespaces.md) and secure
    the names (ADR-010).
 3. **Safety floor first** (0.9 to 0.11): `@jaari/capabilities`, `@jaari/gate` (deny-all stub),
-   and `@jaari/secrets` (resolver + `os-keychain`) with the first package (ADR-018).
+   and `@jaari/secrets` (resolver + `os-keychain` and `host-credential`) with the first package
+   (ADR-018, ADR-079).
 4. **Build `@jaari/llm`** (0.7) on `@earendil-works/pi-ai` with the tier/role config; the
    `jaari llm eval` qualification fixtures that `jaari init` uses arrive with Phase 1 (1.9;
    ADR-019, ADR-045).
@@ -121,3 +122,4 @@ status and exit criteria live there.
 | [076](adr/076-external-control-surface.md) | External control surface: headless CLI commands on the local socket, a two-tool MCP server for paired desktop apps in v1, nothing that approves or changes policy | Accepted |
 | [077](adr/077-subscription-cli-engines.md) | Subscription CLI engines: pluggable CliEngine adapters for sandboxed children only, Pi first, the gate answering the CLI's permission requests, off until the owner enables each engine | Accepted |
 | [078](adr/078-documents-follow-owner-routing.md) | Documents follow the owner's model routing; no forced local-only path for sensitive files | Accepted |
+| [079](adr/079-secret-zero-on-servers.md) | Secret zero on a server: a `host-credential` provider fed by the service manager | Accepted |

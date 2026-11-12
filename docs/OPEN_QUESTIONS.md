@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **25**.
+Last updated: 2026-11-12. Open: **24**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -18,7 +18,6 @@ leaning yet; the options listed are only the ones the docs already name.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-67 | Secret zero on a server | On a headless Linux server or in a Compose container, which store holds secret zero, and how does the daemon get it after an unattended restart? | 0 | None. On record: OS keychain (ADR-013, ADR-018); `env` and `file` are development-only |
 | OQ-68 | Egress before `@jaari/http` | The rule says all network egress goes through `@jaari/http`, but the roadmap ships it in Phase 4. How do model-provider, Telegram, speech, and model-download calls leave the host in Phases 0 to 3? | 0 | None. On record: no option documented |
 | OQ-69 | Secret pasted in chat | When an owner message contains a password, key, or card number, is the write blocked, is the value removed before the transcript and the raw log are stored, or is it kept verbatim? | 0 | None. On record: block and ask (ADR-028); keep verbatim (ADR-074); scrub and advise rotation (learning/11, not adopted) |
 | OQ-70 | Sandbox backend under Compose | With the daemon in a Compose container and no Docker socket, is the sandbox a rootless Podman sidecar or gVisor? How is the daemon's own container hardened? | 4 | None. On record: rootless Podman sidecar or gVisor (ADR-056); Docker or Podman container, bubblewrap (ADR-034, ADR-036) |
@@ -69,10 +68,6 @@ leaning yet; the options listed are only the ones the docs already name.
 Evidence is `ADR-NNN` or a file. "If delayed" is the cost of not deciding before the blocked
 phase starts.
 
-- **OQ-67.** Settled: secret zero stays in the OS keychain and is never in a backup (ADR-013,
-  ADR-027); Phase 0 ships an `os-keychain` provider (ADR-018). Gap: the first hosting target is
-  a VPS (ADR-017) installed with Compose (ADR-056), which has no OS keychain. If delayed: Phase 0
-  cannot start the daemon on a server without a development-only provider.
 - **OQ-68.** Settled: resolve, check, dial is the egress mechanism (ADR-016). Gap: AGENTS.md,
   ARCHITECTURE.md, and SECURITY_MODEL.md state the rule, and no interim route is decided. If
   delayed: Phase 0 code breaks the rule or blocks on a Phase 4 item.
@@ -205,6 +200,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-55 | jaari run/wait/status/export on the local socket with typed exit codes; two-tool MCP server for paired apps in v1, trusted as owner; never approves or changes policy | [ADR-076](adr/076-external-control-surface.md) |
 | OQ-56 | CliEngine adapters (Pi first) for sandboxed children only; gate answers the CLI's permission requests; results applied by Jaari's gated capabilities; off until enabled per engine | [ADR-077](adr/077-subscription-cli-engines.md) |
 | OQ-64 | ADR-013 accepted with the ADR-050 vendor check and amendments from ADR-050, ADR-063, ADR-071, and ADR-072 | [ADR-013](adr/013-vault-providers.md), [ADR-050](adr/050-vault-verification-and-one-time-codes.md) |
+| OQ-67 | On a host without an OS keychain, secret zero comes from the `host-credential` provider: a file supplied by systemd (`LoadCredentialEncrypted=` by default, TPM-sealed when present) or a Compose secret; owner-only, outside the data directory and backups; never an environment variable | [ADR-079](adr/079-secret-zero-on-servers.md) |
 
 ### Original questions
 
@@ -272,3 +268,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-55 | External control surface | Should other tools drive Jaari: a headless `jaari run` / `jaari wait` for scripts, and an MCP server for desktop clients? What must such a surface never expose? | 4 |
 | OQ-56 | Subscription CLI engines | OpenMausBot runs bots on the owner's installed `claude`, `codex`, and other CLIs (27 drivers, including Pi over `pi --mode rpc`), so work is billed to an existing subscription. Should a Jaari child be able to delegate a task to such a CLI? The gate cannot see tool calls inside another loop, and provider terms differ. | 4 |
 | OQ-64 | Accept ADR-013 | ADR-011 and ADR-012 were accepted (ADR-019). ADR-013 (vault providers) is still Proposed and depends on OQ-29: Bitwarden Lite licence needs and the 1Password service-account setup are unverified. | 3 |
+| OQ-67 | Secret zero on a server | On a headless Linux server or in a Compose container, which store holds secret zero, and how does the daemon get it after an unattended restart? | 0 |

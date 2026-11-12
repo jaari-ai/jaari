@@ -16,6 +16,15 @@ The daemon must read your memory to do its work, so the key is on the machine wh
 runs. No setting inside Jaari changes that. If that is not acceptable for your data, run
 Jaari on hardware you own.
 
+## Where the vault key lives
+
+Jaari's vault key (secret zero) opens only Jaari's dedicated vault (ADR-050). On a Mac or a
+Linux desktop it is in the OS keychain. On a server or in Compose there is no keychain, so
+`jaari init` stores it as a credential file that systemd or Compose gives the daemon at each
+start (ADR-079). With systemd the file is encrypted on disk, and sealed to the TPM chip if the
+machine has one. `jaari doctor` tells you which form you have. Anyone with root on the running
+machine can still read it.
+
 ## Encrypting the host disk
 
 Jaari relies on full-disk encryption and `jaari doctor` reports whether it can see it.

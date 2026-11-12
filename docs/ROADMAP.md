@@ -51,7 +51,7 @@ effect. Entry: none.
 | 0.8 | `ChannelAdapter` contract, typed prompts, and the CLI channel | 021, 035 | 0.5; OQ-85 | Planned |
 | 0.9 | `@jaari/capabilities`: manifest schema, built-in loader, daemon–node contract | 015, 018, 071 | 0.1; OQ-85, OQ-90 | Planned |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Planned |
-| 0.11 | `@jaari/secrets` resolver with the `os-keychain` provider | 007, 013, 018 | 0.1; OQ-67 | Blocked (OQ-67, for server targets) |
+| 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079 | 0.1 | Planned |
 | 0.12 | Install, update, and migrations; `jaari doctor` (checks are added as their features ship) | 056, 032 | 0.5; OQ-74 | Planned |
 | 0.13 | Laptop sleep and wake rule | 057 | 0.5; OQ-74 | Planned |
 | 0.14 | `ownerId` in the data model | 044 | 0.5 | Planned |
@@ -62,13 +62,16 @@ Exit criteria:
 - Through the gate stub, every gated capability refuses and read-class ones run (ADR-018).
 - A manifest with an unknown name or kind fails closed (ADR-071).
 - `jaari doctor` warns when an `env` or `file` secret provider is in use (ADR-018).
+- On a host without a keychain, the daemon starts unattended with `host-credential`, and refuses
+  to start when the credential file is readable by others, in the data directory, or in the
+  backup set (ADR-079).
 - `SECURITY.md`, `CONTRIBUTING.md`, the DCO check, gitleaks, the licence check, and the pnpm
   settings are in the repo (ADR-043).
 - Every record carries an `ownerId` (ADR-044).
 - A clock gap over 2 minutes is detected as sleep (ADR-057).
 - A binary older than its data refuses to start (ADR-056).
 
-Open questions that block this phase: OQ-67, OQ-68, OQ-69, OQ-74, OQ-85, OQ-86, OQ-90. OQ-84
+Open questions that block this phase: OQ-68, OQ-69, OQ-74, OQ-85, OQ-86, OQ-90. OQ-84
 (pinning the references) gates no item; decide it before the next `scripts/refs.sh` sync.
 Gate status: not passed.
 
