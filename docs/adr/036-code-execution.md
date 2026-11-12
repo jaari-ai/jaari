@@ -1,7 +1,7 @@
 # ADR-036: Code execution: sealed runs never ask, allow once or for 90 days, pinned recurring jobs
 
 - **Status:** Accepted
-- **Extended by:** [ADR-056](056-install-update-migrate.md), [ADR-072](072-standing-grants.md), [ADR-091](091-engine-runs.md)
+- **Extended by:** [ADR-056](056-install-update-migrate.md), [ADR-072](072-standing-grants.md), [ADR-091](091-engine-runs.md), [ADR-092](092-pinned-jobs.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -65,6 +65,9 @@ commands; code execution only in Phase 7 (the sandbox exists in Phase 4).
 - **ADR-072:** the 90-day target grants follow the one grant model; host commands outside the sandbox are never grantable.
 - **ADR-091:** engine runs (ADR-077) are a named kind with network to the provider and the CLI's
   sign-in; they are not sealed and use the 30-minute child limit.
+- **ADR-092 (resolves OQ-77):** a pinned job is its own repeating approval; host jobs expire
+  after 90 days with one reminder; sandboxed jobs get a 90-day check-in; listed and revoked with
+  `jaari grants`.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

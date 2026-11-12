@@ -93,3 +93,4 @@
 | [089](089-routines-before-children.md) | Routines in Phase 1 run code and one tool-less model step; delivery starts with the ledger | Accepted |
 | [090](090-oauth-token-rotation.md) | Rotating an existing OAuth token is a bounded maintenance write, not an approval | Accepted |
 | [091](091-engine-runs.md) | Subscription CLI runs are "engine runs", approved per workspace, with the child time limit | Accepted |
+| [092](092-pinned-jobs.md) | A pinned job is its own repeating approval, managed with grants; host jobs expire | Accepted |

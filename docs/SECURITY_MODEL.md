@@ -25,6 +25,9 @@ Additions from ADR-016 (accepted; from the OpenMausBot study):
 - Standing grants ("always allow"): one grant model with exact-match keys, a 90-day expiry,
   and a closed list of grantable capabilities; sends, `publish`, `pay`, and `repo.write` are
   never grantable; each use is an audit row with its digest and grant id (ADR-072).
+- Pinned jobs: a recurring script approved once for one exact digest is its own approval kind,
+  listed and revoked with the grants; host jobs expire after 90 days, sandboxed jobs get a 90-day
+  check-in; only the owner creates one, and it cannot use `pay` (ADR-092).
 
 ## Secrets (ADR-007)
 `secretRef:<name>` in config and tool args; resolved only inside executors.

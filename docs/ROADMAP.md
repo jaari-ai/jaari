@@ -223,7 +223,7 @@ and audit log.
 | 4.6 | Optional Web Bot Auth signing for HTTP | 054 | 4.4 | Planned |
 | 4.7 | First sandbox backend | 034, 036 | OQ-70 | Blocked (OQ-70: backend under Compose not chosen) |
 | 4.8 | MCP client, local servers sandboxed (in `@jaari/mcp`) | 034, 086 | 4.3, 4.7; OQ-80 | Planned |
-| 4.9 | Code execution; routine script steps | 036, 064, 089 | 3.6, 4.7; OQ-77 | Planned |
+| 4.9 | Code execution; routine script steps; pinned jobs | 036, 064, 089, 092 | 3.6, 4.7 | Planned |
 | 4.10 | Third-party skills and third-party packages | 060, 071 | 4.3 | Planned |
 | 4.11 | Headless CLI commands | 076 | 0.5 | Planned |
 | 4.12 | Subscription CLI engines for sandboxed children (interface in `@jaari/core`; each engine is a package) | 077, 086, 091 | 4.1, 4.7 | Planned |
@@ -239,7 +239,7 @@ Exit criteria:
   (ADR-053).
 - Each CLI engine's provider terms are checked and recorded in a learning note (ADR-077).
 
-Open questions that block this phase: OQ-70, OQ-77,
+Open questions that block this phase: OQ-70,
 OQ-80, OQ-81.
 Gate status: not passed.
 

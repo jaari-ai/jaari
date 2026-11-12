@@ -32,7 +32,7 @@ status and exit criteria live there.
    they land together.
 10. **Background work** (Phase 4): children, the `reader` role, the `owner-exit` provider and
     per-capability allowlists on `@jaari/http` (ADR-080), the sandbox, MCP, and code execution.
-    Decide OQ-70, OQ-77, and OQ-80 first.
+    Decide OQ-70 and OQ-80 first.
 11. **Integrations, then the browser** (Phases 5 and 6): OAuth broker, mailbox, calendar,
     documents; then the browser under the placement rule, with pool details in ADR-053
     (ADR-017).
@@ -132,3 +132,4 @@ status and exit criteria live there.
 | [089](adr/089-routines-before-children.md) | Routines in Phase 1 run code and one tool-less model step; delivery starts with the ledger | Accepted |
 | [090](adr/090-oauth-token-rotation.md) | Rotating an existing OAuth token is a bounded maintenance write, not an approval | Accepted |
 | [091](adr/091-engine-runs.md) | Subscription CLI runs are "engine runs", approved per workspace, with the child time limit | Accepted |
+| [092](adr/092-pinned-jobs.md) | A pinned job is its own repeating approval, managed with grants; host jobs expire | Accepted |
