@@ -1,7 +1,7 @@
 # ADR-039: Personal data: calendar first, native for calendar, contacts, and files, MCP for the rest
 
 - **Status:** Accepted
-- **Extended by:** [ADR-072](072-standing-grants.md)
+- **Extended by:** [ADR-072](072-standing-grants.md), [ADR-095](095-missing-capability-names.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -57,6 +57,8 @@ standing grants for invitations (they message other people); native adapters for
 
 ## Amendments
 - **ADR-072:** the own-calendar grant follows the one grant model; invitations are never grantable.
+- **ADR-095:** contacts are `contacts.read` and `contacts.write`; remote file storage is
+  `storage.read` and `storage.write`.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -1,7 +1,7 @@
 # ADR-055: Takeover transport: per-adapter live view behind one panel view, a non-blocking state protocol, codes from chat scrubbed before the model
 
 - **Status:** Accepted
-- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md)
+- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md), [ADR-095](095-missing-capability-names.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -58,6 +58,7 @@ owner is in a hurry); letting the model read a pasted code.
 ## Amendments
 - **ADR-081:** codes pasted in chat are one case of the general ingress scrub; "[code used]" is
   kept for a pending code request.
+- **ADR-095:** a takeover is requested with the capability `takeover.request`.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -1,7 +1,7 @@
 # ADR-018: Capability vocabulary, `@jaari/capabilities`, and the Phase 0 safety floor
 
 - **Status:** Accepted
-- **Extended by:** [ADR-034](034-mcp-servers.md), [ADR-039](039-personal-data.md), [ADR-071](071-capability-packages.md), [ADR-079](079-secret-zero-on-servers.md)
+- **Extended by:** [ADR-034](034-mcp-servers.md), [ADR-039](039-personal-data.md), [ADR-071](071-capability-packages.md), [ADR-079](079-secret-zero-on-servers.md), [ADR-095](095-missing-capability-names.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -20,6 +20,9 @@ Per-host capability names (`browser.local` as a gate class: the policy would dep
 - **ADR-079:** Phase 0 ships a `host-credential` provider next to `os-keychain`, for servers and
   containers without a keychain; it is a production provider and `jaari doctor` does not warn
   about it.
+- **ADR-095 (resolves OQ-79):** the vocabulary gains `vault.write`, `contacts.read`,
+  `contacts.write`, `storage.read`, `storage.write`, `memory.read`, `memory.erase`, `skill.read`,
+  and `takeover.request` (the one capability of the `takeover` class).
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

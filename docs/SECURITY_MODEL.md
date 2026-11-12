@@ -75,10 +75,13 @@ separate manifest fields.
 | `pay` | reserved | No executor in v1; checkouts end at an owner takeover (ADR-040) |
 | `llm.escalate` | policy-checked | Children only (ADR-011) |
 | `mcp.read`, `mcp.act` | read, gated | MCP tools that match no other name; unconfirmed or unreadable tools are `mcp.act` (ADR-034) |
+| `contacts.read`, `storage.read` | read | Synced contacts; remote file storage (ADR-039, ADR-095) |
+| `contacts.write`, `storage.write` | gated | Address-book changes; uploads and changes to remote storage; Allow once (ADR-095) |
+| `vault.write` | gated | New or changed vault items; Allow once, never grantable; OAuth rotation within ADR-090 is exempt (ADR-095) |
+| `memory.read`, `skill.read` | read | The tools `memory.search` and `records.query`; `skill.load` (ADR-095) |
+| `memory.erase` | gated | Erase and `jaari memory purge`; Allow once, never grantable (ADR-029, ADR-095) |
+| `takeover.request` | takeover | Hands a step to the owner (ADR-055 states); no digest; Jaari's actions on that session are refused while the owner holds it (ADR-095) |
 
-Gated effects that have no name in this table yet (vault writes, address-book writes,
-file-storage uploads, memory erase), the internal read tools, and the `takeover` class of
-ADR-018 are OQ-79.
 
 Login and CAPTCHA go to owner takeover. One-time codes come from the vault, then from a message on the owner's channels (read by the executor, never the model, with a notice), then from the owner (ADR-050).
 

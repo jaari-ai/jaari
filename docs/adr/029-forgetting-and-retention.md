@@ -1,6 +1,7 @@
 # ADR-029: Forgetting and retention: correct, forget, or erase, by plain request
 
 - **Status:** Accepted
+- **Extended by:** [ADR-095](095-missing-capability-names.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -45,6 +46,9 @@ every remote's history for routine use); an undo window that expires (data stays
 anyway, so a deadline only adds a rule to remember); exact commands as the only way in; acting
 on a forget or erase request without a preview and confirmation; deleting raw daily logs on a
 timer.
+
+## Amendments
+- **ADR-095:** erase is the capability `memory.erase`, Allow once and never grantable.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

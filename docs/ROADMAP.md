@@ -178,7 +178,7 @@ grants land together.
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 3.1 | Real gate: digests, approvals, expiry, re-check at dispatch, the "unreadable" rule; approvals that expired during sleep are asked again; the Approvals view and the audit part of Activity | 006, 016, 018, 057, 082, 088 | 0.10; OQ-79 | Planned |
+| 3.1 | Real gate: digests, approvals, expiry, re-check at dispatch, the "unreadable" rule; approvals that expired during sleep are asked again; the Approvals view and the audit part of Activity | 006, 016, 018, 057, 082, 088, 095 | 0.10 | Planned |
 | 3.2 | Hash-chained `audit.jsonl` | 016 | 3.1 | Planned |
 | 3.3 | Vault providers (Bitwarden, 1Password), the one-time-code ladder, the panel's secret-entry page, and the 1Password check on a real account | 013, 050, 088 | 0.11 | Planned |
 | 3.4 | Web budget (the LLM budget is 1.11, the usage log 0.7) | 046 | 1.11; OQ-89 | Planned |
@@ -186,7 +186,7 @@ grants land together.
 | 3.6 | Standing grants | 072 | 3.1 | Planned |
 | 3.7 | Backup, restore, and the monthly drill; the ADR-027 bundle replaces the local pre-update and nightly snapshots | 027, 082, 087 | 1.1, 3.2; OQ-87 | Planned |
 | 3.8 | Encryption at rest: encrypted remotes, `jaari memory purge` (the pre-write scan is 1.1, the ingress scrub 0.8) | 028, 087 | 1.1 | Planned |
-| 3.9 | Erase. Placement | 029 | 3.1, 1.10; OQ-87 | Planned |
+| 3.9 | Erase (`memory.erase`). Placement | 029, 095 | 3.1, 1.10; OQ-87 | Planned |
 | 3.10 | Shadow mode | 068 | 3.1 | Planned |
 | 3.11 | Degraded mode | 059 | 3.5 | Planned |
 | 3.12 | Crash drills with the real gate | 041 | 3.1, 0.2 | Planned |
@@ -205,7 +205,7 @@ Exit criteria:
 - Budget warnings fire at 50% and 80% (ADR-046).
 - 1Password plan eligibility and limits are checked on a real account (ADR-050).
 
-Open questions that block this phase: OQ-79, OQ-87, OQ-89.
+Open questions that block this phase: OQ-87, OQ-89.
 Gate status: not passed.
 
 ## Phase 4: Background work
@@ -253,7 +253,7 @@ sandbox (4.7).
 | 5.2 | Email as an input channel | 021 | 4.3 | Planned |
 | 5.3 | OAuth broker, with bounded token rotation (in `@jaari/integrations`) | 062, 086, 090 | 3.3 | Planned |
 | 5.4 | The agent's mailbox (in `@jaari/integrations`); watcher triggers on the inbox | 063, 086, 064, 089 | 3.3, 4.3 | Planned |
-| 5.5 | Calendar, contacts, and file storage | 039 | 5.3; OQ-79 | Planned |
+| 5.5 | Calendar, contacts, and file storage (`contacts.*`, `storage.*`) | 039, 095 | 5.3 | Planned |
 | 5.6 | Documents (in file store in `@jaari/memory`) | 038, 078, 086, 093 | 4.7; OQ-87 | Planned |
 | 5.7 | Photo notes | 066 | 5.6 | Planned |
 | 5.8 | Inbound triggers (in `apps/hooks`) | 073, 086 | 1.5, 4.3 | Planned |
@@ -266,7 +266,7 @@ Exit criteria:
   before the 2xx response (ADR-073).
 - The disk watch notifies at 80%, 90%, and 95% used (ADR-038).
 
-Open questions that block this phase: OQ-79, OQ-87, OQ-88, OQ-91.
+Open questions that block this phase: OQ-87, OQ-88, OQ-91.
 Gate status: not passed.
 
 ## Phase 6: Computer use
@@ -279,7 +279,7 @@ Purpose: Jaari drives a browser and a desktop under the placement rule. Entry: c
 | 6.1 | Neutral `browser.*`/`computer.*` surface and pluggable adapters, under the placement rule; local profile, owner exit node, remote CDP | 005, 017, 048 | 4.1; OQ-82 | Planned |
 | 6.2 | Native Anthropic and Gemini toolsets as an `@jaari/llm` mapping | 048 | 6.1 | Planned |
 | 6.3 | Browser SOCKS5 listener and owner-account pinning; opt-in `vpn`, `mobile`, and `residential-proxy` providers | 016, 017, 053 | 4.4 | Planned |
-| 6.4 | Takeover | 055 | 6.1, 2.9, 2.12 | Planned |
+| 6.4 | Takeover (`takeover.request`) | 055, 095 | 6.1, 2.9, 2.12 | Planned |
 | 6.5 | Commitment classifier | 051 | 6.1; OQ-83 | Planned |
 | 6.6 | Browser worker child and task-scoped origins; the scope rule is reviewed from logs last | 052 | 6.1; OQ-83 | Planned |
 | 6.7 | `computer.use` on a host virtual desktop | 015 | 6.1 | Planned |
