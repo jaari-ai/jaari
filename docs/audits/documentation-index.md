@@ -43,7 +43,7 @@ only with a pointer), **generated** (written by a script).
 | `docs/STATE.md` | Summary: what is decided, what is built, what is next, scheduled checks | current |
 | `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current |
 | `docs/ACTION_PLAN.md` | Ordered next steps; a copy of the ADR table | current |
-| `docs/OPEN_QUESTIONS.md` | 6 open (OQ-82 to OQ-91); 85 resolved with ADR links; original wording | current |
+| `docs/OPEN_QUESTIONS.md` | 5 open (OQ-83 to OQ-91); 86 resolved with ADR links; original wording | current |
 
 ## Subsystem designs
 
@@ -61,7 +61,7 @@ only with a pointer), **generated** (written by a script).
 
 ## Decisions
 
-`docs/adr/README.md` is the index of the 97 ADRs (all Accepted). By topic:
+`docs/adr/README.md` is the index of the 98 ADRs (all Accepted). By topic:
 
 | Topic | ADRs |
 |---|---|
@@ -72,7 +72,7 @@ only with a pointer), **generated** (written by a script).
 | Persona and proactive work | 008, 033, 037, 042, 060, 061, 064, 089 |
 | Gate, secrets, safety | 006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075, 079, 081, 090, 092, 095, 096 |
 | Models | 011, 019, 045, 046, 065, 077, 085 |
-| Web, browser, egress | 005, 012, 048, 049, 051, 052, 053, 054, 055, 080 |
+| Web, browser, egress | 005, 012, 048, 049, 051, 052, 053, 054, 055, 080, 098 |
 | Operations | 025, 027, 028, 032, 059, 087, 097 |
 | Extension points and integrations | 034, 036, 039, 062, 063, 071, 073, 084, 091 |
 | Plan and evals | 020, 041 |
@@ -92,6 +92,7 @@ title still says "sensitive files local-only"; ADR-078 replaced that rule.
 | `docs/guides/channel-plugins.md` | Plugin author guide | current |
 | `docs/learning/07-computer.md`, `08-egress-identity-and-takeover.md` | Studies of 2026-11-09 | historical, with a "since decided" pointer |
 | `docs/learning/09-openmausbot.md` | OpenMausBot study at commit `b802268` | historical; basis of ADR-016 |
+| `docs/learning/12-browser-placement.md` | Browser placement in the references (2026-11-13) | dated record; basis of ADR-098 |
 | `docs/learning/10-open-questions-review.md`, `11-pally.md` | Recommendations per question; Pally study | historical, with a "since decided" pointer; some items have no ADR position (report section 6) |
 | `docs/learning/README.md` | Learning-log index and format | current |
 | `docs/00-research.md`, `docs/01-merge-plan.md` | Research capture; original merge reasoning | historical; corrected by pointer only |

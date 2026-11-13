@@ -1,7 +1,7 @@
 # ADR-017: Self-hosted anywhere: VPS, remote server, or home hardware; placement rule and egress pool
 
 - **Status:** Accepted
-- **Extended by:** [ADR-030](030-overlay-network-and-sizing.md), [ADR-073](073-inbound-triggers.md)
+- **Extended by:** [ADR-030](030-overlay-network-and-sizing.md), [ADR-073](073-inbound-triggers.md), [ADR-098](098-owner-accounts-on-any-host.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -16,6 +16,8 @@ VPS as the only target (a datacenter browser meets the CAPTCHA and 2FA walls doc
   proxy (for example sing-box). New egress class `vpn` (for example Cloudflare WARP) serves
   anonymous traffic only.
 - **ADR-073:** one exception to "no public ports": the opt-in hook listener.
+- **ADR-098 (resolves OQ-82):** the placement rule is replaced: owner-account browsers may run
+  on any host with direct egress, and only the home-sites list goes through an owner exit.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

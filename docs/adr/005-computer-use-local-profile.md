@@ -1,7 +1,7 @@
 # ADR-005: Computer use on a pinned local Chromium profile with takeover
 
 - **Status:** Accepted
-- **Extended by:** [ADR-015](015-control-plane-and-nodes.md), [ADR-016](016-openmausbot-hardening.md), [ADR-017](017-self-hosted-anywhere.md), [ADR-048](048-browser-surface-and-adapters.md), [ADR-055](055-takeover-transport.md)
+- **Extended by:** [ADR-015](015-control-plane-and-nodes.md), [ADR-016](016-openmausbot-hardening.md), [ADR-017](017-self-hosted-anywhere.md), [ADR-048](048-browser-surface-and-adapters.md), [ADR-055](055-takeover-transport.md), [ADR-098](098-owner-accounts-on-any-host.md)
 - **Date:** 2026-11-05
 
 ## Decision
@@ -16,6 +16,8 @@ Cloud browser by default (CAPTCHA/2FA walls, as Instinct hit); storing site pass
 - **ADR-016:** takeover is a hold owned by the owner (point 7).
 - **ADR-048:** browser backends are pluggable adapters behind one neutral surface.
 - **ADR-055:** each adapter declares its takeover transport; one panel view shows it.
+- **ADR-098:** a signed-in browser may run on a datacenter host or an enabled third-party
+  provider; a dedicated profile, never the owner's own, still holds.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

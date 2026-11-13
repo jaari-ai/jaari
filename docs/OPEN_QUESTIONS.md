@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **6**.
+Last updated: 2026-11-12. Open: **5**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -18,7 +18,6 @@ leaning yet; the options listed are only the ones the docs already name.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-82 | Hosted browser with owner accounts | ADR-048 says a third-party browser provider is for anonymous work "unless the owner pins it". May a hosted browser carry owner-account sessions, and under which egress rule? | 6 | None. On record: placement rule (ADR-017); "cloud browser by default" rejected (ADR-005) |
 
 ### Approvals and grants
 
@@ -50,7 +49,6 @@ leaning yet; the options listed are only the ones the docs already name.
 Evidence is `ADR-NNN` or a file. "If delayed" is the cost of not deciding before the blocked
 phase starts.
 
-- **OQ-82.** Evidence: ADR-048 ("unless the owner pins it"), ADR-017 (placement rule), ADR-005.
 - **OQ-83.** Evidence: ADR-051 ("During Phase 6 shadow mode every action in owner-account
   sessions is logged"), ADR-052, ADR-068, ADR-070 ("for the first 14 days it only proposes").
 - **OQ-87.** Evidence: ADR-027 ("What is backed up"), ADR-038, ADR-058 (the migration bundle
@@ -68,7 +66,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 |---|---|---|
 | OQ-22 (license part) | MIT | [ADR-014](adr/014-license-mit.md) |
 | OQ-10 (host part) | Daemon on an always-on host (VM, VPS, or server); laptop-only supported by configuration | [ADR-015](adr/015-control-plane-and-nodes.md) |
-| OQ-57 | Self-hosted on a VPS, remote server, or home hardware; placement rule keeps identity-bearing browsers on the owner's network identity; egress pool with owner exit nodes | [ADR-017](adr/017-self-hosted-anywhere.md) |
+| OQ-57 | Self-hosted on a VPS, remote server, or home hardware; egress pool with owner exit nodes. The placement rule (identity-bearing browsers on the owner's network identity) was replaced by ADR-098: any host, only home sites through an owner exit | [ADR-017](adr/017-self-hosted-anywhere.md), [ADR-098](adr/098-owner-accounts-on-any-host.md) |
 | OQ-58 | One capability vocabulary; host and provider are manifest fields; `pay` reserved | [ADR-018](adr/018-capability-vocabulary-and-phase-0-floor.md) |
 | OQ-59 | Short code is a digest lookup; no tolerance; 15-minute default expiry, 5 for send and publish | [ADR-018](adr/018-capability-vocabulary-and-phase-0-floor.md) |
 | OQ-60 | Phase 0 ships the resolver and an `os-keychain` provider | [ADR-018](adr/018-capability-vocabulary-and-phase-0-floor.md) |
@@ -150,6 +148,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-79 | New names: `vault.write`, `contacts.read`/`write`, `storage.read`/`write`, `memory.read` (memory.search, records.query), `memory.erase`, `skill.read` (skill.load), and `takeover.request` (the takeover class); writes Allow once; none grantable | [ADR-095](adr/095-missing-capability-names.md) |
 | OQ-80 | Two named lifetimes: per call for in-process executors; per process for separate long-running processes (MCP servers, packages, channel plugins, vault client), with declared secrets only, kept out of the daemon, scrubbed output, stop when idle, restart on rotation, audit by name | [ADR-096](adr/096-per-process-secret-lifetime.md) |
 | OQ-81 | Receipts in a SQLite `receipts` table and the browser action log in the same store, 90 days (configurable); event log 30 days; screenshots 30 days; effects and decisions forever in `audit.jsonl`; other operational rows 7 days | [ADR-097](adr/097-receipts-and-action-log-retention.md) |
+| OQ-82 | Placement rule replaced: owner-account browsers may run on any host, including an owner-enabled third-party provider, with direct egress; only home sites (shipped default of data-centre-hostile sites plus vault suggestions) go through the owner exit; log-ins on third-party providers by takeover, no vault fill | [ADR-098](adr/098-owner-accounts-on-any-host.md) |
 | OQ-84 | Each reference pinned to a full sha in `scripts/refs.sh`; `sync` re-applies pins; `scripts/refs.sh bump` is the only way to move one, printing old and new commit and warning on a licence change; pins committed on their own | [ADR-083](adr/083-pinned-reference-commits.md) |
 | OQ-85 | One manifest per package under the `jaari` key of `package.json`, read before any code runs; channel fields in a `channel` section; `ChannelAdapter` has no manifest property; shared Vitest contract suite in `@jaari/channels/contract`, Phase 0 | [ADR-084](adr/084-package-manifest-location-and-channel-section.md) |
 | OQ-86 | A refusal never moves the pinned main session: the turn ends with one notice and the owner decides (rephrase or `/model`); other roles move down the chain; off-limits categories go to the owner; detected from `rawStopReason`, never retried as an error | [ADR-085](adr/085-refusal-in-the-pinned-main-session.md) |
@@ -240,3 +239,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-79 | Capability names that are missing | Which capability names cover the gated effects that have none (vault writes, address-book writes, file-storage uploads, memory erase), are internal read tools (`memory.search`, `records.query`, `skill.load`) capabilities, and which capability has the `takeover` class? | 3 |
 | OQ-80 | Secrets held by MCP servers | A local MCP server gets its secrets in its environment at start and keeps them while it runs. Is that an accepted exception to "resolved only inside executors, for the duration of the call"? | 4 |
 | OQ-81 | Retention of receipts and logs | Receipts are "operational rows" kept 7 days (ADR-029) and also live in the 30-day event log (ADR-061, ADR-032); the browser action log is "kept forever" (ADR-052). Where do receipts and the action log live, and for how long? | 4 |
+| OQ-82 | Hosted browser with owner accounts | ADR-048 says a third-party browser provider is for anonymous work "unless the owner pins it". May a hosted browser carry owner-account sessions, and under which egress rule? | 6 |

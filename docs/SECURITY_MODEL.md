@@ -135,9 +135,10 @@ Egress pool (ADR-017): the SOCKS5 listener and `@jaari/http` choose a provider p
 `owner-exit` (Tailscale, Headscale, or WireGuard exit node on owner hardware), `direct`,
 `mobile` (owner 4G dongle), `residential-proxy` (sourcing check), `vpn` (consumer VPN such as
 WARP; anonymous only). `owner-exit` may be a WireGuard peer or a SOCKS5/HTTP proxy (ADR-030). Rotation is for anonymous
-traffic only and may mix owner exit nodes with proxies. Owner-account sessions are pinned to
-one owner node (or direct from home hardware), fail over only to another owner node, and
-refuse when none is up; they never fall back to a rotating or datacenter address.
+traffic only and may mix owner exit nodes with proxies. Owner-account sessions leave by the
+host's direct route; only home sites go through an owner exit, and a home site refuses when
+none is up (ADR-098). A third-party browser provider holds owner sessions only after the owner
+enables it for owner accounts, and never receives vault credentials.
 
 ## Owner hold (ADR-005, ADR-016)
 Takeover is a hold owned by the owner, not by one window: accepted agent calls drain,

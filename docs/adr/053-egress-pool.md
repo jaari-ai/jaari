@@ -1,7 +1,7 @@
 # ADR-053: Egress pool: pluggable providers, one connection baseline, sticky anonymous rotation, home sites suggested from the vault
 
 - **Status:** Accepted
-- **Extended by:** [ADR-071](071-capability-packages.md), [ADR-080](080-egress-core-in-phase-0.md)
+- **Extended by:** [ADR-071](071-capability-packages.md), [ADR-080](080-egress-core-in-phase-0.md), [ADR-098](098-owner-accounts-on-any-host.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -67,6 +67,8 @@ list with no suggestions.
 - **ADR-080:** the `direct` provider ships in Phase 0 with the egress core; `owner-exit` stays
   Phase 4. The container egress proxy ships with the first container that works on untrusted
   input (SearXNG, browser, or sandbox).
+- **ADR-098:** owner-account sessions are no longer pinned to an owner exit; only home sites
+  are, and the list ships with a default of data-centre-hostile sites.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

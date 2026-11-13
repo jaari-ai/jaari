@@ -18,9 +18,9 @@
 13. Always on, reachable anytime: one daemon on an always-on host; capabilities are
     installed where they run, on that host or on owner devices as nodes (ADR-015). A laptop
     is a supported host, with the cost that work pauses while it sleeps.
-14. Identity follows the owner's network: a browser signed in to the owner's accounts runs on
-    or through the owner's connection; rotating addresses are for anonymous traffic only
-    (ADR-017).
+14. A browser signed in to the owner's accounts may run on any host with direct egress; only
+    home sites go through the owner's connection; rotating addresses are for anonymous traffic
+    only (ADR-017, ADR-098).
 15. The gate exists from the first line of executor code: Phase 0 ships it deny-all
     (ADR-018). Phases are a soft plan (ADR-020).
 

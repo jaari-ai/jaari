@@ -18,6 +18,8 @@ Written:
   question, borrowed from open-instinct, openinstinct, gajae-way, Pi, and OpenMausBot (2026-11-10)
 - [11-pally.md](11-pally.md) — Pally, a second commercial reference: cloud plus a Mac companion
   app, what Jaari borrows, and alternatives to the note-10 recommendations (2026-11-10)
+- [12-browser-placement.md](12-browser-placement.md) — where the references run signed-in
+  browsers, which traffic uses the owner's connection, and log-in handling (2026-11-13)
 
 Planned (optional, not scheduled; ADRs have since decided these topics):
 - 01-session.md — persistent session, steering, segments, compaction

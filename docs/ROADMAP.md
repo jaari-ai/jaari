@@ -271,14 +271,14 @@ Gate status: not passed.
 
 ## Phase 6: Computer use
 
-Purpose: Jaari drives a browser and a desktop under the placement rule. Entry: children
+Purpose: Jaari drives a browser and a desktop, with owner accounts on any host (ADR-098). Entry: children
 (4.1), egress (4.4), shadow mode (3.10), pairing (2.7).
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 6.1 | Neutral `browser.*`/`computer.*` surface and pluggable adapters, under the placement rule; local profile, owner exit node, remote CDP | 005, 017, 048 | 4.1; OQ-82 | Planned |
+| 6.1 | Neutral `browser.*`/`computer.*` surface and pluggable adapters; local profile, owner exit node, remote CDP; third-party providers enabled for owner accounts | 005, 017, 048, 098 | 4.1 | Planned |
 | 6.2 | Native Anthropic and Gemini toolsets as an `@jaari/llm` mapping | 048 | 6.1 | Planned |
-| 6.3 | Browser SOCKS5 listener and owner-account pinning; opt-in `vpn`, `mobile`, and `residential-proxy` providers | 016, 017, 053 | 4.4 | Planned |
+| 6.3 | Browser SOCKS5 listener; home sites through the owner exit with the shipped default list; opt-in `vpn`, `mobile`, and `residential-proxy` providers | 016, 017, 053, 098 | 4.4 | Planned |
 | 6.4 | Takeover (`takeover.request`) | 055, 095 | 6.1, 2.9, 2.12 | Planned |
 | 6.5 | Commitment classifier | 051 | 6.1; OQ-83 | Planned |
 | 6.6 | Browser worker child and task-scoped origins; the scope rule is reviewed from logs last | 052 | 6.1; OQ-83 | Planned |
@@ -295,7 +295,7 @@ Exit criteria:
 - Native toolsets are enabled per route only when the Phase 6 fixtures show a gain (ADR-048).
 - The task-scope origin review is done from the logs (ADR-052).
 
-Open questions that block this phase: OQ-82, OQ-83.
+Open questions that block this phase: OQ-83.
 Gate status: not passed.
 
 ## Phase 7: Hardening

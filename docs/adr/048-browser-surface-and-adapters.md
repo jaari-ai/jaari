@@ -1,7 +1,7 @@
 # ADR-048: Browser surface: one neutral tool surface, pluggable browser adapters, any egress route, native toolsets mapped in Phase 6
 
 - **Status:** Accepted
-- **Extended by:** [ADR-071](071-capability-packages.md)
+- **Extended by:** [ADR-071](071-capability-packages.md), [ADR-098](098-owner-accounts-on-any-host.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -69,6 +69,8 @@ execution member.
 
 ## Amendments
 - **ADR-071:** browser adapters are capability packages with a checked manifest.
+- **ADR-098:** a third-party provider may hold owner-account sessions once the owner enables
+  it for owner accounts; log-ins there go through takeover and the vault never fills them.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
