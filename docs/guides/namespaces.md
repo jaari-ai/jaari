@@ -138,7 +138,22 @@ publish. Lock that down first.
 
 ### Repository `jaari-ai/jaari`
 1. Settings → **Rules → Rulesets → New branch ruleset** for `main`: require a pull
-   request, require status checks, block force pushes and deletion.
+   request with **0 required approvals** (with one maintainer, GitHub does not let you approve
+   your own pull request), block force pushes and deletion. Add the CI checks as required
+   status checks once CI exists (roadmap item 0.2).
+   Then a second branch ruleset, `develop`, with the same rules: pull requests target
+   `develop` (ADR-043). With the CLI:
+
+   ~~~bash
+   gh api -X POST repos/jaari-ai/jaari/rulesets --input - <<'JSON'
+   {"name":"develop","target":"branch","enforcement":"active",
+    "conditions":{"ref_name":{"include":["refs/heads/develop"],"exclude":[]}},
+    "rules":[{"type":"deletion"},{"type":"non_fast_forward"},
+             {"type":"pull_request","parameters":{"required_approving_review_count":0,
+              "dismiss_stale_reviews_on_push":false,"require_code_owner_review":false,
+              "require_last_push_approval":false,"required_review_thread_resolution":false}}]}
+   JSON
+   ~~~
 2. Settings → **Rules → Rulesets → New tag ruleset**: target `v*`; restrict
    **creations, updates, deletions**; bypass list: **Repository admin** only.
 3. Settings → **Environments → New environment** `release` (npm), then again `pypi`.
@@ -147,13 +162,16 @@ publish. Lock that down first.
    - **Deployment branches and tags** → **Selected branches and tags** → add tag rule
      `v*`.
    - Add no secrets. None are needed.
-4. Add `.github/CODEOWNERS`:
+4. Settings → **Advanced Security** → **Private vulnerability reporting** → **Enable**, the
+   first reporting route in `SECURITY.md` (ADR-043). With the CLI:
+   `gh api -X PUT repos/jaari-ai/jaari/private-vulnerability-reporting`.
+5. Add `.github/CODEOWNERS`:
 
    ~~~text
    /.github/workflows/  @<your-github-login>
    ~~~
 
-5. Add `.github/dependabot.yml` so pinned action SHAs get updated:
+6. Add `.github/dependabot.yml` so pinned action SHAs get updated:
 
    ~~~yaml
    version: 2
@@ -354,7 +372,8 @@ Checklist:
 - [ ] npm `jaari` published; tokens disallowed.
 - [ ] PyPI `jaari` published by trusted publisher; backup owner added.
 - [ ] No API tokens on either account.
-- [ ] Tag ruleset, environments, CODEOWNERS, Dependabot in place.
+- [ ] Rulesets for `main`, `develop`, and `v*` tags; environments, CODEOWNERS, Dependabot in place.
+- [ ] Private vulnerability reporting enabled.
 - [ ] [INTEGRATIONS.md](../INTEGRATIONS.md) status row updated.
 
 **Every quarter:** re-check owners and tokens on both registries, the domain expiry

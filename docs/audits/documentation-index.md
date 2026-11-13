@@ -88,7 +88,7 @@ title still says "sensitive files local-only"; ADR-078 replaced that rule.
 
 | Path | Purpose | Status |
 |---|---|---|
-| `docs/guides/namespaces.md` | Owner runbook: secure npm and PyPI names, GitHub hardening, release | current; private vulnerability reporting is a follow-up (report D-06, D-08) |
+| `docs/guides/namespaces.md` | Owner runbook: secure npm and PyPI names, GitHub hardening, release | current (D-06 and D-08 fixed 2026-11-13) |
 | `docs/guides/securing-your-install.md` | Owner-facing storage and encryption trade-offs | current; does not yet cover revocation, the panel passkey, or document routing |
 | `docs/guides/channel-plugins.md` | Plugin author guide | current |
 | `docs/learning/07-computer.md`, `08-egress-identity-and-takeover.md` | Studies of 2026-11-09 | historical, with a "since decided" pointer |
