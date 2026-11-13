@@ -1,7 +1,7 @@
 # ADR-027: Backup and restore: owner-chosen destinations and schedule, encrypted archives, monthly drill
 
 - **Status:** Accepted
-- **Extended by:** [ADR-038](038-documents-and-files.md), [ADR-079](079-secret-zero-on-servers.md), [ADR-087](087-safety-pieces-ship-with-what-they-protect.md)
+- **Extended by:** [ADR-038](038-documents-and-files.md), [ADR-079](079-secret-zero-on-servers.md), [ADR-087](087-safety-pieces-ship-with-what-they-protect.md), [ADR-100](100-file-store-backup-and-erase.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -60,6 +60,9 @@ party bucket.
   and the provider refuses to start if the file is in the backup set.
 - **ADR-087:** a nightly local snapshot (last 7, mode 0700) ships in Phase 1; remotes and the
   drill stay Phase 3.
+- **ADR-100 (resolves OQ-87):** the file store is backed up incrementally to S3-compatible
+  object storage (R2, S3, B2, MinIO), per-blob encrypted with keyed-hash names, referenced by
+  each snapshot manifest; short-lived blobs are not backed up.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

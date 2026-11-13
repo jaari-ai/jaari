@@ -43,7 +43,7 @@ only with a pointer), **generated** (written by a script).
 | `docs/STATE.md` | Summary: what is decided, what is built, what is next, scheduled checks | current |
 | `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current |
 | `docs/ACTION_PLAN.md` | Ordered next steps; a copy of the ADR table | current |
-| `docs/OPEN_QUESTIONS.md` | 4 open (OQ-87 to OQ-91); 87 resolved with ADR links; original wording | current |
+| `docs/OPEN_QUESTIONS.md` | 3 open (OQ-88 to OQ-91); 88 resolved with ADR links; original wording | current |
 
 ## Subsystem designs
 
@@ -54,21 +54,21 @@ only with a pointer), **generated** (written by a script).
 | `docs/THREAT_MODEL.md` | Actor, attack, control, left-over table; "not protected against" list | current | 069 and the ADRs each row cites |
 | `docs/LLM.md` | Routing layers, roles, local model sizing, presets | current | 011, 019, 037, 045, 046, 065, 066, 078, 085 |
 | `docs/WEB.md` | Search, fetch ladder, browser placement, presets | current (repeats the egress pool that SECURITY_MODEL.md owns) | 012, 016, 017, 030, 048, 049, 053 |
-| `docs/MEMORY.md` | Memory layout and lifecycle | current, with open points (OQ-87) | 003, 004, 023, 024, 026 to 029, 038, 047, 074 |
+| `docs/MEMORY.md` | Memory layout and lifecycle | current | 003, 004, 023, 024, 026 to 029, 038, 047, 074 |
 | `docs/PERSONA.md` | Dials, curiosity, interruption scoring, routine rules | current | 008, 031, 033, 064 |
 | `docs/INTEGRATIONS.md` | Project identity assets; integrations summary | current, with open points (OQ-91) | 010, 039, 062, 063 |
 | `docs/DEVELOPMENT.md` | `refs/` handling, commands, docs conventions, ADR template, threat-model rule | current | 002, 020, 069, 083 |
 
 ## Decisions
 
-`docs/adr/README.md` is the index of the 99 ADRs (all Accepted). By topic:
+`docs/adr/README.md` is the index of the 100 ADRs (all Accepted). By topic:
 
 | Topic | ADRs |
 |---|---|
 | Core, licence, process | 001, 002, 009, 010, 014, 043, 044, 083, 086 |
 | Hosting, nodes, install | 015, 017, 030, 056, 057, 058, 082, 088, 094 |
 | Channels, owner, panel | 021, 022, 035, 067, 070, 076 |
-| Memory | 003, 004, 023, 024, 026, 029, 038, 047, 066, 074, 078, 093 |
+| Memory | 003, 004, 023, 024, 026, 029, 038, 047, 066, 074, 078, 093, 100 |
 | Persona and proactive work | 008, 033, 037, 042, 060, 061, 064, 089 |
 | Gate, secrets, safety | 006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075, 079, 081, 090, 092, 095, 096 |
 | Models | 011, 019, 045, 046, 065, 077, 085 |
@@ -79,9 +79,9 @@ only with a pointer), **generated** (written by a script).
 
 ADRs whose text is changed in part by a later ADR (read the `Amendments` section first):
 001, 002, 005, 006, 007, 009, 011, 012, 013, 014, 015, 016, 017, 018, 019, 020, 021, 022, 023,
-024, 025, 027, 028, 029, 030, 031, 032, 034, 035, 036, 038, 039, 046, 048, 049, 050, 051, 052,
-053, 055, 056, 057, 058, 060, 061, 062, 063, 064, 065, 066, 067, 068, 070, 071, 072, 074, 077,
-078, 081. ADR-038's
+024, 025, 026, 027, 028, 029, 030, 031, 032, 034, 035, 036, 038, 039, 046, 048, 049, 050, 051,
+052, 053, 055, 056, 057, 058, 060, 061, 062, 063, 064, 065, 066, 067, 068, 070, 071, 072, 074,
+077, 078, 081. ADR-038's
 title still says "sensitive files local-only"; ADR-078 replaced that rule.
 
 ## Guides, learning notes, history

@@ -101,3 +101,4 @@
 | [097](097-receipts-and-action-log-retention.md) | Receipts and the browser action log are kept 90 days in SQLite; effects stay forever in the audit log | Accepted |
 | [098](098-owner-accounts-on-any-host.md) | Owner-account browsers may run on any host with direct egress; only home sites use the owner exit | Accepted |
 | [099](099-browser-reviews-read-the-action-log.md) | Browser reviews read the action log; shadow mode keeps its meaning; onboarding states the real shadow setting | Accepted |
+| [100](100-file-store-backup-and-erase.md) | Binary files never in git; the file store is backed up to object storage; erase reaches every copy Jaari controls | Accepted |

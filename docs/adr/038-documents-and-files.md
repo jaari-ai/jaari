@@ -1,7 +1,7 @@
 # ADR-038: Documents and files: content-addressed store, sealed parsing, sensitive files local-only, disk watch
 
 - **Status:** Accepted
-- **Extended by:** [ADR-037](037-voice.md), [ADR-066](066-photos-as-memory.md), [ADR-078](078-documents-follow-owner-routing.md), [ADR-093](093-sensitive-content-follows-routing.md)
+- **Extended by:** [ADR-037](037-voice.md), [ADR-066](066-photos-as-memory.md), [ADR-078](078-documents-follow-owner-routing.md), [ADR-093](093-sensitive-content-follows-routing.md), [ADR-100](100-file-store-backup-and-erase.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -73,6 +73,8 @@ the daemon's rights); sending sensitive documents to API models by default; drop
 files silently.
 - **ADR-093:** sensitivity is marked by record type, deterministic rules, a local `classify`
   role, or the owner; files are read by `reader`, `vision`, and `summarize`.
+- **ADR-100:** every binary file, uploaded or generated, lives in the store, never in git; the
+  store is backed up to object storage.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

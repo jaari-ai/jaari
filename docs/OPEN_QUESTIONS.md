@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **4**.
+Last updated: 2026-11-12. Open: **3**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -29,7 +29,6 @@ leaning yet; the options listed are only the ones the docs already name.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-87 | File store in backup and erase | How are file-store blobs backed up (ADR-027 does not list them), and does "erase" also remove the blob, the transcript rows, and existing snapshots? | 3 | None. On record: "the store is part of backups" (ADR-038) |
 
 ### Phasing and dependencies
 
@@ -48,8 +47,6 @@ leaning yet; the options listed are only the ones the docs already name.
 Evidence is `ADR-NNN` or a file. "If delayed" is the cost of not deciding before the blocked
 phase starts.
 
-- **OQ-87.** Evidence: ADR-027 ("What is backed up"), ADR-038, ADR-058 (the migration bundle
-  includes the store), ADR-029, ADR-028.
 - **OQ-88.** Evidence: ADR-022, ADR-076.
 - **OQ-89.** Evidence: ADR-046, ADR-053 (egress cost counts against it), `jaari.config.example.jsonc`.
 - **OQ-91.** Evidence: ARCHITECTURE.md (`@jaari/integrations`), INTEGRATIONS.md, ROADMAP.md
@@ -150,6 +147,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-84 | Each reference pinned to a full sha in `scripts/refs.sh`; `sync` re-applies pins; `scripts/refs.sh bump` is the only way to move one, printing old and new commit and warning on a licence change; pins committed on their own | [ADR-083](adr/083-pinned-reference-commits.md) |
 | OQ-85 | One manifest per package under the `jaari` key of `package.json`, read before any code runs; channel fields in a `channel` section; `ChannelAdapter` has no manifest property; shared Vitest contract suite in `@jaari/channels/contract`, Phase 0 | [ADR-084](adr/084-package-manifest-location-and-channel-section.md) |
 | OQ-86 | A refusal never moves the pinned main session: the turn ends with one notice and the owner decides (rephrase or `/model`); other roles move down the chain; off-limits categories go to the owner; detected from `rawStopReason`, never retried as an error | [ADR-085](adr/085-refusal-in-the-pinned-main-session.md) |
+| OQ-87 | Git holds text only; every binary file is a blob in the store; blobs backed up incrementally to S3-compatible object storage (R2, S3, B2, MinIO), per-blob encrypted, referenced by snapshot manifests; erase removes the blob everywhere and the rows that hold it; older snapshots keep rows until retention unless the owner deletes them on the card | [ADR-100](adr/100-file-store-backup-and-erase.md) |
 | OQ-90 | Job engine, routines, skills, `CliEngine` interface, event log in `@jaari/core`; file store in `@jaari/memory`; speech in `@jaari/llm`; OAuth broker and mailbox adapters in `@jaari/integrations`; new `@jaari/mcp` (client and server) and `apps/hooks` (hook listener) | [ADR-086](adr/086-package-homes.md) |
 
 ### Original questions
@@ -239,3 +237,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-81 | Retention of receipts and logs | Receipts are "operational rows" kept 7 days (ADR-029) and also live in the 30-day event log (ADR-061, ADR-032); the browser action log is "kept forever" (ADR-052). Where do receipts and the action log live, and for how long? | 4 |
 | OQ-82 | Hosted browser with owner accounts | ADR-048 says a third-party browser provider is for anonymous work "unless the owner pins it". May a hosted browser carry owner-account sessions, and under which egress rule? | 6 |
 | OQ-83 | Shadow mode and browser logs | ADR-051 and ADR-052 take fixtures and the origin review from "shadow-mode logs" of owner-account sessions, but ADR-068 never shadows what the owner asks for. Which log feeds them? Also: onboarding (Phase 2) promises shadow behaviour that ships in Phase 3 and that the owner may turn off. | 2 |
+| OQ-87 | File store in backup and erase | How are file-store blobs backed up (ADR-027 does not list them), and does "erase" also remove the blob, the transcript rows, and existing snapshots? | 3 |

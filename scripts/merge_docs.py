@@ -59,7 +59,7 @@ def doc_files() -> list[str]:
 def compact(rel: str, text: str) -> str:
     """Drop what an agent does not need: comments, placeholders, duplicate tables, blank runs."""
     text = re.sub(r"<!--.*?-->\n?", "", text, flags=re.S)
-    if rel.startswith("docs/adr/0"):
+    if re.match(r"docs/adr/\d{3}-", rel):
         text = re.sub(r"\n## Consequences\n_TODO: fill in as implementation reveals them\._\n?", "\n", text)
     if rel == "docs/ACTION_PLAN.md":
         text = re.split(r"\n## ADRs\n", text)[0] + "\n(ADR table: see docs/adr/README.md.)\n"
@@ -171,7 +171,7 @@ def check() -> list[str]:
                 errors.append(f"{f}: broken link {m.group(1)}")
 
     # 2. ADR files vs the two index tables, titles and statuses
-    adr_files = {p.name: read(f"docs/adr/{p.name}") for p in sorted((ROOT / "docs/adr").glob("0*.md"))}
+    adr_files = {p.name: read(f"docs/adr/{p.name}") for p in sorted((ROOT / "docs/adr").glob("[0-9][0-9][0-9]-*.md"))}
     truth = {}
     for name, t in adr_files.items():
         title = re.search(r"^# ADR-\d+: (.*)$", t, re.M)

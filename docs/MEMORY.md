@@ -32,7 +32,9 @@
   and win any conflict.
 - Backup (ADR-027): memory pushed to owner-chosen git remotes within minutes; snapshots of
   SQLite, audit log, and config on an owner-set schedule (nightly by default) to local disk,
-  a NAS, or S3-compatible storage; monthly restore drill.
+  a NAS, or S3-compatible storage; monthly restore drill. Binary files (uploads, photos,
+  documents, generated files) never enter git; the file store is backed up incrementally to
+  S3-compatible object storage such as R2 or MinIO (ADR-100).
 - Sensitive content (ADR-093): records, files, photos, and lines at the `sensitive` level
   follow the owner's routing like any other content, so the main session can answer about
   them; privacy comes from making roles local-only. The level is set by record type,
@@ -45,7 +47,9 @@
 - Forgetting (ADR-029): corrections supersede and keep the old line struck through; forget
   removes a fact and can always be undone; erase rewrites history and cannot. The owner asks in
   plain words and confirms a preview; every line carries a source id so forgetting a source
-  cascades.
+  cascades. Erase also deletes the blob locally and in the object store and the rows that
+  contain it; older encrypted snapshots keep those rows until retention, unless the owner
+  deletes older backups on the erase card (ADR-100).
 - Retention (ADR-029, ADR-097): raw daily logs forever; others' messages 30 days; receipts and
   the browser action log 90 days in SQLite; delivered notifications and finished job rows 7
   days; the audit log forever, with forgotten or erased items as a bare mark.

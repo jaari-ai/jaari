@@ -95,7 +95,7 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 1.1 | Memory repo, single writer, write path; pre-write secret scan of derived facts and files | 003, 026, 028, 081, 087 | 0.5 | Planned |
+| 1.1 | Memory repo, single writer, write path; pre-write secret scan of derived facts and files; binary files refused in git | 003, 026, 028, 081, 087, 100 | 0.5 | Planned |
 | 1.2 | Structured records, `records.query`, FTS5 search; sensitivity marking by type and rules | 023, 093 | 1.1 | Planned |
 | 1.3 | Context assembly; session orientation and re-injection from state | 024, 065 | 1.2 | Planned |
 | 1.4 | Job engine; catch-up after sleep (in `@jaari/core`); job-tree abort | 025, 057, 082, 086, 031, 087 | 0.5, 0.13 | Planned |
@@ -184,9 +184,9 @@ grants land together.
 | 3.4 | Web budget (the LLM budget is 1.11, the usage log 0.7) | 046 | 1.11; OQ-89 | Planned |
 | 3.5 | Lowering a capability's permission stops the turn using it (the other ADR-031 limits ship with 0.5, 1.4, 2.x, and 4.1) | 031, 087 | 3.1 | Planned |
 | 3.6 | Standing grants | 072 | 3.1 | Planned |
-| 3.7 | Backup, restore, and the monthly drill; the ADR-027 bundle replaces the local pre-update and nightly snapshots | 027, 082, 087 | 1.1, 3.2; OQ-87 | Planned |
+| 3.7 | Backup, restore, and the monthly drill; the ADR-027 bundle replaces the local pre-update and nightly snapshots; file-store backup to object storage | 027, 082, 087, 100 | 1.1, 3.2 | Planned |
 | 3.8 | Encryption at rest: encrypted remotes, `jaari memory purge` (the pre-write scan is 1.1, the ingress scrub 0.8) | 028, 087 | 1.1 | Planned |
-| 3.9 | Erase (`memory.erase`). Placement | 029, 095 | 3.1, 1.10; OQ-87 | Planned |
+| 3.9 | Erase (`memory.erase`), including blobs and older-backup deletion on request. Placement | 029, 095, 100 | 3.1, 1.10 | Planned |
 | 3.10 | Shadow mode | 068 | 3.1 | Planned |
 | 3.11 | Degraded mode | 059 | 3.5 | Planned |
 | 3.12 | Crash drills with the real gate | 041 | 3.1, 0.2 | Planned |
@@ -205,7 +205,7 @@ Exit criteria:
 - Budget warnings fire at 50% and 80% (ADR-046).
 - 1Password plan eligibility and limits are checked on a real account (ADR-050).
 
-Open questions that block this phase: OQ-87, OQ-89.
+Open questions that block this phase: OQ-89.
 Gate status: not passed.
 
 ## Phase 4: Background work
@@ -254,7 +254,7 @@ sandbox (4.7).
 | 5.3 | OAuth broker, with bounded token rotation (in `@jaari/integrations`) | 062, 086, 090 | 3.3 | Planned |
 | 5.4 | The agent's mailbox (in `@jaari/integrations`); watcher triggers on the inbox | 063, 086, 064, 089 | 3.3, 4.3 | Planned |
 | 5.5 | Calendar, contacts, and file storage (`contacts.*`, `storage.*`) | 039, 095 | 5.3 | Planned |
-| 5.6 | Documents (in file store in `@jaari/memory`) | 038, 078, 086, 093 | 4.7; OQ-87 | Planned |
+| 5.6 | Documents (in file store in `@jaari/memory`) | 038, 078, 086, 093, 100 | 4.7 | Planned |
 | 5.7 | Photo notes | 066 | 5.6 | Planned |
 | 5.8 | Inbound triggers (in `apps/hooks`) | 073, 086 | 1.5, 4.3 | Planned |
 | 5.9 | MCP server for paired desktop apps (in `@jaari/mcp`, `jaari mcp`) | 076, 086 | 2.7; OQ-88 | Planned |
@@ -266,7 +266,7 @@ Exit criteria:
   before the 2xx response (ADR-073).
 - The disk watch notifies at 80%, 90%, and 95% used (ADR-038).
 
-Open questions that block this phase: OQ-87, OQ-88, OQ-91.
+Open questions that block this phase: OQ-88, OQ-91.
 Gate status: not passed.
 
 ## Phase 6: Computer use
