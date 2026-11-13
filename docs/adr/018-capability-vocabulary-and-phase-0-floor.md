@@ -1,7 +1,7 @@
 # ADR-018: Capability vocabulary, `@jaari/capabilities`, and the Phase 0 safety floor
 
 - **Status:** Accepted
-- **Extended by:** [ADR-034](034-mcp-servers.md), [ADR-039](039-personal-data.md), [ADR-071](071-capability-packages.md), [ADR-079](079-secret-zero-on-servers.md), [ADR-095](095-missing-capability-names.md)
+- **Extended by:** [ADR-034](034-mcp-servers.md), [ADR-039](039-personal-data.md), [ADR-071](071-capability-packages.md), [ADR-079](079-secret-zero-on-servers.md), [ADR-095](095-missing-capability-names.md), [ADR-103](103-no-repository-or-registry-integrations.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -23,6 +23,8 @@ Per-host capability names (`browser.local` as a gate class: the policy would dep
 - **ADR-095 (resolves OQ-79):** the vocabulary gains `vault.write`, `contacts.read`,
   `contacts.write`, `storage.read`, `storage.write`, `memory.read`, `memory.erase`, `skill.read`,
   and `takeover.request` (the one capability of the `takeover` class).
+- **ADR-103 (resolves OQ-91):** `repo.write` and `publish` are reserved, like `pay`: no executor
+  in v1, requests fail closed.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

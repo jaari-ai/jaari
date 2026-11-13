@@ -1,52 +1,21 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **1**.
+Last updated: 2026-11-13. Open: **0**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
 suggestion, not a decision.
 
-OQ-01 to OQ-66 were all decided by 2026-11-12 (ADR-014 to ADR-078). OQ-67 to OQ-91 were
-found by the documentation audit of 2026-11-12
-([audits/documentation-reconciliation.md](audits/documentation-reconciliation.md)): each is a
-conflict between accepted ADRs, or a choice that an accepted ADR leaves undecided. None has a
-leaning yet; the options listed are only the ones the docs already name.
+OQ-01 to OQ-66 were decided by 2026-11-12 (ADR-014 to ADR-078). OQ-67 to OQ-91 were found by
+the documentation audit of 2026-11-12
+([audits/documentation-reconciliation.md](audits/documentation-reconciliation.md)), each a
+conflict between accepted ADRs or a choice an ADR left open, and were decided on 2026-11-12 and
+2026-11-13 (ADR-079 to ADR-103).
 
 ## Open
 
-### Secrets and security
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-
-### Approvals and grants
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-
-### Privacy and data
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-
-### Phasing and dependencies
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-
-### Models, packages, and process
-
-| ID | Topic | Question | Blocks phase | Leaning |
-|---|---|---|---|---|
-| OQ-91 | Scope of `repo.write` and `publish` | No ADR decides what Jaari may push or publish (which repos, registries, and how) through the GitHub, npm, and PyPI integrations. | 5 | None. On record: gated, never grantable (ADR-072) |
-
-### Context for each open question
-
-Evidence is `ADR-NNN` or a file. "If delayed" is the cost of not deciding before the blocked
-phase starts.
-
-- **OQ-91.** Evidence: ARCHITECTURE.md (`@jaari/integrations`), INTEGRATIONS.md, ROADMAP.md
-  (Phase 5), ADR-072.
+None. A new question takes the next unused id, in a table with the columns ID, Topic,
+Question, Blocks phase, and Leaning, with a line of context below it.
 
 ## Resolved
 
@@ -146,6 +115,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-87 | Git holds text only; every binary file is a blob in the store; blobs backed up incrementally to S3-compatible object storage (R2, S3, B2, MinIO), per-blob encrypted, referenced by snapshot manifests; erase removes the blob everywhere and the rows that hold it; older snapshots keep rows until retention unless the owner deletes them on the card | [ADR-100](adr/100-file-store-backup-and-erase.md) |
 | OQ-88 | A paired MCP client is not a channel and never becomes active; `collect` is a pull of the requester's own result, so no fan-out; approvals go to the active channel with the client named; each request leaves one line in the main session | [ADR-101](adr/101-mcp-client-and-active-channel.md) |
 | OQ-89 | Web budget for paid search, hosted fetch, hosted browsers, and paid egress; $10 suggested (hybrid, api-only), $0 local-only; 50% and 80% digest lines; at 100% self-hosted only until the reset, one notice to raise | [ADR-102](adr/102-web-budget.md) |
+| OQ-91 | Obsolete: no GitHub, npm, or PyPI integrations (no use case); `repo.write` and `publish` reserved with no executor | [ADR-103](adr/103-no-repository-or-registry-integrations.md) |
 | OQ-90 | Job engine, routines, skills, `CliEngine` interface, event log in `@jaari/core`; file store in `@jaari/memory`; speech in `@jaari/llm`; OAuth broker and mailbox adapters in `@jaari/integrations`; new `@jaari/mcp` (client and server) and `apps/hooks` (hook listener) | [ADR-086](adr/086-package-homes.md) |
 
 ### Original questions
@@ -238,3 +208,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-87 | File store in backup and erase | How are file-store blobs backed up (ADR-027 does not list them), and does "erase" also remove the blob, the transcript rows, and existing snapshots? | 3 |
 | OQ-88 | MCP client and the active channel | Does a message from a paired MCP client make that client the active channel? If not, is `collect` a second output stream next to the one active channel? | 5 |
 | OQ-89 | Web budget | ADR-046 leaves search and fetch cost to "the separate web budget", and ADR-053 counts egress cost against it, but no ADR defines it. What is its default, and what happens at its limit? | 3 |
+| OQ-91 | Scope of `repo.write` and `publish` | No ADR decides what Jaari may push or publish (which repos, registries, and how) through the GitHub, npm, and PyPI integrations. | 5 |

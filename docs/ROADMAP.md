@@ -249,7 +249,6 @@ sandbox (4.7).
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 5.1 | GitHub, npm, and PyPI integrations | none (INTEGRATIONS.md) | 3.1; OQ-91 | Planned |
 | 5.2 | Email as an input channel | 021 | 4.3 | Planned |
 | 5.3 | OAuth broker, with bounded token rotation (in `@jaari/integrations`) | 062, 086, 090 | 3.3 | Planned |
 | 5.4 | The agent's mailbox (in `@jaari/integrations`); watcher triggers on the inbox | 063, 086, 064, 089 | 3.3, 4.3 | Planned |
@@ -266,7 +265,7 @@ Exit criteria:
   before the 2xx response (ADR-073).
 - The disk watch notifies at 80%, 90%, and 95% used (ADR-038).
 
-Open questions that block this phase: OQ-91.
+No open question blocks this phase.
 Gate status: not passed.
 
 ## Phase 6: Computer use
@@ -369,3 +368,4 @@ SOCKS5 listener, owner-account pinning, and the opt-in `vpn`, `mobile`, and
   installs to 2.3 (ADR-082). Safety pieces moved to the phase of what they protect (ADR-087).
   The overlay binding moved to 2.12 and the node link to 6.8; panel views ship with their
   features (ADR-088). Routine delivery and reminders moved to 2.3 (ADR-089).
+  The GitHub, npm, and PyPI integrations (5.1) were removed (ADR-103).

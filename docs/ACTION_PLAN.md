@@ -142,3 +142,4 @@ status and exit criteria live there.
 | [100](adr/100-file-store-backup-and-erase.md) | Binary files never in git; the file store is backed up to object storage; erase reaches every copy Jaari controls | Accepted |
 | [101](adr/101-mcp-client-and-active-channel.md) | A paired MCP client is not a channel; `collect` is a pull by the requester | Accepted |
 | [102](adr/102-web-budget.md) | Web budget: a monthly limit for paid web services, then self-hosted only until the reset | Accepted |
+| [103](adr/103-no-repository-or-registry-integrations.md) | No GitHub, npm, or PyPI integrations; `repo.write` and `publish` are reserved | Accepted |

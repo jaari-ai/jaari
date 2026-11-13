@@ -1,7 +1,7 @@
 # ADR-077: Subscription CLI engines: pluggable CliEngine adapters for sandboxed children only, Pi first, the gate answering the CLI's permission requests, off until the owner enables each engine
 
 - **Status:** Accepted
-- **Extended by:** [ADR-091](091-engine-runs.md)
+- **Extended by:** [ADR-091](091-engine-runs.md), [ADR-103](103-no-repository-or-registry-integrations.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -45,6 +45,8 @@ note.
 - **ADR-091 (resolves OQ-76):** these are engine runs, not sealed runs; on owner files the first
   run per workspace asks Allow once or a 90-day `engine.run` grant; scratch workspaces run without
   asking once enabled; web access on makes the run `outside`; the child time limit applies.
+- **ADR-103:** an engine's result is applied to its workspace with `files.write`; there is no
+  `repo.write` executor.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -43,7 +43,7 @@ only with a pointer), **generated** (written by a script).
 | `docs/STATE.md` | Summary: what is decided, what is built, what is next, scheduled checks | current |
 | `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current |
 | `docs/ACTION_PLAN.md` | Ordered next steps; a copy of the ADR table | current |
-| `docs/OPEN_QUESTIONS.md` | 1 open (OQ-91); 90 resolved with ADR links; original wording | current |
+| `docs/OPEN_QUESTIONS.md` | 0 open; 91 resolved with ADR links; original wording | current |
 
 ## Subsystem designs
 
@@ -56,12 +56,12 @@ only with a pointer), **generated** (written by a script).
 | `docs/WEB.md` | Search, fetch ladder, browser placement, presets | current (repeats the egress pool that SECURITY_MODEL.md owns) | 012, 016, 017, 030, 048, 049, 053 |
 | `docs/MEMORY.md` | Memory layout and lifecycle | current | 003, 004, 023, 024, 026 to 029, 038, 047, 074 |
 | `docs/PERSONA.md` | Dials, curiosity, interruption scoring, routine rules | current | 008, 031, 033, 064 |
-| `docs/INTEGRATIONS.md` | Project identity assets; integrations summary | current, with open points (OQ-91) | 010, 039, 062, 063 |
+| `docs/INTEGRATIONS.md` | Project identity assets; integrations summary | current | 010, 039, 062, 063 |
 | `docs/DEVELOPMENT.md` | `refs/` handling, commands, docs conventions, ADR template, threat-model rule | current | 002, 020, 069, 083 |
 
 ## Decisions
 
-`docs/adr/README.md` is the index of the 102 ADRs (all Accepted). By topic:
+`docs/adr/README.md` is the index of the 103 ADRs (all Accepted). By topic:
 
 | Topic | ADRs |
 |---|---|
@@ -74,7 +74,7 @@ only with a pointer), **generated** (written by a script).
 | Models | 011, 019, 045, 046, 065, 077, 085, 102 |
 | Web, browser, egress | 005, 012, 048, 049, 051, 052, 053, 054, 055, 080, 098, 099 |
 | Operations | 025, 027, 028, 032, 059, 087, 097 |
-| Extension points and integrations | 034, 036, 039, 062, 063, 071, 073, 084, 091 |
+| Extension points and integrations | 034, 036, 039, 062, 063, 071, 073, 084, 091, 103 |
 | Plan and evals | 020, 041 |
 
 ADRs whose text is changed in part by a later ADR (read the `Amendments` section first):

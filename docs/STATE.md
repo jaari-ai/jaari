@@ -1,54 +1,63 @@
 # Jaari: State
 
-Last updated: 2026-11-12
+Last updated: 2026-11-13
 
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (102 ADRs, all Accepted)
+## Decided (103 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain (ADR-010, 014, 043). npm and PyPI names are
   not yet secured; checklist in [guides/namespaces.md](guides/namespaces.md).
 - Core design: Pi agent loop with one persistent main session, pnpm monorepo, open-instinct as
-  shell and openinstinct as spec (ADR-001, 002, 009, 065).
+  shell and openinstinct as spec; package homes; one manifest per package in `package.json`;
+  reference repos pinned (ADR-001, 002, 009, 065, 083, 084, 086).
 - Hosting: one daemon on a VPS, remote server, home hardware, or laptop; capabilities installed
   where they run; nodes over a pinned link; the owner's choice of overlay; install, update,
-  and laptop rules (ADR-015, 017, 030, 056, 057, 058).
+  and laptop rules; the overlay binding in Phase 2 and the node link in Phase 6; the sandbox
+  under Compose (ADR-015, 017, 030, 056, 057, 058, 082, 088, 094).
 - Channels and the owner: CLI, web panel, and Telegram in v1, email as input only; pairing and
   one active channel; typed prompts; the owner panel; one owner per Jaari (ADR-021, 022, 035,
-  044, 067).
+  044, 067); a paired MCP client is not a channel (ADR-101).
 - Memory: git-backed Markdown, canonicalize and daily audit, structured records and FTS5
-  search, context assembly, single writer, capture evidence, forgetting, files and photos
-  (ADR-003, 004, 023, 024, 026, 029, 038, 047, 066, 074, 078, 093).
+  search, context assembly, single writer, capture evidence, forgetting, files and photos,
+  sensitive content following routing, binary files outside git (ADR-003, 004, 023, 024, 026,
+  029, 038, 047, 066, 074, 078, 093, 100).
 - Persona and proactive work: two dials and a monitor, notifications and digests, routines,
   skills, onboarding, voice notes, prompt versioning, learning from outcomes (ADR-008, 033,
-  037, 042, 060, 061, 064, 070).
+  037, 042, 060, 061, 064, 070, 089).
 - Safety: digest-bound approvals, `secretRef` secrets and vault providers, OpenMausBot
   hardening, one capability vocabulary with a deny-all gate from Phase 0, standing grants,
   shadow mode, kill switch and limits, outside lineage, threat model, no payments in v1
   (ADR-006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075, 079, 081, 090, 092, 095, 096).
 - Models: role and tier routing, a pinned main session, local-only defaults decided at init,
-  local-model qualification, a monthly budget (ADR-011, 019, 045, 046).
+  local-model qualification, a monthly budget, refusals in the pinned session (ADR-011, 019,
+  045, 046, 085).
 - Web and computer use: search, fetch ladder, neutral browser surface with adapters,
-  commitment classifier, browser worker, egress pool, signed-agent identity, takeover
-  (ADR-005, 012, 048, 049, 051, 052, 053, 054, 055).
+  commitment classifier, browser worker, egress pool, signed-agent identity, takeover, egress
+  core in Phase 0, owner accounts on any host with home sites via the owner exit, the web
+  budget (ADR-005, 012, 048, 049, 051, 052, 053, 054, 055, 080, 098, 099, 102).
 - Operations: job engine, backup and restore, encryption at rest, observability, degraded mode
-  (ADR-025, 027, 028, 032, 059).
+  (ADR-025, 027, 028, 032, 059); safety pieces ship with what they protect; retention of
+  receipts and the action log (ADR-087, 097).
 - Extension points: MCP servers, code execution, capability packages, inbound triggers,
   external control surface, subscription CLI engines, OAuth broker, mailbox, personal data
-  (ADR-034, 036, 039, 062, 063, 071, 073, 076, 077).
+  (ADR-034, 036, 039, 062, 063, 071, 073, 076, 077); engine runs; no GitHub, npm, or PyPI
+  integrations (ADR-091, 103).
 - Plan: soft phases and v1 scope; behaviour evals (ADR-020, 041).
 
 ## Research and process
 - Instinct, Pally, Muse, Grok Bot, ChatGPT Work, and the open-source clones: [00-research.md](00-research.md).
 - Learning notes: [07 computer use](learning/07-computer.md), [08 egress and takeover](learning/08-egress-identity-and-takeover.md), [09 OpenMausBot](learning/09-openmausbot.md),
-  [10 open questions review](learning/10-open-questions-review.md) and [11 Pally](learning/11-pally.md)
-  (their recommendations fed ADR-021 to ADR-078; some were changed or rejected by the ADR).
+  [10 open questions review](learning/10-open-questions-review.md), [11 Pally](learning/11-pally.md),
+  and [12 browser placement](learning/12-browser-placement.md) (their recommendations fed ADR-021
+  to ADR-098; some were changed or rejected by the ADR).
 - Docs conflict audit (2026-11-10): ten conflicts recorded, accepted, and folded into ADR-017
   to ADR-020.
 - Documentation audit (2026-11-12): docs, ADR links, open questions, and the roadmap
-  reconciled; 25 new open questions recorded. Report:
+  reconciled; 25 new open questions recorded and decided on 2026-11-12 and 2026-11-13
+  (ADR-079 to ADR-103). Report:
   [audits/documentation-reconciliation.md](audits/documentation-reconciliation.md); map of the
   docs: [audits/documentation-index.md](audits/documentation-index.md).
 - Docs are hand-maintained Markdown (conventions in DEVELOPMENT.md); `scripts/merge_docs.py`
@@ -74,10 +83,10 @@ No open question blocks Phase 0.
 - Phase 1: measure the candidate local models (ADR-045).
 - Start of Phase 3: check 1Password plan eligibility and limits on a real account (ADR-050).
 - Phase 5: verify each provider's OAuth redirect and device-flow rules (ADR-062).
-- Phase 6: review the task-scoped origin rule from logs (ADR-052).
+- Phase 6: review the task-scoped origin rule from the browser action log (ADR-052, ADR-099).
 - When each CLI engine adapter is built: check and record the provider's terms (ADR-077).
 - On an outside trigger: Web Bot Auth registration for individuals (ADR-054); `pi-durable`
   leaving Experimental (ADR-025, ADR-065).
 
 ## Open questions
-1 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+0 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

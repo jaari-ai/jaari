@@ -45,7 +45,7 @@
 | `@jaari/web` | `web.search`, `web.fetch`, fetch escalation ladder (ADR-012) |
 | `@jaari/computer` | Browser/desktop control behind one neutral surface with pluggable adapters (Playwright MCP, Stagehand, remote CDP, remote desktop), local profile, takeover (ADR-005, ADR-048, ADR-055) |
 | `@jaari/channels` | `ChannelAdapter` contract and its shared contract suite (`@jaari/channels/contract`, ADR-084), ingress (principal resolution), delivery outbox, built-in adapters |
-| `@jaari/integrations` | GitHub, npm, PyPI, email; mailbox adapters (ADR-063); OAuth broker, with tokens written through the gated vault write (ADR-062) (ADR-086) |
+| `@jaari/integrations` | Email; mailbox adapters (ADR-063); OAuth broker, with tokens written through the gated vault write (ADR-062) (ADR-086) |
 | `@jaari/mcp` | MCP client for configured servers, with generated manifests (ADR-034); the two-tool MCP server for paired apps (ADR-076); served by `jaari mcp` (ADR-086) |
 | `apps/daemon` | Long-running process: scheduler tick, channels, jobs |
 | `apps/hooks` | Separate hook listener: the only optionally public port; checks signatures and hands verified events to the daemon over the local socket (ADR-073, ADR-086) |

@@ -77,7 +77,8 @@ separate manifest fields.
 | `email.read` | read | Content is untrusted |
 | `calendar.freebusy`, `calendar.read` | read | Mirrored into event records (ADR-039) |
 | `calendar.write` | gated | Own calendar without attendees: Allow once or a 90-day grant; invitations always ask (ADR-039) |
-| `email.send`, `publish`, `repo.write` | gated | Never grantable (ADR-072); 5-minute approval expiry for `email.send` and `publish` |
+| `email.send` | gated | Never grantable (ADR-072); 5-minute approval expiry |
+| `publish`, `repo.write` | reserved | No executor in v1; requests fail closed; never grantable (ADR-072, ADR-103) |
 | `pay` | reserved | No executor in v1; checkouts end at an owner takeover (ADR-040) |
 | `llm.escalate` | policy-checked | Children only (ADR-011) |
 | `mcp.read`, `mcp.act` | read, gated | MCP tools that match no other name; unconfirmed or unreadable tools are `mcp.act` (ADR-034) |
