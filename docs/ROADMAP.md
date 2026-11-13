@@ -257,7 +257,7 @@ sandbox (4.7).
 | 5.6 | Documents (in file store in `@jaari/memory`) | 038, 078, 086, 093, 100 | 4.7 | Planned |
 | 5.7 | Photo notes | 066 | 5.6 | Planned |
 | 5.8 | Inbound triggers (in `apps/hooks`) | 073, 086 | 1.5, 4.3 | Planned |
-| 5.9 | MCP server for paired desktop apps (in `@jaari/mcp`, `jaari mcp`) | 076, 086 | 2.7; OQ-88 | Planned |
+| 5.9 | MCP server for paired desktop apps (in `@jaari/mcp`, `jaari mcp`) | 076, 086, 101 | 2.7 | Planned |
 
 Exit criteria:
 - Each provider's OAuth redirect and device-flow rules are verified (ADR-062).
@@ -266,7 +266,7 @@ Exit criteria:
   before the 2xx response (ADR-073).
 - The disk watch notifies at 80%, 90%, and 95% used (ADR-038).
 
-Open questions that block this phase: OQ-88, OQ-91.
+Open questions that block this phase: OQ-91.
 Gate status: not passed.
 
 ## Phase 6: Computer use

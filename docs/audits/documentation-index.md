@@ -43,7 +43,7 @@ only with a pointer), **generated** (written by a script).
 | `docs/STATE.md` | Summary: what is decided, what is built, what is next, scheduled checks | current |
 | `docs/ROADMAP.md` | Phases 0 to 8 and Later: items with IDs, needs, status, exit criteria, blocking questions | current |
 | `docs/ACTION_PLAN.md` | Ordered next steps; a copy of the ADR table | current |
-| `docs/OPEN_QUESTIONS.md` | 3 open (OQ-88 to OQ-91); 88 resolved with ADR links; original wording | current |
+| `docs/OPEN_QUESTIONS.md` | 2 open (OQ-89, OQ-91); 89 resolved with ADR links; original wording | current |
 
 ## Subsystem designs
 
@@ -61,13 +61,13 @@ only with a pointer), **generated** (written by a script).
 
 ## Decisions
 
-`docs/adr/README.md` is the index of the 100 ADRs (all Accepted). By topic:
+`docs/adr/README.md` is the index of the 101 ADRs (all Accepted). By topic:
 
 | Topic | ADRs |
 |---|---|
 | Core, licence, process | 001, 002, 009, 010, 014, 043, 044, 083, 086 |
 | Hosting, nodes, install | 015, 017, 030, 056, 057, 058, 082, 088, 094 |
-| Channels, owner, panel | 021, 022, 035, 067, 070, 076 |
+| Channels, owner, panel | 021, 022, 035, 067, 070, 076, 101 |
 | Memory | 003, 004, 023, 024, 026, 029, 038, 047, 066, 074, 078, 093, 100 |
 | Persona and proactive work | 008, 033, 037, 042, 060, 061, 064, 089 |
 | Gate, secrets, safety | 006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075, 079, 081, 090, 092, 095, 096 |
@@ -81,7 +81,7 @@ ADRs whose text is changed in part by a later ADR (read the `Amendments` section
 001, 002, 005, 006, 007, 009, 011, 012, 013, 014, 015, 016, 017, 018, 019, 020, 021, 022, 023,
 024, 025, 026, 027, 028, 029, 030, 031, 032, 034, 035, 036, 038, 039, 046, 048, 049, 050, 051,
 052, 053, 055, 056, 057, 058, 060, 061, 062, 063, 064, 065, 066, 067, 068, 070, 071, 072, 074,
-077, 078, 081. ADR-038's
+076, 077, 078, 081. ADR-038's
 title still says "sensitive files local-only"; ADR-078 replaced that rule.
 
 ## Guides, learning notes, history

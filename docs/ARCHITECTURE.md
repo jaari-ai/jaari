@@ -186,6 +186,8 @@ sets pairing, revocation, and the single active channel:
 Unknown senders get nothing. Paired channels are equal; only the active channel (the one
 the owner's latest message came from) receives replies, approvals, and proactive messages,
 and switching channels continues the same session without replaying history (ADR-022).
+A paired MCP client (ADR-076) is not a channel: it never becomes active and gets only the
+result of its own request through `collect`; approvals still go to the active channel (ADR-101).
 Revocation: `jaari devices revoke <id>` or the panel (ADR-022).
 In group threads other participants' messages are `outside` content (ADR-075); approvals,
 links, and codes go only to the owner's private chat, only the owner's own message changes
