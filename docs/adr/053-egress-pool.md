@@ -1,7 +1,7 @@
 # ADR-053: Egress pool: pluggable providers, one connection baseline, sticky anonymous rotation, home sites suggested from the vault
 
 - **Status:** Accepted
-- **Extended by:** [ADR-071](071-capability-packages.md), [ADR-080](080-egress-core-in-phase-0.md), [ADR-098](098-owner-accounts-on-any-host.md)
+- **Extended by:** [ADR-071](071-capability-packages.md), [ADR-080](080-egress-core-in-phase-0.md), [ADR-098](098-owner-accounts-on-any-host.md), [ADR-102](102-web-budget.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -69,6 +69,8 @@ list with no suggestions.
   input (SearXNG, browser, or sandbox).
 - **ADR-098:** owner-account sessions are no longer pinned to an owner exit; only home sites
   are, and the list ships with a default of data-centre-hostile sites.
+- **ADR-102:** paid egress counts against the web budget; at its limit anonymous traffic uses
+  `direct` only.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

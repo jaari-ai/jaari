@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-12. Open: **2**.
+Last updated: 2026-11-12. Open: **1**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -38,7 +38,6 @@ leaning yet; the options listed are only the ones the docs already name.
 
 | ID | Topic | Question | Blocks phase | Leaning |
 |---|---|---|---|---|
-| OQ-89 | Web budget | ADR-046 leaves search and fetch cost to "the separate web budget", and ADR-053 counts egress cost against it, but no ADR defines it. What is its default, and what happens at its limit? | 3 | None. On record: the example config values only (`monthlyUsd: 10`, `onExceeded: "local-only"`) |
 | OQ-91 | Scope of `repo.write` and `publish` | No ADR decides what Jaari may push or publish (which repos, registries, and how) through the GitHub, npm, and PyPI integrations. | 5 | None. On record: gated, never grantable (ADR-072) |
 
 ### Context for each open question
@@ -46,7 +45,6 @@ leaning yet; the options listed are only the ones the docs already name.
 Evidence is `ADR-NNN` or a file. "If delayed" is the cost of not deciding before the blocked
 phase starts.
 
-- **OQ-89.** Evidence: ADR-046, ADR-053 (egress cost counts against it), `jaari.config.example.jsonc`.
 - **OQ-91.** Evidence: ARCHITECTURE.md (`@jaari/integrations`), INTEGRATIONS.md, ROADMAP.md
   (Phase 5), ADR-072.
 
@@ -147,6 +145,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 | OQ-86 | A refusal never moves the pinned main session: the turn ends with one notice and the owner decides (rephrase or `/model`); other roles move down the chain; off-limits categories go to the owner; detected from `rawStopReason`, never retried as an error | [ADR-085](adr/085-refusal-in-the-pinned-main-session.md) |
 | OQ-87 | Git holds text only; every binary file is a blob in the store; blobs backed up incrementally to S3-compatible object storage (R2, S3, B2, MinIO), per-blob encrypted, referenced by snapshot manifests; erase removes the blob everywhere and the rows that hold it; older snapshots keep rows until retention unless the owner deletes them on the card | [ADR-100](adr/100-file-store-backup-and-erase.md) |
 | OQ-88 | A paired MCP client is not a channel and never becomes active; `collect` is a pull of the requester's own result, so no fan-out; approvals go to the active channel with the client named; each request leaves one line in the main session | [ADR-101](adr/101-mcp-client-and-active-channel.md) |
+| OQ-89 | Web budget for paid search, hosted fetch, hosted browsers, and paid egress; $10 suggested (hybrid, api-only), $0 local-only; 50% and 80% digest lines; at 100% self-hosted only until the reset, one notice to raise | [ADR-102](adr/102-web-budget.md) |
 | OQ-90 | Job engine, routines, skills, `CliEngine` interface, event log in `@jaari/core`; file store in `@jaari/memory`; speech in `@jaari/llm`; OAuth broker and mailbox adapters in `@jaari/integrations`; new `@jaari/mcp` (client and server) and `apps/hooks` (hook listener) | [ADR-086](adr/086-package-homes.md) |
 
 ### Original questions
@@ -238,3 +237,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-83 | Shadow mode and browser logs | ADR-051 and ADR-052 take fixtures and the origin review from "shadow-mode logs" of owner-account sessions, but ADR-068 never shadows what the owner asks for. Which log feeds them? Also: onboarding (Phase 2) promises shadow behaviour that ships in Phase 3 and that the owner may turn off. | 2 |
 | OQ-87 | File store in backup and erase | How are file-store blobs backed up (ADR-027 does not list them), and does "erase" also remove the blob, the transcript rows, and existing snapshots? | 3 |
 | OQ-88 | MCP client and the active channel | Does a message from a paired MCP client make that client the active channel? If not, is `collect` a second output stream next to the one active channel? | 5 |
+| OQ-89 | Web budget | ADR-046 leaves search and fetch cost to "the separate web budget", and ADR-053 counts egress cost against it, but no ADR defines it. What is its default, and what happens at its limit? | 3 |

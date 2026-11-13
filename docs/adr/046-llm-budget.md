@@ -1,7 +1,7 @@
 # ADR-046: LLM budget: a monthly budget set at init, early warnings, and the owner's choice at the limit
 
 - **Status:** Accepted
-- **Extended by:** [ADR-087](087-safety-pieces-ship-with-what-they-protect.md)
+- **Extended by:** [ADR-087](087-safety-pieces-ship-with-what-they-protect.md), [ADR-102](102-web-budget.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -54,6 +54,8 @@ trade-offs every time (nagging); counting web APIs and payments against the LLM 
 ## Amendments
 - **ADR-087:** the monthly budget and the 100% prompt ship in Phase 1; the 50% and 80% digest
   lines in Phase 2.
+- **ADR-102 (resolves OQ-89):** the web budget is defined: $10 suggested for hybrid and
+  api-only, $0 for local-only; at 100% Jaari switches to self-hosted web services until the reset.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

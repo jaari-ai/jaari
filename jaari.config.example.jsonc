@@ -60,7 +60,9 @@
       "remote": { "cdpUrl": "secretRef:browser.cdp", "enabled": false },
       "disabledTools": ["browser_run_code_unsafe"]
     },
-    "budget": { "monthlyUsd": 10, "onExceeded": "local-only" }
+    // ADR-102: paid search, hosted fetch, hosted browsers, and paid egress; at the limit,
+    // self-hosted services only until the reset.
+    "budget": { "monthlyUsd": 10, "onExceeded": "self-hosted-only" }
   },
 
   // ADR-017: owner accounts pin to one owner exit node; rotation is for anonymous traffic.

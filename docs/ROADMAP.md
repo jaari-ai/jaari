@@ -181,7 +181,7 @@ grants land together.
 | 3.1 | Real gate: digests, approvals, expiry, re-check at dispatch, the "unreadable" rule; approvals that expired during sleep are asked again; the Approvals view and the audit part of Activity | 006, 016, 018, 057, 082, 088, 095 | 0.10 | Planned |
 | 3.2 | Hash-chained `audit.jsonl` | 016 | 3.1 | Planned |
 | 3.3 | Vault providers (Bitwarden, 1Password), the one-time-code ladder, the panel's secret-entry page, and the 1Password check on a real account | 013, 050, 088 | 0.11 | Planned |
-| 3.4 | Web budget (the LLM budget is 1.11, the usage log 0.7) | 046 | 1.11; OQ-89 | Planned |
+| 3.4 | Web budget, with self-hosted only at the limit (the LLM budget is 1.11, the usage log 0.7) | 046, 102 | 1.11 | Planned |
 | 3.5 | Lowering a capability's permission stops the turn using it (the other ADR-031 limits ship with 0.5, 1.4, 2.x, and 4.1) | 031, 087 | 3.1 | Planned |
 | 3.6 | Standing grants | 072 | 3.1 | Planned |
 | 3.7 | Backup, restore, and the monthly drill; the ADR-027 bundle replaces the local pre-update and nightly snapshots; file-store backup to object storage | 027, 082, 087, 100 | 1.1, 3.2 | Planned |
@@ -205,7 +205,7 @@ Exit criteria:
 - Budget warnings fire at 50% and 80% (ADR-046).
 - 1Password plan eligibility and limits are checked on a real account (ADR-050).
 
-Open questions that block this phase: OQ-89.
+No open question blocks this phase.
 Gate status: not passed.
 
 ## Phase 4: Background work

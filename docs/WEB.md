@@ -43,6 +43,9 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
 - AGPL/SSPL services (SearXNG, Firecrawl, CRW, Lightpanda, Browserless) run as separate
   processes; never vendor their code into Jaari packages.
 - Every call logs tool, backend, ladder step, cost, outcome to the usage ledger.
+- Web budget (ADR-102): paid search, hosted fetch, hosted browsers, and paid egress count; $10
+  a month suggested (hybrid, api-only), $0 local-only; digest lines at 50% and 80%; at 100%,
+  self-hosted only until the reset, with one notice offering to raise it.
 
 ## Presets
 | Preset | Search | Fetch | Browser |
