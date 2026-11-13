@@ -16,6 +16,15 @@ The daemon must read your memory to do its work, so the key is on the machine wh
 runs. No setting inside Jaari changes that. If that is not acceptable for your data, run
 Jaari on hardware you own.
 
+## Where the vault key lives
+
+Jaari's vault key (secret zero) opens only Jaari's dedicated vault (ADR-050). On a Mac or a
+Linux desktop it is in the OS keychain. On a server or in Compose there is no keychain, so
+`jaari init` stores it as a credential file that systemd or Compose gives the daemon at each
+start (ADR-079). With systemd the file is encrypted on disk, and sealed to the TPM chip if the
+machine has one. `jaari doctor` tells you which form you have. Anyone with root on the running
+machine can still read it.
+
 ## Encrypting the host disk
 
 Jaari relies on full-disk encryption and `jaari doctor` reports whether it can see it.
@@ -37,7 +46,7 @@ Point Jaari's data directory at the unlocked mount and start the daemon after un
 |---|---|---|
 | Age-encrypted bundles (default) | Nothing but encrypted blobs and their size | S3, Cloudflare R2, Backblaze B2, MinIO, any bucket |
 | `git-remote-gcrypt` | Nothing but encrypted objects | GitHub, GitLab, or another hosted git provider |
-| Plain git push | Everything | Only a NAS or device you own, over Tailscale or your LAN |
+| Plain git push | Everything | Only a NAS or device you own, over your overlay network or your LAN |
 
 `git-crypt` is not offered for hosted remotes: it hides file contents but leaves file names
 (`people/dr-smith.md`), commit messages, and history visible.
@@ -46,7 +55,8 @@ Point Jaari's data directory at the unlocked mount and start the daemon after un
 
 `jaari init` creates an age key for backups. Keep it outside Jaari: on paper, or in your own
 password manager (not the vault Jaari reads from). Without it no backup can be opened, by you
-or anyone else. Two copies in different places is sensible.
+or anyone else. Two copies in different places is sensible. If you use `git-remote-gcrypt`,
+keep its GPG key the same way: the age key does not open gcrypt remotes (ADR-028).
 
 ## If a secret ends up in memory
 
@@ -61,4 +71,5 @@ as well.
 - [ ] At least one backup off the host (ADR-027); `jaari doctor` warns otherwise.
 - [ ] Recovery key stored in two places outside Jaari.
 - [ ] Remotes you do not own use encrypted bundles or gcrypt.
-- [ ] No public ports; the panel reached over Tailscale (ADR-017).
+- [ ] No public ports, except an opt-in hook listener if you create webhooks (ADR-073); the
+      panel reached over your overlay network (ADR-030).

@@ -1,6 +1,7 @@
 # ADR-053: Egress pool: pluggable providers, one connection baseline, sticky anonymous rotation, home sites suggested from the vault
 
 - **Status:** Accepted
+- **Extended by:** [ADR-071](071-capability-packages.md), [ADR-080](080-egress-core-in-phase-0.md), [ADR-098](098-owner-accounts-on-any-host.md), [ADR-102](102-web-budget.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -60,6 +61,16 @@ Routing all traffic through the owner's home (1.7 to 30 times slower, learning/0
 rotation (breaks site sessions); residential proxies for owner accounts (logins from strange
 places trip fraud checks); vendor-specific proxy integrations in v1; a hand-written home-sites
 list with no suggestions.
+
+## Amendments
+- **ADR-071:** egress providers are capability packages with a checked manifest.
+- **ADR-080:** the `direct` provider ships in Phase 0 with the egress core; `owner-exit` stays
+  Phase 4. The container egress proxy ships with the first container that works on untrusted
+  input (SearXNG, browser, or sandbox).
+- **ADR-098:** owner-account sessions are no longer pinned to an owner exit; only home sites
+  are, and the list ships with a default of data-centre-hostile sites.
+- **ADR-102:** paid egress counts against the web budget; at its limit anonymous traffic uses
+  `direct` only.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

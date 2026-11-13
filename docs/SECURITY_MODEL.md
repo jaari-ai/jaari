@@ -25,14 +25,40 @@ Additions from ADR-016 (accepted; from the OpenMausBot study):
 - Standing grants ("always allow"): one grant model with exact-match keys, a 90-day expiry,
   and a closed list of grantable capabilities; sends, `publish`, `pay`, and `repo.write` are
   never grantable; each use is an audit row with its digest and grant id (ADR-072).
+- Pinned jobs: a recurring script approved once for one exact digest is its own approval kind,
+  listed and revoked with the grants; host jobs expire after 90 days, sandboxed jobs get a 90-day
+  check-in; only the owner creates one, and it cannot use `pay` (ADR-092).
 
 ## Secrets (ADR-007)
 `secretRef:<name>` in config and tool args; resolved only inside executors.
 
 Additions from ADR-016 (accepted): resolved values are scrubbed by exact value (and common
 encodings) from tool results and logs; the model names a credential by a typed target id,
-never a path or URL; a value sent to a node is single-use; while a filled secret is on a
+never a path or URL; a value sent to a node is for one action and is then discarded (ADR-015); while a filled secret is on a
 page, screenshots and page evaluation are refused.
+
+Secret lifetimes (ADR-096): in-process executors hold a value for one call. A separate
+long-running process (local MCP server, third-party package, channel plugin, vault client)
+holds only its declared secrets while it runs: in its own environment inside its sandbox or
+process, never the daemon's; its output is scrubbed; it is stopped when idle, restarted when a
+secret rotates, and stopped at once when disabled; each start is audited by secret name.
+
+Vault (ADR-013, ADR-050): Jaari reads only a dedicated vault or collection that the owner
+chooses at `jaari init`; the vault client runs as a separate process; secret zero stays in the
+OS keychain and is never in a backup. On a server or container without a keychain it comes from
+the `host-credential` provider: a file supplied by systemd (`LoadCredentialEncrypted=` by
+default) or a Compose secret, refused if others can read it or it is in the data directory or
+the backup set; never an environment variable (ADR-079). Vault
+writes go through the gate. OAuth tokens are vault items, refreshed by the executor (ADR-062);
+rotating an existing token skips the gate only within the ADR-090 bounds (same item and
+account, value from the listed token endpoint), is written before use, and is audited. Payment-card fields are not resolvable in v1 (ADR-040).
+
+Secrets pasted in chat (ADR-081): every owner message is scrubbed at channel ingress, before
+the transcript, the daily log, or any model: known key and token formats, labelled passwords,
+Luhn-valid card numbers, and exact vault values become `[secret removed: <kind>]`. The value is
+never kept; Jaari deletes the message where the channel can, advises rotation, and offers the
+single-use secret-entry page (until Phase 3, `jaari secret set <name>`, ADR-088). A bare
+unlabelled password is not recognised.
 
 ## Capabilities (ADR-018)
 The only names the model can ask for. A manifest's `provides` lists these and nothing else;
@@ -51,10 +77,18 @@ separate manifest fields.
 | `email.read` | read | Content is untrusted |
 | `calendar.freebusy`, `calendar.read` | read | Mirrored into event records (ADR-039) |
 | `calendar.write` | gated | Own calendar without attendees: Allow once or a 90-day grant; invitations always ask (ADR-039) |
-| `email.send`, `publish`, `repo.write` | gated | Short approval expiry |
+| `email.send` | gated | Never grantable (ADR-072); 5-minute approval expiry |
+| `publish`, `repo.write` | reserved | No executor in v1; requests fail closed; never grantable (ADR-072, ADR-103) |
 | `pay` | reserved | No executor in v1; checkouts end at an owner takeover (ADR-040) |
 | `llm.escalate` | policy-checked | Children only (ADR-011) |
 | `mcp.read`, `mcp.act` | read, gated | MCP tools that match no other name; unconfirmed or unreadable tools are `mcp.act` (ADR-034) |
+| `contacts.read`, `storage.read` | read | Synced contacts; remote file storage (ADR-039, ADR-095) |
+| `contacts.write`, `storage.write` | gated | Address-book changes; uploads and changes to remote storage; Allow once (ADR-095) |
+| `vault.write` | gated | New or changed vault items; Allow once, never grantable; OAuth rotation within ADR-090 is exempt (ADR-095) |
+| `memory.read`, `skill.read` | read | The tools `memory.search` and `records.query`; `skill.load` (ADR-095) |
+| `memory.erase` | gated | Erase and `jaari memory purge`; Allow once, never grantable (ADR-029, ADR-095) |
+| `takeover.request` | takeover | Hands a step to the owner (ADR-055 states); no digest; Jaari's actions on that session are refused while the owner holds it (ADR-095) |
+
 
 Login and CAPTCHA go to owner takeover. One-time codes come from the vault, then from a message on the owner's channels (read by the executor, never the model, with a notice), then from the owner (ADR-050).
 
@@ -67,7 +101,8 @@ minutes; 5 for `email.send` and `publish`; overridable per capability.
 
 ## Phase 0 floor (ADR-018)
 `@jaari/gate` ships as a deny-all stub: gated capabilities refuse, read ones run. The
-`secretRef` resolver and an `os-keychain` provider ship in Phase 0; `env` and `file` are
+`secretRef` resolver and the `os-keychain` and `host-credential` providers (ADR-079) ship in
+Phase 0; `env` and `file` are
 for development and make `jaari doctor` warn. Third-party skills install disabled until
 the `reader` role exists.
 
@@ -81,7 +116,10 @@ origin line on the card (ADR-075).
 
 ## Egress
 All network calls via `@jaari/http`; containers via an egress proxy that blocks private
-ranges and cloud metadata. Tool-level origin allowlists are not a security boundary.
+ranges and cloud metadata. The `@jaari/http` core (resolve, check, dial; `direct`) ships in Phase 0 and every outbound
+call uses it; a lint rule refuses other network clients, and an adapter that cannot take the
+injected `fetch` stays off. Local model servers the owner runs are reached only on their
+configured endpoint; their downloads are their own traffic (ADR-080). Tool-level origin allowlists are not a security boundary.
 
 Mechanism (ADR-016, accepted):
 - Resolve, check, dial: the gate resolves the name, classifies every address, and
@@ -98,9 +136,10 @@ Egress pool (ADR-017): the SOCKS5 listener and `@jaari/http` choose a provider p
 `owner-exit` (Tailscale, Headscale, or WireGuard exit node on owner hardware), `direct`,
 `mobile` (owner 4G dongle), `residential-proxy` (sourcing check), `vpn` (consumer VPN such as
 WARP; anonymous only). `owner-exit` may be a WireGuard peer or a SOCKS5/HTTP proxy (ADR-030). Rotation is for anonymous
-traffic only and may mix owner exit nodes with proxies. Owner-account sessions are pinned to
-one owner node (or direct from home hardware), fail over only to another owner node, and
-refuse when none is up; they never fall back to a rotating or datacenter address.
+traffic only and may mix owner exit nodes with proxies. Owner-account sessions leave by the
+host's direct route; only home sites go through an owner exit, and a home site refuses when
+none is up (ADR-098). A third-party browser provider holds owner sessions only after the owner
+enables it for owner accounts, and never receives vault credentials.
 
 ## Owner hold (ADR-005, ADR-016)
 Takeover is a hold owned by the owner, not by one window: accepted agent calls drain,
@@ -132,3 +171,13 @@ or Always allow for one host or folder for 90 days; host commands are always All
 plus a host off the starter list always ask. Recurring jobs are approved once at creation,
 pinned to a digest of script, placement, secrets, hosts, and schedule; any change holds them.
 A boot self-check disables code execution if the sandbox is weakened.
+Under Compose the sandbox is bubblewrap inside the daemon container, which runs with a shipped
+seccomp profile, AppArmor where present, `cap_drop: ALL` plus a minimal set, `no-new-privileges`,
+a read-only root, a non-root user, and only the data volume and secret-zero file mounted; never
+the Docker socket. An install-time probe and the boot self-check keep code execution off when
+the box cannot start (ADR-094).
+Engine runs (subscription CLIs, ADR-077) are not sealed: they reach the provider's declared hosts
+with the CLI's sign-in. On owner files the first run per workspace asks Allow once or a 90-day
+`engine.run` grant, and the card says the workspace goes to the provider; a scratch workspace
+runs without asking once the engine is enabled; web access on makes the run `outside`; 30-minute
+limit (ADR-091).

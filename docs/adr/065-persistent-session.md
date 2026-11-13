@@ -1,6 +1,7 @@
 # ADR-065: Persistent session: one daemon-owned main session on pi-agent-core, one serial queue, Pi's compaction thresholds, no server-side state for the main session
 
 - **Status:** Accepted
+- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -54,6 +55,9 @@ Borrowed: session, steering, and compaction from Pi (`durable/src/harness/agent.
 A fresh session per restart; compaction at 50% of the window; a byte-identical tool list on every
 model; provider-held conversation state for the main session; `pi-durable` while it is
 Experimental; pruning old transcripts by default.
+
+## Amendments
+- **ADR-081:** the transcript stores the owner's message after the ingress secret scrub.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -10,13 +10,16 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
 | `browser.*` | Pluggable adapters (ADR-048): headful on the host virtual desktop or an owner node, Playwright MCP or Stagehand on the local pinned profile | Any remote CDP: Steel, Kernel, Browser Use, Browserbase, Hyperbrowser; custom adapters, including anti-detect ones |
 
 ## Where the browser runs (ADR-017)
-- Placement rule: a browser signed in to the owner's accounts runs on home hardware, on an owner
-  device installed as a node, or on any host through an owner exit node (Tailscale, Headscale,
-  WireGuard). A browser on a VPS or other datacenter host does anonymous work only.
+- Placement (ADR-098): a browser signed in to the owner's accounts may run on any host (home
+  hardware, an owner node, the daemon's datacenter host, or a third-party provider the owner
+  enabled for owner accounts) with direct egress. Only home sites go through an owner exit;
+  the list ships with Google sign-in and search, YouTube, Instagram, and Reddit, plus entries
+  suggested from vault log-ins. Log-ins on a third-party provider go through takeover, never
+  vault fill.
 - Egress pool: `owner-exit` (WireGuard peer or SOCKS5/HTTP proxy such as sing-box), `direct`,
   `mobile`, `residential-proxy`, `vpn` (WARP and similar; anonymous only, ADR-030). Rotation is for
-  anonymous traffic and may include owner exit nodes; owner-account sessions are pinned to one
-  owner node and refuse when none is up.
+  anonymous traffic and may include owner exit nodes; a home site in an owner-account session
+  refuses when no owner exit is up (ADR-098).
 
 ## Rules
 - Fetch escalates on: 403, 429, challenge page, < ~500 chars of text, JS-required.
@@ -40,6 +43,9 @@ signals; the model calls `web.fetch` to read and asks for `browser.*` only to in
 - AGPL/SSPL services (SearXNG, Firecrawl, CRW, Lightpanda, Browserless) run as separate
   processes; never vendor their code into Jaari packages.
 - Every call logs tool, backend, ladder step, cost, outcome to the usage ledger.
+- Web budget (ADR-102): paid search, hosted fetch, hosted browsers, and paid egress count; $10
+  a month suggested (hybrid, api-only), $0 local-only; digest lines at 50% and 80%; at 100%,
+  self-hosted only until the reset, with one notice offering to raise it.
 
 ## Presets
 | Preset | Search | Fetch | Browser |

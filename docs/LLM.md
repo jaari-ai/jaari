@@ -25,18 +25,24 @@ Owner override: "use the big model for this", `/model <tier>`.
 
 ## Rules
 - Local-only roles never fall back to an API; they fail closed and notify once.
+- Sensitive content follows the routing of the role that reads it; nothing is withheld from a
+  prompt for being sensitive. Privacy is set by making roles local-only (ADR-093).
 - `canonicalize` and `curiosity` are local-only by default only if `jaari llm eval` qualifies
   a local model at `jaari init`; otherwise `init` asks the owner to install one or allow an
   API tier, and canonicalize does not run until they choose (ADR-019).
 - The main session is pinned: no routine switching. On a provider outage it may move down its
   chain at a turn boundary, to a model with the same tools, with one notice, and stays there
   until restart or until the owner reverts (ADR-019).
+- A provider refusal never moves the main session: the turn ends with one notice and the
+  provider's explanation, and the owner may rephrase or use `/model <tier>`. Other roles move to
+  the next model; off-limits categories go to the owner, never to another model. Refusals are
+  read from the provider's raw stop reason, never retried as errors (ADR-085).
 - Every call logs role, model, tokens, cost, latency, escalation reason, outcome to SQLite;
   `jaari llm usage` reports it.
 - `jaari llm eval <model>` runs role fixtures (tool-call accuracy, JSON validity,
   canonicalize golden set, injection resistance); models qualify per tier.
 - Later: learned router trained on Jaari's own outcome log; static rules stay as fallback.
-- After OpenMausBot (learning/09; retry rule accepted in ADR-016, caching points are OQ-44 leanings): a call is retried or moved down the
+- After OpenMausBot (learning/09; retry rule accepted in ADR-016, caching points decided in ADR-065): a call is retried or moved down the
   chain only when protocol state shows the provider never accepted the turn, and only to
   a model that supports the same tools; provider limit-reset times are remembered instead
   of probed; the system prompt is split into a stable and a volatile part and the tool

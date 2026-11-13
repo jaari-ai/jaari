@@ -1,6 +1,7 @@
 # ADR-072: Standing grants: one grant model, exact-match keys, a closed list of grantable capabilities, offered once after three identical approvals
 
 - **Status:** Accepted
+- **Extended by:** [ADR-090](090-oauth-token-rotation.md), [ADR-091](091-engine-runs.md), [ADR-092](092-pinned-jobs.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -55,6 +56,13 @@ Standing grants for sends to an exact recipient (openinstinct, Pally); a grant f
 on Jaari's own branches; wildcard keys; grants without expiry; grants keyed on code or model
 output; offering a grant again after a dismissal; grants that keep working while paused or in
 shadow mode.
+
+## Amendments
+- **ADR-090:** a code-initiated OAuth rotation within its bounds is not a grant and needs no
+  approval; every other credential write stays Allow once.
+- **ADR-091:** the closed list gains `engine.run`, keyed on engine id and workspace path.
+- **ADR-092:** pinned jobs are a separate approval kind outside the closed list, managed and
+  revoked with the grants.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

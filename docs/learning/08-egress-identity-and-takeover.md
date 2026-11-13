@@ -6,6 +6,8 @@ takeover protocol in `refs/open-instinct/skills/maritime-computer/SKILL.md`. Ref
 tables and sources: [00-research.md §10](../00-research.md). No decision was taken; the
 open questions are OQ-32, OQ-33, OQ-34 (and the driver part of OQ-27).
 
+> Since decided: OQ-32 → ADR-053; OQ-33 → ADR-054; OQ-34 → ADR-055; OQ-27 → ADR-048.
+
 ## 1. What the sources do
 
 **Where the traffic comes from.** Cloud agents (Muse, Grok Bot, Instinct) browse from

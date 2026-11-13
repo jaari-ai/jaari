@@ -80,3 +80,28 @@
 | [076](076-external-control-surface.md) | External control surface: headless CLI commands on the local socket, a two-tool MCP server for paired desktop apps in v1, nothing that approves or changes policy | Accepted |
 | [077](077-subscription-cli-engines.md) | Subscription CLI engines: pluggable CliEngine adapters for sandboxed children only, Pi first, the gate answering the CLI's permission requests, off until the owner enables each engine | Accepted |
 | [078](078-documents-follow-owner-routing.md) | Documents follow the owner's model routing; no forced local-only path for sensitive files | Accepted |
+| [079](079-secret-zero-on-servers.md) | Secret zero on a server: a `host-credential` provider fed by the service manager | Accepted |
+| [080](080-egress-core-in-phase-0.md) | Egress core in Phase 0: every outbound call goes through `@jaari/http` from the start | Accepted |
+| [081](081-secrets-pasted-in-chat.md) | Secrets pasted in chat: scrubbed at channel ingress, never kept, rotation advised | Accepted |
+| [082](082-phase-split-update-and-catch-up.md) | Phase split for update and laptop catch-up | Accepted |
+| [083](083-pinned-reference-commits.md) | Reference repos are pinned in `scripts/refs.sh` and moved only with `bump` | Accepted |
+| [084](084-package-manifest-location-and-channel-section.md) | The package manifest lives in `package.json`; channels add a `channel` section; a shared contract suite | Accepted |
+| [085](085-refusal-in-the-pinned-main-session.md) | A provider refusal never moves the pinned main session; other roles move down the chain | Accepted |
+| [086](086-package-homes.md) | Package homes for eleven subsystems; two new homes, `@jaari/mcp` and `apps/hooks` | Accepted |
+| [087](087-safety-pieces-ship-with-what-they-protect.md) | Safety pieces ship in the phase of the first thing they protect | Accepted |
+| [088](088-overlay-panel-and-node-link-phasing.md) | Overlay binding and panel TLS in Phase 2, node link in Phase 6, panel views with their features | Accepted |
+| [089](089-routines-before-children.md) | Routines in Phase 1 run code and one tool-less model step; delivery starts with the ledger | Accepted |
+| [090](090-oauth-token-rotation.md) | Rotating an existing OAuth token is a bounded maintenance write, not an approval | Accepted |
+| [091](091-engine-runs.md) | Subscription CLI runs are "engine runs", approved per workspace, with the child time limit | Accepted |
+| [092](092-pinned-jobs.md) | A pinned job is its own repeating approval, managed with grants; host jobs expire | Accepted |
+| [093](093-sensitive-content-follows-routing.md) | Sensitive content follows the owner's routing; privacy comes from local models, not withholding | Accepted |
+| [094](094-sandbox-under-compose.md) | Under Compose the sandbox is bubblewrap inside a hardened daemon container | Accepted |
+| [095](095-missing-capability-names.md) | Capability names for vault, contacts, storage, memory, skills, and takeover | Accepted |
+| [096](096-per-process-secret-lifetime.md) | Separate long-running processes may hold their declared secrets while they run | Accepted |
+| [097](097-receipts-and-action-log-retention.md) | Receipts and the browser action log are kept 90 days in SQLite; effects stay forever in the audit log | Accepted |
+| [098](098-owner-accounts-on-any-host.md) | Owner-account browsers may run on any host with direct egress; only home sites use the owner exit | Accepted |
+| [099](099-browser-reviews-read-the-action-log.md) | Browser reviews read the action log; shadow mode keeps its meaning; onboarding states the real shadow setting | Accepted |
+| [100](100-file-store-backup-and-erase.md) | Binary files never in git; the file store is backed up to object storage; erase reaches every copy Jaari controls | Accepted |
+| [101](101-mcp-client-and-active-channel.md) | A paired MCP client is not a channel; `collect` is a pull by the requester | Accepted |
+| [102](102-web-budget.md) | Web budget: a monthly limit for paid web services, then self-hosted only until the reset | Accepted |
+| [103](103-no-repository-or-registry-integrations.md) | No GitHub, npm, or PyPI integrations; `repo.write` and `publish` are reserved | Accepted |

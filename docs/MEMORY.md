@@ -8,10 +8,11 @@
 - Daily audit: contradictions, stale facts, orphan files; results to the owner digest.
 - Canonicalize reads the most sensitive data, so its model tier is local-only by default
   if a capable local model passes the fixtures (ADR-011, ADR-045, ADR-047); passes are bounded, sensitive lines never go to an API model, and a pass deleting over 20% of a file is held for review.
-- Proposed line conventions, after OpenMausBot (learning/09): entries are dated and name
-  their source; a superseded fact is struck through with the date instead of deleted; an
-  `until YYYY-MM-DD` suffix stops a line loading after that day. Rules the owner stated
-  ("always", "never") and health or safety facts are never moved or archived by upkeep.
+- Line conventions (ADR-029, ADR-074; after OpenMausBot, learning/09): entries are dated and
+  name their source; a superseded fact is struck through with the date instead of deleted.
+  Rules the owner stated ("always", "never") and health or safety facts are never moved or
+  archived by upkeep. Proposed, not decided: an `until YYYY-MM-DD` suffix that stops a line
+  loading after that day.
 - Capture evidence (ADR-074): raw capture is mechanical; every derived fact carries a quote and
   source id that code checks, including every number, date, path, and URL; facts from others'
   content are "according to" until confirmed; inferred facts are marked and never drive actions
@@ -31,12 +32,26 @@
   and win any conflict.
 - Backup (ADR-027): memory pushed to owner-chosen git remotes within minutes; snapshots of
   SQLite, audit log, and config on an owner-set schedule (nightly by default) to local disk,
-  a NAS, or S3-compatible storage; monthly restore drill.
-- Encryption (ADR-028): secrets are blocked before they reach memory; remotes not owned by the
+  a NAS, or S3-compatible storage; monthly restore drill. Binary files (uploads, photos,
+  documents, generated files) never enter git; the file store is backed up incrementally to
+  S3-compatible object storage such as R2 or MinIO (ADR-100).
+- Sensitive content (ADR-093): records, files, photos, and lines at the `sensitive` level
+  follow the owner's routing like any other content, so the main session can answer about
+  them; privacy comes from making roles local-only. The level is set by record type,
+  deterministic rules, a local `classify` role, or the owner, and canonicalize still keeps
+  sensitive lines out of an API batch (ADR-047).
+- Encryption (ADR-028): secrets are blocked before they reach memory; a secret in an owner
+  message is replaced with `[secret removed: <kind>]` at channel ingress, before the transcript
+  and the daily log, and the owner is told to rotate it (ADR-081); remotes not owned by the
   owner are encrypted; `jaari memory purge` rewrites history.
 - Forgetting (ADR-029): corrections supersede and keep the old line struck through; forget
   removes a fact and can always be undone; erase rewrites history and cannot. The owner asks in
   plain words and confirms a preview; every line carries a source id so forgetting a source
-  cascades.
+  cascades. Erase also deletes the blob locally and in the object store and the rows that
+  contain it; older encrypted snapshots keep those rows until retention, unless the owner
+  deletes older backups on the erase card (ADR-100).
+- Retention (ADR-029, ADR-097): raw daily logs forever; others' messages 30 days; receipts and
+  the browser action log 90 days in SQLite; delivered notifications and finished job rows 7
+  days; the audit log forever, with forgotten or erased items as a bare mark.
 - Files (ADR-038): attachments and dropped files live in a content-addressed store outside the
   git repo; memory keeps a pointer and the extracted text, indexed with page numbers.

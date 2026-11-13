@@ -1,6 +1,7 @@
 # ADR-022: Owner authentication: pluggable pairing, one device registry, one active channel
 
 - **Status:** Accepted
+- **Extended by:** [ADR-076](076-external-control-surface.md), [ADR-101](101-mcp-client-and-active-channel.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -44,6 +45,11 @@ active channel (the stale-message failure openinstinct's cursor rule exists to p
 fixed pairing method (excludes devices without a screen or a keyboard); revocation by editing
 config only (too blunt for a stolen phone); a long-lived setup password (a standing secret);
 automatic device expiry (re-pairing friction with little gain for a single owner).
+
+## Amendments
+- **ADR-076:** adds a pairing method: an MCP client is paired by a code the owner types in their chat, which creates a revocable `device`.
+- **ADR-101 (resolves OQ-88):** a paired MCP client is not a channel and never becomes active;
+  a pull of a request's own result by its handle is not fan-out.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -1,6 +1,7 @@
 # ADR-023: Structured records first, SQLite FTS5 search behind one tool
 
 - **Status:** Accepted
+- **Extended by:** [ADR-093](093-sensitive-content-follows-routing.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -56,6 +57,10 @@ index that can drift, and the most sensitive data leaves the box on an API tier)
 SQLite database as the store of record (ADR-003); keeping numbers and dates as prose facts
 that the model updates (the cause of the drift); three special-case record kinds instead of
 one mechanism.
+
+## Amendments
+- **ADR-093 (resolves OQ-78):** the sensitivity level is a label, not a forced local-only path;
+  sensitive records follow the owner's routing, and the main session can answer about them.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

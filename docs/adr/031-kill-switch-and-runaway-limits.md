@@ -1,6 +1,7 @@
 # ADR-031: Pause, emergency stop, and runaway limits, enforced in code and configurable
 
 - **Status:** Accepted
+- **Extended by:** [ADR-087](087-safety-pieces-ship-with-what-they-protect.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -49,6 +50,11 @@ No step limit (open-instinct; a runaway loop burns budget until someone notices)
 owner's messages silently during a pause and running them all on resume (stale requests run
 without the owner deciding); one stop that both pauses and kills (the owner sometimes wants
 running work to finish); fixed, non-configurable limits.
+
+## Amendments
+- **ADR-087 (resolves OQ-71):** pause, emergency stop, steps per turn, the stall guard, and the
+  watchdog ship in Phase 0; spike alerts in Phase 1; the loop breaker and the persona rules in
+  Phase 2; permission lowering in Phase 3; child limits in Phase 4.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

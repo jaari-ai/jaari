@@ -1,6 +1,7 @@
 # ADR-067: Owner panel: one PWA served by the daemon over the overlay, an optional passkey, untrusted content as text, views grown by phase
 
 - **Status:** Accepted
+- **Extended by:** [ADR-088](088-overlay-panel-and-node-link-phasing.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -48,6 +49,10 @@ behaviour only).
 A separate panel service or a hosted dashboard; panel-only API endpoints; a passkey on every
 approval (nagging, since approvals are digest-bound); a passkey for pause or stop; rendering
 untrusted content as HTML; approving from an offline cache; shipping every view in Phase 2.
+
+## Amendments
+- **ADR-088:** Approvals and the audit part of Activity ship with the real gate (Phase 3), and
+  secret entry with the vault work (Phase 3); the other Phase 2 views are unchanged.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

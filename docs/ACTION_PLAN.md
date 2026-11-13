@@ -1,22 +1,41 @@
 # Jaari: Action plan
 
 Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are a soft plan
-(ADR-020): pick up the next item whose needs are met.
+(ADR-020): pick up the next item whose needs are met. Item numbers (`0.1`) are roadmap IDs;
+status and exit criteria live there.
 
 ## Workstreams
-1. **Phase 0 questions are decided.** The last one, capability packages, is ADR-071.
-2. **Scaffold the monorepo** from the config this script generates; add `@jaari/capabilities`,
-   `@jaari/gate` (deny-all stub), and `@jaari/secrets` (resolver + `os-keychain`) with the
-   first package (ADR-018).
-3. **Build `@jaari/llm`** on `@earendil-works/pi-ai` with the tier/role config; add the
-   `jaari llm eval` hook that `jaari init` uses to decide local-only roles (ADR-019).
-4. **Define `ChannelAdapter` and ship the CLI channel**; then the web panel and Telegram (ADR-021).
-5. **Daemon and install.** `apps/daemon`, `jaari init` (target: VPS, remote server, home
-   hardware, or laptop), `jaari doctor`, Compose, and the laptop sleep/wake rule (ADR-017).
-6. **Memory next**: structured records and FTS5 search (ADR-023) and context assembly (ADR-024), the job engine (ADR-025), and the single writer (ADR-026); then persona, then the real gate and the
-   vault (ADR-006, ADR-016, ADR-018; ADR-013 vault providers, ADR-050).
-7. **Egress and browser.** `@jaari/http` to ADR-016 with `direct` and `owner-exit` (Tailscale)
-   providers; the browser under the placement rule; pool details in ADR-053 (ADR-017).
+1. **Questions that block Phase 0**: all decided (ADR-079 to ADR-086).
+2. **Scaffold the monorepo** (0.1 to 0.4): root `package.json`, lockfile, pnpm supply-chain
+   settings, CI with the tier-1 smoke test, `SECURITY.md` and `CONTRIBUTING.md` (ADR-041,
+   ADR-043); secure the names with [guides/namespaces.md](guides/namespaces.md) (ADR-010;
+   `python/` already matches it).
+3. **Safety floor first** (0.9 to 0.11): `@jaari/capabilities`, `@jaari/gate` (deny-all stub),
+   and `@jaari/secrets` (resolver + `os-keychain` and `host-credential`) with the first package
+   (ADR-018, ADR-079).
+4. **Build `@jaari/llm`** (0.7) on `@earendil-works/pi-ai` with the tier/role config; the
+   `jaari llm eval` qualification fixtures that `jaari init` uses arrive with Phase 1 (1.9;
+   ADR-019, ADR-045).
+5. **Daemon and install** (0.5, 0.6, 0.12 to 0.14): `apps/daemon` with the persistent session,
+   `jaari init` (target: VPS, remote server, home hardware, or laptop), `jaari doctor`,
+   Compose, and the laptop sleep rule (ADR-017, ADR-056, ADR-057, ADR-065).
+6. **Define `ChannelAdapter` and ship the CLI channel** (0.8; ADR-021, ADR-035). The CLI talks
+   to the daemon, so this follows step 5.
+7. **Memory** (Phase 1): single writer (ADR-026), structured records and FTS5 search (ADR-023),
+   context assembly (ADR-024), the job engine (ADR-025), canonicalize and capture evidence
+   (ADR-047, ADR-074).
+8. **Persona and owner surfaces** (Phase 2): dials and notifications, pairing (ADR-022),
+   Telegram, the overlay binding (ADR-088), then the panel (ADR-067).
+9. **The real gate and its companions** (Phase 3): gate and audit log (ADR-006, ADR-016,
+   ADR-018), vault (ADR-013, ADR-050), pause and limits (ADR-031), grants (ADR-072), backup and
+   encryption (ADR-027, ADR-028), shadow mode (ADR-068). They check each other at dispatch, so
+   they land together.
+10. **Background work** (Phase 4): children, the `reader` role, the `owner-exit` provider and
+    per-capability allowlists on `@jaari/http` (ADR-080), the sandbox, MCP, and code execution.
+11. **Integrations, then the browser** (Phases 5 and 6): OAuth broker, mailbox, calendar,
+    documents; then the browser (owner accounts on any host, ADR-098), with pool details in ADR-053
+    (ADR-017).
+12. **Hardening and evals** (Phases 7 and 8).
 
 ## ADRs
 | ADR | Title | Status |
@@ -99,3 +118,28 @@ Ordered by dependency, not by calendar. Phases in the [roadmap](ROADMAP.md) are 
 | [076](adr/076-external-control-surface.md) | External control surface: headless CLI commands on the local socket, a two-tool MCP server for paired desktop apps in v1, nothing that approves or changes policy | Accepted |
 | [077](adr/077-subscription-cli-engines.md) | Subscription CLI engines: pluggable CliEngine adapters for sandboxed children only, Pi first, the gate answering the CLI's permission requests, off until the owner enables each engine | Accepted |
 | [078](adr/078-documents-follow-owner-routing.md) | Documents follow the owner's model routing; no forced local-only path for sensitive files | Accepted |
+| [079](adr/079-secret-zero-on-servers.md) | Secret zero on a server: a `host-credential` provider fed by the service manager | Accepted |
+| [080](adr/080-egress-core-in-phase-0.md) | Egress core in Phase 0: every outbound call goes through `@jaari/http` from the start | Accepted |
+| [081](adr/081-secrets-pasted-in-chat.md) | Secrets pasted in chat: scrubbed at channel ingress, never kept, rotation advised | Accepted |
+| [082](adr/082-phase-split-update-and-catch-up.md) | Phase split for update and laptop catch-up | Accepted |
+| [083](adr/083-pinned-reference-commits.md) | Reference repos are pinned in `scripts/refs.sh` and moved only with `bump` | Accepted |
+| [084](adr/084-package-manifest-location-and-channel-section.md) | The package manifest lives in `package.json`; channels add a `channel` section; a shared contract suite | Accepted |
+| [085](adr/085-refusal-in-the-pinned-main-session.md) | A provider refusal never moves the pinned main session; other roles move down the chain | Accepted |
+| [086](adr/086-package-homes.md) | Package homes for eleven subsystems; two new homes, `@jaari/mcp` and `apps/hooks` | Accepted |
+| [087](adr/087-safety-pieces-ship-with-what-they-protect.md) | Safety pieces ship in the phase of the first thing they protect | Accepted |
+| [088](adr/088-overlay-panel-and-node-link-phasing.md) | Overlay binding and panel TLS in Phase 2, node link in Phase 6, panel views with their features | Accepted |
+| [089](adr/089-routines-before-children.md) | Routines in Phase 1 run code and one tool-less model step; delivery starts with the ledger | Accepted |
+| [090](adr/090-oauth-token-rotation.md) | Rotating an existing OAuth token is a bounded maintenance write, not an approval | Accepted |
+| [091](adr/091-engine-runs.md) | Subscription CLI runs are "engine runs", approved per workspace, with the child time limit | Accepted |
+| [092](adr/092-pinned-jobs.md) | A pinned job is its own repeating approval, managed with grants; host jobs expire | Accepted |
+| [093](adr/093-sensitive-content-follows-routing.md) | Sensitive content follows the owner's routing; privacy comes from local models, not withholding | Accepted |
+| [094](adr/094-sandbox-under-compose.md) | Under Compose the sandbox is bubblewrap inside a hardened daemon container | Accepted |
+| [095](adr/095-missing-capability-names.md) | Capability names for vault, contacts, storage, memory, skills, and takeover | Accepted |
+| [096](adr/096-per-process-secret-lifetime.md) | Separate long-running processes may hold their declared secrets while they run | Accepted |
+| [097](adr/097-receipts-and-action-log-retention.md) | Receipts and the browser action log are kept 90 days in SQLite; effects stay forever in the audit log | Accepted |
+| [098](adr/098-owner-accounts-on-any-host.md) | Owner-account browsers may run on any host with direct egress; only home sites use the owner exit | Accepted |
+| [099](adr/099-browser-reviews-read-the-action-log.md) | Browser reviews read the action log; shadow mode keeps its meaning; onboarding states the real shadow setting | Accepted |
+| [100](adr/100-file-store-backup-and-erase.md) | Binary files never in git; the file store is backed up to object storage; erase reaches every copy Jaari controls | Accepted |
+| [101](adr/101-mcp-client-and-active-channel.md) | A paired MCP client is not a channel; `collect` is a pull by the requester | Accepted |
+| [102](adr/102-web-budget.md) | Web budget: a monthly limit for paid web services, then self-hosted only until the reset | Accepted |
+| [103](adr/103-no-repository-or-registry-integrations.md) | No GitHub, npm, or PyPI integrations; `repo.write` and `publish` are reserved | Accepted |

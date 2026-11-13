@@ -2,6 +2,7 @@
 # scripts/refs.sh: manage read-only reference repos under refs/ (ADR-002).
 #
 #   scripts/refs.sh [sync] [name...]   clone or update to the pinned ref, then lock
+#   scripts/refs.sh bump [name...]     move the pin to the latest default-branch commit (ADR-083)
 #   scripts/refs.sh status             commit, date, lock state, license per ref
 #   scripts/refs.sh lock [name...]     make read-only (default: all)
 #   scripts/refs.sh unlock <name...>   make writable (rarely needed; re-lock after)
@@ -12,17 +13,18 @@
 #   REFS_LIST=<file>    use this manifest instead of the inline one
 set -euo pipefail
 
+SELF="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 cd "$(git rev-parse --show-toplevel)"
 REFS_DIR="refs"
 DEPTH="${REFS_DEPTH:-1}"
 
-# name            url                                          ref ("-" = default branch; or branch/tag/sha)
+# name            url                                          ref (pinned full sha; move it only with `bump`, ADR-083)
 MANIFEST=$(cat <<'EOF'
-pi                https://github.com/earendil-works/pi.git            -
-open-instinct     https://github.com/mariagorskikh/open-instinct.git          -
-openinstinct      https://github.com/Yeachan-Heo/openinstinct.git           -
-gajae-way         https://github.com/Yeachan-Heo/gajae-way.git              -
-openmausbot       https://github.com/milind-soni/OpenMausBot.git            -
+pi                https://github.com/earendil-works/pi.git            469d8651b59069d7bd907c7da84597865e114da6
+open-instinct     https://github.com/mariagorskikh/open-instinct.git          2e5e71b72622d1262e212da7deb0e785bd95facd
+openinstinct      https://github.com/Yeachan-Heo/openinstinct.git           213120cef0c0cb32ab069200e2214577a88ebd9c
+gajae-way         https://github.com/Yeachan-Heo/gajae-way.git              34cbd150c88aa7f5475882a9633236f77c02fcdd
+openmausbot       https://github.com/milind-soni/OpenMausBot.git            b8022684d1f519d49a776e00900ae9c65daa357d
 EOF
 )
 if [[ -n "${REFS_LIST:-}" ]]; then
@@ -35,6 +37,7 @@ info() { printf '%-16s %s\n' "$1" "$2"; }
 usage() {
   cat <<'EOF'
 scripts/refs.sh [sync] [name...]   clone or update to the pinned ref, then lock
+scripts/refs.sh bump [name...]     move the pin to the latest default-branch commit
 scripts/refs.sh status             commit, date, lock state, license per ref
 scripts/refs.sh lock [name...]     make read-only (default: all)
 scripts/refs.sh unlock <name...>   make writable (re-lock after)
@@ -134,6 +137,24 @@ sync_one() {
   info "$name" "$(git -C "$dir" rev-parse --short HEAD)  $(license_of "$dir")"
 }
 
+bump_one() {  # sync to the default branch, then write the new full sha into the manifest line
+  local name=$1 url=$2 dir="$REFS_DIR/$1" file="${REFS_LIST:-$SELF}" old_sha=none old_lic=none new_sha new_lic
+  if [[ -d "$dir/.git" ]]; then
+    old_sha=$(git -C "$dir" rev-parse HEAD)
+    old_lic=$(license_of "$dir")
+  fi
+  sync_one "$name" "$url" - >/dev/null
+  new_sha=$(git -C "$dir" rev-parse HEAD)
+  new_lic=$(license_of "$dir")
+  local line="^(${name}[[:space:]]+[^[:space:]]+[[:space:]]+)[^[:space:]]+[[:space:]]*$"
+  [[ $(grep -cE "$line" "$file") == 1 ]] || die "cannot find one manifest line for $name in $file"
+  sed -i.bak -E "s|$line|\\1$new_sha|" "$file" && rm -f "$file.bak"
+  info "$name" "${old_sha:0:7} -> ${new_sha:0:7}  $new_lic"
+  if [[ "$old_lic" != none && "$old_lic" != "$new_lic" ]]; then
+    printf 'warning: %s licence changed: "%s" -> "%s". Update AGENTS.md before using it.\n' "$name" "$old_lic" "$new_lic" >&2
+  fi
+}
+
 write_index() {
   local dir
   {
@@ -189,6 +210,8 @@ main() {
   if (( $# )); then shift; fi
   case "$cmd" in
     sync|update) ensure_guards; check_names "$@"; each_ref sync_one "$@"; write_index ;;
+    bump)        ensure_guards; check_names "$@"; each_ref bump_one "$@"; write_index
+                 echo "review with: git diff scripts/refs.sh, then commit the new pins" ;;
     status)      status ;;
     lock)        for_dirs lock_dir "$@" ;;
     unlock)      (( $# )) || die "usage: refs.sh unlock <name...>"

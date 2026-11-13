@@ -1,7 +1,7 @@
 # ADR-030: Bring your own overlay network; security does not depend on it; reference sizing
 
 - **Status:** Accepted
-- **Extended by:** [ADR-073](073-inbound-triggers.md)
+- **Extended by:** [ADR-073](073-inbound-triggers.md), [ADR-088](088-overlay-panel-and-node-link-phasing.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -52,6 +52,8 @@ Tailscale as the only overlay (excludes owners who run WireGuard, sing-box, or C
 relying on the overlay for authentication (one misconfiguration exposes the daemon); a public
 tunnel or reverse proxy for the panel and nodes (a public door); WARP or other consumer VPN
 egress for owner-account sessions (datacenter-like reputation and location flags).
+- **ADR-088:** Phase 2 ships the binding, TLS, and the Tailscale, Headscale, and Custom modes;
+  WireGuard peer generation, Cloudflare Zero Trust, and sizing ship in Phase 7.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

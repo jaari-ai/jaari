@@ -1,6 +1,7 @@
 # ADR-056: Install, update, migrate: owner-chosen install method, automatic patch updates, migrations when a store opens
 
 - **Status:** Accepted
+- **Extended by:** [ADR-079](079-secret-zero-on-servers.md), [ADR-082](082-phase-split-update-and-catch-up.md), [ADR-094](094-sandbox-under-compose.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -50,6 +51,16 @@ keeping the previous version from gajae-way `docs/deployment.md` (docs only).
 One install method for every target; automatic minor and major updates (they may break during
 0.x); no automatic updates at all (security fixes wait on the owner); mounting the Docker socket
 into the sandbox; migrations without a snapshot; letting an older binary open newer data.
+
+## Amendments
+- **ADR-079:** the `compose.yaml` that `jaari init` writes has a `secrets:` entry for secret
+  zero; `jaari service install` passes it with `LoadCredentialEncrypted=` (or `LoadCredential=`).
+- **ADR-082 (resolves OQ-74):** Phase 0 ships a manual `jaari update` with a local pre-update
+  snapshot (SQLite online backup, config copy, memory git tag; last two kept); the ADR-027
+  bundle replaces it in Phase 3; automatic patch installs start with quiet hours (Phase 2).
+- **ADR-094 (resolves OQ-70):** under Compose the sandbox is bubblewrap inside the hardened
+  daemon container, replacing "a rootless Podman sidecar or gVisor"; the container hardening is
+  set there.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

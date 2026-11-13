@@ -1,6 +1,7 @@
 # ADR-078: Documents follow the owner's model routing; no forced local-only path for sensitive files
 
 - **Status:** Accepted
+- **Extended by:** [ADR-093](093-sensitive-content-follows-routing.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -21,6 +22,9 @@ separate decision about the owner's own memory.
 ## Alternatives rejected
 Keeping a forced local-only path for sensitive documents while photos follow routing (two rules
 for the same kind of content); removing the option to keep them local.
+
+## Amendments
+- **ADR-093:** the same rule covers records, photos, and memory lines; marking is defined there.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

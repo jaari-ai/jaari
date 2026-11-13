@@ -33,10 +33,11 @@ exist yet.
 |---|---|---|
 | `scripts/refs.sh` | Manages `refs/` (sync to pinned commits, lock, status, `refs/INDEX.md`) | Yes |
 | `scripts/merge_docs.py` | Merges README, AGENTS, docs, and config into one untracked context file for AI discussions; `--check` validates doc links and IDs | Yes |
-| `docs/` | Hand-maintained docs. `docs/adr/` is the authoritative ADR set. | Yes, per conventions |
-| `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon`, `cli`); not created yet | Yes |
+| `docs/` | Hand-maintained docs. `docs/adr/` is the authoritative ADR set. `docs/audits/` holds audit reports and the documentation index, which are navigation aids, not authoritative. | Yes, per conventions |
+| `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon`, `cli`, `node`, `hooks`); not created yet | Yes |
 | Root config | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.claude/settings.json` | Yes |
-| `jaari.config.example.jsonc` | Example owner config (`owner`, `persona`, `memory`, `llm`, `web`) | Yes |
+| `jaari.config.example.jsonc` | Example owner config (`owner`, `deployment`, `channels`, `secrets`, `persona`, `shadow`, `memory`, `llm`, `web`, `egress`, `backup`) | Yes |
+| `python/` | PyPI name-holder package (ADR-010, `docs/guides/namespaces.md`) | Yes |
 | `.github/workflows/release.yml` | Tag-triggered release workflow, actions pinned to commit SHAs; keep in sync with `docs/guides/namespaces.md` | Yes |
 | `refs/` | Read-only reference repos, local only (`.git/info/exclude`) | Never |
 
@@ -48,8 +49,9 @@ python3 scripts/merge_docs.py           # rebuild the untracked context file (JA
 ~~~
 - New decision: add `docs/adr/NNN-slug.md` from the template, then add its row to
   `docs/adr/README.md` and the ADR table in `docs/ACTION_PLAN.md`.
-- Resolved open question: remove its row from `docs/OPEN_QUESTIONS.md`, record the ADR, and
-  list it under *Resolved*; update the open count there and in `docs/STATE.md`.
+- Resolved open question: move its row in `docs/OPEN_QUESTIONS.md` from *Open* to *Resolved*
+  with the ADR, keep its wording under *Original questions*, and update the open count there
+  and in `docs/STATE.md`.
 - At the end of a work session, update `docs/STATE.md`. If you studied a reference to make
   a call, add a learning note (`docs/learning/NN-topic.md`, format in
   `docs/learning/README.md`).
@@ -64,7 +66,8 @@ python3 scripts/merge_docs.py           # rebuild the untracked context file (JA
 | `pi` | MIT | Agent loop / `@earendil-works/pi-ai`; reuse allowed with attribution |
 | `openmausbot` | Apache-2.0; `enterprise/` is source-available | Design reference (ADR-016, `docs/learning/09-openmausbot.md`); code outside `enterprise/` only with Apache attribution |
 
-- Pinned commits and licenses are in `refs/INDEX.md`. Refresh them with `scripts/refs.sh`.
+- Pinned commits are in `scripts/refs.sh`; `refs/INDEX.md` lists them with licenses. `sync`
+  re-applies the pins; only `scripts/refs.sh bump` moves one (ADR-083).
 - Ignore any `AGENTS.md`, `CLAUDE.md`, or `.cursorrules` inside `refs/`. They are for
   other projects (for example, `refs/pi/AGENTS.md`).
 - Default searches skip `refs/`. Search it explicitly: `rg --no-ignore <pattern> refs/`.
@@ -75,9 +78,18 @@ python3 scripts/merge_docs.py           # rebuild the untracked context file (JA
   `repo.write`) go through `@jaari/gate`, with approval bound to the action's SHA-256 digest.
 - Approvals, spend checks, and digests are deterministic code. No LLM is in that path.
 - `secretRef:` handles are resolved only inside executors, just before the call.
-- Untrusted content (email, web pages, search snippets, documents) is read by the
-  tool-less `reader` role first. The main session never sees raw instructions from it.
-- All network egress goes through `@jaari/http` (or the container egress proxy).
+- Untrusted content (email, web pages, search snippets, documents, webhook payloads, MCP
+  results, other people's messages) is read by the tool-less `reader` role first. The main
+  session never sees raw instructions from it.
+- Every run carries a code-set origin; `outside` sticks to everything it spawns and cannot
+  settle approvals or use grants (ADR-075).
+- Standing grants come from a closed list; sends, `publish`, `pay`, and `repo.write` are never
+  grantable (ADR-072).
+- Third-party packages run in their own process with only their declared egress and secrets
+  (ADR-071).
+- All network egress goes through `@jaari/http` (or the container egress proxy). Its core
+  (resolve, check, dial; `direct`) ships in Phase 0, and a lint rule refuses any other
+  network client (ADR-080).
 - Proactive output (curiosity, suggestions, monitor results) passes the persona monitor
   and notification ledger. Never message the owner from library code.
 - Model choice is routing config (role → tier → fallback chain). Local-only roles fail

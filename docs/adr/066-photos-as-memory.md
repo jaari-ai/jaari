@@ -1,6 +1,7 @@
 # ADR-066: Photos as memory: photo notes in the file store, the vision role as the owner routed it, location kept, face recognition planned for later
 
 - **Status:** Accepted
+- **Extended by:** [ADR-093](093-sensitive-content-follows-routing.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -46,6 +47,9 @@ descriptions and text only; they never re-read the images.
 Keeping photos only as files without a note (they could not be found by content); forcing local
 models for photos regardless of the owner's setup; removing GPS by default; face recognition in
 v1; treating Jaari's own screenshots as memory; re-reading images in every audit.
+
+## Amendments
+- **ADR-093:** "marked sensitive" uses the ADR-093 marking rules.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

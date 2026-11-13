@@ -1,6 +1,7 @@
 # ADR-026: Memory writes go through one writer; the owner's edits win
 
 - **Status:** Accepted
+- **Extended by:** [ADR-100](100-file-store-backup-and-erase.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -34,6 +35,9 @@ leaves a stale lock); a git branch per task merged afterwards (Markdown merge co
 heavy machinery for a personal repo); folding the owner's hand edits into Jaari's commits
 (history no longer shows who changed what); letting Jaari's change win a conflict (the owner
 is the authority on their own memory).
+
+## Amendments
+- **ADR-100:** the single writer refuses binary files and files over 1 MiB in a memory commit.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

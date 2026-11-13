@@ -1,6 +1,7 @@
 # ADR-057: Laptop as host and node: sleep detection and capped catch-up, power and battery rules, a published macOS permission matrix
 
 - **Status:** Accepted
+- **Extended by:** [ADR-082](082-phase-split-update-and-catch-up.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -57,6 +58,10 @@ Borrowed: 5-second permission re-probes and attach without restart from openinst
 Replaying every missed slot after sleep; dropping missed jobs silently; keeping the laptop awake
 on battery by default; re-routing gated node actions to another host automatically; discovering
 permissions only when a capability fails.
+
+## Amendments
+- **ADR-082:** catch-up of missed jobs ships with the job engine (Phase 1), asking again for
+  expired approvals with the real gate (Phase 3); the rest of the Phase 0 list is unchanged.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

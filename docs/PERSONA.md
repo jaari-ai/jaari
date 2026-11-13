@@ -34,6 +34,8 @@ apply before the monitor scores anything:
   price). No model call happens when nothing is new; the cursor advances only after the
   run's result is stored.
 - A run that finds nothing posts nothing. A failure alerts once per routine and cause.
+- In Phase 1 routines deliver nothing; their results stay in the run history until the
+  ledger ships in Phase 2 (ADR-089).
 - "Finished" is sent only with a non-empty result, and every notification links to the
   exact thread it is about.
 - After 7 days with no reply or reaction to proactive messages, they pause until the owner

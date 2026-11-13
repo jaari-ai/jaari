@@ -1,6 +1,7 @@
 # ADR-060: Skills: SKILL.md playbooks in the memory repo, loaded on demand, third-party skills scanned and pinned, procedures offered as skills
 
 - **Status:** Accepted
+- **Extended by:** [ADR-071](071-capability-packages.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -45,6 +46,9 @@ OpenMausBot (learning/09).
 Skills loaded in full into every prompt (cache churn and context cost); skills as a permission
 boundary; third-party skills enabled on install; unpinned skill text; saving procedures as skills
 without approval; the owner's skill silently replacing a built-in.
+
+## Amendments
+- **ADR-071:** skills stay `SKILL.md` files and get a generated package manifest, so the same install and trust rules apply.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -1,6 +1,7 @@
 # ADR-034: MCP servers: owner-added, pinned, classified in one step, sandboxed from Phase 4
 
 - **Status:** Accepted
+- **Extended by:** [ADR-071](071-capability-packages.md), [ADR-072](072-standing-grants.md), [ADR-094](094-sandbox-under-compose.md), [ADR-096](096-per-process-secret-lifetime.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -59,6 +60,14 @@ text); unknown tools defaulting to read; asking per tool call until each tool is
 description or add tools without a config change); forbidding local servers until Phase 7 (many
 useful servers are local); running local servers unsandboxed with no warning (they bypass the
 egress gate); a marketplace with auto-install.
+
+## Amendments
+- **ADR-071:** an MCP server stays MCP config and gets a generated package manifest, so the same install and trust rules apply.
+- **ADR-072:** `mcp.act` grants follow the one grant model: server and tool key with the config and tool-list fingerprint, 90 days, never for tools classified as send, publish, or pay.
+- **ADR-094:** under Compose, local MCP servers run in bubblewrap boxes inside the daemon
+  container.
+- **ADR-096:** resolving a server's secrets at start is the per-process lifetime: restart on
+  rotation, stop when idle, scrubbed output, an audit row per start.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

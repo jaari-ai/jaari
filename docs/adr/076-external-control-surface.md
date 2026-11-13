@@ -1,6 +1,7 @@
 # ADR-076: External control surface: headless CLI commands on the local socket, a two-tool MCP server for paired desktop apps in v1, nothing that approves or changes policy
 
 - **Status:** Accepted
+- **Extended by:** [ADR-101](101-mcp-client-and-active-channel.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -42,6 +43,10 @@ owner's chat from Pally (learning/11).
 An MCP server that approves, edits policy, or manages secrets; approving from a non-interactive
 script; treating a paired MCP client as outside content (owner choice: it is paired like any
 channel); an MCP server only after v1; a public HTTP surface.
+
+## Amendments
+- **ADR-101:** a request's result goes only to `collect`; approvals go to the active channel
+  while `collect` reports waiting; each request leaves one line in the main session's history.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

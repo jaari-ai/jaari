@@ -10,5 +10,8 @@ Jaari is released under the MIT License (`LICENSE`). Code reused from MIT-licens
 ## Alternatives rejected
 Apache-2.0 (patent grant and NOTICE mechanism, but heavier for plugin authors and a mismatch with the MIT references); AGPL-3.0 (would allow copying gajae-way, but puts copyleft on every plugin and self-hoster who modifies Jaari); no license (nobody could legally use or contribute).
 
+## Amendments
+- **ADR-016:** code copied from `refs/openmausbot` outside `enterprise/` keeps its Apache-2.0 header and gets a `NOTICE` entry.
+
 ## Consequences
 _TODO: fill in as implementation reveals them._

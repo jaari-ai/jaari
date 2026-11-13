@@ -1,6 +1,7 @@
 # ADR-074: Memory capture evidence: mechanical raw capture, a code-checked quote and source id on every derived fact, inferred facts marked, commit trailers
 
 - **Status:** Accepted
+- **Extended by:** [ADR-056](056-install-update-migrate.md), [ADR-081](081-secrets-pasted-in-chat.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -52,6 +53,10 @@ gajae-way (ADR-026, design only).
 Trusting the model's facts without a quote; letting the model resolve relative dates; facts about
 the owner from others' content without confirmation; inferred facts acting like stated ones;
 commits without actor and source trailers.
+
+## Amendments
+- **ADR-056:** adds the commit actor `migration` (a memory migration is one commit through the writer).
+- **ADR-081:** raw capture writes the owner's turn verbatim after the ingress secret scrub.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

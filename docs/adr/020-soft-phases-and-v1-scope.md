@@ -1,6 +1,7 @@
 # ADR-020: Roadmap phases are a soft plan; scope deferred from the merge plan
 
 - **Status:** Accepted
+- **Extended by:** [ADR-037](037-voice.md), [ADR-088](088-overlay-panel-and-node-link-phasing.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -8,6 +9,11 @@
 
 ## Alternatives rejected
 Hard phase gates (a small project stalls on an unrelated open question); no phases at all (nothing says what to build first); carrying the 7-tier matrix into the first phases (multi-principal machinery for a single owner).
+
+## Amendments
+- **ADR-037:** voice notes and the `stt` and `tts` roles are in v1; of the deferred "voice", only live calls remain deferred.
+- **ADR-088 (resolves OQ-72):** the overlay binding and panel TLS ship in Phase 2; the rest of
+  the overlay modes and sizing stay in Phase 7.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

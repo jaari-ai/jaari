@@ -1,6 +1,7 @@
 # ADR-058: Node link and host moves: pinned TLS over the overlay, results that survive a disconnect, generation-fenced host migration
 
 - **Status:** Accepted
+- **Extended by:** [ADR-088](088-overlay-panel-and-node-link-phasing.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -44,6 +45,9 @@ execution; the relay rule from learning/09.
 A Noise handshake (a second protocol to maintain with no gain over pinned TLS); a relay in v1;
 resending in-flight actions after a reconnect; moving the daemon with approvals silently dropped
 or silently carried; re-pairing every node after a move; two daemons answering at once.
+
+## Amendments
+- **ADR-088:** the node link ships in Phase 6 with remote nodes; host migration stays in Phase 7.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
