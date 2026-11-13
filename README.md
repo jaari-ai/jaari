@@ -1,6 +1,6 @@
 # Jaari
 
-A self-hosted personal AI agent, in the shape of the commercial ones (Instinct, Muse, Grok
+A self-hosted personal AI agent, in the shape of the commercial ones (Instinct, Pally, Muse, Grok
 Bot, ChatGPT Work), that you run yourself: on a VPS, a remote server, hardware at home, or a
 laptop. Git-backed memory, a configurable personality, a browser it can drive, and
 owner-approved external actions.
@@ -19,13 +19,13 @@ in v1.
 
 | Area | Approach | Details |
 |---|---|---|
-| Hosting | Self-hosted, single owner. One daemon on a VPS, remote server, home hardware, or laptop; capabilities installed where they run; Tailscale as the default overlay | [ARCHITECTURE](docs/ARCHITECTURE.md), ADR-015/017 |
-| Browser identity | Identity-bearing browsing runs on or through the owner's network (home box, owner device, Tailscale exit node); rotating proxies only for anonymous traffic | [WEB](docs/WEB.md), ADR-017 |
+| Hosting | Self-hosted, single owner. One daemon on a VPS, remote server, home hardware, or laptop; capabilities installed where they run; bring your own overlay (Tailscale by default, or WireGuard, Headscale, Cloudflare, sing-box) | [ARCHITECTURE](docs/ARCHITECTURE.md), ADR-015/017/030 |
+| Browser identity | Signed-in browsing may run on any host with direct egress; only home sites (sites that turn away data centres) go through an owner exit; rotating proxies only for anonymous traffic | [WEB](docs/WEB.md), ADR-017, ADR-098 |
 | Memory | Separate git repo of Markdown (gajae-way axes), canonicalized every 6 h, audited daily | [MEMORY](docs/MEMORY.md), ADR-003/004 |
 | Personality | Curiosity and Proactivity dials (0 to 3) enforced by a monitor; proactive messages must earn the interruption | [PERSONA](docs/PERSONA.md), ADR-008 |
-| Safety | Every external effect needs owner approval bound to a SHA-256 digest; secrets are `secretRef:` handles the model never sees; untrusted content goes through a tool-less `reader` role; the gate exists from Phase 0 | [SECURITY_MODEL](docs/SECURITY_MODEL.md), ADR-006/007/016/018 |
+| Safety | Every external effect needs owner approval bound to a SHA-256 digest; secrets are `secretRef:` handles the model never sees; untrusted content goes through a tool-less `reader` role; the gate exists from Phase 0 | [SECURITY_MODEL](docs/SECURITY_MODEL.md), [THREAT_MODEL](docs/THREAT_MODEL.md), ADR-006/007/016/018 |
 | Models | Provider-agnostic via Pi; role → tier → fallback chain; budgets and local-only roles | [LLM](docs/LLM.md), ADR-001/011/019 |
-| Web | Pluggable `web.search`, `web.fetch` ladder, and browser via Playwright MCP or Stagehand | [WEB](docs/WEB.md), ADR-012 |
+| Web | Pluggable `web.search`, `web.fetch` ladder, and a neutral browser surface with pluggable adapters | [WEB](docs/WEB.md), ADR-012/048/049 |
 | Channels | Plugins behind a `ChannelAdapter` contract | [guides/channel-plugins](docs/guides/channel-plugins.md) |
 
 ## Documentation
@@ -34,27 +34,31 @@ in v1.
 |---|---|
 | [docs/STATE.md](docs/STATE.md) | What is done, what is next |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Principles, packages, trust boundaries |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | Soft phases 0 to 8 and what each item needs before it ships |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Soft phases 0 to 8: items, needs, status, and exit criteria |
 | [docs/ACTION_PLAN.md](docs/ACTION_PLAN.md) | Next steps |
-| [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Undecided design questions (OQ-01 to OQ-66; some resolved) with current leanings |
+| [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | Undecided design questions, the resolved ones with their ADR, and the original wording of each |
 | [docs/adr/](docs/adr/README.md) | Architecture decision records (the authoritative ADR numbering) |
 | [docs/MEMORY.md](docs/MEMORY.md), [PERSONA.md](docs/PERSONA.md), [SECURITY_MODEL.md](docs/SECURITY_MODEL.md), [LLM.md](docs/LLM.md), [WEB.md](docs/WEB.md), [INTEGRATIONS.md](docs/INTEGRATIONS.md) | Subsystem designs |
+| [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) | Actors, attacks, controls, and what is left over |
+| [docs/audits/](docs/audits/documentation-index.md) | Documentation index and audit reports (navigation aids, not authoritative) |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Dev setup, `refs/`, commands |
-| [docs/guides/](docs/guides/channel-plugins.md) | [Writing a channel plugin](docs/guides/channel-plugins.md); [securing the npm and PyPI namespaces](docs/guides/namespaces.md) |
+| [docs/guides/](docs/guides/channel-plugins.md) | [Securing your install](docs/guides/securing-your-install.md) (owner-facing trade-offs); [writing a channel plugin](docs/guides/channel-plugins.md); [securing the npm and PyPI namespaces](docs/guides/namespaces.md) |
 | [docs/00-research.md](docs/00-research.md), [docs/01-merge-plan.md](docs/01-merge-plan.md) | Background research and the original merge reasoning (historical) |
 | [docs/learning/](docs/learning/README.md) | Learning log, one file per topic studied |
 
 ## Repository layout
 
 ~~~
-README.md AGENTS.md CLAUDE.md   generated by scripts/make_docs.py
-jaari.config.example.jsonc      example owner config (llm, web, persona, memory)
+README.md AGENTS.md CLAUDE.md   project and agent instructions
+jaari.config.example.jsonc      example owner config (owner, channels, secrets, llm, web, egress, backup, ...)
 pnpm-workspace.yaml tsconfig*.json eslint.config.js vitest.config.ts
                                 build config, allowlisted to packages/* and apps/*
-docs/                           generated docs (see above)
-scripts/make_docs.py            single source of truth for docs, ADRs, and base config
+docs/                           design docs, ADRs, open questions (hand-maintained)
+scripts/merge_docs.py           merge all docs into one untracked file for AI discussions
 scripts/refs.sh                 clone, pin, and lock the read-only reference repos
 packages/  apps/                TypeScript packages and apps (not yet created)
+python/                         PyPI name-holder package (ADR-010, docs/guides/namespaces.md)
+.github/                        release workflow, CODEOWNERS, Dependabot
 refs/                           read-only reference repos (local only, git-excluded)
 ~~~
 
@@ -66,7 +70,7 @@ Prerequisites: git, Node 22, pnpm, Python 3.
 git clone https://github.com/jaari-ai/jaari && cd jaari
 scripts/refs.sh                         # clone reference repos into refs/, pin, lock read-only
 scripts/refs.sh status                  # commit, lock state, and license per ref
-python3 scripts/make_docs.py --dry-run  # should report nothing to change
+python3 scripts/merge_docs.py --check   # docs links and IDs are consistent
 ~~~
 
 `pnpm install`, `pnpm -r build`, and `pnpm test` apply once Phase 0 adds the root
@@ -76,10 +80,11 @@ Phase 0 item.
 
 ## Changing the docs
 
-Everything in `docs/`, plus this README, `AGENTS.md`, and `CLAUDE.md`, is generated.
-Edit `scripts/make_docs.py`, preview with `python3 scripts/make_docs.py --dry-run --diff`,
-run it, and commit the script together with its output. ADRs and open questions are data
-in that script (`ADRS`, `OPEN_QUESTIONS`).
+Docs are hand-maintained Markdown. Follow the conventions in
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md#docs) (ADRs, open questions, learning notes,
+state), then run `python3 scripts/merge_docs.py --check`. To talk about the project with an AI
+agent, run `python3 scripts/merge_docs.py` and give it the resulting `JAARI_CONTEXT.md`
+(untracked, rebuilt on every run).
 
 ## Lineage
 

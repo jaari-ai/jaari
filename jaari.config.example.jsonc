@@ -1,10 +1,21 @@
 {
-  "owner": { "timezone": "America/New_York", "quietHours": ["22:00", "08:00"] },
+  // ADR-022: `owner.phones` lets a carrier-identity channel recognise the owner.
+  "owner": { "timezone": "America/New_York", "quietHours": ["22:00", "08:00"], "phones": ["secretRef:owner.phone"] },
 
   // ADR-017: where this daemon runs. "vps" | "server" | "home" | "laptop"
   "deployment": { "target": "vps", "overlay": "tailscale" },
 
+  // ADR-021, ADR-084: channel packages; a local path is for development only.
+  "channels": ["@jaari/channel-cli", "@jaari/channel-web", "@jaari/channel-telegram"],
+
+  // ADR-079: secret zero from the OS keychain ("os-keychain") or, on a server or in Compose,
+  // a file the service manager supplies ("host-credential"). ADR-013, ADR-050: dedicated vault.
+  "secrets": { "zero": "host-credential", "vault": { "provider": "bitwarden", "collection": "jaari" } },
+
   "persona": { "curiosity": 2, "proactivity": 1 },
+
+  // ADR-068: self-initiated effects only propose for this many days (0 = off).
+  "shadow": { "days": 14 },
 
   "memory": {
     "repo": "~/.jaari/memory",
@@ -26,11 +37,16 @@
     "roles": {
       "main": "large", "child": "medium", "canonicalize": "medium",
       "curiosity": "small", "classify": "small", "summarize": "small", "title": "small",
-      "reader": "small", "vision": { "capability": "image" }
+      "reader": "small", "vision": { "capability": "image" },
+      // ADR-037: speech engines are roles; local by default, API engines optional.
+      "stt": "local/whisper.cpp", "tts": "local/piper"
     },
     // ADR-019: `jaari init` sets this only if a local model passes `jaari llm eval`.
+    // ADR-093: privacy is set here, by making roles local-only.
     "privacy": { "localOnly": ["canonicalize", "curiosity"] },
-    "budget": { "monthlyUsd": 30, "perRoleUsd": { "child": 10 }, "onExceeded": "downgrade" },
+    // ADR-046: `jaari init` suggests 20 (hybrid, as here), 30 (api-only), or 0 (local-only).
+    // At the limit the owner chooses (raise, cheaper chat model, local only).
+    "budget": { "monthlyUsd": 20, "resetDay": 1, "perRoleUsd": { "child": 10 }, "warnAt": [0.5, 0.8], "graceOverrun": 0.1, "onExceeded": "ask", "explainTimes": 3 },
     "escalation": { "allowRequest": ["child"], "maxPerDay": 20 }
   },
 
@@ -46,26 +62,44 @@
       "localOnlyRoles": ["curiosity", "canonicalize"]
     },
     "fetch": {
-      "ladder": ["http-readability", "lightpanda", "chromium-local", "jina"],
+      // ADR-049: Lightpanda is optional and off by default; add it after http-readability.
+      "ladder": ["http-readability", "chromium-local", "jina"],
       "firecrawlCompatible": { "url": "http://localhost:3002", "enabled": false },
       "escalateOn": ["403", "429", "challenge-page", "text<500", "js-required"]
     },
     "browser": {
       "driver": "playwright-mcp",
-      // ADR-017: run it where the owner's identity is (home hardware or an owner node).
-      "host": "node:home-mini-pc",
-      "remote": { "cdpUrl": "secretRef:browser.cdp", "enabled": false },
+      // ADR-098: a signed-in browser may run on any host, here the daemon's own.
+      "host": "daemon",
+      // ADR-098: a third-party provider holds owner sessions only when enabled for them;
+      // log-ins there go through takeover, never vault fill.
+      "remote": { "cdpUrl": "secretRef:browser.cdp", "enabled": false, "ownerAccounts": false },
       "disabledTools": ["browser_run_code_unsafe"]
     },
-    "budget": { "monthlyUsd": 10, "onExceeded": "local-only" }
+    // ADR-102: paid search, hosted fetch, hosted browsers, and paid egress; at the limit,
+    // self-hosted services only until the reset.
+    "budget": { "monthlyUsd": 10, "onExceeded": "self-hosted-only" }
   },
 
-  // ADR-017: owner accounts pin to one owner exit node; rotation is for anonymous traffic.
+  // ADR-053, ADR-098: owner-account traffic leaves by the host's direct route; only home sites
+  // go through an owner exit. The list ships with sites that turn away data centres, and
+  // `jaari init` suggests more from vault log-in URLs. Rotation is for anonymous traffic.
   "egress": {
-    "ownerAccounts": { "provider": "owner-exit", "node": "home-mini-pc", "failoverTo": [] },
+    "homeSites": [
+      { "match": "accounts.google.com" },              // shipped default; default owner exit
+      { "match": "*.mybank.com", "via": "node:home-mini-pc" }  // suggested from a vault log-in
+    ],
     "anonymous": {
-      "rotate": ["owner-exit:home-mini-pc", "owner-exit:laptop"],
+      "rotate": ["direct", "owner-exit:home-mini-pc"],
       "residentialProxy": { "enabled": false }
     }
+  },
+
+  // ADR-027: memory to git remotes, snapshots of SQLite, audit log, and config, nightly.
+  // ADR-100: files (uploads, photos, generated files) to S3-compatible object storage only.
+  "backup": {
+    "memoryRemotes": ["ssh://git@home-mini-pc/jaari-memory.git"],
+    "snapshots": { "to": ["s3:backups"], "schedule": "nightly" },
+    "files": { "objectStore": "s3:jaari-files" }
   }
 }
