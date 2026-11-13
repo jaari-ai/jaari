@@ -28,7 +28,7 @@ only with a pointer), **generated** (written by a script).
 | `AGENTS.md` | Rules for coding agents, layout, docs workflow, reference licences, architecture rules | current | ADR-002, 009, 014, 016, 071, 072, 075 |
 | `CLAUDE.md` | Claude Code specifics; imports `AGENTS.md` | current | ADR-002 |
 | `NOTICE`, `LICENSE` | Third-party notices (no derived files yet); MIT | current | ADR-014, 016 |
-| `jaari.config.example.jsonc` | Example owner config | current, with gaps (no `channels`, `owner.phones`, `homeSites`, speech roles; budget figure; see report D-07) | ADR-017, 019, 046, 049, 053 |
+| `jaari.config.example.jsonc` | Example owner config | current (gaps of report D-07 fixed 2026-11-13) | ADR-017, 019, 021, 022, 027, 037, 046, 049, 053, 068, 079, 084, 098, 100, 102 |
 | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts` | Allowlist placeholders for the build | placeholders; no root `package.json` | ADR-002 |
 | `.github/workflows/release.yml`, `CODEOWNERS`, `dependabot.yml` | Tag-triggered PyPI release; workflow owners; action updates | exists, never run; no CI workflow | ADR-010, 043 |
 | `python/` | PyPI name-holder package | does not match `docs/guides/namespaces.md` section 6.2 (report D-06) | ADR-010 |

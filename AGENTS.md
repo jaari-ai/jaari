@@ -36,7 +36,7 @@ exist yet.
 | `docs/` | Hand-maintained docs. `docs/adr/` is the authoritative ADR set. `docs/audits/` holds audit reports and the documentation index, which are navigation aids, not authoritative. | Yes, per conventions |
 | `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon`, `cli`, `node`, `hooks`); not created yet | Yes |
 | Root config | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.claude/settings.json` | Yes |
-| `jaari.config.example.jsonc` | Example owner config (`owner`, `deployment`, `persona`, `memory`, `llm`, `egress`, `web`) | Yes |
+| `jaari.config.example.jsonc` | Example owner config (`owner`, `deployment`, `channels`, `secrets`, `persona`, `shadow`, `memory`, `llm`, `web`, `egress`, `backup`) | Yes |
 | `python/` | PyPI name-holder package (ADR-010, `docs/guides/namespaces.md`) | Yes |
 | `.github/workflows/release.yml` | Tag-triggered release workflow, actions pinned to commit SHAs; keep in sync with `docs/guides/namespaces.md` | Yes |
 | `refs/` | Read-only reference repos, local only (`.git/info/exclude`) | Never |
