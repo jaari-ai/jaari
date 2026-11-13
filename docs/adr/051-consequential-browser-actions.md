@@ -1,7 +1,7 @@
 # ADR-051: Consequential browser actions: a deterministic commitment classifier, Allow once for commitments, unreadable asks
 
 - **Status:** Accepted
-- **Extended by:** [ADR-072](072-standing-grants.md)
+- **Extended by:** [ADR-072](072-standing-grants.md), [ADR-099](099-browser-reviews-read-the-action-log.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -55,6 +55,8 @@ commitment succeeded.
 
 ## Amendments
 - **ADR-072:** grants for low-risk commitments follow the one grant model (key: site and form kind).
+- **ADR-099 (resolves OQ-83):** "shadow mode" in the rollout means the browser action log
+  (ADR-097), which records every owner-account action with its classification.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

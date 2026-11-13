@@ -138,3 +138,4 @@ status and exit criteria live there.
 | [096](adr/096-per-process-secret-lifetime.md) | Separate long-running processes may hold their declared secrets while they run | Accepted |
 | [097](adr/097-receipts-and-action-log-retention.md) | Receipts and the browser action log are kept 90 days in SQLite; effects stay forever in the audit log | Accepted |
 | [098](adr/098-owner-accounts-on-any-host.md) | Owner-account browsers may run on any host with direct egress; only home sites use the owner exit | Accepted |
+| [099](adr/099-browser-reviews-read-the-action-log.md) | Browser reviews read the action log; shadow mode keeps its meaning; onboarding states the real shadow setting | Accepted |

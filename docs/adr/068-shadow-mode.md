@@ -1,6 +1,7 @@
 # ADR-068: Shadow mode: only what Jaari starts on its own, per capability, 14 days by default, each new capability shadowed in turn
 
 - **Status:** Accepted
+- **Extended by:** [ADR-099](099-browser-reviews-read-the-action-log.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -44,6 +45,10 @@ Borrowed: an observe-only job that fails closed on any effect from openinstinct
 Shadowing the owner's direct requests (friction on top of Allow once); one global switch instead
 of per capability; lifting automatically when the period ends; repeated lift prompts; a shadow
 period only after the first install, so capabilities added later run live at once.
+
+## Amendments
+- **ADR-099:** browser reviews read the action log, not shadow mode; shadow mode stays limited
+  to self-initiated effects.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

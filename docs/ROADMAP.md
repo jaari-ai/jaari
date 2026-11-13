@@ -146,7 +146,7 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 | 2.7 | Owner authentication: device registry, `jaari pair`, `jaari devices`. Placement | 022 | 0.8 | Planned |
 | 2.8 | Telegram channel. Placement; loop breaker for other bots | 021, 031, 087 | 0.8, 2.7 | Planned |
 | 2.9 | Owner panel: Home, Memory, Settings, Usage, Activity from the event log (Approvals, audit, and secret entry with 3.1 and 3.3) | 067, 088 | 2.7, 2.12 | Planned |
-| 2.10 | Onboarding | 070 | 2.6; OQ-83 | Planned |
+| 2.10 | Onboarding; the close line states the real shadow setting | 070, 099 | 2.6 | Planned |
 | 2.11 | Voice notes and optional spoken replies (in `@jaari/llm`) | 037, 086 | 0.8 | Planned |
 | 2.12 | Overlay binding and panel TLS: loopback plus one private interface; Tailscale, Headscale, and Custom modes; `jaari doctor` check | 030, 088 | 0.5 | Planned |
 
@@ -166,7 +166,7 @@ Exit criteria:
 - Onboarding asks at most one gap question a day (ADR-070).
 - A conditional spoken answer to an approval is refused and asked again (ADR-037).
 
-Open questions that block this phase: OQ-83.
+No open question blocks this phase.
 Gate status: not passed.
 
 ## Phase 3: Safety
@@ -280,8 +280,8 @@ Purpose: Jaari drives a browser and a desktop, with owner accounts on any host (
 | 6.2 | Native Anthropic and Gemini toolsets as an `@jaari/llm` mapping | 048 | 6.1 | Planned |
 | 6.3 | Browser SOCKS5 listener; home sites through the owner exit with the shipped default list; opt-in `vpn`, `mobile`, and `residential-proxy` providers | 016, 017, 053, 098 | 4.4 | Planned |
 | 6.4 | Takeover (`takeover.request`) | 055, 095 | 6.1, 2.9, 2.12 | Planned |
-| 6.5 | Commitment classifier | 051 | 6.1; OQ-83 | Planned |
-| 6.6 | Browser worker child and task-scoped origins; the scope rule is reviewed from logs last | 052 | 6.1; OQ-83 | Planned |
+| 6.5 | Commitment classifier; fixtures from the action log | 051, 099 | 6.1 | Planned |
+| 6.6 | Browser worker child and task-scoped origins; the scope rule is reviewed from the action log last | 052, 099 | 6.1 | Planned |
 | 6.7 | `computer.use` on a host virtual desktop | 015 | 6.1 | Planned |
 | 6.8 | Remote nodes via `jaari capability install`; packages on nodes; the node link | 015, 058, 071, 088 | 2.7, 2.12 | Planned |
 | 6.9 | macOS permission matrix | 057 | 6.8 | Planned |
@@ -293,9 +293,9 @@ Exit criteria:
 - A takeover link is single use and expires in 10 minutes; after 3 failed takeovers on the
   same step Jaari stops and tells the owner (ADR-055).
 - Native toolsets are enabled per route only when the Phase 6 fixtures show a gain (ADR-048).
-- The task-scope origin review is done from the logs (ADR-052).
+- The task-scope origin review is done from the browser action log (ADR-052, ADR-099).
 
-Open questions that block this phase: OQ-83.
+No open question blocks this phase.
 Gate status: not passed.
 
 ## Phase 7: Hardening

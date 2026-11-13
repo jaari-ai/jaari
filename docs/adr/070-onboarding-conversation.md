@@ -1,6 +1,7 @@
 # ADR-070: Onboarding conversation: a built-in skill after `jaari init`, one question at a time, optional people records, a first week of inference and one gap question a day
 
 - **Status:** Accepted
+- **Extended by:** [ADR-099](099-browser-reviews-read-the-action-log.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -49,6 +50,10 @@ stopping on "later", never asking for credentials, and the question order from o
 One long form at init; repeating setup questions in the chat; asking everything up front instead
 of inferring; required people and trust tiers in v1; explaining dials every time they apply;
 open-ended onboarding questions after the first week.
+
+## Amendments
+- **ADR-099:** the close line states the real setting: "cannot act outside this chat yet"
+  before Phase 3, then the owner's chosen shadow length or "off".
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
