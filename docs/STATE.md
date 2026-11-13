@@ -68,10 +68,10 @@ Nothing runs yet. No package exists under `packages/` or `apps/`.
 - Root config files exist as allowlist placeholders (`pnpm-workspace.yaml`, `tsconfig*.json`,
   `eslint.config.js`, `vitest.config.ts`). There is no root `package.json`; the TypeScript
   ESLint parser, an output directory, and ignore rules come with the Phase 0 scaffolding.
-- `.github/workflows/release.yml` and the `python/` name-holder package exist. `python/` does
-  not match [guides/namespaces.md](guides/namespaces.md) section 6.2 (no `README.md`, no
-  `LICENSE`, module at `src/__init__.py`), so the release build is expected to fail until it
-  is fixed. No CI workflow exists.
+- `.github/workflows/release.yml` and the `python/` name-holder package exist. `python/`
+  matches [guides/namespaces.md](guides/namespaces.md) section 6.2 and builds a wheel and an
+  sdist locally (checked 2026-11-13); the release workflow itself has never run. No CI
+  workflow exists.
 - [THREAT_MODEL.md](THREAT_MODEL.md) is written (ADR-069).
 
 ## Now

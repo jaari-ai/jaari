@@ -8,8 +8,8 @@ status and exit criteria live there.
 1. **Questions that block Phase 0**: all decided (ADR-079 to ADR-086).
 2. **Scaffold the monorepo** (0.1 to 0.4): root `package.json`, lockfile, pnpm supply-chain
    settings, CI with the tier-1 smoke test, `SECURITY.md` and `CONTRIBUTING.md` (ADR-041,
-   ADR-043); fix `python/` to match [guides/namespaces.md](guides/namespaces.md) and secure
-   the names (ADR-010).
+   ADR-043); secure the names with [guides/namespaces.md](guides/namespaces.md) (ADR-010;
+   `python/` already matches it).
 3. **Safety floor first** (0.9 to 0.11): `@jaari/capabilities`, `@jaari/gate` (deny-all stub),
    and `@jaari/secrets` (resolver + `os-keychain` and `host-credential`) with the first package
    (ADR-018, ADR-079).

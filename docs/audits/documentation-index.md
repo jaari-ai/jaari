@@ -31,7 +31,7 @@ only with a pointer), **generated** (written by a script).
 | `jaari.config.example.jsonc` | Example owner config | current (gaps of report D-07 fixed 2026-11-13) | ADR-017, 019, 021, 022, 027, 037, 046, 049, 053, 068, 079, 084, 098, 100, 102 |
 | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts` | Allowlist placeholders for the build | placeholders; no root `package.json` | ADR-002 |
 | `.github/workflows/release.yml`, `CODEOWNERS`, `dependabot.yml` | Tag-triggered PyPI release; workflow owners; action updates | exists, never run; no CI workflow | ADR-010, 043 |
-| `python/` | PyPI name-holder package | does not match `docs/guides/namespaces.md` section 6.2 (report D-06) | ADR-010 |
+| `python/` | PyPI name-holder package | current; matches `docs/guides/namespaces.md` section 6.2 and builds (D-06 fixed 2026-11-13) | ADR-010 |
 | `scripts/refs.sh` | Clones, locks, and indexes `refs/` | current; pins each reference to a full sha; `bump` moves pins (ADR-083) | ADR-002 |
 | `scripts/merge_docs.py` | Builds `JAARI_CONTEXT.md`; `--check` validates links, ADR tables, OQ ids and counts | current | none |
 | `JAARI_CONTEXT.md` | Merged copy of the docs for AI discussions | generated, untracked; never edit | none |
@@ -88,7 +88,7 @@ title still says "sensitive files local-only"; ADR-078 replaced that rule.
 
 | Path | Purpose | Status |
 |---|---|---|
-| `docs/guides/namespaces.md` | Owner runbook: secure npm and PyPI names, GitHub hardening, release | current; `python/` and private vulnerability reporting are follow-ups (report D-06, D-08) |
+| `docs/guides/namespaces.md` | Owner runbook: secure npm and PyPI names, GitHub hardening, release | current; private vulnerability reporting is a follow-up (report D-06, D-08) |
 | `docs/guides/securing-your-install.md` | Owner-facing storage and encryption trade-offs | current; does not yet cover revocation, the panel passkey, or document routing |
 | `docs/guides/channel-plugins.md` | Plugin author guide | current |
 | `docs/learning/07-computer.md`, `08-egress-identity-and-takeover.md` | Studies of 2026-11-09 | historical, with a "since decided" pointer |
