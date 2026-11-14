@@ -217,7 +217,8 @@ dependency.
 - Model ↔ tools: every tool maps to a capability; effectful capabilities go through the gate.
 - Tools ↔ internet: all egress through `@jaari/http` or the container egress proxy (the core
   ships in Phase 0; ADR-080).
-- Untrusted content ↔ main session: `reader` summary only, never raw instructions. Every run
+- Untrusted content ↔ main session: typed `reader` results in fences only, never raw instructions;
+  arguments copied from it carry their provenance to the gate (ADR-104). Every run
   carries a code-set origin; `outside` sticks to derived work (ADR-075).
 - Internet ↔ hook listener: a separate process that serves only hook paths, with signed
   deliveries; public exposure is opt-in (ADR-073).

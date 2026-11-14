@@ -1,7 +1,7 @@
 # ADR-052: Untrusted pages: a browser worker child with task data only, task-scoped origins, fencing as a floor
 
 - **Status:** Accepted
-- **Extended by:** [ADR-097](097-receipts-and-action-log-retention.md), [ADR-099](099-browser-reviews-read-the-action-log.md)
+- **Extended by:** [ADR-097](097-receipts-and-action-log-retention.md), [ADR-099](099-browser-reviews-read-the-action-log.md), [ADR-104](104-prompt-injection-defence-in-depth.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -51,6 +51,7 @@ worker memory or other tools; an unscoped worker that may send task data anywher
 - **ADR-097:** the action log is kept 90 days in SQLite (configurable); decisions and effects,
   browser commitments included, stay forever in `audit.jsonl`.
 - **ADR-099:** the Phase 6 task-scope review reads the browser action log.
+- **ADR-104:** fencing is `fence()` with a per-session fence id, `defuse`, and JSON-encoded bodies; the worker's structured result is the typed reader result; vendor classifiers feed the `suspect` flag.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

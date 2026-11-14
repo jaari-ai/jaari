@@ -1,11 +1,11 @@
 # Jaari: State
 
-Last updated: 2026-11-13
+Last updated: 2026-11-14
 
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (103 ADRs, all Accepted)
+## Decided (104 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain (ADR-010, 014, 043). npm and PyPI names are
@@ -29,8 +29,9 @@ The index is [adr/README.md](adr/README.md). By area:
   037, 042, 060, 061, 064, 070, 089).
 - Safety: digest-bound approvals, `secretRef` secrets and vault providers, OpenMausBot
   hardening, one capability vocabulary with a deny-all gate from Phase 0, standing grants,
-  shadow mode, kill switch and limits, outside lineage, threat model, no payments in v1
-  (ADR-006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075, 079, 081, 090, 092, 095, 096).
+  shadow mode, kill switch and limits, outside lineage, threat model, no payments in v1,
+  prompt-injection defences (ADR-006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075,
+  079, 081, 090, 092, 095, 096, 104).
 - Models: role and tier routing, a pinned main session, local-only defaults decided at init,
   local-model qualification, a monthly budget, refusals in the pinned session (ADR-011, 019,
   045, 046, 085).
@@ -51,7 +52,7 @@ The index is [adr/README.md](adr/README.md). By area:
 - Instinct, Pally, Muse, Grok Bot, ChatGPT Work, and the open-source clones: [00-research.md](00-research.md).
 - Learning notes: [07 computer use](learning/07-computer.md), [08 egress and takeover](learning/08-egress-identity-and-takeover.md), [09 OpenMausBot](learning/09-openmausbot.md),
   [10 open questions review](learning/10-open-questions-review.md), [11 Pally](learning/11-pally.md),
-  and [12 browser placement](learning/12-browser-placement.md) (their recommendations fed ADR-021
+  and [12 browser placement](learning/12-browser-placement.md), [13 prompt injection](learning/13-prompt-injection-and-system-prompts.md) (their recommendations fed ADR-021
   to ADR-098; some were changed or rejected by the ADR).
 - Docs conflict audit (2026-11-10): ten conflicts recorded, accepted, and folded into ADR-017
   to ADR-020.
