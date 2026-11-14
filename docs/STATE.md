@@ -52,8 +52,8 @@ The index is [adr/README.md](adr/README.md). By area:
 - Instinct, Pally, Muse, Grok Bot, ChatGPT Work, and the open-source clones: [00-research.md](00-research.md).
 - Learning notes: [07 computer use](learning/07-computer.md), [08 egress and takeover](learning/08-egress-identity-and-takeover.md), [09 OpenMausBot](learning/09-openmausbot.md),
   [10 open questions review](learning/10-open-questions-review.md), [11 Pally](learning/11-pally.md),
-  and [12 browser placement](learning/12-browser-placement.md), [13 prompt injection](learning/13-prompt-injection-and-system-prompts.md) (their recommendations fed ADR-021
-  to ADR-098; some were changed or rejected by the ADR).
+  [12 browser placement](learning/12-browser-placement.md), and [13 prompt injection](learning/13-prompt-injection-and-system-prompts.md) (their recommendations fed ADR-021
+  to ADR-104; some were changed or rejected by the ADR).
 - Docs conflict audit (2026-11-10): ten conflicts recorded, accepted, and folded into ADR-017
   to ADR-020.
 - Documentation audit (2026-11-12): docs, ADR links, open questions, and the roadmap

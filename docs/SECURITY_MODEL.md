@@ -67,7 +67,7 @@ separate manifest fields.
 
 | Capability | Class | Notes |
 |---|---|---|
-| `web.search`, `web.fetch` | read | Results are untrusted content (reader role) |
+| `web.search`, `web.fetch` | read | Results are untrusted content (reader role); model-built URLs with a path or query, and URLs or queries that match private data, are held (ADR-104) |
 | `browser.read` | read | Page content is untrusted; a browser worker child with task data only sees it (ADR-052) |
 | `browser.act` | gated by classifier | Ordinary clicks and typing; commitments (pay or order, book, send, consent, account changes, upload) escalate to `browser.submit` (ADR-051) |
 | `browser.submit` | gated | Forms, purchases, consent |

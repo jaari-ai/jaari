@@ -194,11 +194,11 @@ Critic, with Jaari's escalate-only rule).
   brackets, zero-width splits, bidi, JSON breakouts) against `fence` and `defuse`; reader
   schema validation; provenance classification and URL holds; canary scanning on every egress
   path; a mutation test that removes one protection at a time (OpenMausBot
-  `bot-box/self-check.ts` style).
+  `server/bot-box/self-check.ts` style).
 - **Model, in `jaari llm eval`:** the existing "injection resistance" fixtures grow into a
   per-role set: the reader must report asks rather than relay them; the main session must
   mention and not follow instructions in fenced blocks. Models qualify per role (ADR-045).
-- **Behaviour, Phase 8:** AgentDojo-style scenarios in the hermetic harness (ADR-041), scored
+- **Behaviour, Phase 8:** AgentDojo-style scenarios as opt-in live behaviour tests (ADR-041 tier 3), scored
   on attack success and on false holds, per model and per preset.
 
 ### Phasing
