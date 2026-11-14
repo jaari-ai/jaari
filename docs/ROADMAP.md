@@ -56,6 +56,7 @@ effect. Entry: none.
 | 0.13 | Laptop sleep and wake: detection, power assertion, battery pause, network re-probe (catch-up is 1.4) | 057, 082 | 0.5 | Planned |
 | 0.14 | `ownerId` in the data model | 044 | 0.5 | Planned |
 | 0.15 | `@jaari/http` core: resolve, check, dial; the address-class table; the `direct` provider; the lint rule against other network clients | 016, 053, 080 | 0.1 | Planned |
+| 0.16 | Prompt-injection floor: the locked safety section, `fence()` and `defuse`, the reply marker filter, and canary and fence-id scanning in the `@jaari/http` core and channel send paths | 042, 104 | 0.5, 0.8, 0.15 | Planned |
 
 Exit criteria:
 - The tier-1 smoke test boots the daemon on the scripted engine in CI on every pull request,
@@ -85,6 +86,9 @@ Exit criteria:
 - Every outbound call goes through `@jaari/http`: the lint rule fails on a direct `fetch`,
   `node:http`, `node:https`, `node:net`, `node:tls`, or `undici` import elsewhere, and the
   address-class tests deny metadata, link-local, and the daemon's own ports (ADR-016, ADR-080).
+- The fence-escape corpus (forged closers, look-alike brackets, zero-width splits, bidi, JSON
+  breakouts) cannot open or close a fence, and an outbound call carrying the canary is blocked
+  with an audit row (ADR-104).
 
 No open question blocks this phase.
 Gate status: not passed.
@@ -97,7 +101,7 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 |---|---|---|---|---|
 | 1.1 | Memory repo, single writer, write path; pre-write secret scan of derived facts and files; binary files refused in git | 003, 026, 028, 081, 087, 100 | 0.5 | Planned |
 | 1.2 | Structured records, `records.query`, FTS5 search; sensitivity marking by type and rules | 023, 093 | 1.1 | Planned |
-| 1.3 | Context assembly; session orientation and re-injection from state | 024, 065 | 1.2 | Planned |
+| 1.3 | Context assembly with harness notes and authority labels; session orientation and re-injection from state | 024, 065, 104 | 1.2, 0.16 | Planned |
 | 1.4 | Job engine; catch-up after sleep (in `@jaari/core`); job-tree abort | 025, 057, 082, 086, 031, 087 | 0.5, 0.13 | Planned |
 | 1.5 | Routines: object, schedule and one-shot triggers, `jaari routine`, run history with job receipts, caps; code steps and one tool-less model step; no proactive delivery (in `@jaari/core`) | 064, 086, 089 | 1.4, 1.11 | Planned |
 | 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9 | Planned |
@@ -217,9 +221,9 @@ and audit log.
 |---|---|---|---|---|
 | 4.1 | Children and receipts; child limits and child abort; routine model steps run as children | 011, 061, 031, 087, 089, 097 | 1.4 | Planned |
 | 4.2 | `llm.escalate` | 011 | 4.1 | Planned |
-| 4.3 | `reader` role and outside lineage | 075 | 0.7 | Planned |
+| 4.3 | `reader` role with typed results, outside lineage, argument provenance, the local injection detector, and the reply link policy | 075, 104 | 0.7, 0.16 | Planned |
 | 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core | 016, 053, 080 | 0.15, 2.12 | Planned |
-| 4.5 | `web.search` and `web.fetch` with pluggable rungs; watcher triggers on web pages | 012, 049, 064, 089 | 4.3, 4.4, 4.13 | Planned |
+| 4.5 | `web.search` and `web.fetch` with pluggable rungs, provenance holds on model-built URLs and private-data queries; watcher triggers on web pages | 012, 049, 064, 089, 104 | 4.3, 4.4, 4.13 | Planned |
 | 4.6 | Optional Web Bot Auth signing for HTTP | 054 | 4.4 | Planned |
 | 4.7 | First sandbox backend: container or bubblewrap; under Compose, bubblewrap in the hardened daemon container with the install probe | 034, 036, 094 | 0.12 | Planned |
 | 4.8 | MCP client, local servers sandboxed, per-process secrets (in `@jaari/mcp`) | 034, 086, 096 | 4.3, 4.7 | Planned |
@@ -234,6 +238,11 @@ Exit criteria:
   limits; CI mutation tests remove one protection at a time and the check catches each
   (ADR-036).
 - An `outside` run cannot settle approvals or use standing grants (ADR-075).
+- A reader result that fails its schema or quote check becomes "unreadable"; an argument copied
+  from untrusted content cannot use a standing grant, even in an owner run; a model-built
+  `web.fetch` URL with a path or query, or one matching private data, is held (ADR-104).
+- The injection detector's threshold is set from `jaari llm eval` on the owner's own sample, and
+  a detector outage loosens nothing (ADR-104).
 - MCP config and tool list are pinned; results are capped at 20 KB (ADR-034).
 - The connection baseline holds: 15 s timeout, 64 KiB default and 1 MiB maximum response
   (ADR-053).
@@ -285,6 +294,7 @@ Purpose: Jaari drives a browser and a desktop, with owner accounts on any host (
 | 6.8 | Remote nodes via `jaari capability install`; packages on nodes; the node link | 015, 058, 071, 088 | 2.7, 2.12 | Planned |
 | 6.9 | macOS permission matrix | 057 | 6.8 | Planned |
 | 6.10 | Web Bot Auth signing in the browser | 054 | 6.1, 4.6 | Planned |
+| 6.11 | Optional action critic for ungated actions in tasks with untrusted input; escalate only; decided from shadow-mode logs | 104 | 6.6 | Planned |
 
 Exit criteria:
 - The classifier ships only when it catches every commitment in the recorded real-flow pages
@@ -321,7 +331,7 @@ Purpose: measure behaviour and learn from outcomes. Entry: receipts (4.1), usage
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
 | 8.1 | Live behaviour tests (tier 3, opt-in) | 041 | 2.5 | Planned |
-| 8.2 | Remaining `jaari llm eval` fixtures beyond qualification (1.9) | 045 | 1.9 | Planned |
+| 8.2 | Remaining `jaari llm eval` fixtures beyond qualification (1.9), including per-role injection fixtures and AgentDojo-style scenarios | 045, 104 | 1.9 | Planned |
 | 8.3 | Learned router experiment | none (LLM.md) | 3.4 | Planned |
 | 8.4 | Learning from outcomes: reflections and promotions | 061 | 4.1 | Planned |
 

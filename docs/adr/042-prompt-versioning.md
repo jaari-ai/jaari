@@ -1,6 +1,7 @@
 # ADR-042: Prompt versioning: versioned prompt files, locked safety prompts, a per-turn fingerprint, propose-and-approve persona edits
 
 - **Status:** Accepted
+- **Extended by:** [ADR-104](104-prompt-injection-defence-in-depth.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -48,6 +49,9 @@ Prompts compiled into code without a version (changes cannot be traced); overrid
 prompt including the safety core (a memory edit or an injected write could weaken the reader
 role or fencing); Jaari applying edits to its own persona or rules without approval; a separate
 prompt store outside memory git (two histories to reconcile).
+
+## Amendments
+- **ADR-104:** the locked safety section has a fixed content contract (who gives instructions, how labels look, what to do with instructions found in data); the canary is never in a form the model is asked to repeat.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
