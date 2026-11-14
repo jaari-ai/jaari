@@ -221,7 +221,7 @@ and audit log.
 |---|---|---|---|---|
 | 4.1 | Children and receipts; child limits and child abort; routine model steps run as children | 011, 061, 031, 087, 089, 097 | 1.4 | Planned |
 | 4.2 | `llm.escalate` | 011 | 4.1 | Planned |
-| 4.3 | `reader` role with typed results, outside lineage, argument provenance, and the local injection detector | 075, 104 | 0.7, 0.16 | Planned |
+| 4.3 | `reader` role with typed results, outside lineage, argument provenance, the local injection detector, and the reply link policy | 075, 104 | 0.7, 0.16 | Planned |
 | 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core | 016, 053, 080 | 0.15, 2.12 | Planned |
 | 4.5 | `web.search` and `web.fetch` with pluggable rungs, provenance holds on model-built URLs and private-data queries; watcher triggers on web pages | 012, 049, 064, 089, 104 | 4.3, 4.4, 4.13 | Planned |
 | 4.6 | Optional Web Bot Auth signing for HTTP | 054 | 4.4 | Planned |

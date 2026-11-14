@@ -44,7 +44,7 @@ blocking every network call until Phase 4 (no model provider in Phases 0 to 3); 
 `undici` dispatcher (does not cover every client, and hides the route from review).
 
 ## Amendments
-- **ADR-104:** the core scans outbound URLs and bodies for the canary and the session fence id and blocks a hit; model-built `web.fetch` URLs with a path or query, and URLs or queries matching private data, are held.
+- **ADR-104:** the core scans outbound URLs and bodies for the canary and the session fence id, blocks a hit, writes an audit row, and alerts the owner. (Provenance holds on `web.fetch` and `web.search` arguments are decided at the tool call, before the gate, not in the core.)
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -48,7 +48,7 @@ would block useful drafts such as a reply to a mail); outside runs using grants;
 losing grants after reading untrusted content (more asks for little gain).
 
 ## Amendments
-- **ADR-104:** in owner-origin runs too, an argument whose value came from untrusted content cannot use a standing grant; the card names its source (argument provenance).
+- **ADR-104:** in owner-origin runs too, an argument whose value came from untrusted content cannot use a standing grant; the card names its source (argument provenance). A block the local injection detector flags `suspect` suspends standing grants for the rest of the turn. Owner runs otherwise keep their grants after reading untrusted content, so the rejected alternative above still holds for whole runs.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
