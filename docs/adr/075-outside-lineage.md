@@ -1,6 +1,7 @@
 # ADR-075: Outside lineage: a code-set origin on every run, sticky across spawned work, outside effects always ask with the origin shown
 
 - **Status:** Accepted
+- **Extended by:** [ADR-104](104-prompt-injection-defence-in-depth.md)
 - **Date:** 2026-11-12
 
 ## Decision
@@ -45,6 +46,9 @@ full-text approval for its memory writes from OpenMausBot `server/host/outside-l
 Origin judged by the model; outside work upgrading itself; refusing every outside effect (it
 would block useful drafts such as a reply to a mail); outside runs using grants; owner runs
 losing grants after reading untrusted content (more asks for little gain).
+
+## Amendments
+- **ADR-104:** in owner-origin runs too, an argument whose value came from untrusted content cannot use a standing grant; the card names its source (argument provenance). A block the local injection detector flags `suspect` suspends standing grants for the rest of the turn. Owner runs otherwise keep their grants after reading untrusted content, so the rejected alternative above still holds for whole runs.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

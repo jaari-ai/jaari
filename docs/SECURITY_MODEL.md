@@ -67,7 +67,7 @@ separate manifest fields.
 
 | Capability | Class | Notes |
 |---|---|---|
-| `web.search`, `web.fetch` | read | Results are untrusted content (reader role) |
+| `web.search`, `web.fetch` | read | Results are untrusted content (reader role); model-built URLs with a path or query, and URLs or queries that match private data, are held (ADR-104) |
 | `browser.read` | read | Page content is untrusted; a browser worker child with task data only sees it (ADR-052) |
 | `browser.act` | gated by classifier | Ordinary clicks and typing; commitments (pay or order, book, send, consent, account changes, upload) escalate to `browser.submit` (ADR-051) |
 | `browser.submit` | gated | Forms, purchases, consent |
@@ -104,7 +104,8 @@ minutes; 5 for `email.send` and `publish`; overridable per capability.
 `secretRef` resolver and the `os-keychain` and `host-credential` providers (ADR-079) ship in
 Phase 0; `env` and `file` are
 for development and make `jaari doctor` warn. Third-party skills install disabled until
-the `reader` role exists.
+the `reader` role exists. The locked safety section, `fence()`, and canary scanning ship in
+Phase 0 (ADR-104).
 
 ## Untrusted content
 Email, web pages, search snippets, and documents go through the tool-less `reader`
@@ -113,6 +114,22 @@ content too (ADR-073). Every run carries a
 code-set origin (`owner`, `routine`, `event`, `outside`). `outside` sticks to everything it
 spawns, cannot settle approvals or use grants, and each of its effects is Allow once with an
 origin line on the card (ADR-075).
+
+Prompt injection (ADR-104). Probabilistic layers may only tighten a decision, never loosen one.
+- A locked safety section says only `owner` lines are requests and that instructions found in
+  data are reported to the owner, never followed. The prompt holds nothing secret.
+- Every untrusted block goes through `fence()`: a per-session fence id, `defuse` (no invisible,
+  bidi, or control characters, no forged markers), a JSON-encoded body, and a harness note with
+  its authority. Replies are stripped of Jaari's markers.
+- The `reader` returns a typed result checked by code: quotes must occur in the source,
+  sentences addressed to the assistant move to attributed `asks`, failures are "unreadable".
+- Argument provenance: an argument copied from untrusted content cannot use a standing grant,
+  even in an owner run, and its card names the source; model-built `web.fetch` URLs with a
+  path or query, and URLs or search queries that match private data, are held.
+- A local injection detector (Llama Prompt Guard 2 86M by default, ProtectAI DeBERTa v2 as the
+  licence-free fallback) flags blocks as `suspect`, which suspends grants for the turn.
+- A per-install canary and the session fence id are scanned for on every outbound path and in
+  replies; a hit is blocked and audited. Replies link only to URLs from the owner or the task.
 
 ## Egress
 All network calls via `@jaari/http`; containers via an egress proxy that blocks private

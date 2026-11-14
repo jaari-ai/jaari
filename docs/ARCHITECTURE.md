@@ -34,7 +34,7 @@
 ## Packages
 | Package | Responsibility |
 |---|---|
-| `@jaari/core` | Agent loop on Pi, sessions, children, tool registry; job engine (ADR-025), routines (ADR-064), skills (ADR-060), the `CliEngine` interface (ADR-077), the event log and the OpenTelemetry adapter (ADR-032) (ADR-086) |
+| `@jaari/core` | Agent loop on Pi, sessions, children, tool registry; job engine (ADR-025), routines (ADR-064), skills (ADR-060), the `CliEngine` interface (ADR-077), the event log and the OpenTelemetry adapter (ADR-032) (ADR-086); the locked safety prompt, `fence()` and `defuse` (ADR-104) |
 | `@jaari/capabilities` | Capability and package manifest schema, loader, and the daemon–node contract; the single capability vocabulary lives in SECURITY_MODEL.md (ADR-015, ADR-018, ADR-071) |
 | `@jaari/llm` | Wraps `@earendil-works/pi-ai`; tiers + fallback chains, role routing, escalation, budgets, local-only privacy, usage log, `jaari llm eval` (ADR-011); speech roles `stt` and `tts` (ADR-037, ADR-086) |
 | `@jaari/memory` | Git-backed memory repo, write path, canonicalize, daily audit, gap queue; file store (ADR-038, ADR-086) |
@@ -217,7 +217,8 @@ dependency.
 - Model ↔ tools: every tool maps to a capability; effectful capabilities go through the gate.
 - Tools ↔ internet: all egress through `@jaari/http` or the container egress proxy (the core
   ships in Phase 0; ADR-080).
-- Untrusted content ↔ main session: `reader` summary only, never raw instructions. Every run
+- Untrusted content ↔ main session: typed `reader` results in fences only, never raw instructions;
+  arguments copied from it carry their provenance to the gate (ADR-104). Every run
   carries a code-set origin; `outside` sticks to derived work (ADR-075).
 - Internet ↔ hook listener: a separate process that serves only hook paths, with signed
   deliveries; public exposure is opt-in (ADR-073).
