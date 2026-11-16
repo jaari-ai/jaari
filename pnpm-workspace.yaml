@@ -6,4 +6,7 @@ packages:
 saveExact: true
 minimumReleaseAge: 10080 # 7 days, in minutes
 strictDepBuilds: true
-allowBuilds: {}
+# Reviewed and denied: the scripts are not needed (2026-11-16, roadmap 0.7, pi-ai's dependencies).
+allowBuilds:
+  "@google/genai": false # preinstall only echoes "no-op"
+  protobufjs: false # postinstall only warns about a dependent's version range

@@ -1,0 +1,24 @@
+{
+  "name": "@jaari/llm",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Model routing on pi-ai: providers, tiers, roles, fallback chains, refusal classification, usage log (ADR-011, ADR-019, ADR-032, ADR-085)",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@jaari/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "1.5.0",
+    "@jaari/http": "workspace:*",
+    "@jaari/secrets": "workspace:*",
+    "typebox": "1.4.6"
+  }
+}

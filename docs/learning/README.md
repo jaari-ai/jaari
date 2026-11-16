@@ -25,6 +25,8 @@ Written:
   the gaps that ADR-104 closes (2026-11-14)
 - [14-egress-core.md](14-egress-core.md) — OpenMausBot's egress gate and address table, and
   where Jaari's `@jaari/http` core differs (2026-11-16)
+- [15-pi-ai.md](15-pi-ai.md) — pi-ai's providers, auth fallback, error and refusal shapes, and
+  what `@jaari/llm` changes (2026-11-16)
 
 Planned (optional, not scheduled; ADRs have since decided these topics):
 - 01-session.md — persistent session, steering, segments, compaction

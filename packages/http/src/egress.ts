@@ -72,28 +72,30 @@ export function createEgress(policy: EgressPolicy = {}): { fetch: typeof globalT
   const check = createPolicyCheck(policy);
   const connect = buildConnector({});
 
-  // Dials the first address that passed. A name may also return refused addresses; they are never dialled.
-  async function pick(host: string, port: number): Promise<string> {
+  // The addresses that passed, in resolver order. A name may also return refused addresses; they are never dialled.
+  async function pick(host: string, port: number): Promise<string[]> {
     const addresses = isIP(host) ? [host] : (await lookup(host, { all: true })).map((a) => a.address);
-    const refusals: Refusal[] = [];
-    for (const address of addresses) {
-      const refusal = check(address, port, host);
-      if (refusal === null) return address;
-      refusals.push(refusal);
-    }
-    throw new EgressRefused(host, port, refusals);
+    const refusals = addresses.map((address) => check(address, port, host));
+    const passed = addresses.filter((_, i) => refusals[i] === null);
+    if (passed.length === 0) throw new EgressRefused(host, port, refusals.filter((r) => r !== null));
+    return passed;
   }
 
   const agent = new Agent({
     connect(opts, callback) {
       const port = Number(opts.port) || (opts.protocol === "https:" ? 443 : 80);
       const host = opts.hostname.replace(/^\[|\]$/g, "");
-      pick(host, port).then(
-        // TLS still checks the certificate against the name, not the address dialled.
-        // shortcut: no fallback to the next checked address when the first one fails to connect; add with the pool (Phase 6).
-        (address) => connect({ ...opts, hostname: address, servername: opts.servername ?? (isIP(host) ? undefined : host) }, callback),
-        (error: Error) => callback(error, null),
-      );
+      // TLS still checks the certificate against the name, not the address dialled.
+      const servername = opts.servername ?? (isIP(host) ? undefined : host);
+      // Try each checked address until one connects: `localhost` gives ::1 first on many systems, while a local
+      // server such as Ollama listens on 127.0.0.1 only.
+      const dial = (addresses: string[]): void =>
+        connect({ ...opts, hostname: addresses[0]!, servername }, (error, socket) => {
+          if (error && addresses.length > 1) dial(addresses.slice(1));
+          else if (error) callback(error, null);
+          else callback(null, socket);
+        });
+      pick(host, port).then(dial, (error: Error) => callback(error, null));
     },
   });
 

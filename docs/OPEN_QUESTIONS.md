@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-16. Open: **1**.
+Last updated: 2026-11-16. Open: **2**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -24,6 +24,11 @@ phase, and Leaning, with a line of context below it.
 Context: ADR-071 lists `platforms` in the manifest, and the schema accepts it (ADR-108), but no ADR
 or roadmap item checks it. The first platform-specific package is `computer.use` with provider
 `macos` on a node (roadmap 6.8, 6.9); a built-in with `platforms` would load on any host today.
+
+| OQ-93 | Refusal categories | Which provider refusal categories count as ADR-011's off-limits ones (impersonation, CAPTCHA solving), how Jaari reads them when pi-ai drops them, and whether other refusals in unpinned roles then move to the next model? | 4 | Read the category through pi-ai's raw-event hook, collect real refusals in the usage log first, then map |
+
+Context: pi-ai 1.5.0 maps Anthropic's `refusal` to `stopReason: "error"` and drops the category
+(learning/15). Until this is decided, every refusal stops and is reported (ADR-114).
 
 ## Resolved
 

@@ -5,7 +5,7 @@ Last updated: 2026-11-16
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (113 ADRs, all Accepted)
+## Decided (114 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -37,8 +37,8 @@ The index is [adr/README.md](adr/README.md). By area:
   prompt-injection defences (ADR-006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075,
   079, 081, 090, 092, 095, 096, 104, 112).
 - Models: role and tier routing, a pinned main session, local-only defaults decided at init,
-  local-model qualification, a monthly budget, refusals in the pinned session (ADR-011, 019,
-  045, 046, 085).
+  local-model qualification, a monthly budget, refusals in the pinned session; pi-ai 1.5.0 with keys
+  only from `secretRef` and the usage log in `node:sqlite` (ADR-011, 019, 045, 046, 085, 114).
 - Web and computer use: search, fetch ladder, neutral browser surface with adapters,
   commitment classifier, browser worker, egress pool, signed-agent identity, takeover, egress
   core in Phase 0 on Node's `fetch` and undici, owner accounts on any host with home sites via the owner exit, the web
@@ -57,7 +57,8 @@ The index is [adr/README.md](adr/README.md). By area:
 - Learning notes: [07 computer use](learning/07-computer.md), [08 egress and takeover](learning/08-egress-identity-and-takeover.md), [09 OpenMausBot](learning/09-openmausbot.md),
   [10 open questions review](learning/10-open-questions-review.md), [11 Pally](learning/11-pally.md),
   [12 browser placement](learning/12-browser-placement.md), and [13 prompt injection](learning/13-prompt-injection-and-system-prompts.md) (their recommendations fed ADR-021
-  to ADR-104; some were changed or rejected by the ADR).
+  to ADR-104; some were changed or rejected by the ADR); [14 egress core](learning/14-egress-core.md) and
+  [15 pi-ai](learning/15-pi-ai.md) were written while building 0.15 and 0.7 (ADR-113, ADR-114).
 - Docs conflict audit (2026-11-10): ten conflicts recorded, accepted, and folded into ADR-017
   to ADR-020.
 - Documentation audit (2026-11-12): docs, ADR links, open questions, and the roadmap
@@ -90,9 +91,14 @@ Nothing runs yet. No app exists under `apps/`.
   link-local, reserved, this-machine, private, public; IPv4 inside IPv6 forms unwrapped), the
   owner's allow list (addresses, ranges, or `name:port` for Compose services) and the daemon's own ports, and `createEgress(policy).fetch`: Node's `fetch`
   with an undici `Agent` whose connector resolves, checks, and dials only a checked address
-  (ADR-113). A lint rule, checked by a test, refuses other network clients (ADR-080). Next: 0.7,
-  `@jaari/llm`, then 0.5, the daemon, which also decides how the daemon runs under plain Node
-  (ADR-111).
+  (ADR-113). A lint rule, checked by a test, refuses other network clients (ADR-080). 
+- `@jaari/llm` (0.7, delivered 2026-11-16): on pi-ai 1.5.0. The `llm` config section checked with
+  TypeBox (local-only roles that reach an API fail at start); providers from config with keys only
+  from `secretRef`; role chains with the main role pinned; a move down the chain only when the
+  provider never accepted the request; refusals read from the raw stop reason and, until OQ-93,
+  stopped and reported; the usage log in SQLite through `node:sqlite` (ADR-114). The egress core now
+  tries each checked address in turn. Next: 0.5, the daemon, which also decides how the daemon runs
+  under plain Node (ADR-111).
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript
@@ -128,4 +134,4 @@ No open question blocks Phase 0.
   leaving Experimental (ADR-025, ADR-065).
 
 ## Open questions
-1 open. OQ-92 (package platforms) blocks Phase 6. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+2 open. OQ-92 (package platforms) blocks Phase 6; OQ-93 (refusal categories) blocks Phase 4. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

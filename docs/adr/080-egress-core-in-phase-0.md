@@ -63,6 +63,6 @@ blocking every network call until Phase 4 (no model provider in Phases 0 to 3); 
   daemon's own ports stay refused.
 - Listening is not egress. The lint rule allows the server names of `node:http`, `node:https`
   (`createServer`, `Server`, `IncomingMessage`, `ServerResponse`) and `node:net` (`createServer`,
-  `Server`) everywhere, for the daemon's local socket (ADR-021) and the hook listener (ADR-073).
+  `Server`, and the parsers `isIP`, `isIPv4`, `isIPv6`) everywhere, for the daemon's local socket (ADR-021) and the hook listener (ADR-073).
   Client names stay refused. How `apps/cli` connects to the daemon's socket is decided with 0.8:
   `net.connect` also dials TCP, so lint cannot limit it to a socket path.

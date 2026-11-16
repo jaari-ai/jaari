@@ -1,7 +1,7 @@
 # ADR-011: LLM routing: owner policy, role-based tiers, request-only escalation
 
 - **Status:** Accepted
-- **Extended by:** [ADR-019](019-model-pinning-and-local-only-defaults.md), [ADR-037](037-voice.md), [ADR-077](077-subscription-cli-engines.md), [ADR-085](085-refusal-in-the-pinned-main-session.md)
+- **Extended by:** [ADR-019](019-model-pinning-and-local-only-defaults.md), [ADR-037](037-voice.md), [ADR-077](077-subscription-cli-engines.md), [ADR-085](085-refusal-in-the-pinned-main-session.md), [ADR-114](114-llm-on-pi-ai.md)
 - **Date:** 2026-11-05
 
 ## Decision
@@ -17,6 +17,9 @@ Model self-selects per message (unauditable); trained router in v1 (trained on c
 - **ADR-085 (resolves OQ-86):** the refusal rule ("next model in the chain") applies to roles
   that are not pinned; in the main session a refusal ends the turn with one notice and the owner
   decides; refusals are detected from the provider's raw stop reason.
+
+- **ADR-114:** pi-ai 1.5.0 underneath; keys only from `secretRef`; a refusal in any role stops and
+  is reported until OQ-93; the usage log is SQLite through `node:sqlite`.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -47,7 +47,7 @@ effect. Entry: none.
 | 0.4 | Namespaces and release: secure the npm and PyPI names, the `python/` pointer package, the release workflow ([guides/namespaces.md](guides/namespaces.md)). Placement | 010 | none | Delivered (2026-11-16; npm `jaari` and org `jaari`, PyPI `jaari` 0.0.0 via trusted publishing) |
 | 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement; pause, emergency stop, steps per turn, stall guard, watchdog, event log; the tier-1 smoke test in CI | 001, 065, 031, 032, 087, 041 | 0.1, 0.7 | Planned |
 | 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship | 017, 019, 056 | 0.1 | Planned |
-| 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains, refusal classification, usage log | 011, 019, 085, 032, 087 | 0.1, 0.15 | Planned |
+| 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains, refusal classification, usage log | 011, 019, 085, 032, 087, 114 | 0.1, 0.15 | Delivered (2026-11-16) |
 | 0.8 | `ChannelAdapter` contract and the shared contract suite, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081, 084 | 0.5, 0.9 | Planned |
 | 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084, 108, 109, 110 | 0.1 | Delivered (2026-11-16) |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Delivered (2026-11-16) |
@@ -73,7 +73,7 @@ Exit criteria:
   settings are in the repo (ADR-043).
 - Every record carries an `ownerId` (ADR-044).
 - A scripted refusal in the main session ends the turn with one notice and no model change; in a
-  child it moves to the next model (ADR-085).
+  role that is not pinned it stops and is reported, until OQ-93 (ADR-085, ADR-114).
 - A clock gap over 2 minutes is detected as sleep (ADR-057).
 - A binary older than its data refuses to start (ADR-056).
 - "stop now" aborts the running turn and "pause" survives a restart; a turn stops at 25 steps
@@ -219,7 +219,7 @@ and audit log.
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 4.1 | Children and receipts; child limits and child abort; routine model steps run as children | 011, 061, 031, 087, 089, 097 | 1.4 | Planned |
+| 4.1 | Children and receipts; child limits and child abort; routine model steps run as children | 011, 061, 031, 087, 089, 097 | 1.4, OQ-93 | Planned |
 | 4.2 | `llm.escalate` | 011 | 4.1 | Planned |
 | 4.3 | `reader` role with typed results, outside lineage, argument provenance, the local injection detector, and the reply link policy | 075, 104 | 0.7, 0.16 | Planned |
 | 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core | 016, 053, 080 | 0.15, 2.12 | Planned |
@@ -231,6 +231,8 @@ and audit log.
 | 4.10 | Third-party skills and third-party packages | 060, 071 | 4.3 | Planned |
 | 4.11 | Headless CLI commands | 076 | 0.5 | Planned |
 | 4.12 | Subscription CLI engines for sandboxed children (interface in `@jaari/core`; each engine is a package) | 077, 086, 091 | 4.1, 4.7 | Planned |
+
+Blocking: [OQ-93](OPEN_QUESTIONS.md) (refusal categories) for 4.1.
 | 4.13 | Container egress proxy on the same address-class table, shipped with the first container that works on untrusted input (SearXNG, browser, sandbox) | 053, 080 | 0.15 | Planned |
 
 Exit criteria:

@@ -1,6 +1,7 @@
 # ADR-085: A provider refusal never moves the pinned main session; other roles move down the chain
 
 - **Status:** Accepted
+- **Extended by:** [ADR-114](114-llm-on-pi-ai.md)
 - **Date:** 2026-11-12
 
 ## Context
@@ -35,5 +36,10 @@ notice and no model change; a refusal in a child moves to the next model.
 Following ADR-011 in the main session (silent model switches break the pin and its cache);
 treating a refusal as a provider error (it would be retried, or trigger failover).
 
+## Amendments
+- **ADR-114:** until OQ-93 maps refusal categories, a refusal in a role that is not pinned also
+  stops and is reported; pi-ai 1.5.0 drops the category that would tell off-limits ones apart.
+
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- **Roadmap 0.7 (2026-11-16):** `outcomeOf` in `@jaari/llm` reads the raw stop reasons above as
+  `refusal`; the main role never leaves its first model.

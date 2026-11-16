@@ -23,7 +23,7 @@ describe("egress lint rule", () => {
   });
 
   it("allows listening servers outside @jaari/http, and still refuses their clients", async () => {
-    const code = 'import { createServer } from "node:http";\nimport { createServer as net } from "node:net";\nexport { createServer, net };';
+    const code = 'import { createServer } from "node:http";\nimport { createServer as net, isIP } from "node:net";\nexport { createServer, net, isIP };';
     expect(await rulesFired(code, "apps/daemon/src/x.ts")).toEqual([]);
     expect(await rulesFired('import { request } from "node:http";\nexport { request };', "apps/daemon/src/x.ts")).toEqual(["no-restricted-imports"]);
     expect(await rulesFired('import { connect } from "node:net";\nexport { connect };', "apps/daemon/src/x.ts")).toEqual(["no-restricted-imports"]);
