@@ -1,6 +1,7 @@
 # ADR-043: Project process: one contact address, DCO without a CLA, lockstep releases, hardened supply chain
 
 - **Status:** Accepted
+- **Extended by:** [ADR-106](106-one-address-for-registry-accounts.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -55,6 +56,9 @@ A CLA (friction for contributors; MIT does not need one); changesets (the packag
 together, so independent versions add work without benefit); a separate `security@` address
 (the owner wants one inbox); ranged dependency versions and unrestricted install scripts (the
 main supply-chain attack paths).
+
+## Amendments
+- **ADR-106:** registry accounts use `hello@jaari.org`; there is no separate `registry@jaari.org` inbox.
 
 ## Consequences
 - pnpm 11 replaced `onlyBuiltDependencies` with `allowBuilds`. The allowlist is `allowBuilds`
