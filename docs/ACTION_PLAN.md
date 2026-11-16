@@ -155,3 +155,4 @@ status and exit criteria live there.
 | [112](adr/112-os-keychain-library.md) | The `os-keychain` provider reads the keychain through `@napi-rs/keyring` | Accepted |
 | [113](adr/113-egress-on-node-fetch-and-undici.md) | The egress core is Node's `fetch` with an undici `Agent` that resolves, checks, and dials | Accepted |
 | [114](adr/114-llm-on-pi-ai.md) | `@jaari/llm` on pi-ai 1.5.0: keys only from `secretRef`, the usage log in `node:sqlite`, refusals stop until categories are mapped | Accepted |
+| [115](adr/115-daemon-runs-from-dist.md) | The daemon runs from built `dist/` files under plain Node; the smoke test and a CI start check prove both paths | Accepted |
