@@ -32,7 +32,7 @@ never "closed" by a calendar. This file carries the per-item status;
 - **Placement** marks an item whose ADR states no phase; it is placed where its dependencies
   put it.
 
-Current position: **Phase 0, not started.** No package exists; no gate has passed.
+Current position: **Phase 0, in progress.** The monorepo scaffolding (0.1) is delivered; no package exists; no gate has passed.
 
 ## Phase 0: Foundation
 
@@ -41,7 +41,7 @@ effect. Entry: none.
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 0.1 | Monorepo scaffolding: root `package.json`, lockfile, pnpm supply-chain settings | 002, 043 | none | In progress (root config files exist as placeholders; no `package.json`) |
+| 0.1 | Monorepo scaffolding: root `package.json`, lockfile, pnpm supply-chain settings | 002, 043 | none | Delivered (2026-11-16) |
 | 0.2 | CI on every pull request: lint, typecheck, tests, tier-1 smoke test, DCO check, gitleaks, licence check | 041, 043 | 0.1 | Planned |
 | 0.3 | Project process files: `SECURITY.md`, `CONTRIBUTING.md` | 043 | none | Planned |
 | 0.4 | Namespaces and release: secure the npm and PyPI names, the `python/` pointer package, the release workflow ([guides/namespaces.md](guides/namespaces.md)). Placement | 010 | none | In progress (`release.yml` and `python/` exist; `python/` matches the guide and builds locally, 2026-11-13; names not secured) |

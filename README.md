@@ -73,8 +73,8 @@ scripts/refs.sh status                  # commit, lock state, and license per re
 python3 scripts/merge_docs.py --check   # docs links and IDs are consistent
 ~~~
 
-`pnpm install`, `pnpm -r build`, and `pnpm test` apply once Phase 0 adds the root
-`package.json` and the first packages. Runtime config will be read from a copy of
+`pnpm install` sets up the workspace, and `pnpm check` runs lint, typecheck, and tests
+(Node 22 or later). No package exists yet. Runtime config will be read from a copy of
 [`jaari.config.example.jsonc`](jaari.config.example.jsonc); the config loader is a
 Phase 0 item.
 

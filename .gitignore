@@ -1,2 +1,6 @@
 # Local build artifacts
 /JAARI_CONTEXT.md
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo

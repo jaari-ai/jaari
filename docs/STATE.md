@@ -1,6 +1,6 @@
 # Jaari: State
 
-Last updated: 2026-11-14
+Last updated: 2026-11-16
 
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
@@ -66,9 +66,11 @@ The index is [adr/README.md](adr/README.md). By area:
 
 ## Built
 Nothing runs yet. No package exists under `packages/` or `apps/`.
-- Root config files exist as allowlist placeholders (`pnpm-workspace.yaml`, `tsconfig*.json`,
-  `eslint.config.js`, `vitest.config.ts`). There is no root `package.json`; the TypeScript
-  ESLint parser, an output directory, and ignore rules come with the Phase 0 scaffolding.
+- Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
+  supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
+  scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript
+  parser), TypeScript, and Vitest config. `pnpm check` runs lint, typecheck, and tests. Each
+  package sets its own output directory (`dist/`, ignored by git).
 - `.github/workflows/release.yml` and the `python/` name-holder package exist. `python/`
   matches [guides/namespaces.md](guides/namespaces.md) section 6.2 and builds a wheel and an
   sdist locally (checked 2026-11-13); the release workflow itself has never run. No CI
@@ -76,7 +78,7 @@ Nothing runs yet. No package exists under `packages/` or `apps/`.
 - [THREAT_MODEL.md](THREAT_MODEL.md) is written (ADR-069).
 
 ## Now
-Phase 0: Foundation, not started. Per-item status, needs, and exit criteria are in
+Phase 0: Foundation, in progress (0.1 delivered). Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
 No open question blocks Phase 0.
 
