@@ -35,8 +35,8 @@ git commit -s
 ~~~
 
 CI refuses a pull request with an unsigned commit. To fix one, run
-`git commit --amend -s` (last commit) or `git rebase --signoff develop` (all commits), and
-force-push your branch. There is no CLA.
+`git commit --amend -s` (last commit) or `git rebase --signoff HEAD~N` (all commits, where N
+is the number of commits in your pull request), and force-push your branch. There is no CLA.
 
 ## Code from other projects
 

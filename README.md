@@ -50,6 +50,7 @@ in v1.
 
 ~~~
 README.md AGENTS.md CLAUDE.md   project and agent instructions
+SECURITY.md CONTRIBUTING.md     security policy and contribution guide
 jaari.config.example.jsonc      example owner config (owner, channels, secrets, llm, web, egress, backup, ...)
 pnpm-workspace.yaml tsconfig*.json eslint.config.js vitest.config.ts
                                 build config, allowlisted to packages/* and apps/*

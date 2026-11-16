@@ -24,8 +24,6 @@ Please include:
 
 - We acknowledge your report within 7 days.
 - We aim to ship a fix or publish an advisory within 90 days.
-- We agree on a disclosure date with you, and credit you in the advisory unless you ask us
-  not to.
 
 ## Scope
 
