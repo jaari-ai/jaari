@@ -18,4 +18,9 @@ Adopting its approval model (approval bound to a request id, cards truncated at 
   clients.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- **Point 6, roadmap 0.11 (2026-11-16):** `scrub` in `@jaari/secrets` removes each secret, its
+  percent-encoding, lower- and upper-case hex, and base64 and base64url. Base64 is matched at all
+  three byte offsets, keeping only the characters made from the secret's own bits, so a secret
+  inside a longer encoded run (HTTP Basic auth's `user:secret`) is found too. Base64 forms shorter
+  than four characters are skipped. Other encodings (JSON escapes of control characters, gzip) are
+  not matched. The in-process host scrubs every result with it.

@@ -23,6 +23,8 @@ Written:
 - [13-prompt-injection-and-system-prompts.md](13-prompt-injection-and-system-prompts.md) — how
   the references and the commercial agents build system prompts and resist prompt injection;
   the gaps that ADR-104 closes (2026-11-14)
+- [14-egress-core.md](14-egress-core.md) — OpenMausBot's egress gate and address table, and
+  where Jaari's `@jaari/http` core differs (2026-11-16)
 
 Planned (optional, not scheduled; ADRs have since decided these topics):
 - 01-session.md — persistent session, steering, segments, compaction

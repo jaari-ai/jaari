@@ -13,7 +13,8 @@ status and exit criteria live there.
 3. **Safety floor first** (0.9 to 0.11): `@jaari/capabilities`, `@jaari/gate` (deny-all stub),
    and `@jaari/secrets` (resolver + `os-keychain` and `host-credential`) with the first package
    (ADR-018, ADR-079).
-4. **Build `@jaari/llm`** (0.7) on `@earendil-works/pi-ai` with the tier/role config; the
+4. **Build the `@jaari/http` core, then `@jaari/llm`** (0.15, then 0.7; ADR-080). `@jaari/llm` is built
+   on `@earendil-works/pi-ai` with the tier/role config; the
    `jaari llm eval` qualification fixtures that `jaari init` uses arrive with Phase 1 (1.9;
    ADR-019, ADR-045).
 5. **Daemon and install** (0.5, 0.6, 0.12 to 0.14): `apps/daemon` with the persistent session,
@@ -152,3 +153,4 @@ status and exit criteria live there.
 | [110](adr/110-daemon-node-contract.md) | The daemon–node contract is JSON data messages checked on receipt, with one final result per action | Accepted |
 | [111](adr/111-workspace-source-condition.md) | Workspace packages resolve to their TypeScript source through the `@jaari/source` export condition | Accepted |
 | [112](adr/112-os-keychain-library.md) | The `os-keychain` provider reads the keychain through `@napi-rs/keyring` | Accepted |
+| [113](adr/113-egress-on-node-fetch-and-undici.md) | The egress core is Node's `fetch` with an undici `Agent` that resolves, checks, and dials | Accepted |

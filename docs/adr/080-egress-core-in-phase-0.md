@@ -47,4 +47,22 @@ blocking every network call until Phase 4 (no model provider in Phases 0 to 3); 
 - **ADR-104:** the core scans outbound URLs and bodies for the canary and the session fence id, blocks a hit, writes an audit row, and alerts the owner. (Provenance holds on `web.fetch` and `web.search` arguments are decided at the tool call, before the gate, not in the core.)
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- **Roadmap 0.15 (2026-11-16):** built on Node's `fetch` and an undici `Agent` (ADR-113).
+- A name may return some refused addresses: the core dials the first address that passed and
+  never a refused one (OpenMausBot refuses the whole connection instead; learning/14). This keeps
+  `localhost` working with one allowed loopback address.
+- The daemon's own ports are refused on every address that is not public, even when allowed.
+  The machine's own interface addresses form a `this-machine` class, treated like loopback.
+- The lint rule also refuses `node:http2`, `node:dgram`, and the `WebSocket` and `EventSource`
+  globals, which are network clients too. `globalThis.fetch` and `global.fetch` are caught; an
+  alias such as `const g = globalThis; g.fetch` is not.
+- A refusal is an `EgressRefused` error, the `cause` of the `TypeError` that `fetch` throws.
+- An allow entry can be `name:port` (port required), such as `ollama:11434`: a Compose service
+  gets a new address on each start. It allows the loopback, this-machine, or private addresses that
+  name resolves to, for that name and port only; metadata, link-local, reserved addresses and the
+  daemon's own ports stay refused.
+- Listening is not egress. The lint rule allows the server names of `node:http`, `node:https`
+  (`createServer`, `Server`, `IncomingMessage`, `ServerResponse`) and `node:net` (`createServer`,
+  `Server`) everywhere, for the daemon's local socket (ADR-021) and the hook listener (ADR-073).
+  Client names stay refused. How `apps/cli` connects to the daemon's socket is decided with 0.8:
+  `net.connect` also dials TCP, so lint cannot limit it to a socket path.
