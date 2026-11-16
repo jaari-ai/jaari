@@ -41,14 +41,13 @@ inbox is only as safe as the domain.
    2. Turn on **registrar lock** (transfer lock) and **auto-renew**, and set a payment
       method that won't expire soon.
    3. If the registrar supports it, turn on DNSSEC.
-2. Create a mailbox (or alias that forwards to one person) **`registry@jaari.org`**.
-   Use it only for npm, PyPI, and other publishing accounts.
+2. Use **`hello@jaari.org`** for npm, PyPI, and other publishing accounts (ADR-106).
 3. Make sure the mail provider account also has 2FA.
 
 ## Part 2. Registry accounts
 
 ### npm
-1. Sign up at <https://www.npmjs.com/signup> with `registry@jaari.org`, or change the
+1. Sign up at <https://www.npmjs.com/signup> with `hello@jaari.org`, or change the
    email on your existing account (Account → Email).
 2. Account → **Two-Factor Authentication** → enable, choosing **security key / passkey**
    (WebAuthn). Avoid authenticator-app-only if you can; never SMS.
@@ -56,7 +55,7 @@ inbox is only as safe as the domain.
 4. Access Tokens page: delete every existing token.
 
 ### PyPI
-1. Sign up at <https://pypi.org/account/register/> with `registry@jaari.org`.
+1. Sign up at <https://pypi.org/account/register/> with `hello@jaari.org`.
 2. Account settings → **Two factor authentication** → add a **security key** (and
    optionally a TOTP app as backup). PyPI requires 2FA to publish.
 3. Save the recovery codes in your password manager.
