@@ -33,6 +33,12 @@ describe("createInProcessHost", () => {
     });
   });
 
+  it("returns a copy of the advertisement, so a caller cannot change it", () => {
+    const host = createInProcessHost("daemon-1", [pkg("files", { executor: { execute: async () => ({ status: "ok" }) } })]);
+    host.advertise().packages.length = 0;
+    expect(host.advertise().packages).toHaveLength(1);
+  });
+
   it("refuses a capability package without an executor", () => {
     expect(() => createInProcessHost("d", [pkg("files", { default: {} })])).toThrow(PackageLoadError);
   });
@@ -55,6 +61,9 @@ describe("dispatch", () => {
     ["an unknown package", request({ packageId: "nope" }), 'no package "nope"'],
     ["a capability the package does not provide", request({}, { capability: "shell" }), "does not provide shell"],
     ["an expired action", request({}, { expiresAt: new Date(Date.now() - 1).toISOString() }), "action expired"],
+    // Valid RFC 3339 that Date.parse cannot read: it must count as expired, not as never expiring.
+    ["an expiry with a time-zone suffix", request({}, { expiresAt: "2099-01-01T00:00:00Z[UTC]" }), "action expired"],
+    ["an expiry on a leap second", request({}, { expiresAt: "2099-12-31T23:59:60Z" }), "action expired"],
   ])("refuses %s without running the executor", async (_, req, error) => {
     const { host, spy } = hostWith(async () => ({ status: "ok" }));
     const result = await host.dispatch(req);

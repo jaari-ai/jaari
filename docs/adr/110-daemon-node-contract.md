@@ -29,6 +29,8 @@ ADR-058 adds re-advertising on reconnect and the "outcome unknown" state.
   serves the `capability` packages whose `hosts` include `daemon`, and refuses to build when one
   does not export `executor.execute`. It refuses a request that fails its schema, names an unknown
   package, asks for a capability the package does not provide, has expired, or was aborted.
+  An `expiresAt` that `Date.parse` cannot read (a leap second, a `[UTC]` suffix) counts as
+  expired. `advertise()` returns a checked copy each time, like every other message.
 
 ## Deferred
 - The digest the executor recomputes (SECURITY_MODEL.md step 4) joins with the real gate (3.1).

@@ -28,7 +28,12 @@ export function createInProcessHost(hostId: string, packages: readonly LoadedPac
   };
 
   return {
-    advertise: () => advertisement,
+    // A fresh, checked copy each time, like every other message (ADR-110).
+    advertise: () => {
+      const copy = receive("advertisement", advertisement);
+      if (!copy.ok) throw new Error(`invalid advertisement: ${copy.errors.join("; ")}`);
+      return copy.value;
+    },
 
     async dispatch(input, signal = new AbortController().signal): Promise<Result> {
       const request = receive("request", input);
@@ -39,7 +44,8 @@ export function createInProcessHost(hostId: string, packages: readonly LoadedPac
       if (!entry.pkg.manifest.provides?.includes(action.capability)) {
         return { status: "failed", error: `package "${packageId}" does not provide ${action.capability}` };
       }
-      if (Date.parse(action.expiresAt) <= Date.now()) return { status: "failed", error: "action expired" };
+      // Fail closed: RFC 3339 times that Date.parse cannot read (a leap second, a "[UTC]" suffix) give NaN.
+      if (!(Date.parse(action.expiresAt) > Date.now())) return { status: "failed", error: "action expired" };
       if (signal.aborted) return { status: "failed", error: "aborted before start" };
 
       // shortcut: secret values are not scrubbed from results yet; exact-value scrubbing ships with @jaari/secrets (0.11).
