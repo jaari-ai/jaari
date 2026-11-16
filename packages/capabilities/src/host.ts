@@ -2,11 +2,30 @@
 import { receive, type Action, type Advertisement, type CapabilityHost, type Executor, type Result } from "./contract.js";
 import { PackageLoadError, type LoadedPackage } from "./loader.js";
 import { CAPABILITIES } from "./vocabulary.js";
+import { scrub } from "@jaari/secrets";
 
 // After the executor has started, only a read is known to have had no effect. Anything else may have,
 // so it is reported as outcome-unknown and never sent again (ADR-016).
 const afterStart = (capability: Action["capability"], message: string): Result =>
   CAPABILITIES[capability] === "read" ? { status: "failed", error: message } : { status: "outcome-unknown", detail: message };
+
+async function run(executor: Executor, action: Action, secrets: Record<string, string>, signal: AbortSignal): Promise<Result> {
+  let raw: unknown;
+  try {
+    raw = await executor.execute({ action, secrets, signal });
+  } catch (e) {
+    return afterStart(action.capability, `executor threw: ${(e as Error)?.message ?? String(e)}`);
+  }
+  const result = receive("result", raw);
+  return result.ok ? result.value : afterStart(action.capability, `invalid result: ${result.errors.join("; ")}`);
+}
+
+// No secret value leaves the host, in output, error, or detail (ADR-016). The status is never touched.
+function scrubResult(r: Result, values: string[]): Result {
+  if (r.status === "failed") return { status: "failed", error: scrub(r.error, values) };
+  if (r.status === "outcome-unknown") return { status: "outcome-unknown", detail: scrub(r.detail, values) };
+  return r.output === undefined ? r : { status: "ok", output: scrub(r.output, values) };
+}
 
 export function createInProcessHost(hostId: string, packages: readonly LoadedPackage[]): CapabilityHost {
   const executors = new Map<string, { pkg: LoadedPackage; executor: Executor }>();
@@ -51,15 +70,7 @@ export function createInProcessHost(hostId: string, packages: readonly LoadedPac
       if (!(Date.parse(action.expiresAt) > Date.now())) return { status: "failed", error: "action expired" };
       if (signal.aborted) return { status: "failed", error: "aborted before start" };
 
-      // shortcut: secret values are not scrubbed from results yet; exact-value scrubbing ships with @jaari/secrets (0.11).
-      let raw: unknown;
-      try {
-        raw = await entry.executor.execute({ action, secrets, signal });
-      } catch (e) {
-        return afterStart(action.capability, `executor threw: ${(e as Error)?.message ?? String(e)}`);
-      }
-      const result = receive("result", raw);
-      return result.ok ? result.value : afterStart(action.capability, `invalid result: ${result.errors.join("; ")}`);
+      return scrubResult(await run(entry.executor, action, secrets, signal), Object.values(secrets));
     },
   };
 }

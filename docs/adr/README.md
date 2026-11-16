@@ -113,3 +113,4 @@
 | [109](109-built-in-package-loader.md) | The built-in loader checks every manifest first; `health` is a method; `config` is inline JSON Schema | Accepted |
 | [110](110-daemon-node-contract.md) | The daemon–node contract is JSON data messages checked on receipt, with one final result per action | Accepted |
 | [111](111-workspace-source-condition.md) | Workspace packages resolve to their TypeScript source through the `@jaari/source` export condition | Accepted |
+| [112](112-os-keychain-library.md) | The `os-keychain` provider reads the keychain through `@napi-rs/keyring` | Accepted |
