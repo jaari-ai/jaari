@@ -1,0 +1,23 @@
+{
+  "name": "@jaari/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Agent loop on Pi: the persistent main session, its transcript, pause, stop, runaway limits, and the event log (ADR-001, ADR-031, ADR-032, ADR-065)",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@jaari/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@earendil-works/pi-agent-core": "1.5.0",
+    "@earendil-works/pi-ai": "1.5.0",
+    "@jaari/llm": "workspace:*"
+  }
+}

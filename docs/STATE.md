@@ -58,7 +58,8 @@ The index is [adr/README.md](adr/README.md). By area:
   [10 open questions review](learning/10-open-questions-review.md), [11 Pally](learning/11-pally.md),
   [12 browser placement](learning/12-browser-placement.md), and [13 prompt injection](learning/13-prompt-injection-and-system-prompts.md) (their recommendations fed ADR-021
   to ADR-104; some were changed or rejected by the ADR); [14 egress core](learning/14-egress-core.md) and
-  [15 pi-ai](learning/15-pi-ai.md) were written while building 0.15 and 0.7 (ADR-113, ADR-114).
+  [15 pi-ai](learning/15-pi-ai.md) were written while building 0.15 and 0.7 (ADR-113, ADR-114);
+  [16 pi-agent-core](learning/16-pi-agent-core.md) while building 0.5.
 - Docs conflict audit (2026-11-10): ten conflicts recorded, accepted, and folded into ADR-017
   to ADR-020.
 - Documentation audit (2026-11-12): docs, ADR links, open questions, and the roadmap
@@ -97,8 +98,14 @@ Nothing runs yet. No app exists under `apps/`.
   from `secretRef`; role chains with the main role pinned; a move down the chain only when the
   provider never accepted the request; refusals read from the raw stop reason and, until OQ-93,
   stopped and reported; the usage log in SQLite through `node:sqlite` (ADR-114). The egress core now
-  tries each checked address in turn. Next: 0.5, the daemon, which also decides how the daemon runs
-  under plain Node (ADR-111).
+  tries each checked address in turn.
+- `@jaari/core` (first half of 0.5, 2026-11-16): the persistent main session on pi-agent-core 1.5.0.
+  The transcript and the pause flag in SQLite; one serial queue; steering; "pause", "stop now", and
+  "resume" handled by code; the step limit, the stall guard, and the sleep-aware watchdog; compaction
+  through the `summarize` role; the event log as NDJSON (ADR-031, ADR-032, ADR-065).
+  `@jaari/llm` gained `stream` for the main session. Next: `apps/daemon` and the tier-1 smoke test,
+  which close 0.5; the daemon runs from built `dist/` files (decided 2026-11-16, ADR to come with
+  it).
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript

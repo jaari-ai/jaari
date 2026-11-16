@@ -1,5 +1,6 @@
 // Role routing on pi-ai (ADR-011): each role maps to a tier, a tier is a fallback chain of models.
 import {
+  createAssistantMessageEventStream,
   createModels,
   createProvider,
   type Api,
@@ -8,6 +9,7 @@ import {
   type Model,
   type MutableModels,
   type Provider,
+  type SimpleStreamOptions,
 } from "@earendil-works/pi-ai";
 import { resolveRef, type VaultProvider } from "@jaari/secrets";
 import { checkLlmConfig, ROLES, roleRefs, splitRef, type LlmConfig, type Role } from "./config.js";
@@ -88,20 +90,21 @@ export async function createLlm(deps: LlmDeps) {
     return typeof config.roles[role] === "string" ? list : list.filter((m) => m.input.includes("image"));
   }
 
-  async function complete(role: Role, context: Context, signal?: AbortSignal): Promise<Completion> {
-    // The main session is pinned to one model (ADR-019); its outage failover belongs to the session.
-    const candidates = role === "main" ? chain(role).slice(0, 1) : chain(role);
-    if (candidates.length === 0) throw new Error(`role "${role}" has no model`);
-    let last: Completion | undefined;
-    for (const model of candidates) {
-      const keyRef = config.providers[model.provider]?.apiKey;
-      // Resolved just before the call and never kept (ADR-007).
-      const apiKey = keyRef ? await resolveRef(keyRef, deps.secrets) : undefined;
-      const begun = performance.now();
-      const stream = models.stream(model, context, { fetch: deps.fetch, signal, ...(apiKey ? { apiKey } : {}) });
+  // One model call. The events pass through to `stream`; `done` settles after the call is logged.
+  async function call(role: Role, model: Model<Api>, context: Context, options?: SimpleStreamOptions) {
+    const keyRef = config.providers[model.provider]?.apiKey;
+    // Resolved just before the call and never kept (ADR-007).
+    const apiKey = keyRef ? await resolveRef(keyRef, deps.secrets) : undefined;
+    const begun = performance.now();
+    const inner = models.streamSimple(model, context, { ...options, fetch: deps.fetch, ...(apiKey ? { apiKey } : {}) });
+    const stream = createAssistantMessageEventStream();
+    const done = (async (): Promise<Completion> => {
       let started = false;
-      for await (const event of stream) if (event.type === "start") started = true;
-      const message = await stream.result();
+      for await (const event of inner) {
+        if (event.type === "start") started = true;
+        stream.push(event);
+      }
+      const message = await inner.result();
       const outcome = outcomeOf(message, started);
       const { usage } = message;
       deps.usage.record({
@@ -109,15 +112,34 @@ export async function createLlm(deps: LlmDeps) {
         cacheRead: usage.cacheRead, cacheWrite: usage.cacheWrite, costUsd: usage.cost.total,
         latencyMs: Math.round(message.durationMs ?? performance.now() - begun), outcome,
       });
-      last = { message, outcome, model };
+      stream.end(message);
+      return { message, outcome, model };
+    })();
+    return { stream, done };
+  }
+
+  async function complete(role: Role, context: Context, signal?: AbortSignal): Promise<Completion> {
+    // The main session is pinned to one model (ADR-019); its outage failover belongs to the session.
+    const candidates = role === "main" ? chain(role).slice(0, 1) : chain(role);
+    if (candidates.length === 0) throw new Error(`role "${role}" has no model`);
+    let last: Completion | undefined;
+    for (const model of candidates) {
+      last = await (await call(role, model, context, { signal })).done;
       // Only a request the provider never accepted moves on (ADR-016). A refusal stops and is reported
       // until refusal categories are mapped (OQ-93); an accepted failure may have cost tokens, so it stops too.
-      if (outcome !== "not-accepted") return last;
+      if (last.outcome !== "not-accepted") return last;
     }
     return last!;
   }
 
+  // The main session's stream for Pi's Agent (ADR-065): the same key handling and usage log as `complete`.
+  const stream = async (model: Model<Api>, context: Context, options?: SimpleStreamOptions) => {
+    const { stream, done } = await call("main", model, context, options);
+    done.catch(() => {}); // a failure reaches the Agent through the stream
+    return stream;
+  };
+
   // A model name the provider does not know fails at start, not at the role's first call (ADR-011).
   ROLES.forEach(chain);
-  return { chain, complete, models };
+  return { chain, complete, stream, models };
 }

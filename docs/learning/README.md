@@ -27,6 +27,8 @@ Written:
   where Jaari's `@jaari/http` core differs (2026-11-16)
 - [15-pi-ai.md](15-pi-ai.md) — pi-ai's providers, auth fallback, error and refusal shapes, and
   what `@jaari/llm` changes (2026-11-16)
+- [16-pi-agent-core.md](16-pi-agent-core.md) — Pi's `Agent`, its loop hooks, steering, and the
+  compaction cut, and what `@jaari/core` adds (2026-11-16)
 
 Planned (optional, not scheduled; ADRs have since decided these topics):
 - 01-session.md — persistent session, steering, segments, compaction

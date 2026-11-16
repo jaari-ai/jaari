@@ -75,6 +75,19 @@ describe("complete", () => {
   });
 });
 
+it("stream passes the events on for the main session and logs the call", async () => {
+  const { faux, llm, rows } = await setup();
+  let seen: { apiKey?: string } = {};
+  faux.setResponses([(_, options) => ((seen = options as typeof seen), ok)]);
+  const stream = await llm.stream(llm.chain("main")[0]!, context);
+  const types: string[] = [];
+  for await (const event of stream) types.push(event.type);
+  expect([types[0], types.at(-1)]).toEqual(["start", "done"]);
+  expect((await stream.result()).content).toEqual(ok.content);
+  expect(seen.apiKey).toBe("value-of-llm.faux");
+  expect(rows).toEqual([expect.objectContaining({ role: "main", model: "a", outcome: "ok" })]);
+});
+
 describe("outcomeOf", () => {
   it.each(["refusal", "content_filter", "SAFETY", "PROHIBITED_CONTENT"])("reads %s as a refusal, not an error", (raw) => {
     expect(outcomeOf(refusal(raw), true)).toBe("refusal");
