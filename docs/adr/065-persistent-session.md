@@ -71,11 +71,19 @@ Built in `@jaari/core` (roadmap 0.5, 2026-11-16):
 - A model whose context window is not above the 16,384 reserved tokens is refused at start. On a
   small window the kept part is at most half of what the window leaves after the reserve.
 - Token counts are the provider's last reported total plus 4 characters per token for later
-  messages. A failed compaction is logged and tried again after the next turn.
+  messages. A failed compaction is logged and tried again after the next turn. After a context
+  failure the provider's word wins over the estimate, so the next compaction runs anyway.
 - The cut lands on an owner or a model message, never on a tool result. An empty summary counts as
   a failed compaction. Pause and emergency stop abort a compaction in flight, and nothing is applied.
+- Compaction is its own job in the serial queue: the reply returns first, and the next turn waits
+  for the compaction. One compaction is also queued when the session opens, so a context stored
+  under a larger model fits the one configured now.
+- Rolling: after two turns in a row that failed on context length (pi-ai's `isContextOverflow`)
+  and a compaction that did not apply, the context restarts after the last stored message. The
+  transcript keeps the old segment; the event log gets `segment.roll`, and the next reply carries
+  a one-time `notice`.
 - Not built yet: the orientation block (1.3), re-injection from state (when approvals and tasks
-  exist), the versioned summary prompt (2.4), rolling to a new segment, and keep-warm pings.
-- Open: this ADR names "stop" and "wait" as handled by code, but no ADR says what they do. Only
-  "pause", "stop everything", "stop now", and "resume" are matched; the two words go to the model
-  until the typed prompts of 0.8 decide them.
+  exist), the versioned summary prompt (2.4), and keep-warm pings. Searching an archived segment
+  comes with transcript search.
+- Open: OQ-94, what "stop" and "wait" do. Only "pause", "stop everything", "stop now", and
+  "resume" are matched, ignoring case, extra spaces, and a trailing `.` or `!`.

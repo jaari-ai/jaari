@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-16. Open: **2**.
+Last updated: 2026-11-16. Open: **3**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -29,6 +29,12 @@ or roadmap item checks it. The first platform-specific package is `computer.use`
 
 Context: pi-ai 1.5.0 maps Anthropic's `refusal` to `stopReason: "error"` and drops the category
 (learning/15). Until this is decided, every refusal stops and is reported (ADR-114).
+
+| OQ-94 | "Stop" and "wait" | ADR-065 says "stop", "wait", and "pause" are handled by code at once, but ADR-031 defines only "pause", "stop everything", and "stop now". What do a bare "stop" and "wait" do: pause, emergency stop, or a typed `confirm` prompt that asks which one? | 0 | A bare "stop" asks with a `confirm` prompt (pause or stop now), since guessing wrong either loses work or keeps it running; "wait" means pause |
+
+Context: found while building 0.5 (2026-11-16). Until this is decided, `@jaari/core` matches only the
+ADR-031 words; "stop" and "wait" go to the model as ordinary text. The typed prompts of 0.8 are the
+natural place to answer it.
 
 ## Resolved
 
