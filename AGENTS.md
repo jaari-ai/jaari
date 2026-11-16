@@ -3,7 +3,7 @@
 Jaari is a self-hosted, single-owner personal AI agent: git-backed Markdown memory,
 persona dials enforced in code, and digest-bound owner approval for every external
 effect. It is in **Phase 0 (Foundation)**: `@jaari/capabilities`, `@jaari/gate`,
-`@jaari/secrets`, `@jaari/http`, and `@jaari/llm` exist; no app does yet. Current status is in `docs/STATE.md`.
+`@jaari/secrets`, `@jaari/http`, `@jaari/llm`, `@jaari/core`, and `apps/daemon` exist. Current status is in `docs/STATE.md`.
 
 ## Hard rules
 - Never create, edit, or delete anything under `refs/`. Read only. Do not format,

@@ -5,7 +5,7 @@ Last updated: 2026-11-16
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (114 ADRs, all Accepted)
+## Decided (115 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -58,7 +58,8 @@ The index is [adr/README.md](adr/README.md). By area:
   [10 open questions review](learning/10-open-questions-review.md), [11 Pally](learning/11-pally.md),
   [12 browser placement](learning/12-browser-placement.md), and [13 prompt injection](learning/13-prompt-injection-and-system-prompts.md) (their recommendations fed ADR-021
   to ADR-104; some were changed or rejected by the ADR); [14 egress core](learning/14-egress-core.md) and
-  [15 pi-ai](learning/15-pi-ai.md) were written while building 0.15 and 0.7 (ADR-113, ADR-114).
+  [15 pi-ai](learning/15-pi-ai.md) were written while building 0.15 and 0.7 (ADR-113, ADR-114);
+  [16 pi-agent-core](learning/16-pi-agent-core.md) while building 0.5.
 - Docs conflict audit (2026-11-10): ten conflicts recorded, accepted, and folded into ADR-017
   to ADR-020.
 - Documentation audit (2026-11-12): docs, ADR links, open questions, and the roadmap
@@ -70,7 +71,7 @@ The index is [adr/README.md](adr/README.md). By area:
   builds one context file for AI discussions; reference tooling is `scripts/refs.sh`.
 
 ## Built
-Nothing runs yet. No app exists under `apps/`.
+The daemon starts and stops, but no channel reaches it yet (0.8).
 - `@jaari/capabilities` (0.9, delivered 2026-11-16): the 29 capability names with their
   classes; the `jaari` manifest checked with TypeBox, closed to unknown names, kinds, and fields
   (ADR-108); the built-in loader, which checks every
@@ -97,8 +98,18 @@ Nothing runs yet. No app exists under `apps/`.
   from `secretRef`; role chains with the main role pinned; a move down the chain only when the
   provider never accepted the request; refusals read from the raw stop reason and, until OQ-93,
   stopped and reported; the usage log in SQLite through `node:sqlite` (ADR-114). The egress core now
-  tries each checked address in turn. Next: 0.5, the daemon, which also decides how the daemon runs
-  under plain Node (ADR-111).
+  tries each checked address in turn.
+- `@jaari/core` (first half of 0.5, 2026-11-16): the persistent main session on pi-agent-core 1.5.0.
+  The transcript and the pause flag in SQLite; one serial queue; steering; "pause", "stop now", and
+  "resume" handled by code; the step limit, the stall guard, and the sleep-aware watchdog; compaction
+  through the `summarize` role; the event log as NDJSON (ADR-031, ADR-032, ADR-065).
+  `@jaari/llm` gained `stream` for the main session.
+- `apps/daemon` (second half of 0.5, 2026-11-16): `startDaemon` refuses to start when secret zero or
+  any model key cannot be read (ADR-079), then wires egress, the model router, and the main session;
+  `jaari-daemon` runs from built `dist/` files (ADR-115). The tier-1 smoke test boots it on the
+  scripted provider in CI, and CI starts the built daemon once with `--check` (ADR-041). No channel
+  reaches the session yet (0.8); the config is read as plain JSON until the loader (0.6).
+  Next: 0.8, the `ChannelAdapter` contract and the CLI channel.
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript
@@ -120,7 +131,7 @@ Nothing runs yet. No app exists under `apps/`.
   set in ADR-043.
 
 ## Now
-Phase 0: Foundation, in progress (0.1 to 0.4 delivered). Per-item status, needs, and exit criteria are in
+Phase 0: Foundation, in progress (0.1 to 0.5, 0.7, and 0.9 to 0.11, 0.15 delivered). Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
 No open question blocks Phase 0.
 

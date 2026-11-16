@@ -57,4 +57,18 @@ running work to finish); fixed, non-configurable limits.
   Phase 2; permission lowering in Phase 3; child limits in Phase 4.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+Built in `@jaari/core` (roadmap 0.5, 2026-11-16):
+- The step limit and the stall guard run in Pi's `finishTurn` hook, after every step. A step counts
+  as failed when it called tools and every call failed; two in a row, or three identical tool
+  errors in one turn, end the turn as `stalled`.
+- The watchdog checks every 5 seconds. A gap of more than 2 minutes between two checks is read as
+  sleep (ADR-057) and starts the 300 seconds again.
+- Pause is one row in the session store. Messages received while paused are stored and handed back
+  on resume; the question to the owner comes with typed prompts (0.8).
+- Compaction does not run while paused, so nothing calls a model.
+- Each limit that fires writes a line to the event log (ADR-032). The audit log line waits for the
+  audit log (3.1).
+- At the step limit the turn ends before the next step, also when a steered message would have
+  continued it. On emergency stop, steered messages join the held messages.
+- A message steered into a turn that a limit then cut runs as the next turn, and the caller gets
+  that turn's reply; the cut is in the event log only until channels deliver notices (0.8).

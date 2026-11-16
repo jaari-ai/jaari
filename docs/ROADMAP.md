@@ -45,7 +45,7 @@ effect. Entry: none.
 | 0.2 | CI on every pull request: lint, typecheck, tests, docs check, DCO check, gitleaks, licence check (`.github/workflows/ci.yml`) | 043 | 0.1 | Delivered (2026-11-16) |
 | 0.3 | Project process files: `SECURITY.md`, `CONTRIBUTING.md` | 043 | none | Delivered (2026-11-16) |
 | 0.4 | Namespaces and release: secure the npm and PyPI names, the `python/` pointer package, the release workflow ([guides/namespaces.md](guides/namespaces.md)). Placement | 010 | none | Delivered (2026-11-16; npm `jaari` and org `jaari`, PyPI `jaari` 0.0.0 via trusted publishing) |
-| 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement; pause, emergency stop, steps per turn, stall guard, watchdog, event log; the tier-1 smoke test in CI | 001, 065, 031, 032, 087, 041 | 0.1, 0.7 | Planned |
+| 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement; pause, emergency stop, steps per turn, stall guard, watchdog, event log; the tier-1 smoke test in CI | 001, 065, 031, 032, 087, 041 | 0.1, 0.7 | Delivered (2026-11-16) |
 | 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship | 017, 019, 056 | 0.1 | Planned |
 | 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains, refusal classification, usage log | 011, 019, 085, 032, 087, 114 | 0.1, 0.15 | Delivered (2026-11-16) |
 | 0.8 | `ChannelAdapter` contract and the shared contract suite, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081, 084 | 0.5, 0.9 | Planned |

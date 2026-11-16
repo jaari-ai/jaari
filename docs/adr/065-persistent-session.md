@@ -60,4 +60,22 @@ Experimental; pruning old transcripts by default.
 - **ADR-081:** the transcript stores the owner's message after the ingress secret scrub.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+Built in `@jaari/core` (roadmap 0.5, 2026-11-16):
+- Pi's "turn" is one model response with its tool calls. Jaari calls that a step, and calls the
+  whole answer to one owner message a turn. Pi's `finishTurn` hook runs after every step.
+- The transcript table keeps every user, assistant, and tool-result message. System messages are
+  not stored: Pi rebuilds the leading one from the prompt and the tool list at each start.
+- A compaction is one state row (the summary, the first kept message, the last message at that
+  time); the context is the summary plus the kept messages. The summary comes from the `summarize`
+  role, so the session refuses to start without a model for it.
+- A model whose context window is not above the 16,384 reserved tokens is refused at start. On a
+  small window the kept part is at most half of what the window leaves after the reserve.
+- Token counts are the provider's last reported total plus 4 characters per token for later
+  messages. A failed compaction is logged and tried again after the next turn.
+- The cut lands on an owner or a model message, never on a tool result. An empty summary counts as
+  a failed compaction. Pause and emergency stop abort a compaction in flight, and nothing is applied.
+- Not built yet: the orientation block (1.3), re-injection from state (when approvals and tasks
+  exist), the versioned summary prompt (2.4), rolling to a new segment, and keep-warm pings.
+- Open: this ADR names "stop" and "wait" as handled by code, but no ADR says what they do. Only
+  "pause", "stop everything", "stop now", and "resume" are matched; the two words go to the model
+  until the typed prompts of 0.8 decide them.
