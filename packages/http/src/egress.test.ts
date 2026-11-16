@@ -11,7 +11,10 @@ vi.mock("node:dns/promises", async (original) => {
   return {
     ...real,
     lookup: vi.fn(async (host: string, options: object) =>
-      host === "rebind.invalid" ? [{ address: "127.0.0.1", family: 4 }] : real.lookup(host, options as { all: true })),
+      host === "rebind.invalid" ? [{ address: "127.0.0.1", family: 4 }]
+      // localhost on many systems: ::1 first, while a server such as Ollama listens on 127.0.0.1 only.
+      : host === "dual.invalid" ? [{ address: "::1", family: 6 }, { address: "127.0.0.1", family: 4 }]
+      : real.lookup(host, options as { all: true })),
   };
 });
 
@@ -106,6 +109,11 @@ describe("createEgress fetch", () => {
     const egress = createEgress({ allow: [`rebind.invalid:${target.port}`] });
     expect(await (await egress.fetch(`http://rebind.invalid:${target.port}/`)).text()).toBe("ok");
     await refusedWith(egress.fetch(`http://127.0.0.1:${target.port}/`));
+  });
+
+  it("tries the next checked address when the first one does not answer", async () => {
+    const egress = createEgress({ allow: [`dual.invalid:${target.port}`] });
+    expect(await (await egress.fetch(`http://dual.invalid:${target.port}/`)).text()).toBe("ok");
   });
 
   it("checks every redirect hop", async () => {

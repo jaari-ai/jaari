@@ -11,8 +11,9 @@ const DEEP = [{ group: ["**/capabilities/src/**"], message: "Import @jaari/capab
 // All network egress goes through @jaari/http (ADR-080).
 const egress = "Network egress goes through @jaari/http (ADR-080).";
 // Listening is not egress: the daemon's local socket (ADR-021) and the hook listener (ADR-073) need servers.
+// isIP and friends only parse a string.
 const HTTP_SERVER = ["createServer", "Server", "IncomingMessage", "ServerResponse"];
-const LISTEN = { http: HTTP_SERVER, https: HTTP_SERVER, net: ["createServer", "Server"] };
+const LISTEN = { http: HTTP_SERVER, https: HTTP_SERVER, net: ["createServer", "Server", "isIP", "isIPv4", "isIPv6"] };
 const NETWORK = [
   ...["http", "https", "net", "tls", "http2", "dgram"].flatMap((m) =>
     [m, `node:${m}`].map((name) => ({ name, message: egress, ...(LISTEN[m] ? { allowImportNames: LISTEN[m] } : {}) }))),

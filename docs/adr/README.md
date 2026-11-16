@@ -115,3 +115,4 @@
 | [111](111-workspace-source-condition.md) | Workspace packages resolve to their TypeScript source through the `@jaari/source` export condition | Accepted |
 | [112](112-os-keychain-library.md) | The `os-keychain` provider reads the keychain through `@napi-rs/keyring` | Accepted |
 | [113](113-egress-on-node-fetch-and-undici.md) | The egress core is Node's `fetch` with an undici `Agent` that resolves, checks, and dials | Accepted |
+| [114](114-llm-on-pi-ai.md) | `@jaari/llm` on pi-ai 1.5.0: keys only from `secretRef`, the usage log in `node:sqlite`, refusals stop until categories are mapped | Accepted |

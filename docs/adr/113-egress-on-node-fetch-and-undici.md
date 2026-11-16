@@ -32,5 +32,6 @@ undici 8.12.4.
 
 ## Consequences
 - When Node moves to a new undici major version, the guard test fails and the pin moves with it.
-- A connection is not retried on the next checked address when the first fails to connect; the
-  egress pool (Phase 6) adds that.
+- **Roadmap 0.7 (2026-11-16):** the connector tries each checked address in resolver order until
+  one connects. `localhost` gives `::1` first on many systems, while Ollama listens on `127.0.0.1`
+  only, so the first local model call failed without it.
