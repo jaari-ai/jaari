@@ -4,7 +4,7 @@
 |---|---|
 | Domain `jaari.org` | Owned |
 | GitHub org `jaari-ai`, repo `jaari-ai/jaari` | Created |
-| npm org `jaari` (scope `@jaari`), npm `jaari`, PyPI `jaari` | **Not yet secured** (nothing published as of 2026-11-05). Steps: [guides/namespaces.md](guides/namespaces.md). Trusted publishing (OIDC) only |
+| npm org `jaari` (scope `@jaari`), npm `jaari`, PyPI `jaari` | **Secured** (2026-11-16): npm `jaari` 0.0.0 and org `jaari`; PyPI `jaari` 0.0.0 via trusted publishing. Steps: [guides/namespaces.md](guides/namespaces.md). Trusted publishing (OIDC) only |
 
 Agent-facing integrations use `secretRef` credentials and gated capabilities. Email uses
 `email.read` and `email.send`. There are no GitHub, npm, or PyPI integrations; `repo.write` and
