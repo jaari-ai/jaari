@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parseManifest } from "./manifest.js";
-import { CAPABILITIES } from "./vocabulary.js";
+import { CAPABILITIES, isCapabilityName } from "./vocabulary.js";
 
 // The example manifest from docs/ARCHITECTURE.md (Channels > Contract).
 const telegram = {
@@ -72,5 +72,7 @@ describe("vocabulary", () => {
 
   it("does not treat inherited object keys as names", () => {
     expect(errorsOf({ ...browser, provides: ["toString"] }).length).toBeGreaterThan(0);
+    expect(isCapabilityName("toString")).toBe(false);
+    expect(isCapabilityName("shell")).toBe(true);
   });
 });

@@ -38,3 +38,7 @@ export type CapabilityClass = "read" | "gated" | "policy" | "reserved" | "takeov
 export type CapabilityName = keyof typeof CAPABILITIES;
 
 export const CAPABILITY_NAMES = Object.keys(CAPABILITIES) as CapabilityName[];
+
+export function isCapabilityName(name: string): name is CapabilityName {
+  return Object.hasOwn(CAPABILITIES, name);
+}
