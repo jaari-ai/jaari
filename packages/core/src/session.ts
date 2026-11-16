@@ -3,7 +3,7 @@
 // Words: Pi calls one model response with its tool calls a "turn"; here that is a step, and a turn is
 // the whole answer to one owner message.
 import { Agent, type AgentMessage, type AgentTool } from "@earendil-works/pi-agent-core";
-import type { AssistantMessage } from "@earendil-works/pi-ai";
+import { isContextOverflow, type AssistantMessage } from "@earendil-works/pi-ai";
 import { outcomeOf, type createLlm } from "@jaari/llm";
 import type { EventLog } from "./events.js";
 import type { Store } from "./store.js";
@@ -25,7 +25,9 @@ export type Status =
   | "done" | "refusal" | "error" // how the model's answer ended
   | "steps" | "stalled" | "watchdog" | "stopped" // a limit or the owner cut the turn
   | "steered" | "held" | "paused" | "resumed"; // no turn of its own
-export type Reply = { status: Status; text?: string; held?: string[] };
+// `tools`: the tools that were running when "stop now" cut the turn (ADR-031: the owner is told what was cut).
+// `notice`: a one-time message for the owner, such as a new segment (ADR-065).
+export type Reply = { status: Status; text?: string; held?: string[]; tools?: string[]; notice?: string };
 
 export type SessionDeps = {
   store: Store;
@@ -43,6 +45,8 @@ type Compaction = { summary: string; firstKept: number; at: number };
 const COMMANDS: Record<string, "pause" | "stop" | "resume"> = {
   pause: "pause", "stop everything": "pause", "stop now": "stop", resume: "resume",
 };
+// "Stop now!", "stop  now." and "STOP NOW" all match: an owner in a hurry types like that.
+const commandOf = (text: string) => COMMANDS[text.trim().toLowerCase().replace(/\s+/g, " ").replace(/[.!]+$/, "")];
 
 const SUMMARY_PROMPT =
   "Summarize the conversation below for the assistant that will continue it. Keep what the owner asked for, " +
@@ -110,6 +114,8 @@ export function createSession(deps: SessionDeps) {
   let failing = 0;
   const errors = new Map<string, number>();
   let ended: Status | undefined; // set when a limit or the owner cuts the running turn
+  let overflows = 0; // turns in a row that failed because the context was too long (ADR-065)
+  const running = new Map<string, string>(); // tool call id → tool name, for the stop reply
   const watchdog = createWatchdog(now, limits.watchdogMs, limits.sleepGapMs);
   const limit = (kind: Status) => ((ended ??= kind), events.write({ type: "limit", limit: kind, steps }));
 
@@ -138,7 +144,11 @@ export function createSession(deps: SessionDeps) {
     watchdog.touch();
     // System messages are rebuilt from the prompt and the tool list at start, so they are not stored.
     if (event.type === "message_end" && event.message.role !== "system") seqOf.set(event.message, store.append(event.message));
-    if (event.type === "tool_execution_end") events.write({ type: "tool", name: event.toolName, isError: event.isError, ms: event.durationMs });
+    if (event.type === "tool_execution_start") running.set(event.toolCallId, event.toolName);
+    if (event.type === "tool_execution_end") {
+      running.delete(event.toolCallId);
+      events.write({ type: "tool", name: event.toolName, isError: event.isError, ms: event.durationMs });
+    }
   });
 
   const paused = () => store.get<boolean>("paused") === true;
@@ -165,14 +175,16 @@ export function createSession(deps: SessionDeps) {
   // Runs only after a turn has settled (ADR-065). The transcript keeps every message; only the
   // model's context shrinks.
   let compacting: AbortController | undefined; // pause and stop abort a compaction in flight (ADR-031)
-  async function compact(): Promise<void> {
+  // Returns true when it replaced older messages with a summary.
+  async function compact(): Promise<boolean> {
     const all = agent.state.messages;
     const start = all[0]?.role === "system" ? 1 : 0;
     const budget = model!.contextWindow - limits.reserveTokens;
-    if (contextTokens(all) <= budget) return;
+    // After a context failure the provider has spoken, whatever the estimate says.
+    if (overflows === 0 && contextTokens(all) <= budget) return false;
     // On a small context window the kept part may take at most half of the budget.
     const cut = selectCut(all, Math.min(limits.keepRecentTokens, Math.floor(budget / 2)), start);
-    if (cut === undefined) return void events.write({ type: "compaction.skipped", reason: "no cut point" });
+    if (cut === undefined) return (events.write({ type: "compaction.skipped", reason: "no cut point" }), false);
     compacting = new AbortController();
     try {
       const older = all.slice(start, cut).map((m) => `${m.role}: ${textOf(m) || JSON.stringify(m.content)}`).join("\n\n");
@@ -186,12 +198,34 @@ export function createSession(deps: SessionDeps) {
       store.set("compaction", { summary: textOf(message), firstKept: seqOf.get(all[cut]!)!, at: seqOf.get(kept.at(-1)!)! } satisfies Compaction);
       agent.state.messages = [...all.slice(0, start), summaryMessage(textOf(message)), ...kept];
       events.write({ type: "compaction", summarized: cut - start, kept: kept.length });
+      return true;
     } catch (error) {
       events.write({ type: "compaction.failed", reason: error instanceof Error ? error.message : String(error) });
+      return false;
     } finally {
       compacting = undefined;
     }
   }
+
+  // After two context failures in a row and a failed compaction, the context starts again from here.
+  // The transcript keeps the old segment (ADR-065).
+  function roll(): string {
+    const last = store.load(store.get<Compaction>("compaction")?.firstKept).at(-1)?.seq ?? 0;
+    const summary = "The earlier conversation was archived because it no longer fit; it is kept and searchable.";
+    store.set("compaction", { summary, firstKept: last + 1, at: last } satisfies Compaction);
+    agent.state.messages = [...agent.state.messages.filter((m) => m.role === "system").slice(0, 1), summaryMessage(summary)];
+    overflows = 0;
+    events.write({ type: "segment.roll" });
+    return "The conversation got too long to summarize, so I started a new segment. The earlier part is archived.";
+  }
+
+  // Compaction is its own job in the queue, so the reply does not wait for the summary call (ADR-065).
+  let notice: string | undefined; // given with the next reply, once
+  const settle = () =>
+    void enqueue(async () => {
+      if (paused()) return; // nothing calls a model while paused (ADR-031)
+      if (!(await compact()) && overflows >= 2 && !paused()) notice = roll();
+    });
 
   async function run(input: AgentMessage[]): Promise<Reply> {
     steps = failing = 0;
@@ -213,12 +247,15 @@ export function createSession(deps: SessionDeps) {
     const outcome = last ? outcomeOf(last, true) : "failed";
     const status: Status = ended ?? (outcome === "ok" ? "done" : outcome === "refusal" ? "refusal" : outcome === "aborted" ? "stopped" : "error");
     events.write({ type: "turn.end", status, steps });
+    overflows = status === "error" && last?.role === "assistant" && isContextOverflow(last, model!.contextWindow) ? overflows + 1 : 0;
     // A message steered into a turn that was cut never reached the model: it is held, or run next.
     const left = agent.peekQueuedMessages();
     agent.clearAllQueues();
-    if (!paused()) await compact(); // nothing calls a model while paused (ADR-031)
-    if (left.length === 0) return { status, text: textOf(last) };
-    return paused() ? hold(left.map(textOf)) : run(left);
+    if (left.length > 0) return paused() ? hold(left.map(textOf)) : run(left);
+    settle();
+    const reply: Reply = { status, text: textOf(last), ...(notice ? { notice } : {}) };
+    notice = undefined;
+    return reply;
   }
 
   function pause(): Reply {
@@ -237,12 +274,13 @@ export function createSession(deps: SessionDeps) {
     agent.clearAllQueues();
     if (steered.length > 0) hold(steered.map(textOf));
     const cut = agent.state.isStreaming;
+    const tools = [...running.values()];
     if (cut) {
       ended ??= "stopped";
       agent.abort();
     }
-    events.write({ type: "stop", cut });
-    return { status: "stopped" };
+    events.write({ type: "stop", cut, tools: tools.length, held: steered.length });
+    return { status: "stopped", tools, held: steered.map(textOf) };
   }
 
   // Held messages are returned, not run: the owner decides whether they still matter (ADR-031).
@@ -255,7 +293,7 @@ export function createSession(deps: SessionDeps) {
   }
 
   async function send(text: string): Promise<Reply> {
-    const command = COMMANDS[text.trim().toLowerCase()];
+    const command = commandOf(text);
     if (command) return { pause, stop, resume }[command]();
     if (paused()) return hold([text]);
     // During a turn the message joins it at the next step boundary (Pi steering).
@@ -263,5 +301,7 @@ export function createSession(deps: SessionDeps) {
     return enqueue(async () => (paused() ? hold([text]) : run([userMessage(text)])));
   }
 
+  // A context stored under a larger model may not fit the one configured now (ADR-065).
+  settle();
   return { send, pause, stop, resume, paused, idle: () => tail.then(() => {}), messages: () => agent.state.messages };
 }

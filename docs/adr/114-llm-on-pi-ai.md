@@ -53,3 +53,7 @@ settle:
   reads them (roadmap 1.9).
 - A provider adapter that refuses the injected `fetch` fails before `start`, so an unpinned role
   moves on; `jaari doctor` naming such adapters (ADR-080) arrives with 0.12.
+- Roadmap 0.5 (2026-11-16): pi-ai's OpenAI-style adapters refuse to send without a key, even to a
+  keyless local server, although pi-ai's README shows that setup. A custom endpoint with no
+  `apiKey` gets the placeholder key `unused`, the value pi-ai itself sends when a header carries
+  the auth. Before this, no keyless local model could answer.

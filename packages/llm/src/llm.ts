@@ -94,7 +94,9 @@ export async function createLlm(deps: LlmDeps) {
   async function call(role: Role, model: Model<Api>, context: Context, options?: SimpleStreamOptions) {
     const keyRef = config.providers[model.provider]?.apiKey;
     // Resolved just before the call and never kept (ADR-007).
-    const apiKey = keyRef ? await resolveRef(keyRef, deps.secrets) : undefined;
+    // pi-ai's OpenAI-style adapters refuse to send without a key, even to a keyless local server; "unused" is
+    // the value pi-ai itself sends when a header carries the auth.
+    const apiKey = keyRef ? await resolveRef(keyRef, deps.secrets) : config.providers[model.provider]?.baseUrl ? "unused" : undefined;
     const begun = performance.now();
     const inner = models.streamSimple(model, context, { ...options, fetch: deps.fetch, ...(apiKey ? { apiKey } : {}) });
     const stream = createAssistantMessageEventStream();
