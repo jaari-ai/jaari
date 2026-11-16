@@ -69,5 +69,8 @@ export async function loadBuiltins(
   }
 
   if (problems.length > 0) throw new PackageLoadError(problems);
-  return Promise.all(checked.map(async ({ name, manifest, url }) => ({ name, manifest, module: await import(url) })));
+  const settled = await Promise.allSettled(checked.map(({ url }) => import(url)));
+  const failed = settled.flatMap((s, i) => (s.status === "rejected" ? [`${checked[i].name}: import failed: ${(s.reason as Error)?.message ?? String(s.reason)}`] : []));
+  if (failed.length > 0) throw new PackageLoadError(failed);
+  return checked.map(({ name, manifest }, i) => ({ name, manifest, module: (settled[i] as PromiseFulfilledResult<unknown>).value }));
 }

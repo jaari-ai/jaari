@@ -42,3 +42,6 @@ ADR-086). The loader must check a manifest before any package code runs (ADR-084
   the loader handles both.
 - `import.meta.resolve` follows a package's `exports` but does not check that the file exists, so
   the loader checks the entry file in the same pass as the manifest, before any import.
+- A package whose import throws is reported by name (`<name>: import failed: <message>`) in the same
+  `PackageLoadError`. Its top-level code, and that of the packages imported with it, has run by
+  then; the daemon still refuses to start.

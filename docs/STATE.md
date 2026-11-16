@@ -5,7 +5,7 @@ Last updated: 2026-11-16
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (110 ADRs, all Accepted)
+## Decided (111 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -14,8 +14,9 @@ The index is [adr/README.md](adr/README.md). By area:
 - Core design: Pi agent loop with one persistent main session, pnpm monorepo, open-instinct as
   shell and openinstinct as spec; package homes; one manifest per package in `package.json`;
   reference repos pinned; Node 26 LTS minimum; the manifest validated with TypeBox and checked
-  before any package code runs; the daemon–node contract as JSON messages (ADR-001, 002, 009, 065,
-  083, 084, 086, 105, 108, 109, 110).
+  before any package code runs; the daemon–node contract as JSON messages; workspace packages read as source
+  through the `@jaari/source` condition (ADR-001, 002, 009, 065, 083, 084, 086, 105, 108, 109, 110,
+  111).
 - Hosting: one daemon on a VPS, remote server, home hardware, or laptop; capabilities installed
   where they run; nodes over a pinned link; the owner's choice of overlay; install, update,
   and laptop rules; the overlay binding in Phase 2 and the node link in Phase 6; the sandbox
@@ -73,7 +74,9 @@ Nothing runs yet. No app exists under `apps/`.
   classes; the `jaari` manifest checked with TypeBox, closed to unknown names, kinds, and fields
   (ADR-108); the built-in loader, which checks every
   manifest before it imports any package and refuses start on any failure (ADR-109); and the
-  daemon–node contract with an in-process host (ADR-110). The gate stub (0.10) is next.
+  daemon–node contract with an in-process host that passes on only declared secrets (ADR-110).
+  Other workspace packages import it through the `@jaari/source` condition (ADR-111). The gate stub
+  (0.10) is next.
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript
@@ -109,4 +112,4 @@ No open question blocks Phase 0.
   leaving Experimental (ADR-025, ADR-065).
 
 ## Open questions
-0 open. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+1 open. OQ-92 (package platforms) blocks Phase 6. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

@@ -150,3 +150,4 @@ status and exit criteria live there.
 | [108](adr/108-manifest-validation-with-typebox.md) | The package manifest is validated with TypeBox; kind names and capability classes | Accepted |
 | [109](adr/109-built-in-package-loader.md) | The built-in loader checks every manifest first; `health` is a method; `config` is inline JSON Schema | Accepted |
 | [110](adr/110-daemon-node-contract.md) | The daemon–node contract is JSON data messages checked on receipt, with one final result per action | Accepted |
+| [111](adr/111-workspace-source-condition.md) | Workspace packages resolve to their TypeScript source through the `@jaari/source` export condition | Accepted |
