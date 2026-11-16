@@ -131,11 +131,85 @@ describe("the main session", () => {
     const context = seen({ messages: session.messages() });
     expect(context).toContain("SUMMARY-1");
     expect(context).not.toContain("first question");
-    expect(context).toContain("second question");
+    expect(context).toContain("two two"); // the cut may now land on the model's last answer
     expect(openStore(path).load().length).toBe(4);
 
     const reopened = (await setup({ path, limits, window: 1_000 })).session;
     expect(seen({ messages: reopened.messages() })).toBe(context);
+  });
+});
+
+describe("review of 0.5", () => {
+  const limits = { reserveTokens: 900, keepRecentTokens: 40 };
+  const long = (word: string) => `${word} `.repeat(60);
+
+  it("never runs a step past the limit, even after a text-only step and a steered message", async () => {
+    let release = () => {};
+    const wait = new Promise<void>((resolve) => (release = resolve));
+    const { faux, session, events } = await setup({ tools: [echo], limits: { stepsPerTurn: 2 } });
+    faux.setResponses([callTool("echo"), async () => (await wait, fauxAssistantMessage("step two")), fauxAssistantMessage("next turn")]);
+    const turn = session.send("go");
+    await expect.poll(() => faux.state.callCount).toBe(2);
+    expect(await session.send("also")).toEqual({ status: "steered" }); // arrives during step 2
+    release();
+    expect(await turn).toEqual({ status: "done", text: "next turn" }); // "also" ran as its own turn
+    expect(faux.state.callCount).toBe(3);
+    expect(await events()).toContainEqual(expect.objectContaining({ type: "limit", limit: "steps", steps: 2 }));
+  });
+
+  it('holds a steered message on "stop now", even when "resume" comes before the turn settles', async () => {
+    let release = () => {};
+    const stubborn = tool("stubborn", () => new Promise((resolve) => (release = () => resolve({ content: [{ type: "text", text: "ok" }], details: undefined }))));
+    const { faux, session } = await setup({ tools: [stubborn] });
+    faux.setResponses([callTool("stubborn"), fauxAssistantMessage("never")]);
+    const turn = session.send("first");
+    await expect.poll(() => faux.state.callCount).toBe(1);
+    await session.send("extra");
+    session.stop();
+    expect(session.resume()).toEqual({ status: "resumed", held: ["extra"] });
+    release();
+    expect((await turn).status).toBe("stopped");
+    expect(faux.state.callCount).toBe(1);
+  });
+
+  it("ends the turn as stalled on three identical tool errors", async () => {
+    const { faux, session } = await setup({ tools: [broken, echo] });
+    const both = fauxAssistantMessage([fauxToolCall("broken", {}), fauxToolCall("echo", {})], { stopReason: "toolUse" });
+    faux.setResponses([both, both, both, both]);
+    expect((await session.send("try")).status).toBe("stalled");
+    expect(faux.state.callCount).toBe(3);
+  });
+
+  it("refuses an empty summary and keeps the context whole", async () => {
+    const { faux, session, events } = await setup({ limits, window: 1_000 });
+    faux.setResponses([fauxAssistantMessage(long("one")), fauxAssistantMessage(long("two")), fauxAssistantMessage("")]);
+    await session.send("first question");
+    await session.send("second question");
+    expect(await events()).toContainEqual(expect.objectContaining({ type: "compaction.failed", reason: "empty summary" }));
+    expect(seen({ messages: session.messages() })).toContain("first question");
+  });
+
+  it('"stop now" during a compaction aborts it, and nothing is applied', async () => {
+    const { faux, session, events } = await setup({ limits, window: 1_000 });
+    faux.setResponses([fauxAssistantMessage(long("one")), fauxAssistantMessage(long("two")), hang]);
+    await session.send("first question");
+    const second = session.send("second question");
+    await expect.poll(() => faux.state.callCount).toBe(3);
+    session.stop();
+    await second;
+    expect(await events()).toContainEqual(expect.objectContaining({ type: "compaction.failed" }));
+    expect(seen({ messages: session.messages() })).toContain("first question");
+  });
+
+  it("compacts one long turn with a single owner message, cutting at a model message", async () => {
+    const big = tool("big", async () => ({ content: [{ type: "text", text: long("data") }], details: undefined }));
+    const { faux, session, events } = await setup({ limits, window: 1_000, tools: [big] });
+    faux.setResponses([callTool("big"), callTool("big"), fauxAssistantMessage("done"), fauxAssistantMessage("SUMMARY")]);
+    await session.send("collect");
+    expect(await events()).toContainEqual(expect.objectContaining({ type: "compaction" }));
+    expect(seen({ messages: session.messages() })).toContain("SUMMARY");
+    const roles = session.messages().map((m) => m.role);
+    expect(roles[roles.indexOf("user") + 1]).not.toBe("toolResult");
   });
 });
 
@@ -161,9 +235,11 @@ it("refuses to start on a model whose window is not above the reserve", async ()
   await expect(setup({ window: 16_000 })).rejects.toThrow("context window");
 });
 
-it("selectCut never cuts inside a tool call and its result", () => {
+it("selectCut never cuts at a tool result", () => {
   const text = (role: "user" | "assistant", size: number) => ({ role, content: "x".repeat(size * 4), timestamp: 0 }) as never;
-  const messages = [text("user", 10), text("assistant", 10), text("user", 10), text("assistant", 10), text("assistant", 10)];
-  expect(selectCut(messages, 15, 0)).toBe(2); // 15 tokens reach back into index 3; the cut moves to the owner message
+  const result = { role: "toolResult", toolCallId: "t", toolName: "x", content: "x".repeat(40), isError: false, timestamp: 0 } as never;
+  const messages = [text("user", 10), text("assistant", 10), result, text("assistant", 10), text("assistant", 10)];
+  expect(selectCut(messages, 15, 0)).toBe(3); // 15 tokens reach back into index 3, a model message
+  expect(selectCut(messages, 25, 0)).toBe(3); // index 2 is a tool result: the cut moves forward, never onto it
   expect(selectCut(messages, 1_000, 0)).toBeUndefined();
 });

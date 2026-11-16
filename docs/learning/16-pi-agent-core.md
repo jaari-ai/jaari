@@ -39,5 +39,6 @@ network clients out of the loop.
 - Jaari reads the steering queue after a cut run, so the owner's message is held or run next and
   never lost.
 - Jaari stores the transcript in its own SQLite table and does not use `pi-durable` (ADR-065). Only
-  the cut rule is borrowed, as a design; the code is Jaari's, and it cuts only at owner messages.
+  the cut rule is borrowed, as a design; the code is Jaari's. It cuts at an owner or a model message,
+  never at a tool result, so one long turn with a single owner message can still be compacted.
 - Jaari sends its own client identity (`jaari`, no attribution headers).

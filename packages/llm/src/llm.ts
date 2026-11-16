@@ -107,12 +107,16 @@ export async function createLlm(deps: LlmDeps) {
       const message = await inner.result();
       const outcome = outcomeOf(message, started);
       const { usage } = message;
-      deps.usage.record({
-        role, provider: model.provider, model: model.id, input: usage.input, output: usage.output,
-        cacheRead: usage.cacheRead, cacheWrite: usage.cacheWrite, costUsd: usage.cost.total,
-        latencyMs: Math.round(message.durationMs ?? performance.now() - begun), outcome,
-      });
-      stream.end(message);
+      // `finally`: a failed usage write must not leave the caller waiting on a stream that never ends.
+      try {
+        deps.usage.record({
+          role, provider: model.provider, model: model.id, input: usage.input, output: usage.output,
+          cacheRead: usage.cacheRead, cacheWrite: usage.cacheWrite, costUsd: usage.cost.total,
+          latencyMs: Math.round(message.durationMs ?? performance.now() - begun), outcome,
+        });
+      } finally {
+        stream.end(message);
+      }
       return { message, outcome, model };
     })();
     return { stream, done };

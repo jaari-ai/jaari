@@ -72,6 +72,8 @@ Built in `@jaari/core` (roadmap 0.5, 2026-11-16):
   small window the kept part is at most half of what the window leaves after the reserve.
 - Token counts are the provider's last reported total plus 4 characters per token for later
   messages. A failed compaction is logged and tried again after the next turn.
+- The cut lands on an owner or a model message, never on a tool result. An empty summary counts as
+  a failed compaction. Pause and emergency stop abort a compaction in flight, and nothing is applied.
 - Not built yet: the orientation block (1.3), re-injection from state (when approvals and tasks
   exist), the versioned summary prompt (2.4), rolling to a new segment, and keep-warm pings.
 - Open: this ADR names "stop" and "wait" as handled by code, but no ADR says what they do. Only

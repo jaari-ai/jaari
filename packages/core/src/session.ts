@@ -76,15 +76,16 @@ export function createWatchdog(now: () => number, limit: number, sleepGap: numbe
 }
 
 // The index of the first message a summary keeps: the most recent `keep` tokens stay, and the cut
-// lands only on an owner message, so a tool call is never split from its result. Design from Pi,
+// lands on an owner or a model message, never on a tool result, so a tool call keeps its result. Design from Pi,
 // refs/pi/packages/durable/src/harness/compaction.ts at 469d865.
 export function selectCut(messages: AgentMessage[], keep: number, start: number): number | undefined {
   let kept = 0;
   for (let index = messages.length - 1; index > start; index--) {
     kept += estimate(messages[index]!);
     if (kept < keep) continue;
-    const owner = messages.flatMap((message, at) => (at > start && message.role === "user" ? [at] : []));
-    return owner.find((at) => at >= index) ?? owner.at(-1);
+    // Pi adds steered messages after a step's tool results, so an owner message never splits a call from its result.
+    const cuts = messages.flatMap((message, at) => (at > start && message.role !== "toolResult" ? [at] : []));
+    return cuts.find((at) => at >= index) ?? cuts.at(-1);
   }
   return undefined;
 }
@@ -127,7 +128,8 @@ export function createSession(deps: SessionDeps) {
         errors.set(key, (errors.get(key) ?? 0) + 1);
       }
       if (failing >= limits.stallSteps || Math.max(0, ...errors.values()) >= limits.sameErrors) limit("stalled");
-      else if (steps >= limits.stepsPerTurn && toolResults.length > 0) limit("steps");
+      // At the limit the turn ends unless it would end anyway; a steered message then runs as the next turn.
+      else if (steps >= limits.stepsPerTurn && (toolResults.length > 0 || agent.hasQueuedMessages())) limit("steps");
       return ended ? { action: "end" } : undefined;
     },
   });
@@ -162,6 +164,7 @@ export function createSession(deps: SessionDeps) {
 
   // Runs only after a turn has settled (ADR-065). The transcript keeps every message; only the
   // model's context shrinks.
+  let compacting: AbortController | undefined; // pause and stop abort a compaction in flight (ADR-031)
   async function compact(): Promise<void> {
     const all = agent.state.messages;
     const start = all[0]?.role === "system" ? 1 : 0;
@@ -169,18 +172,24 @@ export function createSession(deps: SessionDeps) {
     if (contextTokens(all) <= budget) return;
     // On a small context window the kept part may take at most half of the budget.
     const cut = selectCut(all, Math.min(limits.keepRecentTokens, Math.floor(budget / 2)), start);
-    if (cut === undefined) return;
+    if (cut === undefined) return void events.write({ type: "compaction.skipped", reason: "no cut point" });
+    compacting = new AbortController();
     try {
       const older = all.slice(start, cut).map((m) => `${m.role}: ${textOf(m) || JSON.stringify(m.content)}`).join("\n\n");
       // shortcut: one call; a transcript longer than the summarize model's window fails and is logged.
-      const { message, outcome } = await llm.complete("summarize", { systemPrompt: SUMMARY_PROMPT, messages: [{ role: "user", content: older, timestamp: now() }] });
+      const request = { systemPrompt: SUMMARY_PROMPT, messages: [{ role: "user" as const, content: older, timestamp: now() }] };
+      const { message, outcome } = await llm.complete("summarize", request, compacting.signal);
       if (outcome !== "ok") throw new Error(outcome);
+      if (paused()) throw new Error("paused");
+      if (!textOf(message).trim()) throw new Error("empty summary"); // it would drop the older turns with nothing in their place
       const kept = all.slice(cut).filter((m) => m.role !== "system");
       store.set("compaction", { summary: textOf(message), firstKept: seqOf.get(all[cut]!)!, at: seqOf.get(kept.at(-1)!)! } satisfies Compaction);
       agent.state.messages = [...all.slice(0, start), summaryMessage(textOf(message)), ...kept];
       events.write({ type: "compaction", summarized: cut - start, kept: kept.length });
     } catch (error) {
       events.write({ type: "compaction.failed", reason: error instanceof Error ? error.message : String(error) });
+    } finally {
+      compacting = undefined;
     }
   }
 
@@ -214,6 +223,7 @@ export function createSession(deps: SessionDeps) {
 
   function pause(): Reply {
     store.set("paused", true);
+    compacting?.abort();
     events.write({ type: "pause" });
     return { status: "paused" };
   }
@@ -221,6 +231,11 @@ export function createSession(deps: SessionDeps) {
   // Pause, and abort the running turn (ADR-031). Its `send` settles as "stopped".
   function stop(): Reply {
     store.set("paused", true);
+    compacting?.abort();
+    // Messages steered into the stopped turn wait for the owner's decision, even if "resume" comes first.
+    const steered = agent.peekQueuedMessages();
+    agent.clearAllQueues();
+    if (steered.length > 0) hold(steered.map(textOf));
     const cut = agent.state.isStreaming;
     if (cut) {
       ended ??= "stopped";
