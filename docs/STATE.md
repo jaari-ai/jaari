@@ -75,8 +75,12 @@ Nothing runs yet. No app exists under `apps/`.
   (ADR-108); the built-in loader, which checks every
   manifest before it imports any package and refuses start on any failure (ADR-109); and the
   daemon–node contract with an in-process host that passes on only declared secrets (ADR-110).
-  Other workspace packages import it through the `@jaari/source` condition (ADR-111). The gate stub
-  (0.10) is next.
+  Other workspace packages import it through the `@jaari/source` condition (ADR-111). 
+- `@jaari/gate` (0.10, delivered 2026-11-16): the deny-all stub. `createGate` builds the
+  in-process host and keeps it; read-class capabilities run, every other class is refused before
+  the executor starts. It decides on a checked copy of the request and passes on that same copy.
+  A lint rule refuses `createInProcessHost` outside the gate (ADR-018). The `@jaari/secrets`
+  resolver (0.11) is next.
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript

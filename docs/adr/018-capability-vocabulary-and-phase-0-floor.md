@@ -27,4 +27,11 @@ Per-host capability names (`browser.local` as a gate class: the policy would dep
   in v1, requests fail closed.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- **Roadmap 0.10 (2026-11-16):** "no executor can be written around the gate" is enforced by
+  ownership and lint. `createGate(hostId, packages)` builds the in-process host itself and never
+  returns it, and an ESLint `no-restricted-imports` rule refuses `createInProcessHost` (and deep
+  imports of the capabilities source) outside `packages/gate`. Dynamic `import()` and
+  `eslint-disable` comments are not caught; real isolation comes with separate processes
+  (ADR-071). A refusal is a `failed` result (`denied by gate: …`), since the executor never
+  starts; Phase 3 adds an approval status. The gate decides on the checked copy from `receive()`
+  and dispatches that same copy, so a request cannot change between check and use.
