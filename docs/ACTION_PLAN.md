@@ -144,3 +144,4 @@ status and exit criteria live there.
 | [102](adr/102-web-budget.md) | Web budget: a monthly limit for paid web services, then self-hosted only until the reset | Accepted |
 | [103](adr/103-no-repository-or-registry-integrations.md) | No GitHub, npm, or PyPI integrations; `repo.write` and `publish` are reserved | Accepted |
 | [104](adr/104-prompt-injection-defence-in-depth.md) | Prompt injection: a locked prompt contract, unforgeable fences, a typed reader, argument provenance, and signals that only tighten | Accepted |
+| [105](adr/105-node-26-lts-runtime.md) | Node 26 LTS is the minimum runtime; types and compile target follow it | Accepted |

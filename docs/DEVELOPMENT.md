@@ -26,7 +26,7 @@ scripts/refs.sh lock             # re-apply chmod -R a-w
 ## Commands
 ~~~bash
 python3 scripts/merge_docs.py --check           # validate docs
-pnpm install                                    # install the pinned dev tooling (Node 22+)
+pnpm install                                    # install the pinned dev tooling (Node 26+)
 pnpm check                                      # lint, typecheck, and tests
 ~~~
 

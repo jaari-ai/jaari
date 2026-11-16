@@ -64,7 +64,7 @@ refs/                           read-only reference repos (local only, git-exclu
 
 ## Getting started (contributors)
 
-Prerequisites: git, Node 22, pnpm, Python 3.
+Prerequisites: git, Node 26 LTS, pnpm, Python 3.
 
 ~~~bash
 git clone https://github.com/jaari-ai/jaari && cd jaari
@@ -74,7 +74,7 @@ python3 scripts/merge_docs.py --check   # docs links and IDs are consistent
 ~~~
 
 `pnpm install` sets up the workspace, and `pnpm check` runs lint, typecheck, and tests
-(Node 22 or later). No package exists yet. Runtime config will be read from a copy of
+(Node 26 or later). No package exists yet. Runtime config will be read from a copy of
 [`jaari.config.example.jsonc`](jaari.config.example.jsonc); the config loader is a
 Phase 0 item.
 
