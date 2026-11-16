@@ -5,7 +5,7 @@ Last updated: 2026-11-16
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (111 ADRs, all Accepted)
+## Decided (112 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -35,7 +35,7 @@ The index is [adr/README.md](adr/README.md). By area:
   hardening, one capability vocabulary with a deny-all gate from Phase 0, standing grants,
   shadow mode, kill switch and limits, outside lineage, threat model, no payments in v1,
   prompt-injection defences (ADR-006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075,
-  079, 081, 090, 092, 095, 096, 104).
+  079, 081, 090, 092, 095, 096, 104, 112).
 - Models: role and tier routing, a pinned main session, local-only defaults decided at init,
   local-model qualification, a monthly budget, refusals in the pinned session (ADR-011, 019,
   045, 046, 085).
@@ -74,13 +74,19 @@ Nothing runs yet. No app exists under `apps/`.
   classes; the `jaari` manifest checked with TypeBox, closed to unknown names, kinds, and fields
   (ADR-108); the built-in loader, which checks every
   manifest before it imports any package and refuses start on any failure (ADR-109); and the
-  daemon–node contract with an in-process host that passes on only declared secrets (ADR-110).
+  daemon–node contract with an in-process host that passes on only declared secrets and scrubs
+  their values from every result (ADR-110, ADR-016).
   Other workspace packages import it through the `@jaari/source` condition (ADR-111). 
 - `@jaari/gate` (0.10, delivered 2026-11-16): the deny-all stub. `createGate` builds the
   in-process host and keeps it; read-class capabilities run, every other class is refused before
   the executor starts. It decides on a checked copy of the request and passes on that same copy.
-  A lint rule refuses `createInProcessHost` outside the gate (ADR-018). The `@jaari/secrets`
-  resolver (0.11) is next.
+  A lint rule refuses `createInProcessHost` outside the gate (ADR-018).
+- `@jaari/secrets` (0.11, delivered 2026-11-16): `parseRef` and `resolveRef` for bare
+  `secretRef:<name>` handles (names cannot leave a directory; vault handles wait for 3.3), the
+  `os-keychain` provider through `@napi-rs/keyring`, read only and loaded on first use (ADR-112),
+  the `host-credential` provider with its owner-only and outside-the-data-directory checks
+  (ADR-079), and exact-value `scrub` (ADR-016). Next: 0.5, the daemon and `@jaari/core`, which also decides how the daemon runs under
+  plain Node (ADR-111).
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript

@@ -35,3 +35,5 @@ Per-host capability names (`browser.local` as a gate class: the policy would dep
   (ADR-071). A refusal is a `failed` result (`denied by gate: …`), since the executor never
   starts; Phase 3 adds an approval status. The gate decides on the checked copy from `receive()`
   and dispatches that same copy, so a request cannot change between check and use.
+- **Roadmap 0.11 (2026-11-16):** point 4 ships as `@jaari/secrets` with `os-keychain` (ADR-112)
+  and `host-credential` (ADR-079). `env` and `file` are not built yet; tests use fakes instead.

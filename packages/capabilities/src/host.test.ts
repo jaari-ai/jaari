@@ -49,9 +49,18 @@ describe("dispatch", () => {
     const { host, spy } = hostWith(async ({ action, secrets }) => ({
       status: "ok", output: { target: action.target, token: secrets.token, at: new Date(0), fn: () => 1 },
     }));
-    const result = await host.dispatch(request({ secrets: { token: "t" } }));
-    expect(result).toEqual({ status: "ok", output: { target: "/notes.md", token: "t", at: "1970-01-01T00:00:00.000Z" } });
+    const result = await host.dispatch(request({ secrets: { token: "tok-123" } }));
+    expect(result).toEqual({ status: "ok", output: { target: "/notes.md", token: "[redacted]", at: "1970-01-01T00:00:00.000Z" } });
     expect(spy).toHaveBeenCalledOnce();
+    expect(spy.mock.calls[0]?.[0].secrets).toEqual({ token: "tok-123" }); // the executor itself sees the value
+  });
+
+  it.each([
+    ["a thrown error", async () => { throw new Error("bad token tok-123"); }, { status: "failed", error: "executor threw: bad token [redacted]" }],
+    ["a failed result", async () => ({ status: "failed" as const, error: "denied for tok-123" }), { status: "failed", error: "denied for [redacted]" }],
+  ])("scrubs secret values from %s", async (_, execute, expected) => {
+    const { host } = hostWith(execute);
+    expect(await host.dispatch(request({ secrets: { token: "tok-123" } }))).toEqual(expected);
   });
 
   it.each([
