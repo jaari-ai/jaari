@@ -29,6 +29,30 @@ describe("scrub", () => {
     expect(scrub("x=abcd!", ["abc", "bcd"])).toBe("x=[redacted]!");
   });
 
+  // ADR-016 point 6: the exact value "and common encodings of it".
+  const secret = "tok/SECRET+12345="; // / + = change under percent-encoding and differ between base64 forms
+  const leaks = (out: string) =>
+    [out, ...out.split("[redacted]")].some((part) =>
+      [Buffer.from(part, "base64").toString(), Buffer.from(part, "base64url").toString(), decodeURIComponent(part.replace(/%(?![\da-f]{2})/gi, "")), Buffer.from(part, "hex").toString()]
+        .some((decoded) => decoded.includes(secret.slice(0, 8))));
+
+  it.each([
+    ["base64", (s: string) => Buffer.from(s).toString("base64")],
+    ["base64url", (s: string) => Buffer.from(s).toString("base64url")],
+    ["percent-encoding", (s: string) => encodeURIComponent(s + " /&")],
+    ["hex", (s: string) => Buffer.from(s).toString("hex")],
+  ])("hides the %s form", (_, encode) => {
+    const out = scrub(`value=${encode(secret)}`, [secret]);
+    expect(out).toContain("[redacted]");
+    expect(leaks(out)).toBe(false);
+  });
+
+  it.each(["u:", "us:", "use:"])("hides a secret inside a longer base64 run (Basic auth with user %s)", (user) => {
+    const out = scrub(`Authorization: Basic ${Buffer.from(user + secret).toString("base64")}`, [secret]);
+    expect(out).toContain("[redacted]");
+    expect(leaks(out.slice("Authorization: Basic ".length))).toBe(false);
+  });
+
   it("ignores empty values", () => {
     expect(scrub("text", [""])).toBe("text");
   });

@@ -40,7 +40,7 @@
 | `@jaari/memory` | Git-backed memory repo, write path, canonicalize, daily audit, gap queue; file store (ADR-038, ADR-086) |
 | `@jaari/persona` | Curiosity/Proactivity dials, monitor, quiet hours, notification ledger |
 | `@jaari/gate` | The one dispatch entry point; it alone builds capability hosts (Phase 0: deny-all, read class only). Phase 3: action digests, approvals, re-check at dispatch, hash-chained `audit.jsonl` (ADR-006, ADR-016) |
-| `@jaari/secrets` | `secretRef` resolution for executors only, through pluggable providers: `os-keychain` and `host-credential` from Phase 0 (ADR-018, ADR-079), then the vault providers (Bitwarden, 1Password; ADR-013, ADR-050); exact-value scrubbing of resolved secrets (ADR-016) |
+| `@jaari/secrets` | `secretRef` resolution for executors only, through pluggable providers: `os-keychain` and `host-credential` from Phase 0 (ADR-018, ADR-079), then the vault providers (Bitwarden, 1Password; ADR-013, ADR-050); scrubbing of resolved secrets by exact value and common encodings (ADR-016) |
 | `@jaari/http` | Egress gate: resolve, classify every address against one address-class table, dial only checked addresses; SOCKS5 listener for the browser; per-capability allowlists (ADR-016); egress providers `owner-exit`, `direct`, `mobile`, `residential-proxy`, `vpn` (ADR-017, ADR-030, ADR-053) |
 | `@jaari/web` | `web.search`, `web.fetch`, fetch escalation ladder (ADR-012) |
 | `@jaari/computer` | Browser/desktop control behind one neutral surface with pluggable adapters (Playwright MCP, Stagehand, remote CDP, remote desktop), local profile, takeover (ADR-005, ADR-048, ADR-055) |

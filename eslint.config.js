@@ -10,10 +10,14 @@ const HOST = [{ name: "@jaari/capabilities", importNames: ["createInProcessHost"
 const DEEP = [{ group: ["**/capabilities/src/**"], message: "Import @jaari/capabilities by name (ADR-111)." }];
 // All network egress goes through @jaari/http (ADR-080).
 const egress = "Network egress goes through @jaari/http (ADR-080).";
+// Listening is not egress: the daemon's local socket (ADR-021) and the hook listener (ADR-073) need servers.
+const HTTP_SERVER = ["createServer", "Server", "IncomingMessage", "ServerResponse"];
+const LISTEN = { http: HTTP_SERVER, https: HTTP_SERVER, net: ["createServer", "Server"] };
 const NETWORK = [
-  ...["http", "https", "net", "tls", "http2", "dgram"].flatMap((m) => [m, `node:${m}`]),
-  "undici",
-].map((name) => ({ name, message: egress }));
+  ...["http", "https", "net", "tls", "http2", "dgram"].flatMap((m) =>
+    [m, `node:${m}`].map((name) => ({ name, message: egress, ...(LISTEN[m] ? { allowImportNames: LISTEN[m] } : {}) }))),
+  { name: "undici", message: egress },
+];
 const NETWORK_GLOBALS = ["fetch", "WebSocket", "EventSource"];
 
 // A later block replaces an earlier block's options for the same rule, so each set of files gets its whole list.

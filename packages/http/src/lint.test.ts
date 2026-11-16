@@ -22,6 +22,13 @@ describe("egress lint rule", () => {
     expect(await rulesFired(code, "packages/probe/src/x.ts")).toEqual(expect.arrayContaining([expect.stringMatching(/^no-restricted-/)]));
   });
 
+  it("allows listening servers outside @jaari/http, and still refuses their clients", async () => {
+    const code = 'import { createServer } from "node:http";\nimport { createServer as net } from "node:net";\nexport { createServer, net };';
+    expect(await rulesFired(code, "apps/daemon/src/x.ts")).toEqual([]);
+    expect(await rulesFired('import { request } from "node:http";\nexport { request };', "apps/daemon/src/x.ts")).toEqual(["no-restricted-imports"]);
+    expect(await rulesFired('import { connect } from "node:net";\nexport { connect };', "apps/daemon/src/x.ts")).toEqual(["no-restricted-imports"]);
+  });
+
   it("allows the same code inside @jaari/http", async () => {
     expect(await rulesFired('import { Agent } from "undici";\nexport const f = () => fetch("x", { dispatcher: new Agent() } as RequestInit);', "packages/http/src/x.ts")).toEqual([]);
   });
@@ -34,6 +41,6 @@ describe("egress lint rule", () => {
   });
 
   it("refuses network modules in the gate and capabilities too", async () => {
-    expect(await rulesFired('import "node:net";', "packages/gate/src/x.ts")).toEqual(["no-restricted-imports"]);
+    expect(await rulesFired('import { connect } from "node:net";\nexport { connect };', "packages/gate/src/x.ts")).toEqual(["no-restricted-imports"]);
   });
 });

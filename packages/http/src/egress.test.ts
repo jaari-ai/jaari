@@ -61,12 +61,20 @@ describe("createPolicyCheck", () => {
     expect(check("8.8.8.8", 443)).toBeNull();
   });
 
+  it("allows a name:port entry's loopback or private addresses for that name and port only", () => {
+    const check = createPolicyCheck({ allow: ["ollama:11434"] });
+    expect(check("172.18.0.5", 11434, "ollama")).toBeNull();
+    expect(check("172.18.0.5", 11435, "ollama")).toEqual({ address: "172.18.0.5", reason: "private" });
+    expect(check("172.18.0.5", 11434, "other")).toEqual({ address: "172.18.0.5", reason: "private" });
+    expect(check("169.254.169.254", 11434, "ollama")).toEqual({ address: "169.254.169.254", reason: "metadata" });
+  });
+
   it("refuses the daemon's own ports on any address that is not public, even when allowed", () => {
     const check = createPolicyCheck({ allow: ["127.0.0.1"], ownPorts: [7420] });
     expect(check("127.0.0.1", 7420)).toEqual({ address: "127.0.0.1", reason: "own-port" });
   });
 
-  it.each(["localhost", "10.0.0.1/33", "10.0.0.1:0", "[::1", "::1:80:x", "1.2.3"])("refuses the allow entry %s at start", (entry) => {
+  it.each(["localhost", "ollama", "1.2.3:80", "-bad:80", "10.0.0.1/33", "10.0.0.1:0", "[::1", "::1:80:x", "1.2.3"])("refuses the allow entry %s at start", (entry) => {
     expect(() => createPolicyCheck({ allow: [entry] })).toThrow("is not an IP address");
   });
 });
@@ -92,6 +100,12 @@ describe("createEgress fetch", () => {
   it("dials only addresses that pass when a name also returns refused ones (localhost)", async () => {
     const response = await createEgress({ allow: [`127.0.0.1:${target.port}`] }).fetch(`http://localhost:${target.port}/`);
     expect(await response.text()).toBe("ok");
+  });
+
+  it("reaches a name allowed as name:port, as a Compose service name would be", async () => {
+    const egress = createEgress({ allow: [`rebind.invalid:${target.port}`] });
+    expect(await (await egress.fetch(`http://rebind.invalid:${target.port}/`)).text()).toBe("ok");
+    await refusedWith(egress.fetch(`http://127.0.0.1:${target.port}/`));
   });
 
   it("checks every redirect hop", async () => {

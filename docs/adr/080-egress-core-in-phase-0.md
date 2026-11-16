@@ -57,3 +57,12 @@ blocking every network call until Phase 4 (no model provider in Phases 0 to 3); 
   globals, which are network clients too. `globalThis.fetch` and `global.fetch` are caught; an
   alias such as `const g = globalThis; g.fetch` is not.
 - A refusal is an `EgressRefused` error, the `cause` of the `TypeError` that `fetch` throws.
+- An allow entry can be `name:port` (port required), such as `ollama:11434`: a Compose service
+  gets a new address on each start. It allows the loopback, this-machine, or private addresses that
+  name resolves to, for that name and port only; metadata, link-local, reserved addresses and the
+  daemon's own ports stay refused.
+- Listening is not egress. The lint rule allows the server names of `node:http`, `node:https`
+  (`createServer`, `Server`, `IncomingMessage`, `ServerResponse`) and `node:net` (`createServer`,
+  `Server`) everywhere, for the daemon's local socket (ADR-021) and the hook listener (ADR-073).
+  Client names stay refused. How `apps/cli` connects to the daemon's socket is decided with 0.8:
+  `net.connect` also dials TCP, so lint cannot limit it to a socket path.
