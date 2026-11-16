@@ -10,7 +10,7 @@ import {
   type Provider,
 } from "@earendil-works/pi-ai";
 import { resolveRef, type VaultProvider } from "@jaari/secrets";
-import { checkLlmConfig, roleRefs, splitRef, type LlmConfig, type Role } from "./config.js";
+import { checkLlmConfig, ROLES, roleRefs, splitRef, type LlmConfig, type Role } from "./config.js";
 import type { Outcome, UsageLog } from "./usage.js";
 
 // ADR-085: the provider's raw stop reasons that mean a refusal, never a provider error.
@@ -117,5 +117,7 @@ export async function createLlm(deps: LlmDeps) {
     return last!;
   }
 
+  // A model name the provider does not know fails at start, not at the role's first call (ADR-011).
+  ROLES.forEach(chain);
   return { chain, complete, models };
 }

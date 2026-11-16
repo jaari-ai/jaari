@@ -97,6 +97,15 @@ describe("providers", () => {
     expect(llm.chain("classify")).toEqual([expect.objectContaining({ id: "llama3", provider: "local", baseUrl: "http://localhost:11434/v1" })]);
   });
 
+  it("refuses at start a model the provider does not know, even as a fallback", async () => {
+    const models = createModels();
+    models.setProvider(fauxProvider({ provider: "faux", models: [{ id: "a" }] }).provider);
+    await expect(createLlm({
+      config: { providers: { faux: { apiKey: "secretRef:llm.faux" } }, tiers: { small: ["faux/a", "faux/typo"] }, roles: { classify: "small" } },
+      fetch: fetchFn, secrets: { resolve: async () => "", health: async () => ({ ok: true }) }, usage: { record: () => {}, close: () => {} }, models,
+    })).rejects.toThrow('unknown model "faux/typo"');
+  });
+
   it("loads a built-in provider and ignores its environment variable key (ADR-079)", async () => {
     vi.stubEnv("ANTHROPIC_API_KEY", "sk-from-env");
     const any = createModels();
