@@ -75,12 +75,15 @@ Nothing runs yet. No package exists under `packages/` or `apps/`.
   ES2024, pnpm 12.18.0; other dev tools are already at the newest version past the 7-day age.
 - `.github/workflows/release.yml` and the `python/` name-holder package exist. `python/`
   matches [guides/namespaces.md](guides/namespaces.md) section 6.2 and builds a wheel and an
-  sdist locally (checked 2026-11-13); the release workflow itself has never run. No CI
-  workflow exists.
+  sdist locally (checked 2026-11-13); the release workflow itself has never run.
+- CI (0.2, 2026-11-16): `.github/workflows/ci.yml` runs lint, typecheck, tests, the licence
+  check (`scripts/check-licenses.mjs`), and `merge_docs.py --check` on every pull request,
+  plus a DCO sign-off check and a gitleaks history scan. The tier-1 smoke test comes with the
+  daemon in 0.5 (ADR-041).
 - [THREAT_MODEL.md](THREAT_MODEL.md) is written (ADR-069).
 
 ## Now
-Phase 0: Foundation, in progress (0.1 delivered). Per-item status, needs, and exit criteria are in
+Phase 0: Foundation, in progress (0.1 and 0.2 delivered). Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
 No open question blocks Phase 0.
 

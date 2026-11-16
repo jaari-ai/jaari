@@ -63,3 +63,8 @@ main supply-chain attack paths).
 - The release-age rule is `minimumReleaseAge: 10080` (minutes) in `pnpm-workspace.yaml`, with
   `saveExact: true` so new dependencies are pinned exactly.
 - TypeScript is held on 6.0.x because typescript-eslint supports only TypeScript below 6.1.
+- CI is `.github/workflows/ci.yml` (2026-11-16, roadmap 0.2). The DCO check covers only the
+  commits in each pull request, because history before 0.2 is mostly unsigned. gitleaks runs
+  as a release binary with a pinned SHA-256, not `gitleaks-action`, which needs a licence key
+  for organisation repos. It uses the default rules: open-instinct's extra rules are for
+  services Jaari does not use, so no `.gitleaks.toml` exists yet.

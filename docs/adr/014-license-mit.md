@@ -14,4 +14,6 @@ Apache-2.0 (patent grant and NOTICE mechanism, but heavier for plugin authors an
 - **ADR-016:** code copied from `refs/openmausbot` outside `enterprise/` keeps its Apache-2.0 header and gets a `NOTICE` entry.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- `BlueOak-1.0.0` (permissive, OSI-approved, MIT-compatible; used by `minimatch`) is added to the
+  dependency allowlist. `scripts/check-licenses.mjs` holds the list and runs in CI (2026-11-16,
+  roadmap 0.2).
