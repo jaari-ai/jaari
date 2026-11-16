@@ -85,10 +85,10 @@ Nothing runs yet. No app exists under `apps/`.
   `secretRef:<name>` handles (names cannot leave a directory; vault handles wait for 3.3), the
   `os-keychain` provider through `@napi-rs/keyring`, read only and loaded on first use (ADR-112),
   the `host-credential` provider with its owner-only and outside-the-data-directory checks
-  (ADR-079), and exact-value `scrub` (ADR-016). 
+  (ADR-079), and `scrub` of exact values and their common encodings (ADR-016). 
 - `@jaari/http` core (0.15, delivered 2026-11-16): the address-class table (metadata, loopback,
   link-local, reserved, this-machine, private, public; IPv4 inside IPv6 forms unwrapped), the
-  owner's allow list and the daemon's own ports, and `createEgress(policy).fetch`: Node's `fetch`
+  owner's allow list (addresses, ranges, or `name:port` for Compose services) and the daemon's own ports, and `createEgress(policy).fetch`: Node's `fetch`
   with an undici `Agent` whose connector resolves, checks, and dials only a checked address
   (ADR-113). A lint rule, checked by a test, refuses other network clients (ADR-080). Next: 0.7,
   `@jaari/llm`, then 0.5, the daemon, which also decides how the daemon runs under plain Node
