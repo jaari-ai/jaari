@@ -9,7 +9,8 @@ const { values } = parseArgs({
   options: {
     config: { type: "string" },
     data: { type: "string" },
-    credentials: { type: "string", default: process.env.CREDENTIALS_DIRECTORY },
+    // systemd sets $CREDENTIALS_DIRECTORY; Compose mounts secrets at /run/secrets (ADR-079).
+    credentials: { type: "string", default: process.env.CREDENTIALS_DIRECTORY ?? "/run/secrets" },
     check: { type: "boolean", default: false }, // start every part, then stop: proves the build and the config
   },
 });
@@ -20,7 +21,7 @@ if (!values.config || !values.data) {
 
 // shortcut: plain JSON; the config loader with JSONC, defaults, and `jaari init` is roadmap 0.6.
 const config = JSON.parse(await readFile(values.config, "utf8")) as DaemonConfig;
-const daemon = await startDaemon({ config, dataDir: values.data, ...(values.credentials ? { credentialsDir: values.credentials } : {}) });
+const daemon = await startDaemon({ config, dataDir: values.data, credentialsDir: values.credentials! });
 if (values.check) {
   await daemon.close();
   console.log("jaari-daemon: started and stopped cleanly");

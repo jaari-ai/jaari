@@ -35,7 +35,6 @@ function secretsFor(options: DaemonOptions): VaultProvider {
 
 export async function startDaemon(options: DaemonOptions) {
   const { config, dataDir } = options;
-  await mkdir(dataDir, { recursive: true, mode: 0o700 });
   const secrets = secretsFor(options);
   // Unattended start fails here, before anything runs, when secret zero is unusable (ADR-079).
   const health = await secrets.health();
@@ -49,27 +48,32 @@ export async function startDaemon(options: DaemonOptions) {
     });
   }
 
+  // Created only after the checks, so a refused start leaves nothing behind.
+  await mkdir(dataDir, { recursive: true, mode: 0o700 });
   const events = openEventLog(join(dataDir, "events.ndjson"));
-  const usage = openUsageLog(join(dataDir, "usage.db"));
-  const store = openStore(join(dataDir, "session.db"));
+  const opened: { close(): void }[] = [];
   try {
+    const usage = openUsageLog(join(dataDir, "usage.db"));
+    opened.push(usage);
+    const store = openStore(join(dataDir, "session.db"));
+    opened.push(store);
     const policy: EgressPolicy = { allow: config.egress?.allow ?? [] };
     const llm = await createLlm({ config: config.llm, fetch: createEgress(policy).fetch, secrets, usage, ...(options.models ? { models: options.models } : {}) });
     const session = createSession({ store, events, llm, systemPrompt: SYSTEM_PROMPT, ...(config.limits ? { limits: config.limits } : {}) });
     events.write({ type: "daemon.start" });
+    let closing: Promise<void> | undefined;
     return {
       session,
       // Lets a running turn settle, then closes the stores.
-      async close() {
-        await session.idle();
-        events.write({ type: "daemon.stop" });
-        store.close();
-        usage.close();
-      },
+      // Safe to call twice, for example on SIGINT then SIGTERM.
+      close: () =>
+        (closing ??= session.idle().then(() => {
+          events.write({ type: "daemon.stop" });
+          opened.forEach((handle) => handle.close());
+        })),
     };
   } catch (error) {
-    store.close();
-    usage.close();
+    opened.forEach((handle) => handle.close());
     throw error;
   }
 }

@@ -29,6 +29,7 @@ jobs:
       - name: The built daemon starts and stops under plain Node (ADR-115)
         run: |
           mkdir -m 700 "$RUNNER_TEMP/credentials"
+          (umask 077 && echo smoke > "$RUNNER_TEMP/credentials/llm.local") # the start check reads it
           node apps/daemon/dist/main.js --check --config apps/daemon/smoke.config.json --data "$RUNNER_TEMP/jaari" --credentials "$RUNNER_TEMP/credentials"
       - run: node scripts/check-licenses.mjs
       - run: python3 scripts/merge_docs.py --check

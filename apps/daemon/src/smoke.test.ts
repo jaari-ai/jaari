@@ -1,5 +1,5 @@
 // The tier-1 smoke test (ADR-041): boots the real daemon on pi-ai's scripted provider, with no API calls.
-import { chmod, mkdtemp, readFile, writeFile, mkdir } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createModels, fauxAssistantMessage, fauxProvider } from "@earendil-works/pi-ai";
@@ -26,10 +26,28 @@ async function setup() {
 }
 
 describe("tier-1 smoke", () => {
+  it("closes once when two signals arrive together", async () => {
+    const { root, boot } = await setup();
+    const daemon = await boot();
+    await Promise.all([daemon.close(), daemon.close()]);
+    const log = (await readFile(join(root, "data", "events.ndjson"), "utf8")).trim().split("\n");
+    expect(log.filter((line) => line.includes("daemon.stop"))).toHaveLength(1);
+  });
+
+  it("closes what it opened when a store fails to open", async () => {
+    const { root, boot } = await setup();
+    await mkdir(join(root, "data", "session.db"), { recursive: true }); // a directory where the database belongs
+    await expect(boot()).rejects.toThrow();
+  });
+
   it("boots, answers, survives a restart, and keeps the pause", async () => {
     const { root, faux, boot } = await setup();
     let key: string | undefined;
-    faux.setResponses([(_, options) => ((key = options?.apiKey), fauxAssistantMessage("Noted.")), fauxAssistantMessage("Miso.")]);
+    let context = "";
+    faux.setResponses([
+      (_, options) => ((key = options?.apiKey), fauxAssistantMessage("Noted.")),
+      (sent) => ((context = JSON.stringify(sent.messages)), fauxAssistantMessage("Miso.")),
+    ]);
 
     const first = await boot();
     expect(await first.session.send("My cat is Miso.")).toEqual({ status: "done", text: "Noted." });
@@ -42,6 +60,7 @@ describe("tier-1 smoke", () => {
     expect(await second.session.send("What is my cat called?")).toEqual({ status: "held" });
     second.session.resume();
     expect((await second.session.send("What is my cat called?")).text).toBe("Miso.");
+    expect(context).toContain("My cat is Miso."); // the restarted session sent the first turn to the model
     await second.close();
 
     const log = (await readFile(join(root, "data", "events.ndjson"), "utf8")).trim().split("\n").map((l) => JSON.parse(l).type);
@@ -59,5 +78,6 @@ describe("tier-1 smoke", () => {
   it("refuses to start without its credential directory", async () => {
     const { root } = await setup();
     await expect(startDaemon({ config, dataDir: join(root, "data"), credentialsDir: join(root, "missing") })).rejects.toThrow("refusing to start");
+    await expect(stat(join(root, "data"))).rejects.toThrow("ENOENT"); // a refused start leaves no data directory
   });
 });
