@@ -24,7 +24,7 @@ check must be a runtime validator, not only a TypeScript type.
 - **Capability classes.** The code uses the classes of the SECURITY_MODEL.md table: `read`,
   `gated`, `policy` (`llm.escalate`), `reserved` (`publish`, `repo.write`, `pay`), and
   `takeover`. The vocabulary lives in `packages/capabilities/src/vocabulary.ts`; it and the table
-  change together.
+  change together, and a test fails when their names or classes differ.
 - **Field shapes.** `egress` entries are exact lowercase hostnames, with no scheme, port, IP
   literal, or wildcard. `secrets` are dotted lowercase names. A sidecar is either an image pinned
   by `@sha256:` digest or a binary with its SHA-256 and size, and each has an SBOM path.

@@ -1,6 +1,7 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parseManifest } from "./manifest.js";
-import { CAPABILITIES, CAPABILITY_NAMES, isCapabilityName } from "./vocabulary.js";
+import { CAPABILITIES } from "./vocabulary.js";
 
 // The example manifest from docs/ARCHITECTURE.md (Channels > Contract).
 const telegram = {
@@ -53,15 +54,23 @@ describe("parseManifest", () => {
 });
 
 describe("vocabulary", () => {
-  it("has a class for every name", () => {
-    expect(CAPABILITY_NAMES).toHaveLength(29);
-    expect(CAPABILITIES.pay).toBe("reserved");
-    expect(CAPABILITIES["takeover.request"]).toBe("takeover");
+  // The SECURITY_MODEL.md table is the authority (ADR-018); the code must match it name for name.
+  it("matches the capability table in SECURITY_MODEL.md", () => {
+    const doc = readFileSync(new URL("../../../docs/SECURITY_MODEL.md", import.meta.url), "utf8");
+    const table = doc.slice(doc.indexOf("| Capability | Class |")).split("\n\n")[0];
+    const fromDoc: Record<string, string> = {};
+    for (const row of table.split("\n").slice(2)) {
+      const [, nameCell, classCell] = row.split("|");
+      const names = [...nameCell.matchAll(/`([^`]+)`/g)].map((m) => m[1]);
+      // "gated by classifier" -> gated, "policy-checked" -> policy; "read, gated" pairs with the names in order.
+      const classes = classCell.split(",").map((c) => c.trim().match(/^[a-z]+/)![0]);
+      names.forEach((n, i) => (fromDoc[n] = classes.length === names.length ? classes[i] : classes[0]));
+    }
+    expect(Object.keys(fromDoc).length).toBeGreaterThan(0);
+    expect(CAPABILITIES).toEqual(fromDoc);
   });
 
   it("does not treat inherited object keys as names", () => {
     expect(errorsOf({ ...browser, provides: ["toString"] }).length).toBeGreaterThan(0);
-    expect(isCapabilityName("toString")).toBe(false);
-    expect(isCapabilityName("shell")).toBe(true);
   });
 });
