@@ -25,10 +25,9 @@ scripts/refs.sh lock             # re-apply chmod -R a-w
 
 ## Commands
 ~~~bash
-python3 scripts/merge_docs.py --check           # works today: validate docs
-pnpm install                                    # once the root package.json exists (Phase 0)
-pnpm -r build
-pnpm test
+python3 scripts/merge_docs.py --check           # validate docs
+pnpm install                                    # install the pinned dev tooling (Node 22+)
+pnpm check                                      # lint, typecheck, and tests
 ~~~
 
 ## Docs
