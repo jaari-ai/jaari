@@ -50,6 +50,7 @@ in v1.
 
 ~~~
 README.md AGENTS.md CLAUDE.md   project and agent instructions
+SECURITY.md CONTRIBUTING.md     security policy and contribution guide
 jaari.config.example.jsonc      example owner config (owner, channels, secrets, llm, web, egress, backup, ...)
 pnpm-workspace.yaml tsconfig*.json eslint.config.js vitest.config.ts
                                 build config, allowlisted to packages/* and apps/*
@@ -85,6 +86,11 @@ Docs are hand-maintained Markdown. Follow the conventions in
 state), then run `python3 scripts/merge_docs.py --check`. To talk about the project with an AI
 agent, run `python3 scripts/merge_docs.py` and give it the resulting `JAARI_CONTEXT.md`
 (untracked, rebuilt on every run).
+
+## Contributing and security
+
+How to get a change merged, including DCO sign-off: [CONTRIBUTING.md](CONTRIBUTING.md). To
+report a vulnerability privately: [SECURITY.md](SECURITY.md).
 
 ## Lineage
 
