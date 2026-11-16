@@ -29,6 +29,8 @@ Written:
   what `@jaari/llm` changes (2026-11-16)
 - [16-pi-agent-core.md](16-pi-agent-core.md) — Pi's `Agent`, its loop hooks, steering, and the
   compaction cut, and what `@jaari/core` adds (2026-11-16)
+- [17-owner-commands.md](17-owner-commands.md) — how the references and the commercial agents read
+  stop, pause, and approval messages, and what ADR-116 borrows (2026-11-16)
 
 Planned (optional, not scheduled; ADRs have since decided these topics):
 - 01-session.md — persistent session, steering, segments, compaction

@@ -1,7 +1,7 @@
 # ADR-031: Pause, emergency stop, and runaway limits, enforced in code and configurable
 
 - **Status:** Accepted
-- **Extended by:** [ADR-087](087-safety-pieces-ship-with-what-they-protect.md)
+- **Extended by:** [ADR-087](087-safety-pieces-ship-with-what-they-protect.md), [ADR-116](116-owner-commands-in-code.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -55,6 +55,8 @@ running work to finish); fixed, non-configurable limits.
 - **ADR-087 (resolves OQ-71):** pause, emergency stop, steps per turn, the stall guard, and the
   watchdog ship in Phase 0; spike alerts in Phase 1; the loop breaker and the persona rules in
   Phase 2; permission lowering in Phase 3; child limits in Phase 4.
+- **ADR-116 (resolves OQ-94):** code reads the commands in the owner's languages; a bare stop word
+  pauses, a second one within 10 seconds is the emergency stop, and "wait" or "hold on" pauses.
 
 ## Consequences
 Built in `@jaari/core` (roadmap 0.5, 2026-11-16):

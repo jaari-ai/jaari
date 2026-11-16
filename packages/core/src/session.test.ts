@@ -263,6 +263,35 @@ describe("review 2 of 0.5", () => {
   });
 });
 
+describe("brake words (ADR-116)", () => {
+  it("a stop word pauses; a second one within the window cuts the turn", async () => {
+    let release = () => {};
+    const slow = tool("slow", () => new Promise((resolve) => (release = () => resolve({ content: [{ type: "text", text: "ok" }], details: undefined }))));
+    const { faux, session } = await setup({ tools: [slow], limits: { repeatStopMs: 60_000 } });
+    faux.setResponses([callTool("slow"), fauxAssistantMessage("never")]);
+    const turn = session.send("go");
+    await expect.poll(() => faux.state.callCount).toBe(1);
+    expect(await session.send("stop")).toEqual({ status: "paused" });
+    expect(await session.send("STOP!")).toMatchObject({ status: "stopped", tools: ["slow"] });
+    release();
+    expect((await turn).status).toBe("stopped");
+  });
+
+  it("a stop word after the window only pauses again", async () => {
+    const { session } = await setup({ limits: { repeatStopMs: 0 } });
+    expect(await session.send("arrête")).toEqual({ status: "paused" });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    expect(await session.send("arrête")).toEqual({ status: "paused" });
+  });
+
+  it("a sentence that only mentions stopping goes to the model", async () => {
+    const { faux, session } = await setup();
+    faux.setResponses([fauxAssistantMessage("Done.")]);
+    expect(await session.send("stop the emails from Bob")).toEqual({ status: "done", text: "Done." });
+    expect(session.paused()).toBe(false);
+  });
+});
+
 describe("createWatchdog", () => {
   it("expires after the limit, and a sleep gap starts the count again (ADR-057)", () => {
     let time = 0;
