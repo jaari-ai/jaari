@@ -23,7 +23,11 @@ const errorsOf = (value: unknown) => {
 };
 
 describe("parseManifest", () => {
-  it.each([["channel", telegram], ["capability", browser]])("accepts a valid %s manifest", (_, m) => {
+  it.each([
+    ["channel", telegram],
+    ["capability", browser],
+    ["config-schema", { ...browser, config: { type: "object", properties: { profile: { type: "string" } } } }],
+  ])("accepts a valid %s manifest", (_, m) => {
     expect(parseManifest(m)).toEqual({ ok: true, manifest: m });
   });
 
@@ -42,6 +46,8 @@ describe("parseManifest", () => {
     ["a sidecar without a digest", { ...browser, sidecars: [{ name: "driver", size: 1, sbom: "s" }] }],
     ["a channel without its section", { ...telegram, channel: undefined }],
     ["a channel section on another kind", { ...browser, channel: telegram.channel }],
+    ["a config schema that is not for an object", { ...browser, config: { type: "string" } }],
+    ["a health field (ADR-108 dropped it)", { ...browser, health: { intervalSeconds: 300 } }],
     ["a value that is not an object", "telegram"],
     ["null", null],
   ])("refuses %s", (_, m) => {

@@ -148,3 +148,4 @@ status and exit criteria live there.
 | [106](adr/106-one-address-for-registry-accounts.md) | Registry accounts use `hello@jaari.org`; no separate recovery inbox | Accepted |
 | [107](adr/107-dependabot-updates.md) | Dependabot version updates into `develop`; alerts on, security PRs off; bot exempt from DCO | Accepted |
 | [108](adr/108-manifest-validation-with-typebox.md) | The package manifest is validated with TypeBox; kind names and capability classes | Accepted |
+| [109](adr/109-built-in-package-loader.md) | The built-in loader checks every manifest first; `health` is a method; `config` is inline JSON Schema | Accepted |

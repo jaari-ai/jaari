@@ -1,6 +1,7 @@
 # ADR-108: The package manifest is validated with TypeBox; kind names and capability classes
 
 - **Status:** Accepted
+- **Extended by:** [ADR-109](109-built-in-package-loader.md)
 - **Date:** 2026-11-16
 
 ## Context
@@ -38,6 +39,10 @@ check must be a runtime validator, not only a TypeScript type.
 - **Hand-written checks.** No dependency, but more code at a trust boundary, and the type can
   drift from the checks.
 - **`kind` as free text.** A typo would load as an unknown kind; ADR-071 requires fail closed.
+
+## Amendments
+- **ADR-109:** `health` is a method on each kind's interface, not a manifest field; `config` is an
+  inline JSON Schema; the built-in loader refuses start on any failure.
 
 ## Consequences
 - TypeBox's `Compile` generates validator code with `new Function`. It runs only on our own
