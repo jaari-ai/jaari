@@ -47,4 +47,13 @@ blocking every network call until Phase 4 (no model provider in Phases 0 to 3); 
 - **ADR-104:** the core scans outbound URLs and bodies for the canary and the session fence id, blocks a hit, writes an audit row, and alerts the owner. (Provenance holds on `web.fetch` and `web.search` arguments are decided at the tool call, before the gate, not in the core.)
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- **Roadmap 0.15 (2026-11-16):** built on Node's `fetch` and an undici `Agent` (ADR-113).
+- A name may return some refused addresses: the core dials the first address that passed and
+  never a refused one (OpenMausBot refuses the whole connection instead; learning/14). This keeps
+  `localhost` working with one allowed loopback address.
+- The daemon's own ports are refused on every address that is not public, even when allowed.
+  The machine's own interface addresses form a `this-machine` class, treated like loopback.
+- The lint rule also refuses `node:http2`, `node:dgram`, and the `WebSocket` and `EventSource`
+  globals, which are network clients too. `globalThis.fetch` and `global.fetch` are caught; an
+  alias such as `const g = globalThis; g.fetch` is not.
+- A refusal is an `EgressRefused` error, the `cause` of the `TypeError` that `fetch` throws.

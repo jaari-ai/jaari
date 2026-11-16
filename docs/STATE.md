@@ -5,7 +5,7 @@ Last updated: 2026-11-16
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (112 ADRs, all Accepted)
+## Decided (113 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -41,8 +41,8 @@ The index is [adr/README.md](adr/README.md). By area:
   045, 046, 085).
 - Web and computer use: search, fetch ladder, neutral browser surface with adapters,
   commitment classifier, browser worker, egress pool, signed-agent identity, takeover, egress
-  core in Phase 0, owner accounts on any host with home sites via the owner exit, the web
-  budget (ADR-005, 012, 048, 049, 051, 052, 053, 054, 055, 080, 098, 099, 102).
+  core in Phase 0 on Node's `fetch` and undici, owner accounts on any host with home sites via the owner exit, the web
+  budget (ADR-005, 012, 048, 049, 051, 052, 053, 054, 055, 080, 098, 099, 102, 113).
 - Operations: job engine, backup and restore, encryption at rest, observability, degraded mode
   (ADR-025, 027, 028, 032, 059); safety pieces ship with what they protect; retention of
   receipts and the action log (ADR-087, 097).
@@ -85,8 +85,14 @@ Nothing runs yet. No app exists under `apps/`.
   `secretRef:<name>` handles (names cannot leave a directory; vault handles wait for 3.3), the
   `os-keychain` provider through `@napi-rs/keyring`, read only and loaded on first use (ADR-112),
   the `host-credential` provider with its owner-only and outside-the-data-directory checks
-  (ADR-079), and exact-value `scrub` (ADR-016). Next: 0.5, the daemon and `@jaari/core`, which also decides how the daemon runs under
-  plain Node (ADR-111).
+  (ADR-079), and exact-value `scrub` (ADR-016). 
+- `@jaari/http` core (0.15, delivered 2026-11-16): the address-class table (metadata, loopback,
+  link-local, reserved, this-machine, private, public; IPv4 inside IPv6 forms unwrapped), the
+  owner's allow list and the daemon's own ports, and `createEgress(policy).fetch`: Node's `fetch`
+  with an undici `Agent` whose connector resolves, checks, and dials only a checked address
+  (ADR-113). A lint rule, checked by a test, refuses other network clients (ADR-080). Next: 0.7,
+  `@jaari/llm`, then 0.5, the daemon, which also decides how the daemon runs under plain Node
+  (ADR-111).
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript
