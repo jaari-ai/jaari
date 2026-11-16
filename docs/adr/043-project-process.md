@@ -57,4 +57,9 @@ together, so independent versions add work without benefit); a separate `securit
 main supply-chain attack paths).
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- pnpm 11 replaced `onlyBuiltDependencies` with `allowBuilds`. The allowlist is `allowBuilds`
+  in `pnpm-workspace.yaml`, with `strictDepBuilds: true`, so an unlisted install script fails
+  the install (2026-11-16, roadmap 0.1).
+- The release-age rule is `minimumReleaseAge: 10080` (minutes) in `pnpm-workspace.yaml`, with
+  `saveExact: true` so new dependencies are pinned exactly.
+- TypeScript is held on 6.0.x because typescript-eslint supports only TypeScript below 6.1.

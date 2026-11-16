@@ -29,7 +29,7 @@ only with a pointer), **generated** (written by a script).
 | `CLAUDE.md` | Claude Code specifics; imports `AGENTS.md` | current | ADR-002 |
 | `NOTICE`, `LICENSE` | Third-party notices (no derived files yet); MIT | current | ADR-014, 016 |
 | `jaari.config.example.jsonc` | Example owner config | current (gaps of report D-07 fixed 2026-11-13) | ADR-017, 019, 021, 022, 027, 037, 046, 049, 053, 068, 079, 084, 098, 100, 102 |
-| `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts` | Allowlist placeholders for the build | placeholders; no root `package.json` | ADR-002 |
+| `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts` | Allowlisted build config, with the root `package.json` | delivered with 0.1 | ADR-002 |
 | `.github/workflows/release.yml`, `CODEOWNERS`, `dependabot.yml` | Tag-triggered PyPI release; workflow owners; action updates | exists, never run; no CI workflow | ADR-010, 043 |
 | `python/` | PyPI name-holder package | current; matches `docs/guides/namespaces.md` section 6.2 and builds (D-06 fixed 2026-11-13) | ADR-010 |
 | `scripts/refs.sh` | Clones, locks, and indexes `refs/` | current; pins each reference to a full sha; `bump` moves pins (ADR-083) | ADR-002 |
