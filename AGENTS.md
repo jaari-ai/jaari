@@ -99,7 +99,7 @@ python3 scripts/merge_docs.py           # rebuild the untracked context file (JA
 
 ## Stack and conventions
 - pnpm workspace (`packages/*`, `apps/*`), TypeScript strict, `module: NodeNext`, target
-  ES2023, Node 22.
+  ES2024, Node 26 LTS (ADR-105).
 - Tests: Vitest, colocated as `packages/*/src/**/*.test.ts` and `apps/*/src/**/*.test.ts`.
 - Lint: ESLint flat config. All tooling uses allowlists so `refs/` is never included.
   Keep it that way when adding config.

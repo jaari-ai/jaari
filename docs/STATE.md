@@ -5,14 +5,14 @@ Last updated: 2026-11-16
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (104 ADRs, all Accepted)
+## Decided (105 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain (ADR-010, 014, 043). npm and PyPI names are
   not yet secured; checklist in [guides/namespaces.md](guides/namespaces.md).
 - Core design: Pi agent loop with one persistent main session, pnpm monorepo, open-instinct as
   shell and openinstinct as spec; package homes; one manifest per package in `package.json`;
-  reference repos pinned (ADR-001, 002, 009, 065, 083, 084, 086).
+  reference repos pinned; Node 26 LTS minimum (ADR-001, 002, 009, 065, 083, 084, 086, 105).
 - Hosting: one daemon on a VPS, remote server, home hardware, or laptop; capabilities installed
   where they run; nodes over a pinned link; the owner's choice of overlay; install, update,
   and laptop rules; the overlay binding in Phase 2 and the node link in Phase 6; the sandbox
@@ -71,6 +71,8 @@ Nothing runs yet. No package exists under `packages/` or `apps/`.
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript
   parser), TypeScript, and Vitest config. `pnpm check` runs lint, typecheck, and tests. Each
   package sets its own output directory (`dist/`, ignored by git).
+  Runtime moved to Node 26 LTS (ADR-105): `engines` `>=26`, `@types/node` 26.6.6, target
+  ES2024, pnpm 12.18.0; other dev tools are already at the newest version past the 7-day age.
 - `.github/workflows/release.yml` and the `python/` name-holder package exist. `python/`
   matches [guides/namespaces.md](guides/namespaces.md) section 6.2 and builds a wheel and an
   sdist locally (checked 2026-11-13); the release workflow itself has never run. No CI
