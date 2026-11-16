@@ -5,7 +5,7 @@ Last updated: 2026-11-16
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (108 ADRs, all Accepted)
+## Decided (109 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -13,8 +13,8 @@ The index is [adr/README.md](adr/README.md). By area:
   secured (0.0.0, roadmap 0.4); checklist in [guides/namespaces.md](guides/namespaces.md).
 - Core design: Pi agent loop with one persistent main session, pnpm monorepo, open-instinct as
   shell and openinstinct as spec; package homes; one manifest per package in `package.json`;
-  reference repos pinned; Node 26 LTS minimum; the manifest validated with TypeBox (ADR-001, 002,
-  009, 065, 083, 084, 086, 105, 108).
+  reference repos pinned; Node 26 LTS minimum; the manifest validated with TypeBox and checked before any package code runs (ADR-001,
+  002, 009, 065, 083, 084, 086, 105, 108, 109).
 - Hosting: one daemon on a VPS, remote server, home hardware, or laptop; capabilities installed
   where they run; nodes over a pinned link; the owner's choice of overlay; install, update,
   and laptop rules; the overlay binding in Phase 2 and the node link in Phase 6; the sandbox
@@ -68,10 +68,11 @@ The index is [adr/README.md](adr/README.md). By area:
 
 ## Built
 Nothing runs yet. No app exists under `apps/`.
-- `@jaari/capabilities` vocabulary and manifest schema (0.9, part 1 of 3, 2026-11-16): the 29
-  capability names with their classes, and the `jaari` manifest checked with TypeBox, closed
-  to unknown names, kinds, and fields (ADR-108). The loader and the daemon–node contract are
-  next.
+- `@jaari/capabilities` vocabulary and manifest schema (0.9, parts 1 and 2 of 3, 2026-11-16):
+  the 29 capability names with their classes; the `jaari` manifest checked with TypeBox, closed
+  to unknown names, kinds, and fields (ADR-108); and the built-in loader, which checks every
+  manifest before it imports any package and refuses start on any failure (ADR-109). The
+  daemon–node contract is next.
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript

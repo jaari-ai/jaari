@@ -67,6 +67,8 @@ export const ManifestSchema = Type.Object(
     // Exact lowercase hostnames: no scheme, port, IP literal, or wildcard (the @jaari/http allowlist).
     egress: Type.Optional(list(Type.String({ pattern: "^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$" }))),
     secrets: Type.Optional(list(Type.String({ pattern: "^[a-z0-9]+([._-][a-z0-9]+)*$" }))),
+    // JSON Schema for the package's part of the owner config; the config loader (0.6) checks values against it.
+    config: Type.Optional(Type.Object({ type: Type.Literal("object") }, { additionalProperties: true })),
     channel: Type.Optional(ChannelSection),
   },
   closed,
