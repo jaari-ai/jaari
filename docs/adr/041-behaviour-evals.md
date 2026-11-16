@@ -50,4 +50,5 @@ gate must be checked by deterministic scorers); sending golden threads upstream 
 asking to save every exchange as a fixture.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- The tier-1 smoke test moved from roadmap 0.2 to 0.5: it boots the daemon, which 0.5 creates.
+  CI (0.2) shipped without it (2026-11-16).
