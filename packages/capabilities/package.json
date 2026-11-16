@@ -2,11 +2,12 @@
   "name": "@jaari/capabilities",
   "version": "0.0.0",
   "private": true,
-  "description": "Capability vocabulary and the package manifest schema (ADR-018, ADR-071, ADR-084)",
+  "description": "Capability vocabulary, package manifest and loader, and the daemon–node contract (ADR-018, ADR-071, ADR-108 to ADR-110)",
   "license": "MIT",
   "type": "module",
   "exports": {
     ".": {
+      "@jaari/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }

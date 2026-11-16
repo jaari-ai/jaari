@@ -102,6 +102,8 @@ python3 scripts/merge_docs.py           # rebuild the untracked context file (JA
 ## Stack and conventions
 - pnpm workspace (`packages/*`, `apps/*`), TypeScript strict, `module: NodeNext`, target
   ES2024, Node 26 LTS (ADR-105).
+- Workspace package `exports` list `"@jaari/source": "./src/index.ts"` first, so typecheck and
+  tests read source without a build (ADR-111; `docs/DEVELOPMENT.md`, Packages).
 - Tests: Vitest, colocated as `packages/*/src/**/*.test.ts` and `apps/*/src/**/*.test.ts`.
 - Lint: ESLint flat config. All tooling uses allowlists so `refs/` is never included.
   Keep it that way when adding config.

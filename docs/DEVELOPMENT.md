@@ -30,6 +30,15 @@ pnpm install                                    # install the pinned dev tooling
 pnpm check                                      # lint, typecheck, and tests
 ~~~
 
+## Packages
+- A workspace package lives in `packages/<name>` (or `apps/<name>`), is named `@jaari/<name>`,
+  and keeps its tests next to the code as `src/**/*.test.ts`.
+- Its `exports["."]` lists `"@jaari/source": "./src/index.ts"` first, then `types` and `default`
+  pointing at `dist/`; copy `packages/capabilities/package.json` (ADR-111). Typecheck and tests
+  read the source through that condition, so `pnpm check` needs no build step.
+- Its own `tsconfig.json` extends `tsconfig.base.json` with `rootDir: src` and `outDir: dist`, and
+  `pnpm --filter @jaari/<name> build` writes `dist/` (ignored by git).
+
 ## Docs
 Docs are hand-maintained Markdown under `docs/`, plus `README.md`, `AGENTS.md`, and
 `CLAUDE.md`. There is no generator. One topic lives in one file; other files link to it.

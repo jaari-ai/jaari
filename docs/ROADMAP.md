@@ -291,7 +291,7 @@ Purpose: Jaari drives a browser and a desktop, with owner accounts on any host (
 | 6.5 | Commitment classifier; fixtures from the action log | 051, 099 | 6.1 | Planned |
 | 6.6 | Browser worker child and task-scoped origins; the scope rule is reviewed from the action log last | 052, 099 | 6.1 | Planned |
 | 6.7 | `computer.use` on a host virtual desktop | 015 | 6.1 | Planned |
-| 6.8 | Remote nodes via `jaari capability install`; packages on nodes; the node link | 015, 058, 071, 088 | 2.7, 2.12 | Planned |
+| 6.8 | Remote nodes via `jaari capability install`; packages on nodes; the node link | 015, 058, 071, 088 | 2.7, 2.12, OQ-92 | Planned |
 | 6.9 | macOS permission matrix | 057 | 6.8 | Planned |
 | 6.10 | Web Bot Auth signing in the browser | 054 | 6.1, 4.6 | Planned |
 | 6.11 | Optional action critic for ungated actions in tasks with untrusted input; escalate only; decided from shadow-mode logs | 104 | 6.6 | Planned |
@@ -304,7 +304,7 @@ Exit criteria:
 - Native toolsets are enabled per route only when the Phase 6 fixtures show a gain (ADR-048).
 - The task-scope origin review is done from the browser action log (ADR-052, ADR-099).
 
-No open question blocks this phase.
+Blocking: [OQ-92](OPEN_QUESTIONS.md) (package platforms) for 6.8.
 Gate status: not passed.
 
 ## Phase 7: Hardening

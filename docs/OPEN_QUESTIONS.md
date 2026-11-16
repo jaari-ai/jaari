@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-13. Open: **0**.
+Last updated: 2026-11-16. Open: **1**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -14,8 +14,16 @@ conflict between accepted ADRs or a choice an ADR left open, and were decided on
 
 ## Open
 
-None. A new question takes the next unused id, in a table with the columns ID, Topic,
-Question, Blocks phase, and Leaning, with a line of context below it.
+A new question takes the next unused id, in a table with the columns ID, Topic, Question, Blocks
+phase, and Leaning, with a line of context below it.
+
+| ID | Topic | Question | Blocks phase | Leaning |
+|---|---|---|---|---|
+| OQ-92 | Package platforms | Which step checks a package manifest's `platforms` (OS and CPU) against the host, and what happens on a mismatch: the built-in loader, `jaari capability install`, the node when it advertises, or all three? | 6 | Fail closed in the loader on every host (a package that does not list the host's OS and CPU is a load problem), and refuse at install with a clear message |
+
+Context: ADR-071 lists `platforms` in the manifest, and the schema accepts it (ADR-108), but no ADR
+or roadmap item checks it. The first platform-specific package is `computer.use` with provider
+`macos` on a node (roadmap 6.8, 6.9); a built-in with `platforms` would load on any host today.
 
 ## Resolved
 

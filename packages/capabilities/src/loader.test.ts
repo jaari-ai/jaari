@@ -68,6 +68,13 @@ describe("loadBuiltins", () => {
     expect(ran).toEqual([]);
   });
 
+  it("names the package whose import fails", async () => {
+    install("@jaari/a", { version: "0.1.0", jaari: manifest("a") });
+    install("@jaari/b", { version: "0.1.0", jaari: manifest("b") });
+    writeFileSync(join(root, "node_modules", "@jaari/b", "index.js"), 'throw new Error("boom");');
+    expect(await problemsOf(["@jaari/a", "@jaari/b"])).toBe("@jaari/b: import failed: boom");
+  });
+
   it("refuses two packages with the same id and reports both problems at once", async () => {
     install("@jaari/a", { version: "0.1.0", jaari: manifest("same") });
     install("@jaari/b", { version: "0.1.0", jaari: manifest("same") });

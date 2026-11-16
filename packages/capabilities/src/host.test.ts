@@ -8,7 +8,7 @@ const later = () => new Date(Date.now() + 60_000).toISOString();
 const pkg = (id: string, module: unknown, extra: Partial<Manifest> = {}): LoadedPackage => ({
   name: `@jaari/${id}`,
   module,
-  manifest: { id, version: "0.1.0", kind: "capability", interfaceVersion: 1, minJaari: "0.1.0", hosts: ["daemon"], provides: ["files.read", "files.write"], ...extra },
+  manifest: { id, version: "0.1.0", kind: "capability", interfaceVersion: 1, minJaari: "0.1.0", hosts: ["daemon"], provides: ["files.read", "files.write"], secrets: ["token"], ...extra },
 });
 const request = (over: Partial<DispatchRequest> = {}, action: Partial<DispatchRequest["action"]> = {}): DispatchRequest => ({
   actionId: "a1", packageId: "files", secrets: {},
@@ -60,6 +60,7 @@ describe("dispatch", () => {
     ["an expiry that is not a date-time", request({}, { expiresAt: "tomorrow" }), "invalid request"],
     ["an unknown package", request({ packageId: "nope" }), 'no package "nope"'],
     ["a capability the package does not provide", request({}, { capability: "shell" }), "does not provide shell"],
+    ["a secret the manifest does not declare", request({ secrets: { token: "t", "telegram.token": "x" } }), "undeclared secrets: telegram.token"],
     ["an expired action", request({}, { expiresAt: new Date(Date.now() - 1).toISOString() }), "action expired"],
     // Valid RFC 3339 that Date.parse cannot read: it must count as expired, not as never expiring.
     ["an expiry with a time-zone suffix", request({}, { expiresAt: "2099-01-01T00:00:00Z[UTC]" }), "action expired"],

@@ -50,3 +50,5 @@ ADR-058 adds re-advertising on reconnect and the "outcome unknown" state.
 
 ## Consequences
 - The JSON copy costs a little on every in-process call; actions are small and few.
+- The host refuses a request whose `secrets` include a name the package's manifest does not
+  declare, before the executor runs: only declared secrets reach a package (ADR-084, ADR-096).

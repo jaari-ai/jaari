@@ -44,6 +44,9 @@ export function createInProcessHost(hostId: string, packages: readonly LoadedPac
       if (!entry.pkg.manifest.provides?.includes(action.capability)) {
         return { status: "failed", error: `package "${packageId}" does not provide ${action.capability}` };
       }
+      // Only the secrets the manifest declares reach the executor (ADR-084, ADR-096).
+      const undeclared = Object.keys(secrets).filter((n) => !entry.pkg.manifest.secrets?.includes(n));
+      if (undeclared.length > 0) return { status: "failed", error: `undeclared secrets: ${undeclared.join(", ")}` };
       // Fail closed: RFC 3339 times that Date.parse cannot read (a leap second, a "[UTC]" suffix) give NaN.
       if (!(Date.parse(action.expiresAt) > Date.now())) return { status: "failed", error: "action expired" };
       if (signal.aborted) return { status: "failed", error: "aborted before start" };
