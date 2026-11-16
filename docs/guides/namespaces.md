@@ -172,15 +172,10 @@ publish. Lock that down first.
    /.github/workflows/  @<your-github-login>
    ~~~
 
-6. Add `.github/dependabot.yml` so pinned action SHAs get updated:
-
-   ~~~yaml
-   version: 2
-   updates:
-     - package-ecosystem: github-actions
-       directory: /
-       schedule: { interval: weekly }
-   ~~~
+6. Add `.github/dependabot.yml` so pinned action SHAs and npm dependencies get weekly update
+   pull requests into `develop`, with a 7-day cooldown (ADR-107; the file in the repo is the
+   source). Then, under **Settings → Advanced Security**, turn on Dependabot alerts, secret
+   scanning, and push protection; leave Dependabot security updates off.
 
 Rules for `release.yml`, now and later:
 - Pin every action to a full commit SHA (`uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1`).
