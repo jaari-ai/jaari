@@ -5,10 +5,12 @@ After the one-time bootstrap, nothing publishes except `.github/workflows/releas
 `jaari-ai/jaari`, through trusted publishing (OIDC). No long-lived registry tokens exist
 anywhere.
 
-**Status (checked 2026-11-05 against the public registries).** npm `jaari`,
-`@jaari/core`, `@jaari/cli`, and PyPI `jaari` all return 404: nothing is published. A
-pending PyPI publisher does **not** reserve a name. Until parts 3 to 6 are done, the
-names are **not** secured.
+**Status (checked 2026-11-16 against the public registries).** The names are secured.
+npm `jaari` is at `0.0.0` (maintainer `jaari-ai`) and the npm org `jaari` exists, so only the
+project can publish `@jaari/*`. PyPI `jaari` is at `0.0.0`, uploaded by `release.yml` in the
+`pypi` environment through trusted publishing, with attestations. The org's Actions
+allowlist must name the publish action as `pypa/gh-action-pypi-publish@*`: an entry without
+`@` does not match a pinned ref, and the run fails at startup.
 
 **Before each part,** check the registry docs; UI labels and version floors change:
 [npm trusted publishers](https://docs.npmjs.com/trusted-publishers),
