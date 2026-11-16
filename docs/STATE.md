@@ -109,7 +109,7 @@ The daemon starts and stops, but no channel reaches it yet (0.8).
   `jaari-daemon` runs from built `dist/` files (ADR-115). The tier-1 smoke test boots it on the
   scripted provider in CI, and CI starts the built daemon once with `--check` (ADR-041). No channel
   reaches the session yet (0.8); the config is read as plain JSON until the loader (0.6).
-  Next: 0.8, the `ChannelAdapter` contract and the CLI channel.
+  Next: 0.8, the `ChannelAdapter` contract and the CLI channel, after OQ-94.
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript
@@ -133,7 +133,7 @@ The daemon starts and stops, but no channel reaches it yet (0.8).
 ## Now
 Phase 0: Foundation, in progress (0.1 to 0.5, 0.7, and 0.9 to 0.11, 0.15 delivered). Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
-No open question blocks Phase 0.
+OQ-94 ("stop" and "wait") blocks 0.8.
 
 ## Scheduled checks that ADRs defer
 - Phase 1: measure the candidate local models (ADR-045).
@@ -145,4 +145,4 @@ No open question blocks Phase 0.
   leaving Experimental (ADR-025, ADR-065).
 
 ## Open questions
-2 open. OQ-92 (package platforms) blocks Phase 6; OQ-93 (refusal categories) blocks Phase 4. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+3 open. OQ-92 (package platforms) blocks Phase 6; OQ-93 (refusal categories) blocks Phase 4; OQ-94 ("stop" and "wait") blocks 0.8. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

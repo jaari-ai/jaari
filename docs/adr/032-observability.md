@@ -48,4 +48,6 @@ stay small, chained, and authoritative); a raw provider tee left on permanently.
   log stays 30 days.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- Roadmap 0.5 (2026-11-16): the event log drops lines older than the retention period each time it
+  opens (`events.retentionDays` in config, 30 by default). A daemon that runs for months keeps old
+  lines until its next restart. The log and its folder are private to the owner (mode 0600 and 0700).

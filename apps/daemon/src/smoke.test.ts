@@ -1,5 +1,6 @@
 // The tier-1 smoke test (ADR-041): boots the real daemon on pi-ai's scripted provider, with no API calls.
 import { chmod, mkdir, mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
+import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createModels, fauxAssistantMessage, fauxProvider } from "@earendil-works/pi-ai";
@@ -26,6 +27,30 @@ async function setup() {
 }
 
 describe("tier-1 smoke", () => {
+  it("reaches a local model server listed in config through the egress check (ADR-080)", async () => {
+    const { root, credentialsDir } = await setup();
+    let hits = 0;
+    const server = createServer((_, res) => (hits++, res.writeHead(500).end("{}")));
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const { port } = server.address() as { port: number };
+    const local: DaemonConfig = {
+      secrets: { zero: "host-credential" },
+      llm: { providers: { local: { api: "openai-completions", baseUrl: `http://127.0.0.1:${port}/v1` } }, tiers: { small: ["local/m"] }, roles: { main: "small", summarize: "small" } },
+    };
+    const daemon = await startDaemon({ config: local, dataDir: join(root, "data"), credentialsDir });
+    await daemon.session.send("hi"); // the server answers 500; what matters is that the request got there
+    await daemon.close();
+    server.close();
+    expect(hits).toBeGreaterThan(0);
+  });
+
+  it("makes an existing data folder private (ADR-028)", async () => {
+    const { root, boot } = await setup();
+    await mkdir(join(root, "data"), { mode: 0o755 });
+    await (await boot()).close();
+    expect((await stat(join(root, "data"))).mode & 0o777).toBe(0o700);
+  });
+
   it("closes once when two signals arrive together", async () => {
     const { root, boot } = await setup();
     const daemon = await boot();

@@ -1,6 +1,6 @@
 // Starts the daemon's parts in order and refuses to start on any failure: secrets, egress, model
 // routing, the main session (ADR-015, ADR-065, ADR-079).
-import { mkdir } from "node:fs/promises";
+import { chmod, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { MutableModels } from "@earendil-works/pi-ai";
 import { createSession, openEventLog, openStore, type Limits } from "@jaari/core";
@@ -12,8 +12,8 @@ import { createHostCredentialProvider, createOsKeychainProvider, resolveRef, typ
 export type DaemonConfig = {
   secrets?: { zero?: "os-keychain" | "host-credential" };
   llm: unknown; // checked by @jaari/llm
-  egress?: { allow?: string[] };
   limits?: Partial<Limits>;
+  events?: { retentionDays?: number }; // ADR-032: 30 days by default
 };
 
 export type DaemonOptions = {
@@ -25,6 +25,12 @@ export type DaemonOptions = {
 
 // shortcut: a placeholder; the locked safety section and the prompt layers come with roadmap 0.16 and 2.4.
 const SYSTEM_PROMPT = "You are Jaari, the owner's personal assistant.";
+
+// "http://localhost:11434/v1" → "localhost:11434"; the port defaults by scheme. IPv6 keeps its brackets.
+const hostPort = (baseUrl: string) => {
+  const url = new URL(baseUrl);
+  return `${url.hostname}:${url.port || (url.protocol === "https:" ? 443 : 80)}`;
+};
 
 function secretsFor(options: DaemonOptions): VaultProvider {
   const zero = options.config.secrets?.zero ?? "os-keychain";
@@ -41,7 +47,8 @@ export async function startDaemon(options: DaemonOptions) {
   if (!health.ok) throw new Error(`refusing to start: ${health.problem}`);
   // Each model key is read once as a check and dropped, so a bad credential file stops the start, not the
   // first turn (ADR-079). Calls still resolve the key just before they run (ADR-007).
-  for (const [id, provider] of Object.entries(checkLlmConfig(config.llm).providers)) {
+  const providers = checkLlmConfig(config.llm).providers;
+  for (const [id, provider] of Object.entries(providers)) {
     if (!provider.apiKey) continue;
     await resolveRef(provider.apiKey, secrets).catch((error: unknown) => {
       throw new Error(`refusing to start: the key of provider "${id}": ${error instanceof Error ? error.message : String(error)}`);
@@ -50,14 +57,16 @@ export async function startDaemon(options: DaemonOptions) {
 
   // Created only after the checks, so a refused start leaves nothing behind.
   await mkdir(dataDir, { recursive: true, mode: 0o700 });
-  const events = openEventLog(join(dataDir, "events.ndjson"));
+  await chmod(dataDir, 0o700); // `mkdir` leaves a folder that already exists as it is; the transcript is private
+  const events = openEventLog(join(dataDir, "events.ndjson"), config.events?.retentionDays);
   const opened: { close(): void }[] = [];
   try {
     const usage = openUsageLog(join(dataDir, "usage.db"));
     opened.push(usage);
     const store = openStore(join(dataDir, "session.db"));
     opened.push(store);
-    const policy: EgressPolicy = { allow: config.egress?.allow ?? [] };
+    // A model server the owner lists in config counts as allowed (ADR-080), so local models pass the egress check.
+    const policy: EgressPolicy = { allow: Object.values(providers).flatMap((p) => (p.baseUrl ? [hostPort(p.baseUrl)] : [])) };
     const llm = await createLlm({ config: config.llm, fetch: createEgress(policy).fetch, secrets, usage, ...(options.models ? { models: options.models } : {}) });
     const session = createSession({ store, events, llm, systemPrompt: SYSTEM_PROMPT, ...(config.limits ? { limits: config.limits } : {}) });
     events.write({ type: "daemon.start" });

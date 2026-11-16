@@ -69,6 +69,8 @@ Built in `@jaari/core` (roadmap 0.5, 2026-11-16):
 - Each limit that fires writes a line to the event log (ADR-032). The audit log line waits for the
   audit log (3.1).
 - At the step limit the turn ends before the next step, also when a steered message would have
-  continued it. On emergency stop, steered messages join the held messages.
+  continued it. On emergency stop, steered messages join the held messages. The stop reply names
+  the tools that were running and the messages it held, so a channel can tell the owner what was
+  cut.
 - A message steered into a turn that a limit then cut runs as the next turn, and the caller gets
   that turn's reply; the cut is in the event log only until channels deliver notices (0.8).
