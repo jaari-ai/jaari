@@ -363,14 +363,14 @@ npm audit signatures            # inside a project that depends on @jaari packag
 curl -s https://pypi.org/pypi/jaari/json | jq '.info.version'
 ~~~
 
-Checklist:
-- [ ] npm org `jaari` exists; you (and the backup) are owners.
-- [ ] npm `jaari` published; tokens disallowed.
-- [ ] PyPI `jaari` published by trusted publisher; backup owner added.
-- [ ] No API tokens on either account.
-- [ ] Rulesets for `main`, `develop`, and `v*` tags; environments, CODEOWNERS, Dependabot in place.
-- [ ] Private vulnerability reporting enabled.
-- [ ] [INTEGRATIONS.md](../INTEGRATIONS.md) status row updated.
+Checklist (completed 2026-11-16; owner-only items confirmed by the owner):
+- [x] npm org `jaari` exists; you (and the backup) are owners.
+- [x] npm `jaari` published; tokens disallowed.
+- [x] PyPI `jaari` published by trusted publisher; backup owner added.
+- [x] No API tokens on either account.
+- [x] Rulesets for `main`, `develop`, and `v*` tags; environments, CODEOWNERS, Dependabot in place.
+- [x] Private vulnerability reporting enabled.
+- [x] [INTEGRATIONS.md](../INTEGRATIONS.md) status row updated.
 
 **Every quarter:** re-check owners and tokens on both registries, the domain expiry
 date, that environments still require a reviewer, and that actions are SHA-pinned.
