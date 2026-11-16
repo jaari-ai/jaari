@@ -35,4 +35,4 @@ imports another, so every later package would hit this.
 - A new package copies the `exports` shape of `packages/capabilities/package.json`; DEVELOPMENT.md
   and AGENTS.md say so.
 - When the daemon runs under plain Node (roadmap 0.5), it needs a build step or the same condition
-  (`node --conditions=@jaari/source`); decide with 0.5.
+  (`node --conditions=@jaari/source`); decided by ADR-115: build, then run `dist/`.

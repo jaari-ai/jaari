@@ -28,6 +28,9 @@ scripts/refs.sh lock             # re-apply chmod -R a-w
 python3 scripts/merge_docs.py --check           # validate docs
 pnpm install                                    # install the pinned dev tooling (Node 26+)
 pnpm check                                      # lint, typecheck, and tests
+pnpm -r build                                   # compile every package to dist/ (ADR-115)
+node apps/daemon/dist/main.js --check --config apps/daemon/smoke.config.json \
+  --data /tmp/jaari --credentials <dir, mode 700, holding llm.local, mode 600>   # start and stop the built daemon
 ~~~
 
 ## Packages
