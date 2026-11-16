@@ -347,7 +347,7 @@ each new `@jaari/<name>` (and later for `jaari` itself):
            with: { name: dist, path: dist/ }
          - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
            with:
-             node-version: "24"
+             node-version: "26"
              registry-url: "https://registry.npmjs.org"
              package-manager-cache: false
          - run: npm --version                    # must be >= 11.5.1
