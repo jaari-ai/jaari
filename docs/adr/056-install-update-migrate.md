@@ -1,7 +1,7 @@
 # ADR-056: Install, update, migrate: owner-chosen install method, automatic patch updates, migrations when a store opens
 
 - **Status:** Accepted
-- **Extended by:** [ADR-079](079-secret-zero-on-servers.md), [ADR-082](082-phase-split-update-and-catch-up.md), [ADR-094](094-sandbox-under-compose.md)
+- **Extended by:** [ADR-079](079-secret-zero-on-servers.md), [ADR-082](082-phase-split-update-and-catch-up.md), [ADR-094](094-sandbox-under-compose.md), [ADR-105](105-node-26-lts-runtime.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -61,6 +61,7 @@ into the sandbox; migrations without a snapshot; letting an older binary open ne
 - **ADR-094 (resolves OQ-70):** under Compose the sandbox is bubblewrap inside the hardened
   daemon container, replacing "a rootless Podman sidecar or gVisor"; the container hardening is
   set there.
+- **ADR-105:** the npm install needs Node 26 LTS or later, not Node 22.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

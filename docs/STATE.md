@@ -1,18 +1,19 @@
 # Jaari: State
 
-Last updated: 2026-11-13
+Last updated: 2026-11-16
 
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (103 ADRs, all Accepted)
+## Decided (107 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
-  DCO, lockstep releases, hardened supply chain (ADR-010, 014, 043). npm and PyPI names are
-  not yet secured; checklist in [guides/namespaces.md](guides/namespaces.md).
+  DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
+  (ADR-010, 014, 043, 106, 107); Dependabot weekly updates into `develop`. npm `jaari`, the `@jaari` org, and PyPI `jaari` are
+  secured (0.0.0, roadmap 0.4); checklist in [guides/namespaces.md](guides/namespaces.md).
 - Core design: Pi agent loop with one persistent main session, pnpm monorepo, open-instinct as
   shell and openinstinct as spec; package homes; one manifest per package in `package.json`;
-  reference repos pinned (ADR-001, 002, 009, 065, 083, 084, 086).
+  reference repos pinned; Node 26 LTS minimum (ADR-001, 002, 009, 065, 083, 084, 086, 105).
 - Hosting: one daemon on a VPS, remote server, home hardware, or laptop; capabilities installed
   where they run; nodes over a pinned link; the owner's choice of overlay; install, update,
   and laptop rules; the overlay binding in Phase 2 and the node link in Phase 6; the sandbox
@@ -29,8 +30,9 @@ The index is [adr/README.md](adr/README.md). By area:
   037, 042, 060, 061, 064, 070, 089).
 - Safety: digest-bound approvals, `secretRef` secrets and vault providers, OpenMausBot
   hardening, one capability vocabulary with a deny-all gate from Phase 0, standing grants,
-  shadow mode, kill switch and limits, outside lineage, threat model, no payments in v1
-  (ADR-006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075, 079, 081, 090, 092, 095, 096).
+  shadow mode, kill switch and limits, outside lineage, threat model, no payments in v1,
+  prompt-injection defences (ADR-006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075,
+  079, 081, 090, 092, 095, 096, 104).
 - Models: role and tier routing, a pinned main session, local-only defaults decided at init,
   local-model qualification, a monthly budget, refusals in the pinned session (ADR-011, 019,
   045, 046, 085).
@@ -51,8 +53,8 @@ The index is [adr/README.md](adr/README.md). By area:
 - Instinct, Pally, Muse, Grok Bot, ChatGPT Work, and the open-source clones: [00-research.md](00-research.md).
 - Learning notes: [07 computer use](learning/07-computer.md), [08 egress and takeover](learning/08-egress-identity-and-takeover.md), [09 OpenMausBot](learning/09-openmausbot.md),
   [10 open questions review](learning/10-open-questions-review.md), [11 Pally](learning/11-pally.md),
-  and [12 browser placement](learning/12-browser-placement.md) (their recommendations fed ADR-021
-  to ADR-098; some were changed or rejected by the ADR).
+  [12 browser placement](learning/12-browser-placement.md), and [13 prompt injection](learning/13-prompt-injection-and-system-prompts.md) (their recommendations fed ADR-021
+  to ADR-104; some were changed or rejected by the ADR).
 - Docs conflict audit (2026-11-10): ten conflicts recorded, accepted, and folded into ADR-017
   to ADR-020.
 - Documentation audit (2026-11-12): docs, ADR links, open questions, and the roadmap
@@ -65,17 +67,24 @@ The index is [adr/README.md](adr/README.md). By area:
 
 ## Built
 Nothing runs yet. No package exists under `packages/` or `apps/`.
-- Root config files exist as allowlist placeholders (`pnpm-workspace.yaml`, `tsconfig*.json`,
-  `eslint.config.js`, `vitest.config.ts`). There is no root `package.json`; the TypeScript
-  ESLint parser, an output directory, and ignore rules come with the Phase 0 scaffolding.
+- Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
+  supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
+  scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript
+  parser), TypeScript, and Vitest config. `pnpm check` runs lint, typecheck, and tests. Each
+  package sets its own output directory (`dist/`, ignored by git).
+  Runtime moved to Node 26 LTS (ADR-105): `engines` `>=26`, `@types/node` 26.6.6, target
+  ES2024, pnpm 12.18.0; other dev tools are already at the newest version past the 7-day age.
 - `.github/workflows/release.yml` and the `python/` name-holder package exist. `python/`
   matches [guides/namespaces.md](guides/namespaces.md) section 6.2 and builds a wheel and an
-  sdist locally (checked 2026-11-13); the release workflow itself has never run. No CI
-  workflow exists.
+  sdist locally (checked 2026-11-13); the release workflow itself has never run.
+- CI (0.2, 2026-11-16): `.github/workflows/ci.yml` runs lint, typecheck, tests, the licence
+  check (`scripts/check-licenses.mjs`), and `merge_docs.py --check` on every pull request,
+  plus a DCO sign-off check and a gitleaks history scan. The tier-1 smoke test comes with the
+  daemon in 0.5 (ADR-041).
 - [THREAT_MODEL.md](THREAT_MODEL.md) is written (ADR-069).
 
 ## Now
-Phase 0: Foundation, not started. Per-item status, needs, and exit criteria are in
+Phase 0: Foundation, in progress (0.1 and 0.2 delivered). Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
 No open question blocks Phase 0.
 

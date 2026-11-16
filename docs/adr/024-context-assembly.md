@@ -1,7 +1,7 @@
 # ADR-024: Context assembly: a fixed layout built by code, automatic recall, time anchors
 
 - **Status:** Accepted
-- **Extended by:** [ADR-093](093-sensitive-content-follows-routing.md)
+- **Extended by:** [ADR-093](093-sensitive-content-follows-routing.md), [ADR-104](104-prompt-injection-defence-in-depth.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -52,6 +52,7 @@ caching).
 
 ## Amendments
 - **ADR-093:** sensitive records are assembled like any other; privacy comes from routing.
+- **ADR-104:** every untrusted section (recall, reader results, tool results) is inserted with `fence()` and a harness note carrying its authority; owner-written layers get demoted headings inside an `owner-config` note; a per-install canary sits in the Stable part.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

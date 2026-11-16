@@ -20,6 +20,9 @@ Written:
   app, what Jaari borrows, and alternatives to the note-10 recommendations (2026-11-10)
 - [12-browser-placement.md](12-browser-placement.md) — where the references run signed-in
   browsers, which traffic uses the owner's connection, and log-in handling (2026-11-13)
+- [13-prompt-injection-and-system-prompts.md](13-prompt-injection-and-system-prompts.md) — how
+  the references and the commercial agents build system prompts and resist prompt injection;
+  the gaps that ADR-104 closes (2026-11-14)
 
 Planned (optional, not scheduled; ADRs have since decided these topics):
 - 01-session.md — persistent session, steering, segments, compaction

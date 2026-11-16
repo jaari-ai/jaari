@@ -1,6 +1,7 @@
 # ADR-080: Egress core in Phase 0: every outbound call goes through `@jaari/http` from the start
 
 - **Status:** Accepted
+- **Extended by:** [ADR-104](104-prompt-injection-defence-in-depth.md)
 - **Date:** 2026-11-12
 
 ## Context
@@ -41,6 +42,9 @@ address-class table.
 Raw `fetch` until Phase 4 (breaks the rule, and later code must be found and rewritten);
 blocking every network call until Phase 4 (no model provider in Phases 0 to 3); a global
 `undici` dispatcher (does not cover every client, and hides the route from review).
+
+## Amendments
+- **ADR-104:** the core scans outbound URLs and bodies for the canary and the session fence id, blocks a hit, writes an audit row, and alerts the owner. (Provenance holds on `web.fetch` and `web.search` arguments are decided at the tool call, before the gate, not in the core.)
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

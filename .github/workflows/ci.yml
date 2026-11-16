@@ -1,0 +1,68 @@
+# Checks on every pull request (roadmap 0.2, ADR-043). Actions are pinned to commit SHAs.
+# The tier-1 smoke test (ADR-041) joins this file with the daemon in roadmap 0.5.
+name: ci
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with: { node-version: "26" }
+      # The repo allows only actions/* (Settings > Actions), so pnpm comes from npm, pinned by packageManager.
+      - run: npm install -g "$(node -p 'require("./package.json").packageManager')"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: node scripts/check-licenses.mjs
+      - run: python3 scripts/merge_docs.py --check
+
+  dco:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false, fetch-depth: 0 }
+      - name: Every commit in the pull request is signed off (git commit -s)
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          missing=0
+          for c in $(git rev-list --no-merges "$BASE..$HEAD"); do
+            # ADR-107: Dependabot cannot sign off. Skip only its own commits on PRs GitHub says it opened.
+            if [ "$PR_AUTHOR" = "dependabot[bot]" ] &&
+               [ "$(git log -1 --format=%ae "$c")" = "49699333+dependabot[bot]@users.noreply.github.com" ]; then
+              continue
+            fi
+            if ! git log -1 --format='%(trailers:key=Signed-off-by)' "$c" | grep -q .; then
+              echo "::error::$(git log -1 --format='%h %s' "$c") has no Signed-off-by line"
+              missing=1
+            fi
+          done
+          exit $missing
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false, fetch-depth: 0 }
+      - name: Install gitleaks v8.30.1 (checksum verified)
+        run: |
+          f=gitleaks_8.30.1_linux_x64.tar.gz
+          curl -fsSLO "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/$f"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $f" | sha256sum -c -
+          tar -xzf "$f" gitleaks
+      - name: Scan the whole history for leaked secrets
+        run: ./gitleaks git --redact --verbose .

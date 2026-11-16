@@ -5,10 +5,12 @@ After the one-time bootstrap, nothing publishes except `.github/workflows/releas
 `jaari-ai/jaari`, through trusted publishing (OIDC). No long-lived registry tokens exist
 anywhere.
 
-**Status (checked 2026-11-05 against the public registries).** npm `jaari`,
-`@jaari/core`, `@jaari/cli`, and PyPI `jaari` all return 404: nothing is published. A
-pending PyPI publisher does **not** reserve a name. Until parts 3 to 6 are done, the
-names are **not** secured.
+**Status (checked 2026-11-16 against the public registries).** The names are secured.
+npm `jaari` is at `0.0.0` (maintainer `jaari-ai`) and the npm org `jaari` exists, so only the
+project can publish `@jaari/*`. PyPI `jaari` is at `0.0.0`, uploaded by `release.yml` in the
+`pypi` environment through trusted publishing, with attestations. The org's Actions
+allowlist must name the publish action as `pypa/gh-action-pypi-publish@*`: an entry without
+`@` does not match a pinned ref, and the run fails at startup.
 
 **Before each part,** check the registry docs; UI labels and version floors change:
 [npm trusted publishers](https://docs.npmjs.com/trusted-publishers),
@@ -41,14 +43,13 @@ inbox is only as safe as the domain.
    2. Turn on **registrar lock** (transfer lock) and **auto-renew**, and set a payment
       method that won't expire soon.
    3. If the registrar supports it, turn on DNSSEC.
-2. Create a mailbox (or alias that forwards to one person) **`registry@jaari.org`**.
-   Use it only for npm, PyPI, and other publishing accounts.
+2. Use **`hello@jaari.org`** for npm, PyPI, and other publishing accounts (ADR-106).
 3. Make sure the mail provider account also has 2FA.
 
 ## Part 2. Registry accounts
 
 ### npm
-1. Sign up at <https://www.npmjs.com/signup> with `registry@jaari.org`, or change the
+1. Sign up at <https://www.npmjs.com/signup> with `hello@jaari.org`, or change the
    email on your existing account (Account → Email).
 2. Account → **Two-Factor Authentication** → enable, choosing **security key / passkey**
    (WebAuthn). Avoid authenticator-app-only if you can; never SMS.
@@ -56,7 +57,7 @@ inbox is only as safe as the domain.
 4. Access Tokens page: delete every existing token.
 
 ### PyPI
-1. Sign up at <https://pypi.org/account/register/> with `registry@jaari.org`.
+1. Sign up at <https://pypi.org/account/register/> with `hello@jaari.org`.
 2. Account settings → **Two factor authentication** → add a **security key** (and
    optionally a TOTP app as backup). PyPI requires 2FA to publish.
 3. Save the recovery codes in your password manager.
@@ -171,15 +172,10 @@ publish. Lock that down first.
    /.github/workflows/  @<your-github-login>
    ~~~
 
-6. Add `.github/dependabot.yml` so pinned action SHAs get updated:
-
-   ~~~yaml
-   version: 2
-   updates:
-     - package-ecosystem: github-actions
-       directory: /
-       schedule: { interval: weekly }
-   ~~~
+6. Add `.github/dependabot.yml` so pinned action SHAs and npm dependencies get weekly update
+   pull requests into `develop`, with a 7-day cooldown (ADR-107; the file in the repo is the
+   source). Then, under **Settings → Advanced Security**, turn on Dependabot alerts, secret
+   scanning, and push protection; leave Dependabot security updates off.
 
 Rules for `release.yml`, now and later:
 - Pin every action to a full commit SHA (`uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1`).
@@ -347,7 +343,7 @@ each new `@jaari/<name>` (and later for `jaari` itself):
            with: { name: dist, path: dist/ }
          - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
            with:
-             node-version: "24"
+             node-version: "26"
              registry-url: "https://registry.npmjs.org"
              package-manager-cache: false
          - run: npm --version                    # must be >= 11.5.1

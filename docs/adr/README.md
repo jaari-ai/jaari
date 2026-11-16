@@ -105,3 +105,7 @@
 | [101](101-mcp-client-and-active-channel.md) | A paired MCP client is not a channel; `collect` is a pull by the requester | Accepted |
 | [102](102-web-budget.md) | Web budget: a monthly limit for paid web services, then self-hosted only until the reset | Accepted |
 | [103](103-no-repository-or-registry-integrations.md) | No GitHub, npm, or PyPI integrations; `repo.write` and `publish` are reserved | Accepted |
+| [104](104-prompt-injection-defence-in-depth.md) | Prompt injection: a locked prompt contract, unforgeable fences, a typed reader, argument provenance, and signals that only tighten | Accepted |
+| [105](105-node-26-lts-runtime.md) | Node 26 LTS is the minimum runtime; types and compile target follow it | Accepted |
+| [106](106-one-address-for-registry-accounts.md) | Registry accounts use `hello@jaari.org`; no separate recovery inbox | Accepted |
+| [107](107-dependabot-updates.md) | Dependabot version updates into `develop`; alerts on, security PRs off; bot exempt from DCO | Accepted |

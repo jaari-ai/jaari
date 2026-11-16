@@ -7,8 +7,8 @@ status and exit criteria live there.
 ## Workstreams
 1. **Questions that block Phase 0**: all decided (ADR-079 to ADR-086).
 2. **Scaffold the monorepo** (0.1 to 0.4): root `package.json`, lockfile, pnpm supply-chain
-   settings, CI with the tier-1 smoke test, `SECURITY.md` and `CONTRIBUTING.md` (ADR-041,
-   ADR-043); secure the names with [guides/namespaces.md](guides/namespaces.md) (ADR-010;
+   settings, CI (the tier-1 smoke test follows with the daemon in 0.5), `SECURITY.md` and
+   `CONTRIBUTING.md` (ADR-041, ADR-043); secure the names with [guides/namespaces.md](guides/namespaces.md) (ADR-010;
    `python/` already matches it).
 3. **Safety floor first** (0.9 to 0.11): `@jaari/capabilities`, `@jaari/gate` (deny-all stub),
    and `@jaari/secrets` (resolver + `os-keychain` and `host-credential`) with the first package
@@ -143,3 +143,7 @@ status and exit criteria live there.
 | [101](adr/101-mcp-client-and-active-channel.md) | A paired MCP client is not a channel; `collect` is a pull by the requester | Accepted |
 | [102](adr/102-web-budget.md) | Web budget: a monthly limit for paid web services, then self-hosted only until the reset | Accepted |
 | [103](adr/103-no-repository-or-registry-integrations.md) | No GitHub, npm, or PyPI integrations; `repo.write` and `publish` are reserved | Accepted |
+| [104](adr/104-prompt-injection-defence-in-depth.md) | Prompt injection: a locked prompt contract, unforgeable fences, a typed reader, argument provenance, and signals that only tighten | Accepted |
+| [105](adr/105-node-26-lts-runtime.md) | Node 26 LTS is the minimum runtime; types and compile target follow it | Accepted |
+| [106](adr/106-one-address-for-registry-accounts.md) | Registry accounts use `hello@jaari.org`; no separate recovery inbox | Accepted |
+| [107](adr/107-dependabot-updates.md) | Dependabot version updates into `develop`; alerts on, security PRs off; bot exempt from DCO | Accepted |

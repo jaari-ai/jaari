@@ -1,6 +1,7 @@
 # ADR-043: Project process: one contact address, DCO without a CLA, lockstep releases, hardened supply chain
 
 - **Status:** Accepted
+- **Extended by:** [ADR-106](106-one-address-for-registry-accounts.md), [ADR-107](107-dependabot-updates.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -56,5 +57,19 @@ together, so independent versions add work without benefit); a separate `securit
 (the owner wants one inbox); ranged dependency versions and unrestricted install scripts (the
 main supply-chain attack paths).
 
+## Amendments
+- **ADR-106:** registry accounts use `hello@jaari.org`; there is no separate `registry@jaari.org` inbox.
+- **ADR-107:** the DCO check exempts Dependabot's own commits on Dependabot pull requests; Dependabot version updates use a 7-day cooldown to match `minimumReleaseAge`.
+
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- pnpm 11 replaced `onlyBuiltDependencies` with `allowBuilds`. The allowlist is `allowBuilds`
+  in `pnpm-workspace.yaml`, with `strictDepBuilds: true`, so an unlisted install script fails
+  the install (2026-11-16, roadmap 0.1).
+- The release-age rule is `minimumReleaseAge: 10080` (minutes) in `pnpm-workspace.yaml`, with
+  `saveExact: true` so new dependencies are pinned exactly.
+- TypeScript is held on 6.0.x because typescript-eslint supports only TypeScript below 6.1.
+- CI is `.github/workflows/ci.yml` (2026-11-16, roadmap 0.2). The DCO check covers only the
+  commits in each pull request, because history before 0.2 is mostly unsigned. gitleaks runs
+  as a release binary with a pinned SHA-256, not `gitleaks-action`, which needs a licence key
+  for organisation repos. It uses the default rules: open-instinct's extra rules are for
+  services Jaari does not use, so no `.gitleaks.toml` exists yet.

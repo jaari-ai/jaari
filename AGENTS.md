@@ -38,6 +38,8 @@ exist yet.
 | Root config | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.claude/settings.json` | Yes |
 | `jaari.config.example.jsonc` | Example owner config (`owner`, `deployment`, `channels`, `secrets`, `persona`, `shadow`, `memory`, `llm`, `web`, `egress`, `backup`) | Yes |
 | `python/` | PyPI name-holder package (ADR-010, `docs/guides/namespaces.md`) | Yes |
+| `.github/workflows/ci.yml` | Pull request checks: lint, typecheck, tests, licences, docs, DCO, gitleaks (ADR-043) | Yes |
+| `scripts/check-licenses.mjs` | Fails CI on a dependency licence outside the ADR-014 allowlist | Yes |
 | `.github/workflows/release.yml` | Tag-triggered release workflow, actions pinned to commit SHAs; keep in sync with `docs/guides/namespaces.md` | Yes |
 | `refs/` | Read-only reference repos, local only (`.git/info/exclude`) | Never |
 
@@ -99,7 +101,7 @@ python3 scripts/merge_docs.py           # rebuild the untracked context file (JA
 
 ## Stack and conventions
 - pnpm workspace (`packages/*`, `apps/*`), TypeScript strict, `module: NodeNext`, target
-  ES2023, Node 22.
+  ES2024, Node 26 LTS (ADR-105).
 - Tests: Vitest, colocated as `packages/*/src/**/*.test.ts` and `apps/*/src/**/*.test.ts`.
 - Lint: ESLint flat config. All tooling uses allowlists so `refs/` is never included.
   Keep it that way when adding config.
