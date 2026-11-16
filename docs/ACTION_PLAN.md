@@ -146,3 +146,4 @@ status and exit criteria live there.
 | [104](adr/104-prompt-injection-defence-in-depth.md) | Prompt injection: a locked prompt contract, unforgeable fences, a typed reader, argument provenance, and signals that only tighten | Accepted |
 | [105](adr/105-node-26-lts-runtime.md) | Node 26 LTS is the minimum runtime; types and compile target follow it | Accepted |
 | [106](adr/106-one-address-for-registry-accounts.md) | Registry accounts use `hello@jaari.org`; no separate recovery inbox | Accepted |
+| [107](adr/107-dependabot-updates.md) | Dependabot version updates into `develop`; alerts on, security PRs off; bot exempt from DCO | Accepted |

@@ -5,11 +5,11 @@ Last updated: 2026-11-16
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (106 ADRs, all Accepted)
+## Decided (107 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
-  (ADR-010, 014, 043, 106). npm `jaari`, the `@jaari` org, and PyPI `jaari` are
+  (ADR-010, 014, 043, 106, 107); Dependabot weekly updates into `develop`. npm `jaari`, the `@jaari` org, and PyPI `jaari` are
   secured (0.0.0, roadmap 0.4); checklist in [guides/namespaces.md](guides/namespaces.md).
 - Core design: Pi agent loop with one persistent main session, pnpm monorepo, open-instinct as
   shell and openinstinct as spec; package homes; one manifest per package in `package.json`;

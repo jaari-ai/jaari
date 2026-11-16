@@ -1,5 +1,23 @@
+# Weekly version updates into develop (ADR-107). Dependabot reads this file from the
+# default branch (main), so changes here take effect once develop is merged into main.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
+    target-branch: develop
     schedule: { interval: weekly }
+    cooldown: { default-days: 7 } # same 7 days as pnpm minimumReleaseAge (ADR-043)
+    commit-message: { prefix: ci }
+    groups:
+      actions-minor-patch:
+        update-types: [minor, patch] # majors get one PR each
+
+  - package-ecosystem: npm # covers pnpm (pnpm-lock.yaml)
+    directory: /
+    target-branch: develop
+    schedule: { interval: weekly }
+    cooldown: { default-days: 7 }
+    commit-message: { prefix: deps }
+    groups:
+      npm-minor-patch:
+        update-types: [minor, patch]
