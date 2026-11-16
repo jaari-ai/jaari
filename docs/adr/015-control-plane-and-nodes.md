@@ -1,7 +1,7 @@
 # ADR-015: One daemon on an always-on host; capabilities installed where they run
 
 - **Status:** Accepted
-- **Extended by:** [ADR-017](017-self-hosted-anywhere.md), [ADR-018](018-capability-vocabulary-and-phase-0-floor.md), [ADR-058](058-node-link-and-host-migration.md), [ADR-071](071-capability-packages.md), [ADR-073](073-inbound-triggers.md)
+- **Extended by:** [ADR-017](017-self-hosted-anywhere.md), [ADR-018](018-capability-vocabulary-and-phase-0-floor.md), [ADR-058](058-node-link-and-host-migration.md), [ADR-071](071-capability-packages.md), [ADR-073](073-inbound-triggers.md), [ADR-110](110-daemon-node-contract.md)
 - **Date:** 2026-11-09
 
 ## Decision
@@ -17,6 +17,8 @@ One process with every capability built in (a VPS cannot reach the owner's lapto
   with every other pluggable part; third-party packages run in their own process.
 - **ADR-058:** the node link is a pinned TLS WebSocket across the overlay only; no relay in v1.
 - **ADR-073:** one exception to "no public ports": the opt-in hook listener.
+- **ADR-110:** the daemon–node contract is JSON data messages checked on receipt, with one final
+  result per action (`ok`, `failed`, `outcome-unknown`); in Phase 0 an in-process host runs it.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
