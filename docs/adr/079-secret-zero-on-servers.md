@@ -46,7 +46,8 @@ warns about it); environment variables; Docker Swarm secrets (Jaari's install is
 Compose); a passphrase typed at every start as the default (no unattended restart).
 
 ## Consequences
-- **Roadmap 0.11 (2026-11-16):** `createHostCredentialProvider(dir, dataDir)` reads `<dir>/<name>`.
+- **Roadmap 0.11 (2026-11-16):** `createHostCredentialProvider(dir, dataDir)` reads `<dir>/<name>`,
+  and checks the name itself (no `/`, no leading `.`), not only through `parseRef`.
   The daemon passes `$CREDENTIALS_DIRECTORY` (systemd) or `/run/secrets` (Compose); the directory
   path is not a secret. It refuses any mode bit for group or others (`& 0o077`, stricter than
   "readable"), a file that resolves, after links, inside the data directory, a non-regular file,

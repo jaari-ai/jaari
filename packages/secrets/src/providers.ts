@@ -1,7 +1,7 @@
 // The two Phase 0 providers of secret zero: os-keychain (ADR-013, ADR-018) and host-credential (ADR-079).
 import { open, realpath, stat } from "node:fs/promises";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
-import type { VaultProvider } from "./secrets.js";
+import { isSecretName, type VaultProvider } from "./secrets.js";
 
 // macOS Keychain, Secret Service on Linux desktops, Credential Manager on Windows. The native module loads
 // on first use, so a host that uses host-credential never loads it.
@@ -37,6 +37,7 @@ const inside = (dir: string, path: string) => {
 export function createHostCredentialProvider(dir: string, dataDir: string): VaultProvider {
   return {
     async resolve(name) {
+      if (!isSecretName(name)) throw new Error(`not a secret name: "${name}"`); // the path is built here, so the check is too
       const file = await realpath(join(dir, name)); // follows links, so the location check sees the real file
       if (inside(await realOrResolved(dataDir), file)) throw new Error(`credential "${name}" lies inside the Jaari data directory`);
       const handle = await open(file, "r");

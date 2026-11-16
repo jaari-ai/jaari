@@ -50,6 +50,11 @@ describe("host-credential", () => {
     await expect(createHostCredentialProvider(creds, data).resolve("zero")).rejects.toThrow("open to group or others");
   });
 
+  it.each(["../zero", "a/b", ".hidden"])("refuses the name %s, even when the file is owner-only", async (name) => {
+    await put(root, "zero", "s3cret");
+    await expect(createHostCredentialProvider(creds, data).resolve(name)).rejects.toThrow("not a secret name");
+  });
+
   it("refuses an empty file", async () => {
     await put(creds, "zero", "\n");
     await expect(createHostCredentialProvider(creds, data).resolve("zero")).rejects.toThrow("is empty");

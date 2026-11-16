@@ -21,8 +21,12 @@ describe("scrub", () => {
     expect(scrub({ msg: "auth abc failed", list: ["abc"], abc: 1, n: 2 }, ["abc"])).toEqual({ msg: "auth [redacted] failed", list: ["[redacted]"], "[redacted]": 1, n: 2 });
   });
 
-  it("replaces the longest value first, so no part of it survives", () => {
+  it("hides a value that contains another, so no part of it survives", () => {
     expect(scrub("key=abcdef", ["abc", "abcdef"])).toBe("key=[redacted]");
+  });
+
+  it("hides two values that overlap, with nothing left between or after", () => {
+    expect(scrub("x=abcd!", ["abc", "bcd"])).toBe("x=[redacted]!");
   });
 
   it("ignores empty values", () => {
