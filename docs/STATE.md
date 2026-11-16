@@ -76,15 +76,19 @@ Nothing runs yet. No package exists under `packages/` or `apps/`.
   ES2024, pnpm 12.18.0; other dev tools are already at the newest version past the 7-day age.
 - `.github/workflows/release.yml` and the `python/` name-holder package exist. `python/`
   matches [guides/namespaces.md](guides/namespaces.md) section 6.2 and builds a wheel and an
-  sdist locally (checked 2026-11-13); the release workflow itself has never run.
+  sdist locally (checked 2026-11-13); the release workflow published PyPI `jaari` 0.0.0
+  (2026-11-16, roadmap 0.4).
 - CI (0.2, 2026-11-16): `.github/workflows/ci.yml` runs lint, typecheck, tests, the licence
   check (`scripts/check-licenses.mjs`), and `merge_docs.py --check` on every pull request,
   plus a DCO sign-off check and a gitleaks history scan. The tier-1 smoke test comes with the
   daemon in 0.5 (ADR-041).
 - [THREAT_MODEL.md](THREAT_MODEL.md) is written (ADR-069).
+- Process files (0.3, 2026-11-16): `SECURITY.md` (private reporting, 7-day acknowledgement,
+  scope) and `CONTRIBUTING.md` (pull requests to `develop`, DCO, reference code, AI use), as
+  set in ADR-043.
 
 ## Now
-Phase 0: Foundation, in progress (0.1 and 0.2 delivered). Per-item status, needs, and exit criteria are in
+Phase 0: Foundation, in progress (0.1 to 0.4 delivered). Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
 No open question blocks Phase 0.
 

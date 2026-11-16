@@ -86,6 +86,11 @@ state), then run `python3 scripts/merge_docs.py --check`. To talk about the proj
 agent, run `python3 scripts/merge_docs.py` and give it the resulting `JAARI_CONTEXT.md`
 (untracked, rebuilt on every run).
 
+## Contributing and security
+
+How to get a change merged, including DCO sign-off: [CONTRIBUTING.md](CONTRIBUTING.md). To
+report a vulnerability privately: [SECURITY.md](SECURITY.md).
+
 ## Lineage
 
 Jaari merges ideas from these projects. They are kept in `refs/` for study, not vendored:
