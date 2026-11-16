@@ -16,13 +16,15 @@ ADR-086). The loader must check a manifest before any package code runs (ADR-084
   `"type": "object"` at the top. It is static and covered by npm's integrity hash, so the host can
   check the owner's config without running package code. The config loader (roadmap 0.6) checks
   values against it.
-- **Loader.** `loadBuiltins(names, base, importModule)` in `@jaari/capabilities`:
+- **Loader.** `loadBuiltins(names, resolve)` in `@jaari/capabilities`:
   1. finds each package's root `package.json` with Node's `module.findPackageJSON`, which runs no
      package code;
   2. checks its `jaari` manifest (ADR-108), that `jaari.version` equals the package's `version`,
      and that no two packages share an `id`;
-  3. only when every package passes, imports each one with the caller's `importModule`.
-  Names resolve from the caller's `base` (its `import.meta.url`), not from `@jaari/capabilities`.
+  3. only when every package passes, imports each one by the URL that `resolve` returns.
+  `resolve` is the caller's `(s) => import.meta.resolve(s)`, so names resolve from the caller, not
+  from `@jaari/capabilities`. The check and the import both use it, so they cannot reach two
+  different copies of a package.
 - **Any failure refuses start.** Built-ins release in lockstep with Jaari (ADR-043), so a bad
   built-in manifest is a broken release. The loader reports every problem at once and imports
   nothing.
@@ -38,3 +40,5 @@ ADR-086). The loader must check a manifest before any package code runs (ADR-084
 - `module.findPackageJSON` is "Stability 1.1, Active development" in Node 26. Node 26 throws
   `ERR_MODULE_NOT_FOUND` for a missing bare name, although the docs say it returns `undefined`;
   the loader handles both.
+- `import.meta.resolve` follows a package's `exports` but does not check that the file exists, so
+  the loader checks the entry file in the same pass as the manifest, before any import.
