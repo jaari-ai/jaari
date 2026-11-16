@@ -145,3 +145,4 @@ status and exit criteria live there.
 | [103](adr/103-no-repository-or-registry-integrations.md) | No GitHub, npm, or PyPI integrations; `repo.write` and `publish` are reserved | Accepted |
 | [104](adr/104-prompt-injection-defence-in-depth.md) | Prompt injection: a locked prompt contract, unforgeable fences, a typed reader, argument provenance, and signals that only tighten | Accepted |
 | [105](adr/105-node-26-lts-runtime.md) | Node 26 LTS is the minimum runtime; types and compile target follow it | Accepted |
+| [106](adr/106-one-address-for-registry-accounts.md) | Registry accounts use `hello@jaari.org`; no separate recovery inbox | Accepted |
