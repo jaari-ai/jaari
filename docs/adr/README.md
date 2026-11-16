@@ -111,3 +111,4 @@
 | [107](107-dependabot-updates.md) | Dependabot version updates into `develop`; alerts on, security PRs off; bot exempt from DCO | Accepted |
 | [108](108-manifest-validation-with-typebox.md) | The package manifest is validated with TypeBox; kind names and capability classes | Accepted |
 | [109](109-built-in-package-loader.md) | The built-in loader checks every manifest first; `health` is a method; `config` is inline JSON Schema | Accepted |
+| [110](110-daemon-node-contract.md) | The daemon–node contract is JSON data messages checked on receipt, with one final result per action | Accepted |
