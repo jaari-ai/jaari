@@ -68,3 +68,6 @@ into the sandbox; migrations without a snapshot; letting an older binary open ne
   asks for the target, where secrets are kept, and one model provider; running it again revisits
   every step. `jaari config`, the `compose.yaml`, and the other init steps are scheduled in
   ADR-118's Consequences.
+- Roadmap 0.14 (2026-11-17): SQLite stores migrate when they open and refuse a newer
+  `user_version` (ADR-119). Until the pre-update snapshot ships (roadmap 0.12), each step is
+  protected by its transaction only.

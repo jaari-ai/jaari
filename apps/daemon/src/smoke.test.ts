@@ -4,6 +4,7 @@ import { createServer } from "node:http";
 // eslint-disable-next-line no-restricted-imports -- the test plays `jaari chat`, so it dials the daemon's local socket
 import { createConnection } from "node:net";
 import { tmpdir } from "node:os";
+import { DatabaseSync } from "node:sqlite";
 import { join } from "node:path";
 import { createModels, fauxAssistantMessage, fauxProvider } from "@earendil-works/pi-ai";
 import { describe, expect, it } from "vitest";
@@ -33,8 +34,9 @@ async function terminal(path: string) {
   return { socket, say, messages };
 }
 
+const OWNER = "11111111-1111-4111-8111-111111111111";
 const config: DaemonConfig = {
-  secrets: { zero: "host-credential" },
+  owner: { id: OWNER }, secrets: { zero: "host-credential" },
   llm: { providers: { faux: { apiKey: "secretRef:llm.faux" } }, tiers: { small: ["faux/a"] }, roles: { main: "small", summarize: "small" } },
 };
 
@@ -60,7 +62,7 @@ describe("tier-1 smoke", () => {
     await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
     const { port } = server.address() as { port: number };
     const local: DaemonConfig = {
-      secrets: { zero: "host-credential" },
+      owner: { id: OWNER }, secrets: { zero: "host-credential" },
       llm: { providers: { local: { api: "openai-completions", baseUrl: `http://127.0.0.1:${port}/v1` } }, tiers: { small: ["local/m"] }, roles: { main: "small", summarize: "small" } },
     };
     const daemon = await startDaemon({ config: local, dataDir: join(root, "data"), credentialsDir });
@@ -89,6 +91,55 @@ describe("tier-1 smoke", () => {
     const { root, boot } = await setup();
     await mkdir(join(root, "data", "session.db"), { recursive: true }); // a directory where the database belongs
     await expect(boot()).rejects.toThrow();
+  });
+
+  it("migrates a data folder from before owner ids, and keeps the conversation (ADR-056, ADR-119)", async () => {
+    const { root, faux, boot } = await setup();
+    await mkdir(join(root, "data"), { mode: 0o700 });
+    // The stores exactly as roadmap 0.5 to 0.8 wrote them: no version, no owner.
+    const session = new DatabaseSync(join(root, "data", "session.db"));
+    session.exec(`CREATE TABLE transcript (seq INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, message TEXT NOT NULL);
+      CREATE TABLE state (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+      CREATE TABLE message_ref (channel TEXT NOT NULL, conversation_id TEXT NOT NULL, message_id TEXT NOT NULL, seq INTEGER, origin TEXT NOT NULL, PRIMARY KEY (channel, conversation_id, message_id))`);
+    const add = session.prepare("INSERT INTO transcript (seq, at, message) VALUES (?, ?, ?)");
+    add.run(7, "2026-11-16T10:00:00.000Z", JSON.stringify({ role: "user", content: [{ type: "text", text: "My cat is Miso." }], timestamp: 1 }));
+    add.run(8, "2026-11-16T10:00:01.000Z", JSON.stringify({ role: "assistant", content: [{ type: "text", text: "Noted." }], api: "faux", provider: "faux", model: "a", usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } }, stopReason: "stop", timestamp: 2 }));
+    session.exec(`INSERT INTO state VALUES ('paused', 'true'); INSERT INTO message_ref VALUES ('cli', 'local', 'old-1', 8, 'turn')`);
+    session.close();
+    const usage = new DatabaseSync(join(root, "data", "usage.db"));
+    usage.exec(`CREATE TABLE usage (at TEXT NOT NULL, role TEXT NOT NULL, provider TEXT NOT NULL, model TEXT NOT NULL, input INTEGER NOT NULL, output INTEGER NOT NULL, cache_read INTEGER NOT NULL, cache_write INTEGER NOT NULL, cost_usd REAL NOT NULL, latency_ms INTEGER NOT NULL, outcome TEXT NOT NULL);
+      INSERT INTO usage VALUES ('2026-11-16T10:00:01.000Z', 'main', 'faux', 'a', 1, 2, 0, 0, 0, 5, 'ok')`);
+    usage.close();
+
+    let context = "";
+    faux.setResponses([(sent) => ((context = JSON.stringify(sent.messages)), fauxAssistantMessage("Miso."))]);
+    const daemon = await boot();
+    expect(daemon.session.paused()).toBe(true); // the state row came across
+    daemon.session.resume();
+    expect((await daemon.session.send("What is my cat called?")).seq).toBeGreaterThan(8); // row numbers go on, never reused
+    expect(context).toContain("My cat is Miso.");
+    await daemon.close();
+
+    const after = new DatabaseSync(join(root, "data", "session.db"));
+    expect(after.prepare("SELECT DISTINCT owner_id FROM transcript").all()).toEqual([{ owner_id: OWNER }]);
+    expect(after.prepare("SELECT owner_id, seq FROM message_ref WHERE message_id = 'old-1'").get()).toEqual({ owner_id: OWNER, seq: 8 });
+    expect(after.prepare("PRAGMA user_version").get()).toEqual({ user_version: 2 });
+    after.close();
+    const used = new DatabaseSync(join(root, "data", "usage.db"));
+    expect(used.prepare("SELECT owner_id, role FROM usage ORDER BY at").all()).toEqual([{ owner_id: OWNER, role: "main" }, { owner_id: OWNER, role: "main" }]);
+    used.close();
+    const log = (await readFile(join(root, "data", "events.ndjson"), "utf8")).trim().split("\n").map((line) => JSON.parse(line) as { ownerId?: string });
+    expect(log.every((line) => line.ownerId === OWNER)).toBe(true);
+  });
+
+  it("refuses data that belongs to another owner, and a config with no owner id (ADR-119)", async () => {
+    const { root, credentialsDir, boot } = await setup();
+    await (await boot()).close();
+    const other = { ...config, owner: { id: "22222222-2222-4222-8222-222222222222" } };
+    await expect(startDaemon({ config: other, dataDir: join(root, "data"), credentialsDir })).rejects.toThrow(/belongs to another owner \(11111111-/);
+    await (await boot()).close(); // the refused start changed nothing: the right owner still opens it
+    await expect(startDaemon({ config: { ...config, owner: {} }, dataDir: join(root, "fresh"), credentialsDir })).rejects.toThrow("run `jaari init` once");
+    await expect(stat(join(root, "fresh"))).rejects.toThrow("ENOENT"); // refused before anything was written
   });
 
   it("boots, answers, survives a restart, and keeps the pause", async () => {

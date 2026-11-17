@@ -3,7 +3,8 @@
   "version": 1,
 
   // ADR-022: `owner.phones` lets a carrier-identity channel recognise the owner.
-  "owner": { "timezone": "America/New_York", "quietHours": ["22:00", "08:00"], "phones": ["secretRef:owner.phone"] },
+  // ADR-119: `id` is written once by `jaari init`; every record carries it. Never change it by hand.
+  "owner": { "id": "00000000-0000-4000-8000-000000000000", "timezone": "America/New_York", "quietHours": ["22:00", "08:00"], "phones": ["secretRef:owner.phone"] },
 
   // ADR-017: where this daemon runs. "vps" | "server" | "home" | "laptop"
   "deployment": { "target": "vps", "overlay": "tailscale" },

@@ -1,6 +1,6 @@
 // `jaari init [--home <dir>]`: ask a few questions and write the owner config (ADR-056). Run again, it revisits every
 // step with the current values as defaults and edits only what changed, so the owner's comments stay.
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { lstat, mkdir, readFile, readlink, realpath, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { isDeepStrictEqual, parseArgs } from "node:util";
@@ -13,6 +13,9 @@ import { createPrompter, InputEnded } from "./prompt.js";
 const TEMPLATE = `{
   // ADR-056, ADR-118: the schema version of this file. \`jaari init\` writes it; migrations raise it.
   "version": ${CONFIG_VERSION},
+
+  // ADR-119: written once by \`jaari init\`; every record carries it. Never change it by hand.
+  "owner": {},
 
   // ADR-017: where this daemon runs. "vps" | "server" | "home" | "laptop"
   "deployment": { "target": "vps" },
@@ -126,6 +129,8 @@ export async function init(args: string[], io: Io, platform: NodeJS.Platform = p
   };
   // shortcut: an older config is migrated only in memory, so only `version` changes in the file; write the migrated sections here when the first migration ships (ADR-056)
   set(["version"], CONFIG_VERSION);
+  // Made once and never replaced: the stores refuse to open under another id (ADR-119).
+  set(["owner", "id"], current?.owner?.id ?? randomUUID());
   set(["deployment", "target"], target);
   set(["secrets", "zero"], zero);
   set(["secrets", "credentialsDir"], credentialsDir);
