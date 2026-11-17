@@ -97,9 +97,14 @@ export async function init(args: string[], io: Io, platform: NodeJS.Platform = p
 
   const mac = platform === "darwin";
   const prompter = createPrompter(io);
-  let target: string, zero: string, credentialsDir: string | undefined, llm: Config["llm"] | undefined;
+  let target: string, stayAwake: string | undefined, zero: string, credentialsDir: string | undefined, llm: Config["llm"] | undefined;
   try {
     target = await prompter.ask("Where does Jaari run (vps, server, home, laptop)?", { current: current?.deployment?.target ?? (mac ? "laptop" : "vps"), allowed: ["vps", "server", "home", "laptop"] });
+    // ADR-057: asked only on a laptop; another host never sleeps by itself.
+    if (target === "laptop") {
+      say("While Jaari works on mains power, it can ask the laptop not to fall asleep by itself (a closed lid still sleeps).");
+      stayAwake = await prompter.ask("Keep the laptop awake (working, never, always)?", { current: current?.power?.stayAwake ?? "working", allowed: ["working", "never", "always"] });
+    }
     say("A server has no keychain, so it keeps secrets in a folder of owner-only files (host-credential).");
     zero = await prompter.ask("Where are secrets kept (os-keychain, host-credential)?", { current: current?.secrets?.zero ?? (mac ? "os-keychain" : "host-credential"), allowed: ["os-keychain", "host-credential"] });
     if (zero === "host-credential") {
@@ -132,6 +137,7 @@ export async function init(args: string[], io: Io, platform: NodeJS.Platform = p
   // Made once and never replaced: the stores refuse to open under another id (ADR-119).
   set(["owner", "id"], current?.owner?.id ?? randomUUID());
   set(["deployment", "target"], target);
+  if (stayAwake !== undefined) set(["power", "stayAwake"], stayAwake); // a host that is no laptop keeps what it had
   set(["secrets", "zero"], zero);
   set(["secrets", "credentialsDir"], credentialsDir);
   if (llm !== undefined) set(["llm"], llm);

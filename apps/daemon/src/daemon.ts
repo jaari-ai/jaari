@@ -4,18 +4,19 @@ import { chmod, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { MutableModels } from "@earendil-works/pi-ai";
 import { CLI_MANIFEST, createCliChannel, createIngress, socketPath } from "@jaari/channels";
-import { commandOf, createMarkers, createSession, openDatabase, openEventLog, openStore, ownerIdOf, randomMarker, SAFETY, systemPrompt, type Config } from "@jaari/core";
+import { commandOf, createMarkers, createPowerWatch, createSession, LIMITS, openDatabase, openEventLog, openStore, ownerIdOf, randomMarker, SAFETY, systemPrompt, type Config, type PowerDeps } from "@jaari/core";
 import { createEgress, type EgressPolicy } from "@jaari/http";
 import { checkLlmConfig, createLlm, openUsageLog, USAGE_MIGRATIONS } from "@jaari/llm";
 import { createHostCredentialProvider, createOsKeychainProvider, resolveRef, type VaultProvider } from "@jaari/secrets";
 
 // The sections of the owner's config (ADR-118) that the daemon reads in Phase 0. `llm` is checked by @jaari/llm.
-export type DaemonConfig = Pick<Config, "owner" | "secrets" | "llm" | "limits" | "events">;
+export type DaemonConfig = Pick<Config, "owner" | "deployment" | "power" | "secrets" | "llm" | "limits" | "events">;
 
 export type DaemonOptions = {
   config: DaemonConfig;
   dataDir: string;
   credentialsDir?: string; // host-credential: $CREDENTIALS_DIRECTORY under systemd, /run/secrets under Compose
+  power?: Partial<PowerDeps>; // the smoke test replaces the clocks and the OS tools
   models?: MutableModels; // the smoke test passes pi-ai's scripted provider here (ADR-041)
 };
 
@@ -77,7 +78,24 @@ export async function startDaemon(options: DaemonOptions) {
     // Model calls are not scanned: the prompt they carry holds the canary and the fence id by design (ADR-120).
     const llm = await createLlm({ config: config.llm, fetch: createEgress(policy).fetch, secrets, usage, ...(options.models ? { models: options.models } : {}) });
     const session = createSession({ store, events, llm, systemPrompt: systemPrompt(markers), ...(config.limits ? { limits: config.limits } : {}) });
-    const ingress = createIngress({ session, refs: store.refs, events, isCommand: (text) => commandOf(text) !== undefined, guard: markers });
+    // The laptop host (ADR-057, ADR-121). It runs on every host: a virtual machine is suspended too, and a host with
+    // no battery reads none. Its events go to the log; what reacts to them ships with its own feature.
+    const power = createPowerWatch({
+      emit: (event) => events.write(event),
+      stayAwake: config.power?.stayAwake ?? (config.deployment?.target === "laptop" ? "working" : "never"),
+      sleepGapMs: config.limits?.sleepGapMs ?? LIMITS.sleepGapMs,
+      ...(config.power?.batteryPausePercent ? { batteryPausePercent: config.power.batteryPausePercent } : {}),
+      ...(options.power ? { deps: options.power } : {}),
+    });
+    opened.push({ close: () => power.stop() });
+    await power.tick(); // the power source is known before the first turn
+    // A turn is the only work in Phase 0: the machine is held awake until its reply is ready.
+    // shortcut: the compaction after a turn is not held; the job engine holds its own jobs (roadmap 1.4)
+    const awake: typeof session.send = (text, sendOptions) => {
+      const done = power.working();
+      return session.send(text, sendOptions).finally(done);
+    };
+    const ingress = createIngress({ session: { send: awake }, refs: store.refs, events, isCommand: (text) => commandOf(text) !== undefined, guard: markers });
     // The egress for everything that is not a model call: a request that carries a marker is blocked, logged, and
     // reported to the owner (ADR-104). No tool uses it yet; the first one that fetches does (roadmap 4.5).
     const egress = createEgress({
@@ -103,6 +121,7 @@ export async function startDaemon(options: DaemonOptions) {
     return {
       session,
       egress,
+      power,
       socketPath: socketPath(dataDir),
       // Lets a running turn and its delivery settle, then closes the socket and the stores. The socket closes
       // last, so the owner gets the answer to a turn that was running at shutdown.
