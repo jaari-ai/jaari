@@ -5,6 +5,7 @@ import { PassThrough } from "node:stream";
 import { loadConfig } from "@jaari/core/config";
 import { checkLlmConfig } from "@jaari/llm";
 import { afterEach, beforeEach, expect, it } from "vitest";
+import { run as configCommand } from "./config-command.js";
 import { init } from "./init.js";
 
 let root: string;
@@ -158,4 +159,37 @@ it("writes the owner id once, keeps it on later runs, and adds it to a config fr
   expect(added.owner?.id).not.toBe(id);
   expect(added.deployment?.target).toBe("server");
   expect(await readFile(config, "utf8")).toContain("// mine, by hand");
+});
+
+// `jaari config <step>`: one step of init, on the platform this test runs on.
+const revisit = async (step: string, lines: string[]) => {
+  const input = new PassThrough();
+  const output = new PassThrough();
+  let shown = "";
+  output.on("data", (chunk: Buffer) => (shown += chunk.toString()));
+  input.end(lines.map((line) => `${line}\n`).join(""));
+  return { code: await configCommand([step, "--home", home], { input, output, isTTY: false }), shown };
+};
+
+it("jaari config revisits one step and leaves the rest of the file as it was", async () => {
+  expect((await revisit("llm", ["", "", "m"])).shown).toContain("run `jaari init` first"); // no config yet
+  await answer(["", "", "", "", "", "claude-test"]);
+  await writeFile(config, (await readFile(config, "utf8")).replace("{", "{\n  // mine, by hand"));
+  const before = await loadConfig(config);
+
+  const target = await revisit("deployment", ["laptop", "always"]);
+  expect(target.code).toBe(0);
+  expect(target.shown).not.toContain("secrets"); // only this step's questions
+  expect(await loadConfig(config)).toEqual({ ...before, deployment: { target: "laptop" }, power: { stayAwake: "always" } });
+
+  expect((await revisit("llm", ["", "", "other-model"])).shown).toContain("jaari secret set llm.anthropic"); // asked at once, no "keep?"
+  const after = await loadConfig(config);
+  expect(checkLlmConfig(after.llm).tiers).toEqual({ large: ["anthropic/other-model"] });
+  expect(after.secrets).toEqual(before.secrets);
+  expect(await readFile(config, "utf8")).toContain("// mine, by hand");
+
+  const text = await readFile(config, "utf8");
+  expect((await revisit("secrets", ["", ""])).code).toBe(0);
+  expect(await readFile(config, "utf8")).toBe(text); // empty answers change nothing
+  expect(await revisit("nope", [])).toMatchObject({ code: 2, shown: expect.stringContaining("usage: jaari config") as string });
 });

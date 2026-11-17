@@ -1,7 +1,7 @@
 # ADR-028: Encryption at rest: prevent secrets in memory, encrypt every remote you do not control, purge on demand
 
 - **Status:** Accepted
-- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md), [ADR-087](087-safety-pieces-ship-with-what-they-protect.md), [ADR-100](100-file-store-backup-and-erase.md)
+- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md), [ADR-087](087-safety-pieces-ship-with-what-they-protect.md), [ADR-100](100-file-store-backup-and-erase.md), [ADR-122](122-install-in-three-steps.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -52,6 +52,8 @@ command (a leaked secret would stay in history and every remote).
   (Phase 1).
 - **ADR-100:** erase also deletes the blob from the object store; older SQLite snapshots keep
   erased rows until retention unless the owner deletes them on the erase card.
+- **ADR-122:** `openDatabase` sets each store to 0600 when it opens; `jaari doctor` checks the
+  modes and reports FileVault on macOS. Disk encryption on Linux is not checked yet.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

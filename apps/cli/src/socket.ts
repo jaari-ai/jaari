@@ -32,3 +32,14 @@ export async function connect(path: string): Promise<Connection> {
   }
   return { send: (line) => void socket.write(encode(line)), lines: lines(), close: () => void socket.destroy() };
 }
+
+// True when something answers on the daemon's socket. A socket file that a crash left behind refuses the connection.
+export async function daemonRunning(path: string): Promise<boolean> {
+  try {
+    (await connect(path)).close();
+    return true;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    return code !== "ENOENT" && code !== "ECONNREFUSED"; // it answered, even if with a refusal
+  }
+}

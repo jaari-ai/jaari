@@ -5,12 +5,20 @@ import type { Command } from "./io.js";
 const USAGE = `usage: jaari <command>
   chat [--home <dir> | --data <dir> | --socket <path>]   talk to the running daemon
   init [--home <dir>]                     write or revisit the config (~/.jaari/config.jsonc)
-  secret set <name> [--home <dir>] [--config <file>]   store a secret; typed, never an argument`;
+  config <deployment | secrets | llm> [--home <dir>]   revisit one step of init
+  secret set <name> [--home <dir>] [--config <file>]   store a secret; typed, never an argument
+  doctor [--home <dir>]                   check the install; exits 1 when a check fails
+  service install [--home <dir>] [--daemon <path>] [--print]   start the daemon at login or boot
+  rollback [--home <dir>] [--list] [--yes]   restore the latest snapshot of the stores and the config`;
 
 const COMMANDS: Record<string, () => Promise<{ run: Command }>> = {
   chat: () => import("./chat-command.js"),
   init: () => import("./init.js"),
+  config: () => import("./config-command.js"),
   secret: () => import("./secret.js"),
+  doctor: () => import("./doctor.js"),
+  service: () => import("./service.js"),
+  rollback: () => import("./rollback.js"),
 };
 
 const [name = "", ...args] = process.argv.slice(2);

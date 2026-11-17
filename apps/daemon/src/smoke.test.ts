@@ -8,6 +8,7 @@ import { DatabaseSync } from "node:sqlite";
 import { join } from "node:path";
 import { createModels, fauxAssistantMessage, fauxProvider } from "@earendil-works/pi-ai";
 import { describe, expect, it } from "vitest";
+import { listSnapshots } from "@jaari/core";
 import { startDaemon, type DaemonConfig } from "./daemon.js";
 
 // A terminal on the daemon's socket, as `jaari chat` would attach.
@@ -132,6 +133,18 @@ describe("tier-1 smoke", () => {
     used.close();
     const log = (await readFile(join(root, "data", "events.ndjson"), "utf8")).trim().split("\n").map((line) => JSON.parse(line) as { ownerId?: string });
     expect(log.every((line) => line.ownerId === OWNER)).toBe(true);
+
+    // The stores were copied before the migration touched them, once (ADR-082, ADR-122).
+    const snapshots = await listSnapshots(join(root, "data"));
+    expect(snapshots).toMatchObject([{ reason: "pre-migration", stores: { "session.db": 0, "usage.db": 0 } }]);
+    const kept = new DatabaseSync(join(snapshots[0]!.dir, "session.db"), { readOnly: true });
+    expect(kept.prepare("SELECT name FROM pragma_table_info('transcript')").all().map((row) => row.name)).not.toContain("owner_id");
+    kept.close();
+    await (await boot()).close(); // nothing left to migrate: no second snapshot
+    expect(await listSnapshots(join(root, "data"))).toHaveLength(1);
+    const fresh = await setup();
+    await (await fresh.boot()).close(); // a new install has nothing to protect
+    expect(await listSnapshots(join(fresh.root, "data"))).toEqual([]);
   });
 
   it("refuses data that belongs to another owner, and a config with no owner id (ADR-119)", async () => {

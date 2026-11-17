@@ -23,7 +23,7 @@ decided. This ADR decides what 0.13 ships. It amends ADR-057 and ADR-082.
     by that much, is reported as a wake too: both need the same reaction.
 3.  **No native helper and no logind listener in Phase 0.** ADR-057 names a small macOS helper
     and logind `PrepareForSleep` for a faster response. A helper is native code that must be
-    signed (ADR-056, decided with 0.12), and a logind listener needs a D-Bus client. Phase 0
+    signed (ADR-056; ADR-122 moved that to 7.7), and a logind listener needs a D-Bus client. Phase 0
     has nothing that needs the speed: a wake is seen at most 30 seconds late. Both stay
     allowed by ADR-057 and are added when a feature needs them.
 4.  **The power assertion uses the tools of the OS.** macOS: `caffeinate -i -w <daemon pid>`.
@@ -67,7 +67,7 @@ decided. This ADR decides what 0.13 ships. It amends ADR-057 and ADR-082.
 - The sleep-aware watchdog of the session (ADR-031) keeps its own wall-clock check; it runs
   only during a turn and needs no event.
 - `jaari doctor` should report `power.hold.failed` and what `"always"` does not cover (a
-  closed lid) when it ships (0.12).
+  closed lid) when it ships (0.12). Done: ADR-122.
 - The Linux paths (`/sys/class/power_supply`, `systemd-inhibit`) are tested with fakes and a
   temporary folder only; the macOS tools were run on a real machine.
 - A laptop with two batteries reports the first one.

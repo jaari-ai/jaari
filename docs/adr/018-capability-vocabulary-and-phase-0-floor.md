@@ -1,7 +1,7 @@
 # ADR-018: Capability vocabulary, `@jaari/capabilities`, and the Phase 0 safety floor
 
 - **Status:** Accepted
-- **Extended by:** [ADR-034](034-mcp-servers.md), [ADR-039](039-personal-data.md), [ADR-071](071-capability-packages.md), [ADR-079](079-secret-zero-on-servers.md), [ADR-095](095-missing-capability-names.md), [ADR-103](103-no-repository-or-registry-integrations.md)
+- **Extended by:** [ADR-034](034-mcp-servers.md), [ADR-039](039-personal-data.md), [ADR-071](071-capability-packages.md), [ADR-079](079-secret-zero-on-servers.md), [ADR-095](095-missing-capability-names.md), [ADR-103](103-no-repository-or-registry-integrations.md), [ADR-122](122-install-in-three-steps.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -25,6 +25,8 @@ Per-host capability names (`browser.local` as a gate class: the policy would dep
   and `takeover.request` (the one capability of the `takeover` class).
 - **ADR-103 (resolves OQ-91):** `repo.write` and `publish` are reserved, like `pay`: no executor
   in v1, requests fail closed.
+- **ADR-122:** `jaari doctor` has no warning for `env` and `file` providers: the config refuses
+  them, so the config check fails instead.
 
 ## Consequences
 - **Roadmap 0.10 (2026-11-16):** "no executor can be written around the gate" is enforced by

@@ -34,7 +34,7 @@
 ## Packages
 | Package | Responsibility |
 |---|---|
-| `@jaari/core` | Agent loop on Pi, sessions, children, tool registry; job engine (ADR-025), routines (ADR-064), skills (ADR-060), the `CliEngine` interface (ADR-077), the event log and the OpenTelemetry adapter (ADR-032) (ADR-086); the locked safety prompt, `fence()`, `defuse`, and the markers of a run (ADR-104, ADR-120); the laptop host's detector, `createPowerWatch`: sleep, power source, stay-awake hold, network change (ADR-057, ADR-121); the owner config loader, `@jaari/core/config` (ADR-118); `openDatabase`, the one way to open a versioned, owned SQLite store (ADR-119) |
+| `@jaari/core` | Agent loop on Pi, sessions, children, tool registry; job engine (ADR-025), routines (ADR-064), skills (ADR-060), the `CliEngine` interface (ADR-077), the event log and the OpenTelemetry adapter (ADR-032) (ADR-086); the locked safety prompt, `fence()`, `defuse`, and the markers of a run (ADR-104, ADR-120); the laptop host's detector, `createPowerWatch`: sleep, power source, stay-awake hold, network change (ADR-057, ADR-121); the owner config loader, `@jaari/core/config` (ADR-118); `openDatabase`, the one way to open a versioned, owned SQLite store (ADR-119); the local snapshot, `takeSnapshot` and `restoreSnapshot` (ADR-082, ADR-122) |
 | `@jaari/capabilities` | Capability and package manifest schema, loader, and the daemon–node contract; the single capability vocabulary lives in SECURITY_MODEL.md (ADR-015, ADR-018, ADR-071) |
 | `@jaari/llm` | Wraps `@earendil-works/pi-ai`; tiers + fallback chains, role routing, escalation, budgets, local-only privacy, usage log, `jaari llm eval` (ADR-011); speech roles `stt` and `tts` (ADR-037, ADR-086) |
 | `@jaari/memory` | Git-backed memory repo, write path, canonicalize, daily audit, gap queue; file store (ADR-038, ADR-086) |
@@ -49,7 +49,7 @@
 | `@jaari/mcp` | MCP client for configured servers, with generated manifests (ADR-034); the two-tool MCP server for paired apps (ADR-076); served by `jaari mcp` (ADR-086) |
 | `apps/daemon` | Long-running process: scheduler tick, channels, jobs; runs from built `dist/` files (ADR-115) |
 | `apps/hooks` | Separate hook listener: the only optionally public port; checks signatures and hands verified events to the daemon over the local socket (ADR-073, ADR-086) |
-| `apps/cli` | `jaari chat` (0.8, the CLI channel's terminal: numbered messages, `>N` replies, ADR-117), `jaari init` and `jaari secret set` (0.6, ADR-118), `jaari doctor`, `jaari llm eval`, `jaari llm usage`, `jaari pair` and `jaari devices` (ADR-022), `jaari run`, `wait`, `status`, `export`, and `mcp` (ADR-076), admin commands; `jaari doctor` collects each package's `health` (ADR-032, ADR-086) |
+| `apps/cli` | `jaari chat` (0.8, the CLI channel's terminal: numbered messages, `>N` replies, ADR-117), `jaari init` and `jaari secret set` (0.6, ADR-118), `jaari doctor`, `jaari config`, `jaari service install`, and `jaari rollback` (0.12, ADR-122), `jaari llm eval`, `jaari llm usage`, `jaari pair` and `jaari devices` (ADR-022), `jaari run`, `wait`, `status`, `export`, and `mcp` (ADR-076), admin commands; `jaari doctor` collects each package's `health` (ADR-032, ADR-086) |
 | `apps/node` | Capability host on an owner device: `jaari capability install <name>` pairs it as a `device`, it advertises installed capabilities, runs gate-approved actions, hosts takeover and live view. Capabilities on the daemon host run through the same contract in-process (ADR-015) |
 
 ## Channels

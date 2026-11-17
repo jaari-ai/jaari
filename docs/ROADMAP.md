@@ -52,11 +52,13 @@ effect. Entry: none.
 | 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084, 108, 109, 110 | 0.1 | Delivered (2026-11-16) |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Delivered (2026-11-16) |
 | 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079, 112 | 0.1 | Delivered (2026-11-16) |
-| 0.12 | Install, manual update with a local pre-update snapshot, rollback (store migrations on open shipped with 0.14, ADR-119; the pre-update snapshot protects them from here); `jaari doctor` (checks are added as their features ship; a failed power hold, ADR-121); `jaari config`, the `compose.yaml` that `jaari init` writes, and `jaari service install` with encrypted credentials (ADR-118) | 056, 032, 079, 082, 118 | 0.5, 0.6 | Planned |
+| 0.12 | The local commands: `jaari doctor` (checks are added as their features ship), `jaari config <step>`, `jaari service install` (launchd; systemd with encrypted credentials), a snapshot before every store migration, and `jaari rollback` for data (ADR-122; the release is 0.17, `jaari update` 0.18) | 056, 032, 079, 082, 118, 122 | 0.5, 0.6 | Delivered (2026-11-17) |
 | 0.13 | Laptop sleep and wake: clock-gap detection, the power assertion for a turn, the battery pause state, and network-change detection, as events (ADR-121; catch-up is 1.4, the battery notice 2.3, OS wake events when a feature needs them) | 057, 082, 121 | 0.5 | Delivered (2026-11-17) |
 | 0.14 | `ownerId` in the data model; versioned stores that migrate on open and refuse newer or foreign data | 044, 056, 119 | 0.5, 0.6 | Delivered (2026-11-17) |
 | 0.15 | `@jaari/http` core: resolve, check, dial; the address-class table; the `direct` provider; the lint rule against other network clients | 016, 053, 080, 113 | 0.1 | Delivered (2026-11-16) |
 | 0.16 | Prompt-injection floor: the locked safety section, `fence()` and `defuse`, the reply marker filter, and canary and fence-id scanning in the `@jaari/http` core (model calls excepted, ADR-120) and channel send paths | 042, 104, 120 | 0.5, 0.8, 0.15 | Delivered (2026-11-17) |
+| 0.17 | Release: one public npm package `jaari` (daemon and command), a multi-arch image on the GitHub container registry, both signed without a stored key (npm provenance, cosign); the `compose.yaml` that `jaari init` writes; in `jaari doctor`, TPM-sealed credentials and Linux disk encryption | 010, 056, 079, 094, 122 | 0.12 | Planned |
+| 0.18 | `jaari update`: signature and provenance check, snapshot, versions kept side by side with a `current` link, `jaari doctor` after the swap, automatic rollback of data and version; `jaari uninstall` | 056, 082, 122 | 0.17 | Planned |
 
 Exit criteria:
 - The tier-1 smoke test boots the daemon on the scripted engine in CI on every pull request,
@@ -65,7 +67,10 @@ Exit criteria:
 - A manifest with an unknown name or kind fails closed (ADR-071), and is checked before any
   package code runs (ADR-084).
 - The CLI channel passes the shared channel contract suite (ADR-084).
-- `jaari doctor` warns when an `env` or `file` secret provider is in use (ADR-018).
+- `jaari doctor` exits non-zero when a check fails and zero on warnings; a config that names an
+  `env` or `file` secret provider fails its config check (ADR-018, ADR-032, ADR-122).
+- A store that a start will migrate is copied first, and `jaari rollback` puts it back (ADR-082,
+  ADR-122).
 - On a host without a keychain, the daemon starts unattended with `host-credential`, and refuses
   to start when the credential file is readable by others, in the data directory, or in the
   backup set (ADR-079).
@@ -110,7 +115,7 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 | 1.9 | Local-model qualification and the `jaari llm eval` qualification fixtures; the `jaari init` LLM presets and the local-only question (ADR-019, ADR-118) | 019, 045, 118 | 0.7, 0.6 | Planned |
 | 1.10 | Correct and forget (erase is 3.9). Placement | 029 | 1.1 | Planned |
 | 1.11 | Monthly LLM budget with the 100% prompt; spike alerts | 046, 031, 087 | 0.7, 0.8 | Planned |
-| 1.12 | Nightly local snapshot of memory, SQLite, and config (last 7) | 027, 082, 087 | 1.1, 0.12 | Planned |
+| 1.12 | Nightly local snapshot of memory, SQLite, and config (last 7), on `takeSnapshot`; the memory git tag joins the snapshot (ADR-122) | 027, 082, 087, 122 | 1.1, 0.12 | Planned |
 
 Exit criteria:
 - A scheduled routine with nothing new makes no model call and posts nothing; a run with a
@@ -143,7 +148,7 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 |---|---|---|---|---|
 | 2.1 | Dials and monitor; repeated-failure and 7-day quiet rules | 008, 031, 087 | 0.5 | Planned |
 | 2.2 | Curiosity from the gap queue | 008 | 1.6, 2.1 | Planned |
-| 2.3 | Quiet hours, notification ledger, digests, delivery; automatic patch installs in quiet hours; 50% and 80% budget lines; routine delivery and reminders, marked late after sleep; the one battery notice per cycle (ADR-121) | 033, 056, 082, 046, 087, 064, 089, 121 | 2.1, 0.12, 1.5 | Planned |
+| 2.3 | Quiet hours, notification ledger, digests, delivery; automatic patch installs in quiet hours; 50% and 80% budget lines; routine delivery and reminders, marked late after sleep; the one battery notice per cycle (ADR-121) | 033, 056, 082, 046, 087, 064, 089, 121 | 2.1, 0.18, 1.5 | Planned |
 | 2.4 | Prompt versioning | 042 | 0.5 | Planned |
 | 2.5 | Replay harness and golden threads | 041 | 0.2 | Planned |
 | 2.6 | Skills: built-in and owner (third-party is 4.10) (in `@jaari/core`) | 060, 086 | 1.1 | Planned |
@@ -225,7 +230,7 @@ and audit log.
 | 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core; the exit is re-probed on `power.wake` and `network.change` (ADR-057, ADR-121) | 016, 053, 057, 080, 121 | 0.15, 2.12 | Planned |
 | 4.5 | `web.search` and `web.fetch` with pluggable rungs, provenance holds on model-built URLs and private-data queries; watcher triggers on web pages | 012, 049, 064, 089, 104 | 4.3, 4.4, 4.13, OQ-95 | Planned |
 | 4.6 | Optional Web Bot Auth signing for HTTP | 054 | 4.4 | Planned |
-| 4.7 | First sandbox backend: container or bubblewrap; under Compose, bubblewrap in the hardened daemon container with the install probe | 034, 036, 094 | 0.12 | Planned |
+| 4.7 | First sandbox backend: container or bubblewrap; under Compose, bubblewrap in the hardened daemon container with the install probe | 034, 036, 094 | 0.17 | Planned |
 | 4.8 | MCP client, local servers sandboxed, per-process secrets (in `@jaari/mcp`) | 034, 086, 096 | 4.3, 4.7 | Planned |
 | 4.9 | Code execution; routine script steps; pinned jobs | 036, 064, 089, 092 | 3.6, 4.7 | Planned |
 | 4.10 | Third-party skills and third-party packages | 060, 071 | 4.3 | Planned |
@@ -320,6 +325,7 @@ Purpose: stronger isolation, more network modes, and moving hosts. Entry: Phase 
 | 7.4 | WireGuard peer-config generation, Cloudflare Zero Trust, and sizing per target | 030, 088 | 2.12 | Planned |
 | 7.5 | Multi-device state and host migration ("multi-device state" has no ADR; the node link is 6.8) | 058, 088 | 6.8 | Planned |
 | 7.6 | Observability: opt-in traces and the raw tee (in `@jaari/core`) | 032, 086 | 3.4 | Planned |
+| 7.7 | More install channels: a Homebrew tap, a single binary, and the one-line installer; an Apple Developer ID for what macOS must trust | 056, 122 | 0.18 | Planned |
 
 Exit criteria: none documented in the ADRs. Define them before this phase starts.
 

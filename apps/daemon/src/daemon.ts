@@ -4,7 +4,7 @@ import { chmod, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { MutableModels } from "@earendil-works/pi-ai";
 import { CLI_MANIFEST, createCliChannel, createIngress, socketPath } from "@jaari/channels";
-import { commandOf, createMarkers, createPowerWatch, createSession, LIMITS, openDatabase, openEventLog, openStore, ownerIdOf, randomMarker, SAFETY, systemPrompt, type Config, type PowerDeps } from "@jaari/core";
+import { commandOf, createMarkers, createPowerWatch, createSession, LIMITS, openDatabase, openEventLog, openStore, ownerIdOf, randomMarker, SAFETY, STORE_MIGRATIONS, storeVersion, systemPrompt, takeSnapshot, type Config, type PowerDeps } from "@jaari/core";
 import { createEgress, type EgressPolicy } from "@jaari/http";
 import { checkLlmConfig, createLlm, openUsageLog, USAGE_MIGRATIONS } from "@jaari/llm";
 import { createHostCredentialProvider, createOsKeychainProvider, resolveRef, type VaultProvider } from "@jaari/secrets";
@@ -15,6 +15,7 @@ export type DaemonConfig = Pick<Config, "owner" | "deployment" | "power" | "secr
 export type DaemonOptions = {
   config: DaemonConfig;
   dataDir: string;
+  configPath?: string; // copied into a snapshot with the stores (ADR-122)
   credentialsDir?: string; // host-credential: $CREDENTIALS_DIRECTORY under systemd, /run/secrets under Compose
   power?: Partial<PowerDeps>; // the smoke test replaces the clocks and the OS tools
   models?: MutableModels; // the smoke test passes pi-ai's scripted provider here (ADR-041)
@@ -62,6 +63,13 @@ export async function startDaemon(options: DaemonOptions) {
   const events = openEventLog(join(dataDir, "events.ndjson"), ownerId, config.events?.retentionDays);
   const opened: { close(): void }[] = [];
   try {
+    // A store that this start will migrate is copied first, with the config, so `jaari rollback` can put it back
+    // (ADR-082, ADR-122). A store newer than this Jaari is refused below and needs no copy.
+    const migrates = ([file, steps]: readonly [string, readonly unknown[]]) => (storeVersion(join(dataDir, file)) ?? steps.length) < steps.length;
+    if (([["session.db", STORE_MIGRATIONS], ["usage.db", USAGE_MIGRATIONS]] as const).some(migrates)) {
+      const snapshot = await takeSnapshot({ dataDir, reason: "pre-migration", ...(options.configPath ? { configPath: options.configPath } : {}) });
+      events.write({ type: "snapshot", reason: snapshot.reason, name: snapshot.name });
+    }
     // Each store refuses to open when it is newer than this Jaari or belongs to another owner (ADR-056, ADR-119).
     // The conversation first: a wrong id is refused there before a missing usage log is created and claimed by it.
     const store = openStore(join(dataDir, "session.db"), ownerId);
