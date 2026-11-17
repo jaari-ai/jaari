@@ -5,7 +5,7 @@ Last updated: 2026-11-16
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (116 ADRs, all Accepted)
+## Decided (117 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -60,7 +60,7 @@ The index is [adr/README.md](adr/README.md). By area:
   to ADR-104; some were changed or rejected by the ADR); [14 egress core](learning/14-egress-core.md) and
   [15 pi-ai](learning/15-pi-ai.md) were written while building 0.15 and 0.7 (ADR-113, ADR-114);
   [16 pi-agent-core](learning/16-pi-agent-core.md) while building 0.5; [17 owner commands](learning/17-owner-commands.md)
-  for ADR-116.
+  for ADR-116; [18 owner replies](learning/18-owner-replies.md) for ADR-117.
 - Docs conflict audit (2026-11-10): ten conflicts recorded, accepted, and folded into ADR-017
   to ADR-020.
 - Documentation audit (2026-11-12): docs, ADR links, open questions, and the roadmap
@@ -114,6 +114,9 @@ The daemon starts and stops, but no channel reaches it yet (0.8).
 - Owner commands (2026-11-16, ADR-116): code reads "stop", "wait", "hold on", and the other brake
   words in the owner's languages, with OpenMausBot's stop-word rule; a stop word pauses and a
   repeated one stops the turn.
+- Owner replies (2026-11-17, ADR-117): a reply to an earlier message is a pointer resolved by
+  code from Jaari's own record, inside the one main session; it can widen a brake and answer one
+  approval like a tap. The contract fields and the `message_ref` table land with 0.8.
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript

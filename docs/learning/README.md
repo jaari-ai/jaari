@@ -31,6 +31,8 @@ Written:
   compaction cut, and what `@jaari/core` adds (2026-11-16)
 - [17-owner-commands.md](17-owner-commands.md) — how the references and the commercial agents read
   stop, pause, and approval messages, and what ADR-116 borrows (2026-11-16)
+- [18-owner-replies.md](18-owner-replies.md) — how channels and the references handle replies to
+  earlier messages, and what ADR-117 borrows (2026-11-17)
 
 Planned (optional, not scheduled; ADRs have since decided these topics):
 - 01-session.md — persistent session, steering, segments, compaction

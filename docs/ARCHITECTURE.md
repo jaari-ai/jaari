@@ -89,6 +89,7 @@ export interface ChannelManifest {
     media?: boolean; reactions?: boolean; typing?: boolean;
     groups?: boolean; readReceipts?: boolean; edits?: boolean;
     deletes?: boolean;               // can delete the owner's message (ADR-055, ADR-081)
+    replies?: boolean;               // can send a quote-reply (ADR-117)
   };
   identity: "carrier" | "account" | "device" | "none";  // see Identity binding
   prompts: "buttons" | "quickReplies" | "text";          // how the host renders a Prompt (ADR-035)
@@ -117,6 +118,8 @@ export interface InboundMessage {
   isGroup: boolean; participants?: string[];
   text?: string; attachments?: Attachment[];
   answer?: { promptId: string; option: string };  // a tap on a rendered Prompt
+  replyTo?: string;                  // id of the replied-to message, unique in conversationId (ADR-117)
+  threadId?: string;                 // forum topic or thread to deliver into; not a session
   sentAt: string; receivedAt: string; // ISO 8601
 }
 
@@ -124,7 +127,8 @@ export interface OutboundMessage {
   channel: string; conversationId: string;
   text?: string; attachments?: Attachment[];
   idempotencyKey: string;            // from the outbox; the adapter must dedupe on it
-  replyTo?: string;
+  replyTo?: string;                  // set by code, never by the model; dropped without `replies`
+  threadId?: string;
   prompt?: Prompt;                   // rendered by the host for this channel, never by the plugin
 }
 

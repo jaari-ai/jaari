@@ -1,6 +1,7 @@
 # ADR-116: Owner commands are read by code in the owner's languages; a stop word pauses, and a repeated one stops the turn
 
 - **Status:** Accepted
+- **Extended by:** [ADR-117](117-owner-replies-are-pointers.md)
 - **Date:** 2026-11-16
 
 ## Context
@@ -38,6 +39,10 @@ exist (OpenMausBot's decider, gajae-way's judge) can only route or veto, and fal
   rule gives the fast brake when the owner insists.
 - **Pause only, no repeat rule:** a frustrated owner who types "stop" twice should not have to know
   the exact phrase "stop now".
+
+## Amendments
+- **ADR-117:** a reply target may widen a brake (also pause the routine it replies to), never
+  narrow it; `commandOf` still reads only the text.
 
 ## Consequences
 - Indirect wording ("ugh, not that one"), typos ("stpo"), swearing, and languages outside the word
