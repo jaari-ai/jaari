@@ -66,6 +66,8 @@ describe("battery (ADR-057)", () => {
     expect(parsePmset("Now drawing from 'AC Power'\n -InternalBattery-0 (id=1)\t96%; charging; 0:26 remaining present: true\n")).toEqual({ onBattery: false, percent: 96 });
     expect(parsePmset("Now drawing from 'Battery Power'\n -InternalBattery-0 (id=1)\t7%; discharging; 0:20 remaining present: true\n")).toEqual({ onBattery: true, percent: 7 });
     expect(parsePmset("Now drawing from 'AC Power'\n")).toBeUndefined(); // a desktop
+    expect(parsePmset("Now drawing from 'Battery Power'\n -Magic Keyboard (id=2)\t80%; discharging\n -InternalBattery-0 (id=1)\t7%; discharging; (no estimate) present: true\n")).toEqual({ onBattery: true, percent: 7 });
+    expect(parsePmset("Now drawing from 'UPS Power'\n -UPS 1500 (id=3)\t60%; discharging\n")).toBeUndefined(); // a UPS is not the laptop's battery
 
     const dir = await mkdtemp(join(tmpdir(), "jaari-power-"));
     const supply = async (name: string, files: Record<string, string>) => {
@@ -77,6 +79,31 @@ describe("battery (ADR-057)", () => {
     await supply("BAT0", { type: "Battery", capacity: "41", status: "Discharging" });
     expect(await readSysfs(dir)).toEqual({ onBattery: true, percent: 41 });
     expect(await readSysfs(join(dir, "missing"))).toBeUndefined();
+  });
+
+  it("keeps the last source and its cycle when a read fails", async () => {
+    const { state, events, pass, power } = watch("working");
+    const read = { fail: false };
+    const failing = createPowerWatch({
+      emit: (event) => events.push(event), stayAwake: "working", tickMs: 3_600_000,
+      deps: {
+        wall: () => state.wall, mono: () => state.mono, addresses: () => state.addresses,
+        read: () => (read.fail ? Promise.reject(new Error("pmset timed out")) : Promise.resolve({ onBattery: true, percent: 10 })),
+        hold: () => (state.held++, () => void state.held--),
+      },
+    });
+    power.stop();
+    failing.working();
+    await failing.tick();
+    read.fail = true;
+    await failing.tick();
+    expect(state.held).toBe(0); // still on battery: no hold
+    expect(failing.backgroundPaused()).toBe(true);
+    read.fail = false;
+    await failing.tick();
+    expect(types(events)).toEqual(["power.source", "power.battery.low"]); // no second source, no second notice
+    failing.stop();
+    await pass(0);
   });
 });
 
@@ -115,6 +142,22 @@ describe("staying awake (ADR-057)", () => {
     expect(always.state.held).toBe(1);
     always.power.stop();
     expect(always.state.held).toBe(0);
+  });
+
+  it("takes no hold after stop, even from a tick that was reading", async () => {
+    const { state, power } = watch("always");
+    let finish: (value: undefined) => void = () => {};
+    const slow = createPowerWatch({
+      emit: () => {}, stayAwake: "always", tickMs: 3_600_000,
+      deps: { wall: () => 0, mono: () => 0, addresses: () => "", read: () => new Promise((resolve) => (finish = resolve)), hold: () => (state.holds++, () => {}) },
+    });
+    power.stop();
+    const reading = slow.tick();
+    slow.stop();
+    finish(undefined);
+    await reading;
+    slow.working();
+    expect(state.holds).toBe(0);
   });
 
   it("reports a failed hold once and does not try again", async () => {

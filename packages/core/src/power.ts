@@ -18,15 +18,16 @@ export type PowerEvent =
 export type PowerDeps = {
   wall(): number;
   mono(): number;
-  read(): Promise<PowerSource | undefined>; // undefined: no battery, or it cannot be read
+  read(): Promise<PowerSource | undefined>; // undefined: no battery; a rejection: the read failed
   // Asks the OS to stay awake; returns the release. `failed` is called if the OS tool is missing or exits by itself.
   hold(failed: () => void): () => void;
   addresses(): string;
 };
 
-// `pmset -g batt`: "Now drawing from 'AC Power'" then, on a laptop, a line with "96%; charging". A desktop has no "%".
+// `pmset -g batt`: "Now drawing from 'AC Power'" then, on a laptop, a line "-InternalBattery-0 (id=…)\t96%; charging".
+// Only the internal battery counts: a UPS or an accessory may be listed too. A desktop has none.
 export function parsePmset(text: string): PowerSource | undefined {
-  const percent = /(\d+)%/.exec(text);
+  const percent = /InternalBattery[^\n]*?(\d+)%/.exec(text);
   return percent ? { onBattery: text.includes("'Battery Power'"), percent: Number(percent[1]) } : undefined;
 }
 
@@ -54,15 +55,19 @@ export function systemPowerDeps(platform = process.platform): PowerDeps {
     wall: Date.now,
     mono: () => performance.now(),
     read: platform === "darwin"
-      ? () => promisify(execFile)("pmset", ["-g", "batt"], { timeout: 5_000 }).then(({ stdout }) => parsePmset(stdout), () => undefined)
+      ? () => promisify(execFile)("pmset", ["-g", "batt"], { timeout: 5_000 }).then(({ stdout }) => parsePmset(stdout))
       : platform === "linux" ? () => readSysfs() : () => Promise.resolve(undefined),
     hold(failed) {
       const command = HOLD[platform]?.(String(process.pid));
       if (!command) return (failed(), () => {});
       const child = spawn(command[0]!, command.slice(1), { stdio: "ignore" });
+      let released = false;
       child.on("error", failed); // the tool is not installed
-      child.on("exit", (code) => void (code && failed())); // it refused; `code` is null when we killed it
-      return () => void child.kill();
+      child.on("exit", () => void (released || failed())); // it refused, or ended by itself: no hold is left
+      return () => {
+        released = true;
+        child.kill();
+      };
     },
     // Link-local addresses are left out: they do not change with the network.
     addresses: () => Object.entries(networkInterfaces())
@@ -92,15 +97,18 @@ export function createPowerWatch(options: PowerOptions) {
   let working = 0;
   let release: (() => void) | undefined;
   let holdFailed = false;
+  let stopped = false; // a tick that was reading when `stop()` ran must not hold again
 
   // "working" holds only on mains power, or when the machine has no battery (ADR-057).
   function sync() {
+    if (stopped) return;
     const want = !holdFailed && (stayAwake === "always" || (stayAwake === "working" && working > 0 && !source?.onBattery));
     if (want && !release) {
       // shortcut: after one failure no hold is tried again until the daemon restarts; `jaari doctor` reports it (roadmap 0.12)
       release = deps.hold(() => {
         if (!holdFailed) emit({ type: "power.hold.failed" });
         holdFailed = true;
+        sync(); // drops the dead hold
       });
     } else if (!want && release) {
       release();
@@ -118,7 +126,12 @@ export function createPowerWatch(options: PowerOptions) {
     const addresses = deps.addresses();
     if (addresses !== network) emit({ type: "network.change" });
     network = addresses;
-    const next = await deps.read();
+    let next: PowerSource | undefined;
+    try {
+      next = await deps.read();
+    } catch {
+      return sync(); // a failed read is not "no battery": the last known source stays, with its battery cycle
+    }
     if (next && next.onBattery !== source?.onBattery) emit({ type: "power.source", ...next });
     source = next;
     if (!source?.onBattery) low = false;
@@ -150,6 +163,7 @@ export function createPowerWatch(options: PowerOptions) {
     // For background work, when it exists (roadmap 1.4 and later): the main session never pauses for the battery.
     backgroundPaused: () => source?.onBattery === true && source.percent < threshold,
     stop() {
+      stopped = true;
       clearInterval(timer);
       release?.();
       release = undefined;

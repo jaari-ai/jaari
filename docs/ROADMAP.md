@@ -148,7 +148,7 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 | 2.5 | Replay harness and golden threads | 041 | 0.2 | Planned |
 | 2.6 | Skills: built-in and owner (third-party is 4.10) (in `@jaari/core`) | 060, 086 | 1.1 | Planned |
 | 2.7 | Owner authentication: device registry, `jaari pair`, `jaari devices`. Placement | 022 | 0.8 | Planned |
-| 2.8 | Telegram channel. Placement; loop breaker for other bots. The config loader checks a package's own config section against the schema in its manifest (ADR-109, ADR-118) | 021, 031, 087, 109, 118 | 0.8, 2.7 | Planned |
+| 2.8 | Telegram channel. Placement; loop breaker for other bots; reconnect on `power.wake` and `network.change` (ADR-121). The config loader checks a package's own config section against the schema in its manifest (ADR-109, ADR-118) | 021, 031, 087, 109, 118, 121 | 0.8, 2.7 | Planned |
 | 2.9 | Owner panel: Home, Memory, Settings, Usage, Activity from the event log (Approvals, audit, and secret entry with 3.1 and 3.3) | 067, 088 | 2.7, 2.12 | Planned |
 | 2.10 | Onboarding; the close line states the real shadow setting | 070, 099 | 2.6 | Planned |
 | 2.11 | Voice notes and optional spoken replies (in `@jaari/llm`) | 037, 086 | 0.8 | Planned |
