@@ -279,6 +279,16 @@ describe("delivery", () => {
     expect(h.sleeps).toEqual([]);
     expect(h.types()).toContain("delivery.ambiguous");
     expect(h.rows.size).toBe(1); // only the owner's message
+    // The plugin's error text may quote the message, so no delivery event carries it (ADR-032).
+    expect(h.events.filter((e) => String(e.type).startsWith("delivery.")).every((e) => !("error" in e))).toBe(true);
+  });
+
+  it("takes nothing new after close, so shutdown cannot start a turn", async () => {
+    const h = await setup();
+    await h.ingress.close();
+    await h.receive("still typing");
+    expect(h.calls).toEqual([]);
+    expect(h.types()).toEqual(["ingress.closed"]);
   });
 
   it("close stops a pending retry and waits for the message in flight", async () => {

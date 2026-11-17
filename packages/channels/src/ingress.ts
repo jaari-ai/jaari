@@ -177,6 +177,8 @@ export function createIngress(deps: IngressDeps) {
   // The pipeline's order is the security argument: sender, duplicate, scrub, then meaning.
   async function handle(manifest: ChannelManifest, vouched: boolean, message: unknown): Promise<void> {
     const channel = manifest.id;
+    // After close() nothing new starts: a turn begun during shutdown could outlive the stores.
+    if (abort.signal.aborted) return void events.write({ type: "ingress.closed", channel });
     if (!isInboundMessage(message) || message.channel !== channel) return void events.write({ type: "ingress.invalid", channel });
     if (!isOwner(message, manifest, vouched)) return void events.write({ type: "ingress.unknown", channel }); // unknown senders get nothing
     const key: MessageKey = { channel, conversationId: message.conversationId, messageId: message.messageId };
@@ -230,7 +232,8 @@ export function createIngress(deps: IngressDeps) {
       await track(deliver(to, [{ text: renderPrompt(prompt, channels.get(to.channel)!.manifest.channel.prompts), prompt }]));
       return true;
     },
-    // Stops the retry waits at once (a pending retry gives up), then waits for every message in flight.
+    // Refuses new messages and stops the retry waits at once (a pending retry gives up), then waits for every
+    // message in flight, so close() ends even while the owner keeps typing.
     async close(): Promise<void> {
       abort.abort();
       while (inflight.size > 0) await Promise.allSettled([...inflight]);
