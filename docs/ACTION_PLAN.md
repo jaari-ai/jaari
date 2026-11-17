@@ -161,3 +161,4 @@ status and exit criteria live there.
 | [118](adr/118-owner-config-file.md) | The owner config: one JSONC file under `~/.jaari`, versioned, closed at the top, read through `@jaari/core/config` | Accepted |
 | [119](adr/119-owner-id-and-versioned-stores.md) | The owner id comes from `jaari init`; every store is versioned, owned, and opened through one function | Accepted |
 | [120](adr/120-prompt-injection-floor-as-built.md) | The prompt-injection floor as built: model calls are not scanned, the fence id lasts one run, the canary lives with the conversation, and an unlabelled turn is the owner | Accepted |
+| [121](adr/121-laptop-host-as-built.md) | The laptop host as built: sleep is a clock gap, OS tools instead of a native helper, and detectors that only emit events | Accepted |

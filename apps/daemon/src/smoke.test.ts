@@ -260,6 +260,44 @@ describe("tier-1 smoke", () => {
     expect(log).not.toContain("a".repeat(40));
   });
 
+  it("on a laptop: holds the machine awake for a turn, and logs a wake and a low battery (0.13, ADR-057)", async () => {
+    const { root, credentialsDir, faux } = await setup();
+    const clock = { wall: 1_000_000, held: 0, holds: 0, onBattery: false };
+    let heldDuringTurn = -1;
+    faux.setResponses([() => ((heldDuringTurn = clock.held), fauxAssistantMessage("Done."))]);
+    const models = createModels();
+    models.setProvider(faux.provider);
+    const daemon = await startDaemon({
+      config: { ...config, deployment: { target: "laptop" } }, // no `power` section: a laptop defaults to "working"
+      dataDir: join(root, "data"), credentialsDir, models,
+      power: {
+        wall: () => clock.wall, mono: () => 0, addresses: () => "en0=10.0.0.2",
+        read: () => Promise.resolve({ onBattery: clock.onBattery, percent: 12 }),
+        hold: () => (clock.holds++, clock.held++, () => void clock.held--),
+      },
+    });
+    const chat = await terminal(daemon.socketPath);
+    chat.say("hi");
+    await expect.poll(() => chat.messages().map((m) => m.text)).toEqual(["Done."]);
+    expect(heldDuringTurn).toBe(1);
+    await expect.poll(() => clock.held).toBe(0); // released when the turn ended
+    expect(clock.holds).toBe(1);
+
+    clock.wall += 600_000; // the lid was closed for ten minutes, and the charger is gone
+    clock.onBattery = true;
+    await daemon.power.tick();
+    expect(daemon.power.backgroundPaused()).toBe(true);
+    chat.socket.destroy();
+    await daemon.close();
+    const log = (await readFile(join(root, "data", "events.ndjson"), "utf8")).trim().split("\n").map((line) => JSON.parse(line) as Record<string, unknown>);
+    expect(log.filter((event) => String(event.type).startsWith("power."))).toMatchObject([
+      { type: "power.source", onBattery: false, percent: 12 },
+      { type: "power.wake", gapMs: 600_000 },
+      { type: "power.source", onBattery: true },
+      { type: "power.battery.low", percent: 12 },
+    ]);
+  });
+
   it("refuses to start when the credential file is open to others (ADR-079)", async () => {
     const { credentialsDir, faux, boot } = await setup();
     await chmod(join(credentialsDir, "llm.faux"), 0o644);

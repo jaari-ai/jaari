@@ -33,6 +33,7 @@ it("writes a new config from the defaults on linux, and names the secret to set"
   const { code, shown } = await answer(["", "", "", "", "", "claude-test"]);
   expect(code).toBe(0);
   const written = await loadConfig(config);
+  expect(written.power).toBeUndefined();
   expect(written).toMatchObject({ version: 1, deployment: { target: "vps" }, secrets: { zero: "host-credential", credentialsDir: join(home, "credentials") } });
   expect(checkLlmConfig(written.llm).tiers).toEqual({ large: ["anthropic/claude-test"] });
   expect(shown).toContain("jaari secret set llm.anthropic");
@@ -44,9 +45,10 @@ it("writes a new config from the defaults on linux, and names the secret to set"
 });
 
 it("defaults to laptop and the keychain on macOS, with no credentials folder", async () => {
-  expect((await answer(["", "", "", "", "m"], "darwin")).code).toBe(0);
+  expect((await answer(["", "", "", "", "", "m"], "darwin")).code).toBe(0);
   const written = await loadConfig(config);
   expect(written.deployment?.target).toBe("laptop");
+  expect(written.power).toEqual({ stayAwake: "working" }); // asked on a laptop only (ADR-057)
   expect(written.secrets).toEqual({ zero: "os-keychain" });
 });
 

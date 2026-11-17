@@ -9,6 +9,10 @@
   // ADR-017: where this daemon runs. "vps" | "server" | "home" | "laptop"
   "deployment": { "target": "vps", "overlay": "tailscale" },
 
+  // ADR-057, ADR-121: a laptop host. `stayAwake`: "working" (while a turn runs on mains power; the default on a
+  // laptop) | "never" | "always". Below `batteryPausePercent` on battery, background work pauses.
+  "power": { "stayAwake": "working", "batteryPausePercent": 20 },
+
   // ADR-021, ADR-084: channel packages; a local path is for development only. The CLI channel is
   // built in and always on, so it is not listed.
   "channels": ["@jaari/channel-web", "@jaari/channel-telegram"],

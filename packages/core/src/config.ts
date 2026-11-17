@@ -44,6 +44,11 @@ export const ConfigSchema = Type.Object(
     version: Type.Integer({ minimum: 1 }),
     // ADR-017: where this daemon runs. `jaari init` asks.
     deployment: Type.Optional(Type.Object({ target: Type.Enum(["vps", "server", "home", "laptop"]), overlay: Type.Optional(Type.String({ minLength: 1 })) }, closed)),
+    // ADR-057, ADR-121: a laptop host. `stayAwake`: hold off idle sleep while a turn runs on mains power ("working",
+    // the default on a laptop), "never", or "always". Below `batteryPausePercent` on battery, background work pauses.
+    power: Type.Optional(
+      Type.Object({ stayAwake: Type.Optional(Type.Enum(["working", "never", "always"])), batteryPausePercent: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })) }, closed),
+    ),
     secrets: Type.Optional(
       Type.Object(
         {

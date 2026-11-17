@@ -5,7 +5,7 @@ Last updated: 2026-11-17
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (120 ADRs, all Accepted)
+## Decided (121 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -124,7 +124,7 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   an ambiguous send is never retried. The CLI channel listens on `jaari.sock` (mode 0600) in the
   data folder with NDJSON and a version hello; `apps/cli` adds `jaari chat`, which numbers
   messages and reads `>N text` as a reply. Open prompts live in memory until the gate (Phase 3).
-  Next: 0.13 and the rest of 0.12.
+  Next: the rest of 0.12.
 - Config (0.6, 2026-11-17, ADR-118): one JSONC file, `~/.jaari/config.jsonc`, with a schema version
   and a closed top level, read through `@jaari/core/config`; the daemon refuses an invalid or
   newer config and names each problem. `jaari init` asks for the target, where secrets are kept,
@@ -137,6 +137,13 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   through `openDatabase`, which runs forward-only migration steps (one transaction each), refuses
   a store newer than the binary or owned by another id, and records the owner. Every row has
   `owner_id` and every event line has `ownerId`; existing data migrates on first start.
+- Laptop host (0.13, 2026-11-17, ADR-057, ADR-121): `createPowerWatch` in `@jaari/core` ticks
+  every 30 seconds and emits `power.wake` (a gap over 2 minutes on either clock),
+  `power.source`, `power.battery.low` (once per battery cycle), `power.hold.failed`, and
+  `network.change`; the daemon writes them to the event log. While a turn runs, the daemon holds
+  off idle sleep with `caffeinate` or `systemd-inhibit`, by the `power.stayAwake` choice that
+  `jaari init` asks on a laptop. No native helper, no owner notice, and nothing reconnects yet.
+  Not yet tried on a real machine: a lid-close sleep and a charger change (owner test).
 - Prompt-injection floor (0.16, 2026-11-17, ADR-104, ADR-120): `@jaari/core` holds the locked
   safety section (`packages/core/prompts/safety.md`, version 1), `fence()` and `defuse` with the
   fence-escape corpus and a test that removes one `defuse` step at a time, the reply marker

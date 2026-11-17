@@ -52,8 +52,8 @@ effect. Entry: none.
 | 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084, 108, 109, 110 | 0.1 | Delivered (2026-11-16) |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Delivered (2026-11-16) |
 | 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079, 112 | 0.1 | Delivered (2026-11-16) |
-| 0.12 | Install, manual update with a local pre-update snapshot, rollback (store migrations on open shipped with 0.14, ADR-119; the pre-update snapshot protects them from here); `jaari doctor` (checks are added as their features ship); `jaari config`, the `compose.yaml` that `jaari init` writes, and `jaari service install` with encrypted credentials (ADR-118) | 056, 032, 079, 082, 118 | 0.5, 0.6 | Planned |
-| 0.13 | Laptop sleep and wake: detection, power assertion, battery pause, network re-probe (catch-up is 1.4) | 057, 082 | 0.5 | Planned |
+| 0.12 | Install, manual update with a local pre-update snapshot, rollback (store migrations on open shipped with 0.14, ADR-119; the pre-update snapshot protects them from here); `jaari doctor` (checks are added as their features ship; a failed power hold, ADR-121); `jaari config`, the `compose.yaml` that `jaari init` writes, and `jaari service install` with encrypted credentials (ADR-118) | 056, 032, 079, 082, 118 | 0.5, 0.6 | Planned |
+| 0.13 | Laptop sleep and wake: clock-gap detection, the power assertion for a turn, the battery pause state, and network-change detection, as events (ADR-121; catch-up is 1.4, the battery notice 2.3, OS wake events when a feature needs them) | 057, 082, 121 | 0.5 | Delivered (2026-11-17) |
 | 0.14 | `ownerId` in the data model; versioned stores that migrate on open and refuse newer or foreign data | 044, 056, 119 | 0.5, 0.6 | Delivered (2026-11-17) |
 | 0.15 | `@jaari/http` core: resolve, check, dial; the address-class table; the `direct` provider; the lint rule against other network clients | 016, 053, 080, 113 | 0.1 | Delivered (2026-11-16) |
 | 0.16 | Prompt-injection floor: the locked safety section, `fence()` and `defuse`, the reply marker filter, and canary and fence-id scanning in the `@jaari/http` core (model calls excepted, ADR-120) and channel send paths | 042, 104, 120 | 0.5, 0.8, 0.15 | Delivered (2026-11-17) |
@@ -74,7 +74,7 @@ Exit criteria:
 - Every record carries an `ownerId` (ADR-044).
 - A scripted refusal in the main session ends the turn with one notice and no model change; in a
   role that is not pinned it stops and is reported, until OQ-93 (ADR-085, ADR-114).
-- A clock gap over 2 minutes is detected as sleep (ADR-057).
+- A clock gap over 2 minutes is detected as sleep (ADR-057, ADR-121).
 - A binary older than its data refuses to start (ADR-056).
 - "stop now" aborts the running turn and "pause" survives a restart; a turn stops at 25 steps
   (ADR-031, ADR-087).
@@ -102,7 +102,7 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 | 1.1 | Memory repo, single writer, write path; pre-write secret scan of derived facts and files; binary files refused in git | 003, 026, 028, 081, 087, 100 | 0.5 | Planned |
 | 1.2 | Structured records, `records.query`, FTS5 search; sensitivity marking by type and rules | 023, 093 | 1.1 | Planned |
 | 1.3 | Context assembly with harness notes and authority labels (the ADR-117 reply line is labelled as Jaari's quoted words, not the owner's); harness notes on the reply line and the compaction summary, and the per-turn prompt fingerprint (ADR-042, ADR-120); session orientation and re-injection from state | 024, 042, 065, 104, 117, 120 | 1.2, 0.16 | Planned |
-| 1.4 | Job engine; catch-up after sleep (in `@jaari/core`); job-tree abort | 025, 057, 082, 086, 031, 087 | 0.5, 0.13 | Planned |
+| 1.4 | Job engine; catch-up after sleep on `power.wake`, the power assertion per job, and background jobs that pause on `backgroundPaused()` (in `@jaari/core`, ADR-121); job-tree abort | 025, 057, 082, 086, 031, 087, 121 | 0.5, 0.13 | Planned |
 | 1.5 | Routines: object, schedule and one-shot triggers, `jaari routine`, run history with job receipts, caps; code steps and one tool-less model step; no proactive delivery (in `@jaari/core`) | 064, 086, 089 | 1.4, 1.11 | Planned |
 | 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9 | Planned |
 | 1.7 | Daily audit | 004 | 1.1, 1.4 | Planned |
@@ -143,7 +143,7 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 |---|---|---|---|---|
 | 2.1 | Dials and monitor; repeated-failure and 7-day quiet rules | 008, 031, 087 | 0.5 | Planned |
 | 2.2 | Curiosity from the gap queue | 008 | 1.6, 2.1 | Planned |
-| 2.3 | Quiet hours, notification ledger, digests, delivery; automatic patch installs in quiet hours; 50% and 80% budget lines; routine delivery and reminders, marked late after sleep | 033, 056, 082, 046, 087, 064, 089 | 2.1, 0.12, 1.5 | Planned |
+| 2.3 | Quiet hours, notification ledger, digests, delivery; automatic patch installs in quiet hours; 50% and 80% budget lines; routine delivery and reminders, marked late after sleep; the one battery notice per cycle (ADR-121) | 033, 056, 082, 046, 087, 064, 089, 121 | 2.1, 0.12, 1.5 | Planned |
 | 2.4 | Prompt versioning | 042 | 0.5 | Planned |
 | 2.5 | Replay harness and golden threads | 041 | 0.2 | Planned |
 | 2.6 | Skills: built-in and owner (third-party is 4.10) (in `@jaari/core`) | 060, 086 | 1.1 | Planned |
@@ -152,7 +152,7 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 | 2.9 | Owner panel: Home, Memory, Settings, Usage, Activity from the event log (Approvals, audit, and secret entry with 3.1 and 3.3) | 067, 088 | 2.7, 2.12 | Planned |
 | 2.10 | Onboarding; the close line states the real shadow setting | 070, 099 | 2.6 | Planned |
 | 2.11 | Voice notes and optional spoken replies (in `@jaari/llm`) | 037, 086 | 0.8 | Planned |
-| 2.12 | Overlay binding and panel TLS: loopback plus one private interface; Tailscale, Headscale, and Custom modes; `jaari doctor` check | 030, 088 | 0.5 | Planned |
+| 2.12 | Overlay binding and panel TLS: loopback plus one private interface; Tailscale, Headscale, and Custom modes; reconnect on `power.wake` and `network.change` (ADR-121); `jaari doctor` check | 030, 088, 121 | 0.5 | Planned |
 
 Exit criteria:
 - A routine result reaches the owner only through the ledger: in the digest by default, at once
