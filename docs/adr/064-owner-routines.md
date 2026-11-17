@@ -1,7 +1,7 @@
 # ADR-064: Owner routines: visible routine objects, queued overlaps, cheap checks first, a 14-day check-in, stop by replying
 
 - **Status:** Accepted
-- **Extended by:** [ADR-089](089-routines-before-children.md)
+- **Extended by:** [ADR-089](089-routines-before-children.md), [ADR-117](117-owner-replies-are-pointers.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -61,6 +61,8 @@ runs; posting "nothing new"; repeated check-ins; judging a routine "ignored" fro
 - **ADR-089 (resolves OQ-73):** Phase 1 routines run plain code and at most one tool-less
   model step, and deliver nothing proactively; delivery starts with the ledger (Phase 2);
   children, scripts, and watchers arrive in Phases 4 and 5.
+- **ADR-117:** "stop by replying" is read from the reply's id, looked up in Jaari's own record;
+  a brake word in such a reply pauses that routine and the running turn.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

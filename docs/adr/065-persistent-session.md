@@ -1,7 +1,7 @@
 # ADR-065: Persistent session: one daemon-owned main session on pi-agent-core, one serial queue, Pi's compaction thresholds, no server-side state for the main session
 
 - **Status:** Accepted
-- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md), [ADR-116](116-owner-commands-in-code.md)
+- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md), [ADR-116](116-owner-commands-in-code.md), [ADR-117](117-owner-replies-are-pointers.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -59,6 +59,8 @@ Experimental; pruning old transcripts by default.
 ## Amendments
 - **ADR-081:** the transcript stores the owner's message after the ingress secret scrub.
 - **ADR-116:** "stop" and "wait" are pause words read by code; a repeated stop word stops the turn.
+- **ADR-117:** a reply to an earlier message is a pointer within this one session, never a
+  separate thread session; the quote comes from the transcript.
 
 ## Consequences
 Built in `@jaari/core` (roadmap 0.5, 2026-11-16):

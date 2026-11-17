@@ -1,7 +1,7 @@
 # ADR-035: Channel-neutral prompts: Jaari asks in types, each channel renders what it can
 
 - **Status:** Accepted
-- **Extended by:** [ADR-037](037-voice.md)
+- **Extended by:** [ADR-037](037-voice.md), [ADR-117](117-owner-replies-are-pointers.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -43,6 +43,8 @@ text-only channels such as iMessage and SMS).
 
 ## Amendments
 - **ADR-037:** decides spoken answers (left here as OQ-16): a spoken approval is one rendering of the prompt.
+- **ADR-117:** in a direct owner conversation, a reply to an open approval whose whole text is an
+  answer settles that prompt, like a tap; the reply id maps to the prompt id.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
