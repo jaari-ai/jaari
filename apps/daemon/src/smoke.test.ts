@@ -75,7 +75,7 @@ describe("tier-1 smoke", () => {
     ]);
 
     const first = await boot();
-    expect(await first.session.send("My cat is Miso.")).toEqual({ status: "done", text: "Noted." });
+    expect(await first.session.send("My cat is Miso.")).toEqual({ status: "done", text: "Noted.", seq: expect.any(Number) });
     expect(key).toBe("scripted-key"); // from the credential file, through secretRef, not from the environment
     first.session.pause();
     await first.close();

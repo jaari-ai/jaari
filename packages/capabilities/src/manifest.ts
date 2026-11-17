@@ -32,6 +32,7 @@ const ChannelSection = Type.Object(
         readReceipts: Type.Optional(Type.Boolean()),
         edits: Type.Optional(Type.Boolean()),
         deletes: Type.Optional(Type.Boolean()),
+        replies: Type.Optional(Type.Boolean()), // can send a quote-reply (ADR-117)
       },
       closed,
     ),

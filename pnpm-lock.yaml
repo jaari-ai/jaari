@@ -212,6 +212,19 @@ importers:
         specifier: 1.4.6
         version: 1.4.6
 
+  packages/channels:
+    dependencies:
+      '@jaari/capabilities':
+        specifier: workspace:*
+        version: link:../capabilities
+      typebox:
+        specifier: 1.4.6
+        version: 1.4.6
+    devDependencies:
+      vitest:
+        specifier: 5.1.0
+        version: 5.1.0(@types/node@26.6.6)(vite@8.3.7(@types/node@26.6.6))
+
   packages/core:
     dependencies:
       '@earendil-works/pi-agent-core':

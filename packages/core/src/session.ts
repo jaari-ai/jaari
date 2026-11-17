@@ -29,7 +29,11 @@ export type Status =
   | "steered" | "held" | "paused" | "resumed"; // no turn of its own
 // `tools`: the tools that were running when "stop now" cut the turn (ADR-031: the owner is told what was cut).
 // `notice`: a one-time message for the owner, such as a new segment (ADR-065).
-export type Reply = { status: Status; text?: string; held?: string[]; tools?: string[]; notice?: string };
+// `seq`: the transcript row of the answer, so a channel's message id can point at it (ADR-117).
+export type Reply = { status: Status; text?: string; held?: string[]; tools?: string[]; notice?: string; seq?: number };
+// `preface`: context that code puts before the owner's words for the model, such as the message they replied to.
+// Owner commands are read from the text alone. `stored`: called with the message's transcript row once it is stored.
+export type SendOptions = { preface?: string; stored?: (seq: number) => void };
 
 export type SessionDeps = {
   store: Store;
@@ -101,6 +105,7 @@ export function createSession(deps: SessionDeps) {
 
   // The session reopens over its transcript; a fresh one never starts silently (ADR-065).
   const seqOf = new WeakMap<AgentMessage, number>();
+  const storedOf = new WeakMap<AgentMessage, (seq: number) => void>();
   const summaryMessage = (summary: string) => userMessage(`Summary of the earlier conversation:\n${summary}`);
   const compaction = store.get<Compaction>("compaction");
   const messages = store.load(compaction?.firstKept).map(({ seq, message }) => (seqOf.set(message, seq), message));
@@ -140,7 +145,11 @@ export function createSession(deps: SessionDeps) {
   agent.subscribe((event) => {
     watchdog.touch();
     // System messages are rebuilt from the prompt and the tool list at start, so they are not stored.
-    if (event.type === "message_end" && event.message.role !== "system") seqOf.set(event.message, store.append(event.message));
+    if (event.type === "message_end" && event.message.role !== "system") {
+      const seq = store.append(event.message);
+      seqOf.set(event.message, seq);
+      storedOf.get(event.message)?.(seq);
+    }
     if (event.type === "tool_execution_start") running.set(event.toolCallId, event.toolName);
     if (event.type === "tool_execution_end") {
       running.delete(event.toolCallId);
@@ -250,7 +259,8 @@ export function createSession(deps: SessionDeps) {
     agent.clearAllQueues();
     if (left.length > 0) return paused() ? hold(left.map(textOf)) : run(left);
     settle();
-    const reply: Reply = { status, text: textOf(last), ...(notice ? { notice } : {}) };
+    const seq = last && seqOf.get(last);
+    const reply: Reply = { status, text: textOf(last), ...(notice ? { notice } : {}), ...(seq ? { seq } : {}) };
     notice = undefined;
     return reply;
   }
@@ -289,7 +299,7 @@ export function createSession(deps: SessionDeps) {
     return { status: "resumed", held };
   }
 
-  async function send(text: string): Promise<Reply> {
+  async function send(text: string, options: SendOptions = {}): Promise<Reply> {
     // Handled by code at once, never queued behind the model (ADR-031, ADR-065, ADR-116).
     const command = commandOf(text);
     if (command === "brake") {
@@ -299,9 +309,11 @@ export function createSession(deps: SessionDeps) {
     }
     if (command) return { pause, stop, resume }[command]();
     if (paused()) return hold([text]);
+    const message = userMessage(options.preface ? `${options.preface}\n${text}` : text);
+    if (options.stored) storedOf.set(message, options.stored);
     // During a turn the message joins it at the next step boundary (Pi steering).
-    if (agent.state.isStreaming) return (agent.steer(userMessage(text)), { status: "steered" });
-    return enqueue(async () => (paused() ? hold([text]) : run([userMessage(text)])));
+    if (agent.state.isStreaming) return (agent.steer(message), { status: "steered" });
+    return enqueue(async () => (paused() ? hold([text]) : run([message])));
   }
 
   // A context stored under a larger model may not fit the one configured now (ADR-065).

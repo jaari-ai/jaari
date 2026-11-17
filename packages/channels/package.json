@@ -1,0 +1,50 @@
+{
+  "name": "@jaari/channels",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The ChannelAdapter contract and its shared contract suite, ingress, delivery, typed prompts, and the built-in CLI channel (ADR-021, ADR-035, ADR-081, ADR-084, ADR-117)",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@jaari/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./contract": {
+      "@jaari/source": "./src/contract.ts",
+      "types": "./dist/contract.d.ts",
+      "default": "./dist/contract.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@jaari/capabilities": "workspace:*",
+    "typebox": "1.4.6"
+  },
+  "peerDependencies": {
+    "vitest": "5.1.0"
+  },
+  "peerDependenciesMeta": {
+    "vitest": { "optional": true }
+  },
+  "devDependencies": {
+    "vitest": "5.1.0"
+  },
+  "jaari": {
+    "id": "cli",
+    "version": "0.0.0",
+    "kind": "channel",
+    "interfaceVersion": 1,
+    "minJaari": "0.0.0",
+    "hosts": ["daemon"],
+    "channel": {
+      "capabilities": { "text": true, "replies": true },
+      "identity": "device",
+      "prompts": "text",
+      "maxMessageChars": 4000
+    }
+  }
+}
