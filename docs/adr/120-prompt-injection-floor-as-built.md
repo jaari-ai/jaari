@@ -46,7 +46,8 @@ canary in the Stable part), and [ADR-117](117-owner-replies-are-pointers.md) (th
    percent-encoded (each `%xx` on its own, twice, so a stray `%` elsewhere does not hide it), or
    split by any other characters: spaces, dots (a host name), hyphens, NUL bytes (UTF-16), or
    invisible characters. It reads the URL, every header, and the body, and stops reading a body
-   when the caller aborts. It does not find a hex, base64, compressed, or reworded leak
+   when the caller aborts. It does not find a hex, base64, HTML-entity, triple percent-encoded,
+   compressed, or reworded leak
    (THREAT_MODEL.md, "Any path out").
 7. **The order on a channel.** The reply marker filter runs first, then the scan, then the
    split into messages, so a marker cut in two cannot pass. The filter removes a block of this
