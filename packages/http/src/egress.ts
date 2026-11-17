@@ -36,6 +36,7 @@ export class EgressLeak extends Error {
   }
 }
 
+// `signal` is the request's own signal, which is dropped with the request, so its listener needs no removal.
 const aborted = (signal: AbortSignal) =>
   new Promise<never>((_, reject) => {
     if (signal.aborted) reject(signal.reason);

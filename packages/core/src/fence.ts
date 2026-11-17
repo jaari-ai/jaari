@@ -1,5 +1,5 @@
 // The prompt-injection floor (ADR-104, ADR-120): `fence()` wraps a block that is not the owner's own words in a
-// marker that content cannot forge, `defuse()` cleans the block first, `stripMarkers()` is the reply marker filter,
+// marker that content cannot forge, `defuse()` cleans the block first, `strip()` is the reply marker filter,
 // and `leak()` finds the canary or the fence id in text that is about to leave. Deterministic code, no model.
 import { randomInt } from "node:crypto";
 
@@ -7,7 +7,7 @@ const BASE32 = "abcdefghijklmnopqrstuvwxyz234567";
 // `length` random base32 characters, 5 bits each.
 export const randomMarker = (length: number): string => Array.from({ length }, () => BASE32[randomInt(32)]).join("");
 
-export const AUTHORITIES = ["owner", "owner-config", "on-behalf", "information"] as const;
+const AUTHORITIES = ["owner", "owner-config", "on-behalf", "information"] as const;
 export type Authority = (typeof AUTHORITIES)[number];
 
 // Format characters (zero-width, joiners, the byte order mark, tag characters) and variation selectors: a wider
@@ -99,4 +99,3 @@ export function createMarkers(canary: string, fenceId = randomMarker(8)) {
     },
   };
 }
-export type Markers = ReturnType<typeof createMarkers>;
