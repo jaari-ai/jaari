@@ -59,6 +59,29 @@ describe("openDatabase (ADR-056, ADR-119)", () => {
     openDatabase(path, A, [v1, v2]).close(); // the right owner still opens it
   });
 
+  it("refuses a store that is versioned but records no owner, instead of claiming it", async () => {
+    const path = await file();
+    openDatabase(path, A, [v1]).close();
+    const db = new DatabaseSync(path);
+    db.exec("DELETE FROM owner"); // the state a crash between a step and the owner row could leave in an earlier build
+    db.close();
+    expect(() => openDatabase(path, B, [v1])).toThrow("records no owner");
+    expect(() => openDatabase(path, A, [v1])).toThrow("records no owner");
+  });
+
+  it("records the owner in the same transaction as the first step", async () => {
+    const path = await file();
+    const broken: Migration = () => {
+      throw new Error("disk full");
+    };
+    expect(() => openDatabase(path, A, [broken])).toThrow("disk full");
+    const db = new DatabaseSync(path);
+    expect(db.prepare("SELECT id FROM owner").all()).toEqual([]); // rolled back with the step
+    expect(version(db)).toBe(0);
+    db.close();
+    openDatabase(path, B, [v1]).close(); // nothing was claimed, so the next start is a clean first open
+  });
+
   it("leaves the store untouched when a step fails", async () => {
     const path = await file();
     const first = openDatabase(path, A, [v1]);

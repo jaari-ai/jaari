@@ -24,12 +24,16 @@ export const STORE_MIGRATIONS: readonly Migration[] = [
       CREATE TABLE state_2 (owner_id TEXT NOT NULL, key TEXT NOT NULL, value TEXT NOT NULL, PRIMARY KEY (owner_id, key));
       CREATE TABLE message_ref_2 (owner_id TEXT NOT NULL, channel TEXT NOT NULL, conversation_id TEXT NOT NULL, message_id TEXT NOT NULL,
         seq INTEGER, origin TEXT NOT NULL, PRIMARY KEY (channel, conversation_id, message_id))`);
+    // The rebuild would reset the row counter to the highest row left, so a deleted row's number could come back.
+    const counter = Number(db.prepare(`SELECT seq FROM sqlite_sequence WHERE name = 'transcript'`).get()?.seq ?? 0);
     db.prepare(`INSERT INTO transcript_2 (seq, owner_id, at, message) SELECT seq, ?, at, message FROM transcript`).run(ownerId);
     db.prepare(`INSERT INTO state_2 SELECT ?, key, value FROM state`).run(ownerId);
     db.prepare(`INSERT INTO message_ref_2 SELECT ?, channel, conversation_id, message_id, seq, origin FROM message_ref`).run(ownerId);
     db.exec(`DROP TABLE transcript; ALTER TABLE transcript_2 RENAME TO transcript;
       DROP TABLE state; ALTER TABLE state_2 RENAME TO state;
       DROP TABLE message_ref; ALTER TABLE message_ref_2 RENAME TO message_ref`);
+    db.prepare(`DELETE FROM sqlite_sequence WHERE name = 'transcript'`).run();
+    db.prepare(`INSERT INTO sqlite_sequence (name, seq) SELECT 'transcript', MAX(?, COALESCE(MAX(seq), 0)) FROM transcript`).run(counter);
   },
 ];
 

@@ -12,4 +12,6 @@ it("drops lines older than the retention period when it opens (ADR-032)", async 
   const types = (await readFile(path, "utf8")).trim().split("\n").map((line) => (line.startsWith("{") ? JSON.parse(line).type : line));
   expect(types).toEqual(["recent", "not json", "new"]);
   expect(JSON.parse((await readFile(path, "utf8")).trim().split("\n").at(-1)!)).toMatchObject({ type: "new", ownerId: "11111111-1111-4111-8111-111111111111" });
+  openEventLog(path, "11111111-1111-4111-8111-111111111111", 30, now).write({ type: "forged", ownerId: "someone-else" });
+  expect(JSON.parse((await readFile(path, "utf8")).trim().split("\n").at(-1)!).ownerId).toBe("11111111-1111-4111-8111-111111111111");
 });

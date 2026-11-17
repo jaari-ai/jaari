@@ -20,10 +20,16 @@ export function openDatabase(path: string, ownerId: string, migrations: readonly
     if (version > migrations.length) {
       throw new Error(`${path} is at version ${version}, newer than this Jaari reads (${migrations.length}); update Jaari, or restore the data from before the update`);
     }
+    // The owner is recorded in the same transaction as the first step, so no store is ever versioned but unowned.
+    // One that is (an earlier build could leave it) holds rows of an unknown owner: refused, never claimed.
+    if (owners.length === 0 && version > 0) {
+      throw new Error(`${path} is at version ${version} but records no owner; restore it from a backup, or move it away to start a new store`);
+    }
     for (let at = version; at < migrations.length; at++) {
       // One transaction per step, with the version: a failed step leaves the store exactly as it was.
       db.exec("BEGIN IMMEDIATE");
       try {
+        if (at === version && owners.length === 0) db.prepare("INSERT INTO owner VALUES (?)").run(ownerId);
         migrations[at]!(db, ownerId);
         db.exec(`PRAGMA user_version = ${at + 1}`);
         db.exec("COMMIT");
@@ -32,7 +38,6 @@ export function openDatabase(path: string, ownerId: string, migrations: readonly
         throw error;
       }
     }
-    if (owners.length === 0) db.prepare("INSERT INTO owner VALUES (?)").run(ownerId);
     return db;
   } catch (error) {
     db.close();
