@@ -185,11 +185,20 @@ importers:
         specifier: 5.1.0
         version: 5.1.0(@types/node@26.6.6)(vite@8.3.7(@types/node@26.6.6))
 
+  apps/cli:
+    dependencies:
+      '@jaari/channels':
+        specifier: workspace:*
+        version: link:../../packages/channels
+
   apps/daemon:
     dependencies:
       '@earendil-works/pi-ai':
         specifier: 1.5.0
         version: 1.5.0(@aws-sdk/credential-provider-node@3.972.94)(@smithy/signature-v4@5.7.5)(undici@8.12.4)(ws@8.22.2)
+      '@jaari/channels':
+        specifier: workspace:*
+        version: link:../../packages/channels
       '@jaari/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -211,6 +220,19 @@ importers:
       typebox:
         specifier: 1.4.6
         version: 1.4.6
+
+  packages/channels:
+    dependencies:
+      '@jaari/capabilities':
+        specifier: workspace:*
+        version: link:../capabilities
+      typebox:
+        specifier: 1.4.6
+        version: 1.4.6
+    devDependencies:
+      vitest:
+        specifier: 5.1.0
+        version: 5.1.0(@types/node@26.6.6)(vite@8.3.7(@types/node@26.6.6))
 
   packages/core:
     dependencies:

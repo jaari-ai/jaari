@@ -40,7 +40,7 @@ describe("the main session", () => {
   it("answers, and reopens over its transcript after a restart (ADR-065)", async () => {
     const first = await setup();
     first.faux.setResponses([fauxAssistantMessage("Hello.")]);
-    expect(await first.session.send("My cat is Miso.")).toEqual({ status: "done", text: "Hello." });
+    expect(await first.session.send("My cat is Miso.")).toEqual({ status: "done", text: "Hello.", seq: expect.any(Number) });
 
     const second = await setup({ path: first.path });
     let context = "";
@@ -48,6 +48,30 @@ describe("the main session", () => {
     expect((await second.session.send("What is my cat called?")).text).toBe("Miso.");
     expect(context).toContain("My cat is Miso.");
     expect((await second.events()).map((e) => e.type)).toEqual(["turn.start", "turn.end"]);
+  });
+
+  it("gives the model a preface, reads commands from the text alone, and reports transcript rows (ADR-117)", async () => {
+    const { faux, session, path } = await setup();
+    let context = "";
+    faux.setResponses([(sent) => ((context = seen(sent)), fauxAssistantMessage("The 10:40 one."))]);
+    const rows: number[] = [];
+    const reply = await session.send("the cheaper one", { preface: '[replying to Jaari: "Two flights: 9:15 or 10:40."]', stored: (seq) => rows.push(seq) });
+    expect(context).toContain('[replying to Jaari: \\"Two flights: 9:15 or 10:40.\\"]\\nthe cheaper one');
+    expect(rows).toHaveLength(1);
+    expect(reply.seq).toBeGreaterThan(rows[0]!);
+    // A preface never turns a command into model input, and never hides one.
+    expect(await session.send("stop", { preface: "[replying to Jaari: \"x\"]" })).toEqual({ status: "paused" });
+
+    const store = openStore(path);
+    const key = { channel: "cli", conversationId: "local", messageId: "m1" };
+    expect(store.refs.put(key, "turn")).toBe(true);
+    expect(store.refs.put(key, "turn")).toBe(false); // the same message delivered twice
+    expect(store.refs.get(key)).toEqual({ origin: "turn" }); // not stored yet: no copy to quote
+    store.refs.stored(key, rows[0]!);
+    expect(store.refs.get(key)).toMatchObject({ origin: "turn", seq: rows[0], message: { role: "user" } });
+    expect(store.refs.get({ ...key, conversationId: "other" })).toBeUndefined(); // ids are unique only inside a conversation
+    expect(store.refs.put({ ...key, messageId: "p1" }, "prompt:4821")).toBe(true);
+    expect(store.refs.get({ ...key, messageId: "p1" })).toEqual({ origin: "prompt:4821" });
   });
 
   it("stops a turn at the step limit (ADR-031)", async () => {
@@ -86,7 +110,7 @@ describe("the main session", () => {
     const turn = session.send("work");
     await expect.poll(() => faux.state.callCount).toBeGreaterThan(0);
     expect(await session.send("pause")).toEqual({ status: "paused" });
-    expect(await turn).toEqual({ status: "done", text: "finished" });
+    expect(await turn).toEqual({ status: "done", text: "finished", seq: expect.any(Number) });
     expect(await session.send("more")).toEqual({ status: "held" });
     expect(faux.state.callCount).toBe(2);
   });
@@ -153,7 +177,7 @@ describe("review of 0.5", () => {
     await expect.poll(() => faux.state.callCount).toBe(2);
     expect(await session.send("also")).toEqual({ status: "steered" }); // arrives during step 2
     release();
-    expect(await turn).toEqual({ status: "done", text: "next turn" }); // "also" ran as its own turn
+    expect(await turn).toEqual({ status: "done", text: "next turn", seq: expect.any(Number) }); // "also" ran as its own turn
     expect(faux.state.callCount).toBe(3);
     expect(await events()).toContainEqual(expect.objectContaining({ type: "limit", limit: "steps", steps: 2 }));
   });
@@ -243,7 +267,7 @@ describe("review 2 of 0.5", () => {
     expect((await events()).map((e) => e.type)).toContain("segment.roll");
     let context = "";
     faux.setResponses([(sent) => ((context = seen(sent)), fauxAssistantMessage("fresh"))]);
-    expect(await session.send("four")).toEqual({ status: "done", text: "fresh", notice: expect.stringContaining("new segment") });
+    expect(await session.send("four")).toEqual({ status: "done", text: "fresh", notice: expect.stringContaining("new segment"), seq: expect.any(Number) });
     expect(context).not.toContain("one");
     expect(context).toContain("archived");
     expect((await session.send("five")).notice).toBeUndefined(); // told once
@@ -287,7 +311,7 @@ describe("brake words (ADR-116)", () => {
   it("a sentence that only mentions stopping goes to the model", async () => {
     const { faux, session } = await setup();
     faux.setResponses([fauxAssistantMessage("Done.")]);
-    expect(await session.send("stop the emails from Bob")).toEqual({ status: "done", text: "Done." });
+    expect(await session.send("stop the emails from Bob")).toEqual({ status: "done", text: "Done.", seq: expect.any(Number) });
     expect(session.paused()).toBe(false);
   });
 });

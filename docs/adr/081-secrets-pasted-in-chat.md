@@ -49,4 +49,10 @@ ids).
 - **ADR-088:** until the secret-entry page exists, the notice points to `jaari secret set <name>`.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- Roadmap 0.8 (2026-11-17): `scrubSecrets` in `@jaari/channels` runs at ingress before the
+  transcript, the model, or the event log. Known prefixes (`sk-`, GitHub, Slack, AWS, Google,
+  Telegram bot tokens), PEM blocks, JWTs, labelled passwords, and card numbers with an issuer
+  prefix that pass the Luhn check; the prefix keeps millisecond timestamps out.
+- Not yet: the exact-value match against vault values (the vault has no list until 3.3), and
+  deleting the owner's message (the adapter contract has no delete call), so the notice says the
+  value stays in the app's history.

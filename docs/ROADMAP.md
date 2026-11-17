@@ -46,9 +46,9 @@ effect. Entry: none.
 | 0.3 | Project process files: `SECURITY.md`, `CONTRIBUTING.md` | 043 | none | Delivered (2026-11-16) |
 | 0.4 | Namespaces and release: secure the npm and PyPI names, the `python/` pointer package, the release workflow ([guides/namespaces.md](guides/namespaces.md)). Placement | 010 | none | Delivered (2026-11-16; npm `jaari` and org `jaari`, PyPI `jaari` 0.0.0 via trusted publishing) |
 | 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement; pause, emergency stop, steps per turn, stall guard, watchdog, event log; the tier-1 smoke test in CI | 001, 065, 031, 032, 087, 041 | 0.1, 0.7 | Delivered (2026-11-16) |
-| 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship | 017, 019, 056 | 0.1 | Planned |
+| 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship. `jaari secret set <name>` (masked input into `os-keychain` or `host-credential`; the ADR-081 notice points to it) | 017, 019, 056, 088 | 0.1, 0.11 | Planned |
 | 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains, refusal classification, usage log | 011, 019, 085, 032, 087, 114 | 0.1, 0.15 | Delivered (2026-11-16) |
-| 0.8 | `ChannelAdapter` contract and the shared contract suite, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081, 084, 116 | 0.5, 0.9 | Planned |
+| 0.8 | `ChannelAdapter` contract and the shared contract suite, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081, 084, 116, 117 | 0.5, 0.9 | Delivered (2026-11-17) |
 | 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084, 108, 109, 110 | 0.1 | Delivered (2026-11-16) |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Delivered (2026-11-16) |
 | 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079, 112 | 0.1 | Delivered (2026-11-16) |
@@ -101,12 +101,12 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 |---|---|---|---|---|
 | 1.1 | Memory repo, single writer, write path; pre-write secret scan of derived facts and files; binary files refused in git | 003, 026, 028, 081, 087, 100 | 0.5 | Planned |
 | 1.2 | Structured records, `records.query`, FTS5 search; sensitivity marking by type and rules | 023, 093 | 1.1 | Planned |
-| 1.3 | Context assembly with harness notes and authority labels; session orientation and re-injection from state | 024, 065, 104 | 1.2, 0.16 | Planned |
+| 1.3 | Context assembly with harness notes and authority labels (the ADR-117 reply line is labelled as Jaari's quoted words, not the owner's); session orientation and re-injection from state | 024, 065, 104, 117 | 1.2, 0.16 | Planned |
 | 1.4 | Job engine; catch-up after sleep (in `@jaari/core`); job-tree abort | 025, 057, 082, 086, 031, 087 | 0.5, 0.13 | Planned |
 | 1.5 | Routines: object, schedule and one-shot triggers, `jaari routine`, run history with job receipts, caps; code steps and one tool-less model step; no proactive delivery (in `@jaari/core`) | 064, 086, 089 | 1.4, 1.11 | Planned |
 | 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9 | Planned |
 | 1.7 | Daily audit | 004 | 1.1, 1.4 | Planned |
-| 1.8 | Capture evidence | 074, 081 | 1.1, 0.8 | Planned |
+| 1.8 | Capture evidence; strip the ADR-117 reply line (`[The owner replied to …]`) from owner turns before the evidence check | 074, 081, 117 | 1.1, 0.8 | Planned |
 | 1.9 | Local-model qualification and the `jaari llm eval` qualification fixtures | 019, 045 | 0.7 | Planned |
 | 1.10 | Correct and forget (erase is 3.9). Placement | 029 | 1.1 | Planned |
 | 1.11 | Monthly LLM budget with the 100% prompt; spike alerts | 046, 031, 087 | 0.7, 0.8 | Planned |

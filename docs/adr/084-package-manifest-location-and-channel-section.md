@@ -37,4 +37,10 @@ it); a separate `ChannelManifest` object next to the package manifest (two sourc
 `version`).
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- Roadmap 0.8 (2026-11-17): `channelContract({ manifest, sources, create })` takes the `jaari`
+  key, the plugin's source folder (scanned for forbidden imports), and a factory for an adapter
+  with its fake transport; the CLI channel and an in-memory channel pass it.
+- `ChannelContext.emit` may settle only after the turn, so an adapter must read its next message
+  without waiting on it; otherwise a "stop" typed during a turn would wait for the turn (ADR-116).
+- Owner identity never comes from a manifest: the host passes `owner: true` only for a transport
+  it made owner-only itself (the CLI socket), so a package that names itself `cli` is not the owner.

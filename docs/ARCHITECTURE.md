@@ -49,7 +49,7 @@
 | `@jaari/mcp` | MCP client for configured servers, with generated manifests (ADR-034); the two-tool MCP server for paired apps (ADR-076); served by `jaari mcp` (ADR-086) |
 | `apps/daemon` | Long-running process: scheduler tick, channels, jobs; runs from built `dist/` files (ADR-115) |
 | `apps/hooks` | Separate hook listener: the only optionally public port; checks signatures and hands verified events to the daemon over the local socket (ADR-073, ADR-086) |
-| `apps/cli` | `jaari init`, `jaari doctor`, `jaari llm eval`, `jaari llm usage`, `jaari pair` and `jaari devices` (ADR-022), `jaari secret set` (masked input, ADR-088), `jaari run`, `wait`, `status`, `export`, and `mcp` (ADR-076), admin commands; `jaari doctor` collects each package's `health` (ADR-032, ADR-086) |
+| `apps/cli` | `jaari chat` (0.8, the CLI channel's terminal: numbered messages, `>N` replies, ADR-117), `jaari init`, `jaari doctor`, `jaari llm eval`, `jaari llm usage`, `jaari pair` and `jaari devices` (ADR-022), `jaari secret set` (masked input, ADR-088), `jaari run`, `wait`, `status`, `export`, and `mcp` (ADR-076), admin commands; `jaari doctor` collects each package's `health` (ADR-032, ADR-086) |
 | `apps/node` | Capability host on an owner device: `jaari capability install <name>` pairs it as a `device`, it advertises installed capabilities, runs gate-approved actions, hosts takeover and live view. Capabilities on the daemon host run through the same contract in-process (ADR-015) |
 
 ## Channels
@@ -141,7 +141,7 @@ export interface ChannelHealth { ok: boolean; detail?: string }
 
 export interface ChannelContext {
   manifest: ChannelManifest;         // checked by the host before the plugin loads
-  emit(msg: InboundMessage): Promise<void>;   // hand a message to ingress
+  emit(msg: InboundMessage): Promise<void>;   // hand a message to ingress; read the next one without waiting on it
   secrets: { get(ref: string): Promise<string> };  // this plugin's own secretRefs only
   log: { info(msg: string): void; warn(msg: string): void; error(msg: string): void };
   signal: AbortSignal;               // aborted on stop()
