@@ -1,4 +1,4 @@
-import { mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, readdir, readFile, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PassThrough } from "node:stream";
@@ -102,4 +102,24 @@ it("writes nothing when the input ends early", async () => {
   expect(code).toBe(1);
   expect(shown).toContain("Cancelled; nothing was written.");
   await expect(stat(home)).rejects.toThrow();
+});
+
+it("refuses a credentials folder inside the data folder, which the daemon would refuse (ADR-079)", async () => {
+  const { code, shown } = await answer(["", "", "data/creds", "creds", "", "", "claude-test"]);
+  expect(code).toBe(0);
+  expect(shown).toContain(`not inside the data folder ${join(home, "data")}`);
+  expect((await loadConfig(config)).secrets?.credentialsDir).toBe("creds");
+});
+
+it("writes through a config that is a link, so a dotfiles manager keeps its link", async () => {
+  const real = join(root, "dotfiles", "jaari.jsonc");
+  await mkdir(join(root, "dotfiles"));
+  await mkdir(home);
+  await answer(["", "", "", "", "", "claude-test"]); // writes the file first
+  await writeFile(real, await readFile(config, "utf8"));
+  await rm(config);
+  await symlink(real, config);
+  expect((await answer(["server", "", "", ""])).code).toBe(0);
+  expect((await lstat(config)).isSymbolicLink()).toBe(true);
+  expect((await loadConfig(real)).deployment?.target).toBe("server");
 });

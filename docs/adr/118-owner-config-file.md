@@ -31,7 +31,8 @@ of ADR-079 only reads a folder that a service manager supplies).
   manager supplies one. `jaari secret set` writes there and the daemon reads there; the default
   is `~/.jaari/credentials`, a sibling of the data folder, never inside it (ADR-079). The daemon
   takes the folder from `--credentials`, then `$CREDENTIALS_DIRECTORY` (systemd), then this key.
-  Compose passes `--credentials /run/secrets`.
+  Compose passes `--credentials /run/secrets`. `jaari secret set --config <file>` reads the same file the
+  daemon was given, and `jaari init` refuses a folder inside the data folder before writing.
 - **`jaari secret set <name>`** needs a person at a terminal (ADR-076), reads the value with no
   echo, and never takes it as an argument. For `host-credential` it writes `<folder>/<name>` at
   mode 0600 through a temporary file and a rename.

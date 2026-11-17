@@ -2,7 +2,7 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { ConfigError, credentialsDirOf, expandHome, jaariPaths, loadConfig, parseConfig } from "./config.js";
+import { ConfigError, credentialsDirOf, expandHome, isInsideData, jaariPaths, loadConfig, parseConfig } from "./config.js";
 
 const llm = { providers: {}, tiers: {}, roles: {} };
 const problems = (text: string): string[] => {
@@ -48,12 +48,14 @@ describe("the owner config (ADR-056, ADR-118)", () => {
     expect(problems(JSON.stringify({ llm }))).toEqual([expect.stringContaining('"version" is missing')]);
     expect(problems(JSON.stringify({ version: 2, llm }))).toEqual([expect.stringContaining("newer than this Jaari reads")]);
     expect(problems("[1]")).toEqual(["the config must be one object"]);
+    expect(problems(JSON.stringify({ version: "1", llm }))).toEqual(['"version" must be a whole number such as 1, not "1"']);
+    expect(problems(JSON.stringify({ version: 1.5, llm }))).toEqual(['"version" must be a whole number such as 1, not 1.5']);
   });
 
   it("points at the line of a syntax error, and at init when the file is missing", async () => {
     expect(problems('{\n  "version": 1,\n  "llm": \n}')).toEqual([expect.stringMatching(/^line 4, column 1: ValueExpected/)]);
     const dir = await mkdtemp(join(tmpdir(), "jaari-config-"));
-    await expect(loadConfig(join(dir, "config.jsonc"))).rejects.toThrow("run `jaari init`");
+    await expect(loadConfig(join(dir, "config.jsonc"))).rejects.toThrow(/^No config:\n.*run `jaari init`/);
     await writeFile(join(dir, "config.jsonc"), JSON.stringify({ version: 1, llm }));
     expect((await loadConfig(join(dir, "config.jsonc"))).version).toBe(1);
   });
@@ -69,6 +71,10 @@ describe("the owner config (ADR-056, ADR-118)", () => {
     expect(credentialsDirOf({ secrets: { credentialsDir: "/run/secrets" } }, paths)).toBe("/run/secrets");
     expect(credentialsDirOf({ secrets: { credentialsDir: "creds" } }, paths)).toBe("/home/owner/.jaari/creds");
     expect(credentialsDirOf({ secrets: { credentialsDir: "~/c" } }, paths)).toBe(join(homedir(), "c"));
+    expect(isInsideData("/home/owner/.jaari/data/creds", paths)).toBe(true);
+    expect(isInsideData("/home/owner/.jaari/data", paths)).toBe(true);
+    expect(isInsideData("/home/owner/.jaari/credentials", paths)).toBe(false);
+    expect(isInsideData("/home/owner/.jaari/data-old", paths)).toBe(false); // a sibling that starts the same
   });
 
   it("keeps the smoke config that CI starts valid", async () => {

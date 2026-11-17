@@ -5,7 +5,7 @@ import type { Command } from "./io.js";
 const USAGE = `usage: jaari <command>
   chat [--home <dir> | --data <dir> | --socket <path>]   talk to the running daemon
   init [--home <dir>]                     write or revisit the config (~/.jaari/config.jsonc)
-  secret set <name> [--home <dir>]        store a secret; the value is typed, never an argument`;
+  secret set <name> [--home <dir>] [--config <file>]   store a secret; typed, never an argument`;
 
 const COMMANDS: Record<string, () => Promise<{ run: Command }>> = {
   chat: () => import("./chat-command.js"),

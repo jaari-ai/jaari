@@ -6,7 +6,7 @@ import { ConfigError, credentialsDirOf, jaariPaths, loadConfig } from "@jaari/co
 import { createHostCredentialProvider, createOsKeychainProvider, isSecretName, scrub } from "@jaari/secrets";
 import type { Io } from "./io.js";
 
-const USAGE = "usage: jaari secret set <name> [--home <dir>] [--data <dir>]";
+const USAGE = "usage: jaari secret set <name> [--home <dir>] [--config <file>] [--data <dir>]";
 
 // The keychain is passed in, so a test hands over a fake and can never write to the owner's real keychain.
 export type SecretDeps = { keychain: () => Pick<ReturnType<typeof createOsKeychainProvider>, "store"> };
@@ -15,7 +15,7 @@ export async function secret(args: string[], io: Io, deps: SecretDeps = { keycha
   const say = (line: string) => io.output.write(`${line}\n`);
   let parsed;
   try {
-    parsed = parseArgs({ args, allowPositionals: true, options: { home: { type: "string" }, data: { type: "string" } } });
+    parsed = parseArgs({ args, allowPositionals: true, options: { home: { type: "string" }, config: { type: "string" }, data: { type: "string" } } });
   } catch {
     // parseArgs errors quote the argument, which may be a value typed in the wrong place.
     say(USAGE);
@@ -29,10 +29,11 @@ export async function secret(args: string[], io: Io, deps: SecretDeps = { keycha
   if (!io.isTTY) return (say("jaari: secret set needs an interactive terminal; it does not read a value from a pipe"), 2);
   if (!isSecretName(name)) return (say("jaari: a secret name uses letters, digits, '.', '_' and '-', and starts with a letter or digit"), 2);
 
-  const paths = jaariPaths(values.home === undefined ? undefined : resolve(values.home));
+  const paths = jaariPaths(values.home ? resolve(values.home) : undefined); // an empty --home means the default
   let config;
   try {
-    config = await loadConfig(paths.config);
+    // The same file the daemon reads, so both find the same credentials folder (ADR-118).
+    config = await loadConfig(values.config ? resolve(values.config) : paths.config);
   } catch (error) {
     if (!(error instanceof ConfigError)) throw error;
     for (const problem of error.problems) say(`jaari: ${problem}`);

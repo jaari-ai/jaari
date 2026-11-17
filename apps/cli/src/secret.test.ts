@@ -108,6 +108,14 @@ describe("jaari secret set", () => {
     expect(text).not.toContain(VALUE);
   });
 
+  it("reads the config file the daemon was given, so both use the same credentials folder", async () => {
+    const other = join(home, "other.jsonc");
+    await writeFile(other, `{"version":1,"secrets":{"zero":"host-credential","credentialsDir":"creds2"},${LLM}}`);
+    const { code } = await jaari([...set(), "--config", other], [VALUE, "\r"]);
+    expect(code).toBe(0);
+    expect(await createHostCredentialProvider(join(home, "creds2"), join(home, "data")).resolve("llm.x")).toBe(VALUE);
+  });
+
   it("stores in the OS keychain by default", async () => {
     await writeFile(join(home, "config.jsonc"), `{"version":1,${LLM}}`);
     keychain.store.mockResolvedValue(undefined);

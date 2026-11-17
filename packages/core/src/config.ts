@@ -2,7 +2,7 @@
 // checks for the sections this version reads. The daemon and the `jaari` command both read it through here.
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join, resolve } from "node:path";
+import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { parse, printParseErrorCode, type ParseError } from "jsonc-parser";
 import { Type, type Static } from "typebox";
 import { Compile } from "typebox/compile";
@@ -26,6 +26,12 @@ export const expandHome = (path: string): string => (path === "~" || path.starts
 // daemon reads it, so both must agree (ADR-118). A relative path counts from the Jaari folder.
 export const credentialsDirOf = (config: Pick<Config, "secrets">, paths: ReturnType<typeof jaariPaths>): string =>
   config.secrets?.credentialsDir ? resolve(paths.home, expandHome(config.secrets.credentialsDir)) : paths.credentials;
+
+// The lexical form of ADR-079's rule; the provider also checks the real path, after links, before it writes or reads.
+export const isInsideData = (dir: string, paths: ReturnType<typeof jaariPaths>): boolean => {
+  const rel = relative(paths.data, dir);
+  return rel === "" || !(rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel));
+};
 
 const closed = { additionalProperties: false } as const;
 // A section that belongs to a feature not built yet: its name is known, so a typo in a name still fails, and its
@@ -61,8 +67,8 @@ export type Config = Omit<Static<typeof ConfigSchema>, "limits"> & { limits?: Pa
 const MIGRATIONS: ((config: Record<string, unknown>) => Record<string, unknown>)[] = [];
 
 export class ConfigError extends Error {
-  constructor(readonly problems: string[]) {
-    super(`The config is not valid:\n${problems.join("\n")}`);
+  constructor(readonly problems: string[], heading = "The config is not valid:") {
+    super(`${heading}\n${problems.join("\n")}`);
     this.name = "ConfigError";
   }
 }
@@ -90,7 +96,8 @@ export function parseConfig(text: string): Config {
   if (errors.length > 0) throw new ConfigError(errors.map((error) => `${position(text, error.offset)}: ${printParseErrorCode(error.error)}`));
   if (typeof value !== "object" || value === null || Array.isArray(value)) throw new ConfigError(["the config must be one object"]);
   const version = (value as { version?: unknown }).version;
-  if (!Number.isInteger(version) || (version as number) < 1) throw new ConfigError([`"version" is missing; this Jaari writes version ${CONFIG_VERSION}`]);
+  if (version === undefined) throw new ConfigError([`"version" is missing; this Jaari writes version ${CONFIG_VERSION}`]);
+  if (!Number.isInteger(version) || (version as number) < 1) throw new ConfigError([`"version" must be a whole number such as ${CONFIG_VERSION}, not ${JSON.stringify(version)}`]);
   // A binary older than its data refuses to start (ADR-056).
   if ((version as number) > CONFIG_VERSION) {
     throw new ConfigError([`the config is version ${String(version)}, newer than this Jaari reads (${CONFIG_VERSION}); update Jaari, or restore the config from before the update`]);
@@ -105,7 +112,7 @@ export async function loadConfig(path: string): Promise<Config> {
   try {
     text = await readFile(path, "utf8");
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") throw new ConfigError([`no config at ${path}; run \`jaari init\` to write one`]);
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") throw new ConfigError([`no config at ${path}; run \`jaari init\` to write one`], "No config:");
     throw error;
   }
   return parseConfig(text);

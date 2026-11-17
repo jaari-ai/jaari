@@ -1,10 +1,10 @@
 // `jaari init [--home <dir>]`: ask a few questions and write the owner config (ADR-056). Run again, it revisits every
 // step with the current values as defaults and edits only what changed, so the owner's comments stay.
 import { randomBytes } from "node:crypto";
-import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, realpath, rename, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { isDeepStrictEqual, parseArgs } from "node:util";
-import { CONFIG_VERSION, ConfigError, jaariPaths, parseConfig, type Config } from "@jaari/core/config";
+import { CONFIG_VERSION, ConfigError, credentialsDirOf, isInsideData, jaariPaths, parseConfig, type Config } from "@jaari/core/config";
 import { applyEdits, modify } from "jsonc-parser";
 import type { Command, Io } from "./io.js";
 import { createPrompter, InputEnded } from "./prompt.js";
@@ -60,8 +60,10 @@ async function askModel(ask: ReturnType<typeof createPrompter>["ask"]): Promise<
 }
 
 // Writes into the same folder and renames, so a crash never leaves half a config; owner-only, as it names accounts.
-async function writePrivately(home: string, path: string, text: string): Promise<void> {
+// A config that is a link (a dotfiles manager) is written through, so the link stays a link.
+async function writePrivately(home: string, link: string, text: string): Promise<void> {
   await mkdir(home, { recursive: true, mode: 0o700 });
+  const path = await realpath(link).catch(() => link);
   const temp = `${path}.${randomBytes(6).toString("hex")}.tmp`;
   try {
     await writeFile(temp, text, { flag: "wx", mode: 0o600 });
@@ -74,7 +76,8 @@ async function writePrivately(home: string, path: string, text: string): Promise
 
 export async function init(args: string[], io: Io, platform: NodeJS.Platform = process.platform): Promise<number> {
   const { values } = parseArgs({ args, options: { home: { type: "string" } } });
-  const paths = jaariPaths(values.home === undefined ? undefined : resolve(values.home));
+  const home = values.home ? resolve(values.home) : undefined; // an empty --home means the default, as everywhere
+  const paths = jaariPaths(home);
   const say = (line: string) => io.output.write(`${line}\n`);
   const existing = await readExisting(paths.config);
   let current: Config | undefined;
@@ -95,7 +98,11 @@ export async function init(args: string[], io: Io, platform: NodeJS.Platform = p
     say("A server has no keychain, so it keeps secrets in a folder of owner-only files (host-credential).");
     zero = await prompter.ask("Where are secrets kept (os-keychain, host-credential)?", { current: current?.secrets?.zero ?? (mac ? "os-keychain" : "host-credential"), allowed: ["os-keychain", "host-credential"] });
     if (zero === "host-credential") {
-      credentialsDir = await prompter.ask("Credentials folder", { current: current?.secrets?.credentialsDir ?? (values.home === undefined ? "~/.jaari/credentials" : paths.credentials) });
+      credentialsDir = await prompter.ask("Credentials folder", {
+        current: current?.secrets?.credentialsDir ?? (home === undefined ? "~/.jaari/credentials" : paths.credentials),
+        // The daemon and `jaari secret set` refuse it there (ADR-079), so init does too, before writing.
+        check: (answer) => (isInsideData(credentialsDirOf({ secrets: { credentialsDir: answer } }, paths), paths) ? `not inside the data folder ${paths.data}` : undefined),
+      });
     }
     const keep = current !== undefined && (await llmIsValid(current.llm))
       && !/^n/i.test(await prompter.ask("Keep the current model settings? [Y/n]", { check: (a) => (/^(y|yes|n|no)?$/i.test(a) ? undefined : "answer y or n") }));
@@ -136,8 +143,8 @@ export async function init(args: string[], io: Io, platform: NodeJS.Platform = p
 
   say(`Wrote ${paths.config}. Next:`);
   const providers = Object.values((config.llm as { providers: Record<string, { apiKey?: string }> }).providers);
-  for (const { apiKey } of providers) if (apiKey?.startsWith("secretRef:")) say(`  jaari secret set ${apiKey.slice("secretRef:".length)}${values.home === undefined ? "" : ` --home ${paths.home}`}`);
-  const where = values.home === undefined ? "" : ` --home ${paths.home}`;
+  const where = home === undefined ? "" : ` --home ${paths.home}`;
+  for (const { apiKey } of providers) if (apiKey?.startsWith("secretRef:")) say(`  jaari secret set ${apiKey.slice("secretRef:".length)}${where}`);
   say(`  jaari-daemon${where}`);
   say(`  jaari chat${where}`);
   return 0;
