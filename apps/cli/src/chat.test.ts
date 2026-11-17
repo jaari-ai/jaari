@@ -68,3 +68,10 @@ it("sends nothing for an unknown message number", async () => {
   input.write("next\n");
   await expect.poll(() => emitted.map((m) => m.text)).toEqual(["next"]);
 });
+
+it("shows control codes as a placeholder, so a reply cannot set the clipboard or clear the screen", async () => {
+  await say("\x1b]52;c;ZWNobyBoaQ==\x07ok\x1b[2J\u009b31m\tdone\nnext line");
+  await expect.poll(() => shown).toContain("ok");
+  for (const code of ["\x1b", "\x07", "\u009b"]) expect(shown).not.toContain(code);
+  expect(shown).toBe("[1] jaari: \uFFFD]52;c;ZWNobyBoaQ==\uFFFDok\uFFFD[2J\uFFFD31m\tdone\nnext line\n");
+});
