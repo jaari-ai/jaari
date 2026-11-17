@@ -117,3 +117,4 @@
 | [113](113-egress-on-node-fetch-and-undici.md) | The egress core is Node's `fetch` with an undici `Agent` that resolves, checks, and dials | Accepted |
 | [114](114-llm-on-pi-ai.md) | `@jaari/llm` on pi-ai 1.5.0: keys only from `secretRef`, the usage log in `node:sqlite`, refusals stop until categories are mapped | Accepted |
 | [115](115-daemon-runs-from-dist.md) | The daemon runs from built `dist/` files under plain Node; the smoke test and a CI start check prove both paths | Accepted |
+| [116](116-owner-commands-in-code.md) | Owner commands are read by code in the owner's languages; a stop word pauses, and a repeated one stops the turn | Accepted |

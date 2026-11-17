@@ -5,7 +5,7 @@ Last updated: 2026-11-16
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (115 ADRs, all Accepted)
+## Decided (116 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -59,7 +59,8 @@ The index is [adr/README.md](adr/README.md). By area:
   [12 browser placement](learning/12-browser-placement.md), and [13 prompt injection](learning/13-prompt-injection-and-system-prompts.md) (their recommendations fed ADR-021
   to ADR-104; some were changed or rejected by the ADR); [14 egress core](learning/14-egress-core.md) and
   [15 pi-ai](learning/15-pi-ai.md) were written while building 0.15 and 0.7 (ADR-113, ADR-114);
-  [16 pi-agent-core](learning/16-pi-agent-core.md) while building 0.5.
+  [16 pi-agent-core](learning/16-pi-agent-core.md) while building 0.5; [17 owner commands](learning/17-owner-commands.md)
+  for ADR-116.
 - Docs conflict audit (2026-11-10): ten conflicts recorded, accepted, and folded into ADR-017
   to ADR-020.
 - Documentation audit (2026-11-12): docs, ADR links, open questions, and the roadmap
@@ -109,7 +110,10 @@ The daemon starts and stops, but no channel reaches it yet (0.8).
   `jaari-daemon` runs from built `dist/` files (ADR-115). The tier-1 smoke test boots it on the
   scripted provider in CI, and CI starts the built daemon once with `--check` (ADR-041). No channel
   reaches the session yet (0.8); the config is read as plain JSON until the loader (0.6).
-  Next: 0.8, the `ChannelAdapter` contract and the CLI channel, after OQ-94.
+  Next: 0.8, the `ChannelAdapter` contract and the CLI channel.
+- Owner commands (2026-11-16, ADR-116): code reads "stop", "wait", "hold on", and the other brake
+  words in the owner's languages, with OpenMausBot's stop-word rule; a stop word pauses and a
+  repeated one stops the turn.
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript
@@ -133,7 +137,7 @@ The daemon starts and stops, but no channel reaches it yet (0.8).
 ## Now
 Phase 0: Foundation, in progress (0.1 to 0.5, 0.7, and 0.9 to 0.11, 0.15 delivered). Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
-OQ-94 ("stop" and "wait") blocks 0.8.
+No open question blocks Phase 0.
 
 ## Scheduled checks that ADRs defer
 - Phase 1: measure the candidate local models (ADR-045).
@@ -145,4 +149,4 @@ OQ-94 ("stop" and "wait") blocks 0.8.
   leaving Experimental (ADR-025, ADR-065).
 
 ## Open questions
-3 open. OQ-92 (package platforms) blocks Phase 6; OQ-93 (refusal categories) blocks Phase 4; OQ-94 ("stop" and "wait") blocks 0.8. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+3 open. OQ-92 (package platforms) blocks Phase 6; OQ-93 (refusal categories) blocks 4.1; OQ-95 (a model reading owner messages) blocks 4.5. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

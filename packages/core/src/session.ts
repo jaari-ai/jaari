@@ -5,6 +5,7 @@
 import { Agent, type AgentMessage, type AgentTool } from "@earendil-works/pi-agent-core";
 import { isContextOverflow, type AssistantMessage } from "@earendil-works/pi-ai";
 import { outcomeOf, type createLlm } from "@jaari/llm";
+import { commandOf } from "./commands.js";
 import type { EventLog } from "./events.js";
 import type { Store } from "./store.js";
 
@@ -18,6 +19,7 @@ export const LIMITS = {
   sleepGapMs: 120_000, // a longer gap between two ticks is sleep, not a stall (ADR-057)
   reserveTokens: 16_384,
   keepRecentTokens: 20_000,
+  repeatStopMs: 10_000, // a second stop word within this time cuts the turn (ADR-116)
 };
 export type Limits = typeof LIMITS;
 
@@ -41,12 +43,6 @@ export type SessionDeps = {
 
 type Compaction = { summary: string; firstKept: number; at: number };
 
-// Handled by code at once, never queued behind the model (ADR-031, ADR-065).
-const COMMANDS: Record<string, "pause" | "stop" | "resume"> = {
-  pause: "pause", "stop everything": "pause", "stop now": "stop", resume: "resume",
-};
-// "Stop now!", "stop  now." and "STOP NOW" all match: an owner in a hurry types like that.
-const commandOf = (text: string) => COMMANDS[text.trim().toLowerCase().replace(/\s+/g, " ").replace(/[.!]+$/, "")];
 
 const SUMMARY_PROMPT =
   "Summarize the conversation below for the assistant that will continue it. Keep what the owner asked for, " +
@@ -114,6 +110,7 @@ export function createSession(deps: SessionDeps) {
   let failing = 0;
   const errors = new Map<string, number>();
   let ended: Status | undefined; // set when a limit or the owner cuts the running turn
+  let lastBrake = -Infinity; // when the last stop word arrived, for the repeat rule
   let overflows = 0; // turns in a row that failed because the context was too long (ADR-065)
   const running = new Map<string, string>(); // tool call id → tool name, for the stop reply
   const watchdog = createWatchdog(now, limits.watchdogMs, limits.sleepGapMs);
@@ -293,7 +290,13 @@ export function createSession(deps: SessionDeps) {
   }
 
   async function send(text: string): Promise<Reply> {
+    // Handled by code at once, never queued behind the model (ADR-031, ADR-065, ADR-116).
     const command = commandOf(text);
+    if (command === "brake") {
+      const repeated = now() - lastBrake <= limits.repeatStopMs;
+      lastBrake = now();
+      return repeated ? stop() : pause();
+    }
     if (command) return { pause, stop, resume }[command]();
     if (paused()) return hold([text]);
     // During a turn the message joins it at the next step boundary (Pi steering).

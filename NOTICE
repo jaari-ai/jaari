@@ -2,10 +2,10 @@ Jaari
 Copyright (c) 2026 Elyess Zouaghi and Jaari contributors
 Licensed under the MIT License (see LICENSE).
 
-This product may include code from the third-party projects below, each under the
-MIT License. Files derived from them are listed under each project with the upstream
-path and commit (ADR-014). npm dependencies carry their own license files and are not
-listed here.
+This product may include code from the third-party projects below, under the MIT
+License or the Apache License 2.0 as stated for each. Files derived from them are listed
+under each project with the upstream path and commit (ADR-014, ADR-016). npm dependencies
+carry their own license files and are not listed here.
 
 ------------------------------------------------------------------------------
 pi (https://github.com/earendil-works/pi)
@@ -60,3 +60,17 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+------------------------------------------------------------------------------
+OpenMausBot (https://github.com/milind-soni/OpenMausBot)
+Derived files:
+  packages/core/src/commands.ts: the stop, filler, and resume word sets and the
+    stop-word rule, from server/room-holds.ts at
+    b8022684d1f519d49a776e00900ae9c65daa357d (modified)
+
+Licensed under the Apache License, Version 2.0; full text in
+third_party/openmausbot/LICENSE. Nothing is taken from its enterprise/ directory.
+
+From OpenMausBot's NOTICE:
+OpenMausBot
+Copyright 2026 Milind Soni and OpenMausBot contributors

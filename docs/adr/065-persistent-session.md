@@ -1,7 +1,7 @@
 # ADR-065: Persistent session: one daemon-owned main session on pi-agent-core, one serial queue, Pi's compaction thresholds, no server-side state for the main session
 
 - **Status:** Accepted
-- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md)
+- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md), [ADR-116](116-owner-commands-in-code.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -58,6 +58,7 @@ Experimental; pruning old transcripts by default.
 
 ## Amendments
 - **ADR-081:** the transcript stores the owner's message after the ingress secret scrub.
+- **ADR-116:** "stop" and "wait" are pause words read by code; a repeated stop word stops the turn.
 
 ## Consequences
 Built in `@jaari/core` (roadmap 0.5, 2026-11-16):
@@ -85,5 +86,5 @@ Built in `@jaari/core` (roadmap 0.5, 2026-11-16):
 - Not built yet: the orientation block (1.3), re-injection from state (when approvals and tasks
   exist), the versioned summary prompt (2.4), and keep-warm pings. Searching an archived segment
   comes with transcript search.
-- Open: OQ-94, what "stop" and "wait" do. Only "pause", "stop everything", "stop now", and
-  "resume" are matched, ignoring case, extra spaces, and a trailing `.` or `!`.
+- "Stop" and "wait" are decided by ADR-116. Whether a model should also read what code misses is
+  OQ-95.
