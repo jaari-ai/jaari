@@ -4,7 +4,7 @@ import { chmod, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { MutableModels } from "@earendil-works/pi-ai";
 import { CLI_MANIFEST, createCliChannel, createIngress, socketPath } from "@jaari/channels";
-import { commandOf, createSession, openDatabase, openEventLog, openStore, ownerIdOf, type Config } from "@jaari/core";
+import { commandOf, createMarkers, createSession, openDatabase, openEventLog, openStore, ownerIdOf, randomMarker, SAFETY, stripMarkers, systemPrompt, type Config } from "@jaari/core";
 import { createEgress, type EgressPolicy } from "@jaari/http";
 import { checkLlmConfig, createLlm, openUsageLog, USAGE_MIGRATIONS } from "@jaari/llm";
 import { createHostCredentialProvider, createOsKeychainProvider, resolveRef, type VaultProvider } from "@jaari/secrets";
@@ -19,8 +19,7 @@ export type DaemonOptions = {
   models?: MutableModels; // the smoke test passes pi-ai's scripted provider here (ADR-041)
 };
 
-// shortcut: a placeholder; the locked safety section and the prompt layers come with roadmap 0.16 and 2.4.
-const SYSTEM_PROMPT = "You are Jaari, the owner's personal assistant.";
+const EGRESS_LEAK = "Jaari blocked an outbound call: it carried an internal marker. Something Jaari read may have tried to make it send its instructions out. Nothing was sent.";
 
 // "http://localhost:11434/v1" → "localhost:11434"; the port defaults by scheme. IPv6 keeps its brackets.
 const hostPort = (baseUrl: string) => {
@@ -68,11 +67,26 @@ export async function startDaemon(options: DaemonOptions) {
     opened.push(store);
     const usage = openUsageLog(openDatabase(join(dataDir, "usage.db"), ownerId, USAGE_MIGRATIONS), ownerId);
     opened.push(usage);
+    // The canary belongs to the install: made once, kept with the conversation, so a restored backup keeps it. The
+    // fence id is new at every start (ADR-104, ADR-120).
+    const canary = store.get<string>("canary") ?? randomMarker(24);
+    if (store.get<string>("canary") !== canary) store.set("canary", canary);
+    const markers = createMarkers(canary);
     // A model server the owner lists in config counts as allowed (ADR-080), so local models pass the egress check.
     const policy: EgressPolicy = { allow: Object.values(providers).flatMap((p) => (p.baseUrl ? [hostPort(p.baseUrl)] : [])) };
+    // Model calls are not scanned: the prompt they carry holds the canary and the fence id by design (ADR-120).
     const llm = await createLlm({ config: config.llm, fetch: createEgress(policy).fetch, secrets, usage, ...(options.models ? { models: options.models } : {}) });
-    const session = createSession({ store, events, llm, systemPrompt: SYSTEM_PROMPT, ...(config.limits ? { limits: config.limits } : {}) });
-    const ingress = createIngress({ session, refs: store.refs, events, isCommand: (text) => commandOf(text) !== undefined });
+    const session = createSession({ store, events, llm, systemPrompt: systemPrompt(markers), ...(config.limits ? { limits: config.limits } : {}) });
+    const ingress = createIngress({ session, refs: store.refs, events, isCommand: (text) => commandOf(text) !== undefined, guard: { strip: stripMarkers, leak: markers.leak } });
+    // The egress for everything that is not a model call: a request that carries a marker is blocked, logged, and
+    // reported to the owner (ADR-104). No tool uses it yet; the first one that fetches does (roadmap 4.5).
+    const egress = createEgress({
+      scan: markers.leak,
+      onLeak: ({ host, marker }) => {
+        events.write({ type: "leak.blocked", path: "egress", host, marker });
+        void ingress.tell(EGRESS_LEAK).catch(() => {});
+      },
+    });
     const abort = new AbortController();
     opened.push({ close: () => void cli.stop() }); // before start: a start that fails after listening still removes the socket
     await cli.start({
@@ -83,10 +97,12 @@ export async function startDaemon(options: DaemonOptions) {
       log: { info: () => {}, warn: () => events.write({ type: "channel.warn", channel: "cli" }), error: () => events.write({ type: "channel.error", channel: "cli" }) },
       signal: abort.signal,
     });
-    events.write({ type: "daemon.start" });
+    // Which safety text is in force, so a turn can be traced to it (ADR-042).
+    events.write({ type: "daemon.start", safetyVersion: SAFETY.version, safetySha256: SAFETY.sha256 });
     let closing: Promise<void> | undefined;
     return {
       session,
+      egress,
       socketPath: socketPath(dataDir),
       // Lets a running turn and its delivery settle, then closes the socket and the stores. The socket closes
       // last, so the owner gets the answer to a turn that was running at shutdown.

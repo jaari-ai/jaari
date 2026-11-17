@@ -18,6 +18,9 @@ export type IngressDeps = {
   };
   events: { write(event: { type: string } & Record<string, unknown>): void };
   isCommand(text: string): boolean; // owner commands (stop, pause, resume); the session executes them
+  // The floor of ADR-104 for everything that leaves on a channel, from @jaari/core: `strip` is the reply marker
+  // filter, and `leak` names the canary or the fence id when the text carries one.
+  guard: { strip(text: string): string; leak(text: string): string | undefined };
   onAnswer?(answer: { promptId: string; option: string }): void | Promise<void>; // the gate, from Phase 3
   now?: () => number;
   sleep?: (ms: number, signal: AbortSignal) => Promise<void>;
@@ -25,6 +28,8 @@ export type IngressDeps = {
 
 const RETRY_MS = [5_000, 25_000, 125_000];
 const QUOTE_CHARS = 500;
+const ONLY_MARKERS = "Jaari's reply held only internal markers, so it is not shown.";
+const LEAK = "Jaari blocked one of its own messages: it carried an internal marker. Something Jaari read may have tried to make it reveal its instructions. Nothing was sent.";
 const GROUP = "Answers count only in your private chat with Jaari, never in a group.";
 
 // `vouched`: the host itself made the transport owner-only (the CLI socket in the owner's data folder). A manifest's
@@ -56,7 +61,8 @@ const textOf = (content: unknown): string =>
   : "";
 
 // The quote comes from Jaari's own copy, never from the platform (ADR-117); JSON keeps it on one line.
-// shortcut: a plain bracketed line; use fence() when the prompt-injection floor ships (roadmap 0.16)
+// shortcut: a plain bracketed line that stays one line (capture strips it by its prefix, roadmap 1.8); context
+// assembly labels it with a harness note (roadmap 1.3, ADR-120)
 function prefaceOf(ref: ReturnType<IngressDeps["refs"]["get"]>): string {
   if (!ref?.message) return "[The owner replied to a message Jaari has no record of.]";
   const role = ref.message.role;
@@ -146,7 +152,12 @@ export function createIngress(deps: IngressDeps) {
       ? quote.messageId : undefined;
     const base = item.seq !== undefined ? `turn:${item.seq}` : randomUUID();
     const origin = item.prompt ? `prompt:${item.prompt.id}` : "turn";
-    const parts = split(item.text, manifest.channel.maxMessageChars);
+    // Before the split, so a marker cut in two cannot pass. The event names the marker, never the text (ADR-032).
+    const stripped = deps.guard.strip(item.text);
+    if (stripped !== item.text) events.write({ type: "reply.stripped", channel: to.channel });
+    const marker = deps.guard.leak(stripped);
+    if (marker) events.write({ type: "leak.blocked", path: "channel", channel: to.channel, marker });
+    const parts = split(marker ? LEAK : stripped.trim() ? stripped : ONLY_MARKERS, manifest.channel.maxMessageChars);
     for (const [i, text] of parts.entries()) {
       const out: OutboundMessage = { channel: to.channel, conversationId: to.conversationId, idempotencyKey: `${base}:${i}`, text, threadId: to.threadId };
       if (i === 0 && replyTo) out.replyTo = replyTo;
@@ -230,8 +241,22 @@ export function createIngress(deps: IngressDeps) {
       // Approvals and codes never go to a group (ADR-044).
       if (!active || active.isGroup) return false;
       const to = active;
+      // Checked before the prompt opens: an answer word must never settle a prompt the owner did not see.
+      const marker = deps.guard.leak(JSON.stringify(prompt));
+      if (marker) {
+        events.write({ type: "leak.blocked", path: "channel", channel: to.channel, marker });
+        await track(deliver(to, [{ text: LEAK }]));
+        return false;
+      }
       prompts.open(keyOf(to), prompt);
       await track(deliver(to, [{ text: renderPrompt(prompt, channels.get(to.channel)!.manifest.channel.prompts), prompt }]));
+      return true;
+    },
+    // A notice that code sends to the owner's active conversation, such as a blocked outbound call (ADR-104).
+    // Returns false when no conversation is active yet. shortcut: no ledger or quiet hours yet (roadmap 2.3)
+    async tell(text: string): Promise<boolean> {
+      if (!active) return false;
+      await track(deliver(active, [{ text }]));
       return true;
     },
     // Refuses new messages and stops the retry waits at once (a pending retry gives up), then waits for every

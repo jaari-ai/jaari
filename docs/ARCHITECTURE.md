@@ -34,17 +34,17 @@
 ## Packages
 | Package | Responsibility |
 |---|---|
-| `@jaari/core` | Agent loop on Pi, sessions, children, tool registry; job engine (ADR-025), routines (ADR-064), skills (ADR-060), the `CliEngine` interface (ADR-077), the event log and the OpenTelemetry adapter (ADR-032) (ADR-086); the locked safety prompt, `fence()` and `defuse` (ADR-104); the owner config loader, `@jaari/core/config` (ADR-118); `openDatabase`, the one way to open a versioned, owned SQLite store (ADR-119) |
+| `@jaari/core` | Agent loop on Pi, sessions, children, tool registry; job engine (ADR-025), routines (ADR-064), skills (ADR-060), the `CliEngine` interface (ADR-077), the event log and the OpenTelemetry adapter (ADR-032) (ADR-086); the locked safety prompt, `fence()`, `defuse`, and the markers of a run (ADR-104, ADR-120); the owner config loader, `@jaari/core/config` (ADR-118); `openDatabase`, the one way to open a versioned, owned SQLite store (ADR-119) |
 | `@jaari/capabilities` | Capability and package manifest schema, loader, and the daemon–node contract; the single capability vocabulary lives in SECURITY_MODEL.md (ADR-015, ADR-018, ADR-071) |
 | `@jaari/llm` | Wraps `@earendil-works/pi-ai`; tiers + fallback chains, role routing, escalation, budgets, local-only privacy, usage log, `jaari llm eval` (ADR-011); speech roles `stt` and `tts` (ADR-037, ADR-086) |
 | `@jaari/memory` | Git-backed memory repo, write path, canonicalize, daily audit, gap queue; file store (ADR-038, ADR-086) |
 | `@jaari/persona` | Curiosity/Proactivity dials, monitor, quiet hours, notification ledger |
 | `@jaari/gate` | The one dispatch entry point; it alone builds capability hosts (Phase 0: deny-all, read class only). Phase 3: action digests, approvals, re-check at dispatch, hash-chained `audit.jsonl` (ADR-006, ADR-016) |
 | `@jaari/secrets` | `secretRef` resolution for executors only, through pluggable providers: `os-keychain` and `host-credential` from Phase 0 (ADR-018, ADR-079), then the vault providers (Bitwarden, 1Password; ADR-013, ADR-050); scrubbing of resolved secrets by exact value and common encodings (ADR-016) |
-| `@jaari/http` | Egress gate: resolve, classify every address against one address-class table, dial only checked addresses; SOCKS5 listener for the browser; per-capability allowlists (ADR-016); egress providers `owner-exit`, `direct`, `mobile`, `residential-proxy`, `vpn` (ADR-017, ADR-030, ADR-053) |
+| `@jaari/http` | Egress gate: resolve, classify every address against one address-class table, dial only checked addresses; an optional scan of each request for the canary and the fence id (ADR-104, ADR-120); SOCKS5 listener for the browser; per-capability allowlists (ADR-016); egress providers `owner-exit`, `direct`, `mobile`, `residential-proxy`, `vpn` (ADR-017, ADR-030, ADR-053) |
 | `@jaari/web` | `web.search`, `web.fetch`, fetch escalation ladder (ADR-012) |
 | `@jaari/computer` | Browser/desktop control behind one neutral surface with pluggable adapters (Playwright MCP, Stagehand, remote CDP, remote desktop), local profile, takeover (ADR-005, ADR-048, ADR-055) |
-| `@jaari/channels` | `ChannelAdapter` contract and its shared contract suite (`@jaari/channels/contract`, ADR-084), ingress (principal resolution), delivery outbox, built-in adapters |
+| `@jaari/channels` | `ChannelAdapter` contract and its shared contract suite (`@jaari/channels/contract`, ADR-084), ingress (principal resolution), delivery outbox with the reply marker filter and the leak scan (ADR-104), built-in adapters |
 | `@jaari/integrations` | Email; mailbox adapters (ADR-063); OAuth broker, with tokens written through the gated vault write (ADR-062) (ADR-086) |
 | `@jaari/mcp` | MCP client for configured servers, with generated manifests (ADR-034); the two-tool MCP server for paired apps (ADR-076); served by `jaari mcp` (ADR-086) |
 | `apps/daemon` | Long-running process: scheduler tick, channels, jobs; runs from built `dist/` files (ADR-115) |

@@ -13,6 +13,11 @@ export type EgressPolicy = {
   allow?: readonly string[];
   // The daemon's own listening ports, refused on every address that is not public (ADR-016).
   ownPorts?: readonly number[];
+  // Names what must not leave in this text, if anything: the canary or the session fence id (ADR-104). It gets
+  // the URL, the headers, and the body of every request. Model calls use an egress without it, because the prompt
+  // that goes to the provider holds both (ADR-120).
+  scan?: (text: string) => string | undefined;
+  onLeak?: (hit: { host: string; marker: string }) => void; // the audit row and the owner's alert, written by the host
 };
 
 export type Refusal = { address: string; reason: AddressClass | "own-port" };
@@ -21,6 +26,13 @@ export class EgressRefused extends Error {
   constructor(readonly host: string, readonly port: number, readonly refusals: readonly Refusal[]) {
     super(`egress refused: ${host}:${port} (${refusals.map((r) => `${r.address} ${r.reason}`).join(", ") || "no addresses"})`);
     this.name = "EgressRefused";
+  }
+}
+
+export class EgressLeak extends Error {
+  constructor(readonly host: string, readonly marker: string) {
+    super(`egress refused: the request to ${host} carried an internal marker (${marker})`);
+    this.name = "EgressLeak";
   }
 }
 
@@ -99,8 +111,21 @@ export function createEgress(policy: EgressPolicy = {}): { fetch: typeof globalT
     },
   });
 
+  // The caller's init cannot replace the dispatcher, so it cannot dial around the check.
+  const send: typeof globalThis.fetch = (input, init) => globalThis.fetch(input, { ...init, dispatcher: agent } as RequestInit);
+  const { scan } = policy;
+  if (!scan) return { fetch: send };
   return {
-    // The caller's init cannot replace the dispatcher, so it cannot dial around the check.
-    fetch: ((input, init) => globalThis.fetch(input, { ...init, dispatcher: agent } as RequestInit)) as typeof globalThis.fetch,
+    // Before any connection opens: a request that carries a marker never reaches DNS or the network.
+    // shortcut: the body is read into memory once more for the scan, stream it when a tool uploads large files (roadmap 4.x)
+    async fetch(input, init) {
+      const request = new Request(input, init);
+      const body = request.body ? await request.clone().text() : "";
+      const marker = scan([request.url, ...[...request.headers].map(([name, value]) => `${name}: ${value}`), body].join("\n"));
+      if (!marker) return send(request);
+      const { host } = new URL(request.url);
+      policy.onLeak?.({ host, marker });
+      throw new EgressLeak(host, marker);
+    },
   };
 }

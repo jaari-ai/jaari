@@ -5,3 +5,5 @@ export * from "./session.js";
 export * from "./limits.js";
 export * from "./config.js";
 export * from "./database.js";
+export * from "./fence.js";
+export * from "./prompt.js";
