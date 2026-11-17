@@ -143,6 +143,18 @@ describe("ingress: reply pointers (ADR-117)", () => {
     expect(preface).not.toContain("what did you mean");
   });
 
+  it("starts every reply line with the fixed prefix that capture strips (ADR-117, roadmap 1.8)", async () => {
+    const h = await setup();
+    await h.receive("hello");
+    await h.receive("about that", { replyTo: "out-2" }); // a stored Jaari message
+    await h.receive("and this", { replyTo: "nowhere" }); // an id Jaari has no record of
+    await h.ingress.ask(approval("a", "4821"));
+    await h.receive("why do you ask", { replyTo: h.promptMessage("a") }); // a prompt, not an answer
+    const prefaces = h.calls.flatMap((call) => (call.options?.preface ? [call.options.preface] : []));
+    expect(prefaces).toHaveLength(3);
+    for (const preface of prefaces) expect(preface.startsWith("[The owner replied to")).toBe(true);
+  });
+
   it("tells the model when the replied-to message is unknown", async () => {
     const h = await setup();
     await h.receive("about that", { replyTo: "never-seen" });
