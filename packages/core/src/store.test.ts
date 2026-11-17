@@ -21,6 +21,9 @@ it("never hands out a row number again after the owner migration, even one delet
   expect(store.load().map(({ seq }) => seq)).toEqual([1, 2, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
   expect(store.append(message("next"))).toBe(21); // not 16: an old reference to row 16 must never find a new message
   store.close();
+  const db = new DatabaseSync(path);
+  expect(db.prepare("SELECT typeof(seq) AS type FROM sqlite_sequence WHERE name = 'transcript'").get()).toEqual({ type: "integer" });
+  db.close();
 });
 
 it("keeps the counter of an empty transcript whose rows were all deleted", async () => {

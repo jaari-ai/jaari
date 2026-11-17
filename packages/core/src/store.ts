@@ -33,7 +33,7 @@ export const STORE_MIGRATIONS: readonly Migration[] = [
       DROP TABLE state; ALTER TABLE state_2 RENAME TO state;
       DROP TABLE message_ref; ALTER TABLE message_ref_2 RENAME TO message_ref`);
     db.prepare(`DELETE FROM sqlite_sequence WHERE name = 'transcript'`).run();
-    db.prepare(`INSERT INTO sqlite_sequence (name, seq) SELECT 'transcript', MAX(?, COALESCE(MAX(seq), 0)) FROM transcript`).run(counter);
+    db.prepare(`INSERT INTO sqlite_sequence (name, seq) SELECT 'transcript', CAST(MAX(?, COALESCE(MAX(seq), 0)) AS INTEGER) FROM transcript`).run(counter);
   },
 ];
 
