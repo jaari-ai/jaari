@@ -37,6 +37,21 @@ describe("createPrompts (ADR-035, ADR-117)", () => {
     expect(prompts.text("conv", "once 9999")).toMatchObject({ kind: "refused" });
   });
 
+  it("takes a two-word message that starts like an answer as a message, unless the second word is a code", () => {
+    const prompts = createPrompts(() => NOW);
+    for (const text of ["no thanks", "yes please", "once upon"]) expect(prompts.text("conv", text)).toEqual({ kind: "none" });
+    prompts.open("conv", approval("a", "4821"));
+    expect(prompts.text("conv", "no thanks")).toEqual({ kind: "none" });
+    expect(prompts.text("conv", "once 4812")).toEqual({ kind: "refused", reason: "No approval has the code 4812." });
+  });
+
+  it("answers an input question only by a reply, never by a tap", () => {
+    const prompts = createPrompts(() => NOW);
+    prompts.open("conv", { kind: "input", id: "q", question: "Which address?" });
+    expect(prompts.tap("conv", { promptId: "q", option: "anything" })).toMatchObject({ kind: "refused" });
+    expect(prompts.text("conv", "12 Rue Oberkampf", "q")).toEqual({ kind: "answer", answer: { promptId: "q", option: "12 Rue Oberkampf" } });
+  });
+
   it("settles the replied-to prompt without its code", () => {
     expect(setup(approval("a", "4821"), approval("b", "1234")).text("conv", "yes", "b")).toEqual(answer("b", "once"));
   });

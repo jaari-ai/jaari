@@ -128,10 +128,11 @@ export function createIngress(deps: IngressDeps) {
       }
       if (receipt.status === "confirmed") return receipt.providerMessageId;
       // The message may have gone out: sending it again could deliver it twice (ARCHITECTURE.md, Channels).
-      if (receipt.status === "ambiguous") return void events.write({ type: "delivery.ambiguous", ...about, error: receipt.error });
+      // The receipt's error text comes from the plugin and may quote the message, so it stays out of the events (ADR-032).
+      if (receipt.status === "ambiguous") return void events.write({ type: "delivery.ambiguous", ...about });
       const delay = receipt.retryable ? RETRY_MS[tries - 1] : undefined;
       const waited = delay !== undefined && !abort.signal.aborted && (await sleep(delay, abort.signal).then(() => true, () => false));
-      if (!waited) return void events.write({ type: "delivery.failed", ...about, attempts: tries, retryable: receipt.retryable, error: receipt.error });
+      if (!waited) return void events.write({ type: "delivery.failed", ...about, attempts: tries, retryable: receipt.retryable });
     }
   }
 

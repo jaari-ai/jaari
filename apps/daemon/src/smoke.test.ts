@@ -159,6 +159,17 @@ describe("tier-1 smoke", () => {
     expect(faux.state.callCount).toBe(0);
   });
 
+  it("delivers the answer to a turn that is running when the daemon closes", async () => {
+    const { faux, boot } = await setup();
+    faux.setResponses([async () => (await new Promise((resolve) => setTimeout(resolve, 300)), fauxAssistantMessage("Done just in time."))]);
+    const daemon = await boot();
+    const chat = await terminal(daemon.socketPath);
+    chat.say("hi");
+    await expect.poll(() => faux.state.callCount).toBe(1);
+    await daemon.close();
+    expect(chat.messages().map((m) => m.text)).toEqual(["Done just in time."]);
+  });
+
   it("refuses a data folder whose socket path is too long, before writing anything", async () => {
     const { root, credentialsDir } = await setup();
     const data = join(root, "d".repeat(120));

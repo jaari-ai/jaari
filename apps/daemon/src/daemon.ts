@@ -76,6 +76,7 @@ export async function startDaemon(options: DaemonOptions) {
     const session = createSession({ store, events, llm, systemPrompt: SYSTEM_PROMPT, ...(config.limits ? { limits: config.limits } : {}) });
     const ingress = createIngress({ session, refs: store.refs, events, isCommand: (text) => commandOf(text) !== undefined });
     const abort = new AbortController();
+    opened.push({ close: () => void cli.stop() }); // before start: a start that fails after listening still removes the socket
     await cli.start({
       manifest: CLI_MANIFEST,
       emit: ingress.channel(CLI_MANIFEST, cli, { owner: true }),
@@ -84,20 +85,20 @@ export async function startDaemon(options: DaemonOptions) {
       log: { info: () => {}, warn: () => events.write({ type: "channel.warn", channel: "cli" }), error: () => events.write({ type: "channel.error", channel: "cli" }) },
       signal: abort.signal,
     });
-    opened.push({ close: () => void cli.stop() });
     events.write({ type: "daemon.start" });
     let closing: Promise<void> | undefined;
     return {
       session,
       socketPath: socketPath(dataDir),
-      // Stops taking messages, lets a running turn and its delivery settle, then closes the stores.
+      // Lets a running turn and its delivery settle, then closes the socket and the stores. The socket closes
+      // last, so the owner gets the answer to a turn that was running at shutdown.
       // Safe to call twice, for example on SIGINT then SIGTERM.
       close: () =>
         (closing ??= (async () => {
+          await ingress.close();
+          await session.idle();
           abort.abort();
           await cli.stop();
-          await session.idle();
-          await ingress.close();
           events.write({ type: "daemon.stop" });
           opened.forEach((handle) => handle.close());
         })()),

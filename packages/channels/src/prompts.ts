@@ -85,7 +85,9 @@ export function createPrompts(now: () => number = Date.now) {
     // A tap: only the literal option ids count.
     tap(conversation: string, answer: Answer): Settled {
       const entry = entries.get(answer.promptId);
-      return entry?.conversation === conversation ? settle(entry, answer.option) : NOT_OPEN;
+      if (entry?.conversation !== conversation) return NOT_OPEN;
+      // A tap's option skips the secret scrub, so free text arrives only as a reply (ADR-081).
+      return entry.prompt.kind === "input" ? refused("Answer that question by replying to it.") : settle(entry, answer.option);
     },
     // The whole message must be an answer: any other word makes it a message for the session ("yes, but cc Sam").
     text(conversation: string, text: string, target?: string): Settled {
@@ -100,7 +102,9 @@ export function createPrompts(now: () => number = Date.now) {
         if (option === undefined) return { kind: "none" };
         const coded = inConversation(conversation).filter((e) => e.prompt.kind === "approval" && e.prompt.code.toLowerCase() === code);
         const found = coded.find((e) => !e.done) ?? coded[0];
-        return found ? settle(found, option) : refused(`No approval has the code ${code}.`);
+        if (found) return settle(found, option);
+        // "no thanks" and "yes please" are messages, not a wrong code; only digits are taken as a mistyped code.
+        return /^\d+$/.test(code) ? refused(`No approval has the code ${code}.`) : { kind: "none" };
       }
       if (target !== undefined) {
         if (entry?.conversation !== conversation) return APPROVAL.has(word) ? NOT_OPEN : { kind: "none" };
