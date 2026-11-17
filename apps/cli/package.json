@@ -2,7 +2,7 @@
   "name": "@jaari/cli",
   "version": "0.0.0",
   "private": true,
-  "description": "The `jaari` command: a thin terminal client for the daemon's local socket (ADR-021, ADR-117)",
+  "description": "The `jaari` command: chat with the daemon, write the config, and store secrets (ADR-021, ADR-056, ADR-088, ADR-117)",
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -12,11 +12,17 @@
       "default": "./dist/chat.js"
     }
   },
-  "bin": { "jaari": "./dist/main.js" },
+  "bin": {
+    "jaari": "./dist/main.js"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@jaari/channels": "workspace:*"
+    "@jaari/channels": "workspace:*",
+    "@jaari/core": "workspace:*",
+    "@jaari/llm": "workspace:*",
+    "@jaari/secrets": "workspace:*",
+    "jsonc-parser": "3.3.1"
   }
 }

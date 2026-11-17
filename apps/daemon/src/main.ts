@@ -1,27 +1,30 @@
 #!/usr/bin/env node
-// `jaari-daemon --config <file> --data <dir> [--credentials <dir>] [--check]`. Runs from the built
-// dist/ files under plain Node (ADR-115).
-import { readFile } from "node:fs/promises";
+// `jaari-daemon [--home <dir>] [--config <file>] [--data <dir>] [--credentials <dir>] [--check]`. Runs from the
+// built dist/ files under plain Node (ADR-115). Without flags it uses ~/.jaari, as `jaari init` writes it (ADR-118).
+import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { startDaemon, type DaemonConfig } from "./daemon.js";
+import { ConfigError, credentialsDirOf, jaariPaths, loadConfig } from "@jaari/core";
+import { startDaemon } from "./daemon.js";
 
 const { values } = parseArgs({
   options: {
+    home: { type: "string" }, // the Jaari folder, in place of ~/.jaari
     config: { type: "string" },
     data: { type: "string" },
-    // systemd sets $CREDENTIALS_DIRECTORY; Compose mounts secrets at /run/secrets (ADR-079).
-    credentials: { type: "string", default: process.env.CREDENTIALS_DIRECTORY ?? "/run/secrets" },
+    // host-credential files: the flag, then what systemd supplies, then the folder named in the config (ADR-079).
+    // Compose passes `--credentials /run/secrets`.
+    credentials: { type: "string", default: process.env.CREDENTIALS_DIRECTORY },
     check: { type: "boolean", default: false }, // start every part, then stop: proves the build and the config
   },
 });
-if (!values.config || !values.data) {
-  console.error("usage: jaari-daemon --config <file> --data <dir> [--credentials <dir>] [--check]");
-  process.exit(2);
-}
+const paths = jaariPaths(values.home ? resolve(values.home) : undefined);
 
-// shortcut: plain JSON; the config loader with JSONC, defaults, and `jaari init` is roadmap 0.6.
-const config = JSON.parse(await readFile(values.config, "utf8")) as DaemonConfig;
-const daemon = await startDaemon({ config, dataDir: values.data, credentialsDir: values.credentials! });
+const config = await loadConfig(values.config ?? paths.config).catch((error: unknown) => {
+  if (!(error instanceof ConfigError)) throw error;
+  console.error(`jaari-daemon: ${error.message}`);
+  process.exit(1);
+});
+const daemon = await startDaemon({ config, dataDir: values.data ?? paths.data, credentialsDir: values.credentials ?? credentialsDirOf(config, paths) });
 if (values.check) {
   await daemon.close();
   console.log("jaari-daemon: started and stopped cleanly");

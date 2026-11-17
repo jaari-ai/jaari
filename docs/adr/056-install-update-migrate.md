@@ -64,4 +64,7 @@ into the sandbox; migrations without a snapshot; letting an older binary open ne
 - **ADR-105:** the npm install needs Node 26 LTS or later, not Node 22.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- Roadmap 0.6 (2026-11-17): the config file, its version, and its checks are ADR-118. `jaari init`
+  asks for the target, where secrets are kept, and one model provider; running it again revisits
+  every step. `jaari config`, the `compose.yaml`, and the other init steps are scheduled in
+  ADR-118's Consequences.

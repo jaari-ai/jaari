@@ -157,4 +157,5 @@ status and exit criteria live there.
 | [114](adr/114-llm-on-pi-ai.md) | `@jaari/llm` on pi-ai 1.5.0: keys only from `secretRef`, the usage log in `node:sqlite`, refusals stop until categories are mapped | Accepted |
 | [115](adr/115-daemon-runs-from-dist.md) | The daemon runs from built `dist/` files under plain Node; the smoke test and a CI start check prove both paths | Accepted |
 | [116](adr/116-owner-commands-in-code.md) | Owner commands are read by code in the owner's languages; a stop word pauses, and a repeated one stops the turn | Accepted |
+| [118](adr/118-owner-config-file.md) | The owner config: one JSONC file under `~/.jaari`, versioned, closed at the top, read through `@jaari/core/config` | Accepted |
 | [117](adr/117-owner-replies-are-pointers.md) | Owner replies are pointers resolved by code; a reply may widen a brake and may answer one approval | Accepted |

@@ -36,4 +36,6 @@ All overlay modes in Phase 2 (WireGuard generation and Cloudflare are not needed
 the panel waiting for Phase 7; showing an Approvals view before approvals exist.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- Roadmap 0.6 (2026-11-17): `jaari secret set <name>` ships (ADR-118): no echo, a terminal
+  required, the value never an argument. For `host-credential` it writes the folder named by
+  `secrets.credentialsDir`.

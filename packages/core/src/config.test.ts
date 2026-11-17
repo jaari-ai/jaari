@@ -2,7 +2,7 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { ConfigError, expandHome, jaariPaths, loadConfig, parseConfig } from "./config.js";
+import { ConfigError, credentialsDirOf, expandHome, jaariPaths, loadConfig, parseConfig } from "./config.js";
 
 const llm = { providers: {}, tiers: {}, roles: {} };
 const problems = (text: string): string[] => {
@@ -31,7 +31,9 @@ describe("the owner config (ADR-056, ADR-118)", () => {
 
   it("names every problem: a typo in a section name, a wrong value, a wrong type", () => {
     const found = problems(JSON.stringify({ version: 1, llm, deploymnet: {}, deployment: { target: "moon" }, limits: { stepsPerTurn: "many", nope: 1 }, secrets: { zero: "env" } }));
-    expect(found.join("\n")).toMatch(/deploymnet|additional/i);
+    expect(found).toContain("/deploymnet: unknown key");
+    expect(found).toContain("/limits/nope: unknown key");
+    expect(found.join("\n")).not.toContain("schema is false");
     expect(found.some((line) => line.startsWith("/deployment/target"))).toBe(true);
     expect(found.some((line) => line.startsWith("/limits"))).toBe(true);
     expect(found.some((line) => line.startsWith("/secrets/zero"))).toBe(true); // `env` is development-only, never config (ADR-079)
@@ -63,6 +65,10 @@ describe("the owner config (ADR-056, ADR-118)", () => {
     expect(expandHome("~/.jaari/credentials")).toBe(join(homedir(), ".jaari/credentials"));
     expect(expandHome("/run/secrets")).toBe("/run/secrets");
     expect(expandHome("~other/x")).toBe("~other/x");
+    expect(credentialsDirOf({}, paths)).toBe("/home/owner/.jaari/credentials");
+    expect(credentialsDirOf({ secrets: { credentialsDir: "/run/secrets" } }, paths)).toBe("/run/secrets");
+    expect(credentialsDirOf({ secrets: { credentialsDir: "creds" } }, paths)).toBe("/home/owner/.jaari/creds");
+    expect(credentialsDirOf({ secrets: { credentialsDir: "~/c" } }, paths)).toBe(join(homedir(), "c"));
   });
 
   it("keeps the smoke config that CI starts valid", async () => {

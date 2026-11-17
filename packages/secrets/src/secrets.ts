@@ -4,6 +4,7 @@
 export type VaultProvider = {
   resolve(name: string): Promise<string>;
   health(): Promise<{ ok: true } | { ok: false; problem: string }>;
+  store?(name: string, value: string): Promise<void>; // for `jaari secret set` only (ADR-088); executors never call it
 };
 
 // No slash and no leading dot, so a name can never leave a provider's directory (path traversal).

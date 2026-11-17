@@ -4,18 +4,13 @@ import { chmod, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { MutableModels } from "@earendil-works/pi-ai";
 import { CLI_MANIFEST, createCliChannel, createIngress, socketPath } from "@jaari/channels";
-import { commandOf, createSession, openEventLog, openStore, type Limits } from "@jaari/core";
+import { commandOf, createSession, openEventLog, openStore, type Config } from "@jaari/core";
 import { createEgress, type EgressPolicy } from "@jaari/http";
 import { checkLlmConfig, createLlm, openUsageLog } from "@jaari/llm";
 import { createHostCredentialProvider, createOsKeychainProvider, resolveRef, type VaultProvider } from "@jaari/secrets";
 
-// The sections of the owner's config the daemon reads in Phase 0; the full loader is roadmap 0.6.
-export type DaemonConfig = {
-  secrets?: { zero?: "os-keychain" | "host-credential" };
-  llm: unknown; // checked by @jaari/llm
-  limits?: Partial<Limits>;
-  events?: { retentionDays?: number }; // ADR-032: 30 days by default
-};
+// The sections of the owner's config (ADR-118) that the daemon reads in Phase 0. `llm` is checked by @jaari/llm.
+export type DaemonConfig = Pick<Config, "secrets" | "llm" | "limits" | "events">;
 
 export type DaemonOptions = {
   config: DaemonConfig;

@@ -2,7 +2,7 @@
 // checks for the sections this version reads. The daemon and the `jaari` command both read it through here.
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { parse, printParseErrorCode, type ParseError } from "jsonc-parser";
 import { Type, type Static } from "typebox";
 import { Compile } from "typebox/compile";
@@ -21,6 +21,11 @@ export const jaariPaths = (home = join(homedir(), ".jaari")) => ({
 
 // "~/x" as the owner writes it in the config file.
 export const expandHome = (path: string): string => (path === "~" || path.startsWith("~/") ? join(homedir(), path.slice(1)) : path);
+
+// The folder of host-credential files when no service manager supplies one: `jaari secret set` writes it and the
+// daemon reads it, so both must agree (ADR-118). A relative path counts from the Jaari folder.
+export const credentialsDirOf = (config: Pick<Config, "secrets">, paths: ReturnType<typeof jaariPaths>): string =>
+  config.secrets?.credentialsDir ? resolve(paths.home, expandHome(config.secrets.credentialsDir)) : paths.credentials;
 
 const closed = { additionalProperties: false } as const;
 // A section that belongs to a feature not built yet: its name is known, so a typo in a name still fails, and its
@@ -64,6 +69,15 @@ export class ConfigError extends Error {
 
 const check = Compile(ConfigSchema);
 
+// One line per problem, in words an owner can act on: an unknown key is named, not reported as "schema is false".
+function problemOf(error: { keyword: string; schemaPath: string; instancePath: string; params: unknown; message: string }): string[] {
+  if (error.keyword === "additionalProperties") {
+    return ((error.params as { additionalProperties?: string[] }).additionalProperties ?? []).map((name) => `${error.instancePath}/${name}: unknown key`);
+  }
+  if (error.schemaPath.endsWith("/additionalProperties")) return []; // the same unknown key, reported a second time
+  return [`${error.instancePath || "/"}: ${error.message}`];
+}
+
 const position = (text: string, offset: number) => {
   const before = text.slice(0, offset).split("\n");
   return `line ${before.length}, column ${before.at(-1)!.length + 1}`;
@@ -82,7 +96,7 @@ export function parseConfig(text: string): Config {
     throw new ConfigError([`the config is version ${String(version)}, newer than this Jaari reads (${CONFIG_VERSION}); update Jaari, or restore the config from before the update`]);
   }
   for (let from = version as number; from < CONFIG_VERSION; from++) value = { ...MIGRATIONS[from - 1]!(value as Record<string, unknown>), version: from + 1 };
-  if (!check.Check(value)) throw new ConfigError(check.Errors(value).map((error) => `${error.instancePath || "/"}: ${error.message}`));
+  if (!check.Check(value)) throw new ConfigError(check.Errors(value).flatMap(problemOf));
   return value as Config;
 }
 

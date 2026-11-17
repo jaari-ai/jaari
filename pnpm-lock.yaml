@@ -190,6 +190,18 @@ importers:
       '@jaari/channels':
         specifier: workspace:*
         version: link:../../packages/channels
+      '@jaari/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@jaari/llm':
+        specifier: workspace:*
+        version: link:../../packages/llm
+      '@jaari/secrets':
+        specifier: workspace:*
+        version: link:../../packages/secrets
+      jsonc-parser:
+        specifier: 3.3.1
+        version: 3.3.1
 
   apps/daemon:
     dependencies:

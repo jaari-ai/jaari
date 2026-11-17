@@ -53,3 +53,8 @@ Compose); a passphrase typed at every start as the default (no unattended restar
   "readable"), a file that resolves, after links, inside the data directory, a non-regular file,
   and an empty file. The mode is checked on the open file handle. One trailing newline is dropped.
   The "not in the backup set" check waits for backup (Phase 3).
+- **Roadmap 0.6 (2026-11-17, ADR-118):** the daemon takes the folder from `--credentials`, then
+  `$CREDENTIALS_DIRECTORY`, then `secrets.credentialsDir` in the config (default
+  `~/.jaari/credentials`); the fixed `/run/secrets` default is gone, so Compose passes
+  `--credentials /run/secrets`. `jaari secret set` writes a file there at mode 0600 and refuses a
+  folder inside the data directory or open to group or others.
