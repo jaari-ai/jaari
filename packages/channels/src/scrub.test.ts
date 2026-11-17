@@ -29,8 +29,8 @@ describe("scrubSecrets (ADR-081)", () => {
   });
 
   it("removes a labelled password and keeps the label", () => {
-    expect(scrubSecrets("password: hunter2 and pwd=abc PassPhrase : x y").text).toBe(
-      "password: [secret removed: password] and pwd=[secret removed: password] PassPhrase : [secret removed: password] y");
+    expect(scrubSecrets("password: hunter2\npwd=abc\nPassPhrase : correct horse battery staple\nthanks").text).toBe(
+      "password: [secret removed: password]\npwd=[secret removed: password]\nPassPhrase : [secret removed: password]\nthanks");
   });
 
   it("reports each kind once", () => {

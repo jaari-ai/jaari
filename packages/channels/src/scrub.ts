@@ -29,7 +29,8 @@ const RULES: { kind: string; pattern: RegExp; check?: (match: string) => boolean
 ];
 
 // The label stays so the owner sees what was removed; a value another rule already removed is left alone.
-const LABELLED = /\b(password|passwd|pwd|passphrase)(\s*[:=]\s*)(?!\[secret removed)(\S+)/gi;
+// The value runs to the end of the line, because a passphrase has spaces; removing a little too much is the safe side.
+const LABELLED = /\b(password|passwd|pwd|passphrase)(\s*[:=]\s*)(?!\[secret removed)([^\n]+)/gi;
 
 const removed = (kind: string) => `[secret removed: ${kind}]`;
 

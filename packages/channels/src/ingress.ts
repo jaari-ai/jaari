@@ -75,7 +75,9 @@ function headOf(reply: SessionReply): string | undefined {
     case "paused": return "Paused. Nothing runs until you send resume.";
     case "resumed": return held.length > 0 ? `Resumed. These messages came while paused and did not run; send again what still matters:\n${list(held)}` : "Resumed.";
     case "stopped": {
-      const tools = reply.tools ?? [];
+      // The command's reply names what was cut (it has `tools`); the cut turn's own reply would only repeat "Stopped."
+      if (reply.tools === undefined) return undefined;
+      const tools = reply.tools;
       const cut = tools.length > 0 ? ` Cut while running: ${tools.join(", ")}.` : "";
       return `Stopped.${cut}${held.length > 0 ? ` Held, not run:\n${list(held)}` : ""}`;
     }

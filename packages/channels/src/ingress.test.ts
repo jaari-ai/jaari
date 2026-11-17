@@ -123,6 +123,13 @@ describe("ingress: commands (ADR-116)", () => {
     expect(h.answers).toEqual([]);
     expect(h.texts().at(-1)).toBe("Stopped. Cut while running: web.fetch. Held, not run:\n1. book the table");
   });
+
+  it("says Stopped once: the cut turn sends only its own text", async () => {
+    const h = await setup({ replies: [{ status: "stopped" }, { status: "stopped", text: "Searched 2 of 5 sites." }] });
+    await h.receive("book a table");
+    await h.receive("find flights");
+    expect(h.texts()).toEqual(["Searched 2 of 5 sites."]);
+  });
 });
 
 describe("ingress: reply pointers (ADR-117)", () => {
