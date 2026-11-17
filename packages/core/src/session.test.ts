@@ -6,7 +6,8 @@ import { createModels, fauxAssistantMessage, fauxProvider, fauxToolCall, type As
 import { createLlm } from "@jaari/llm";
 import { describe, expect, it, vi } from "vitest";
 import { openEventLog } from "./events.js";
-import { createSession, createWatchdog, selectCut, type Limits } from "./session.js";
+import type { Limits } from "./limits.js";
+import { createSession, createWatchdog, selectCut } from "./session.js";
 import { openStore } from "./store.js";
 
 const tool = (name: string, execute: AgentTool["execute"]): AgentTool => ({ name, label: name, description: name, parameters: { type: "object", properties: {} }, execute });

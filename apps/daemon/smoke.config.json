@@ -1,8 +1,24 @@
 {
-  "secrets": { "zero": "host-credential" },
+  "version": 1,
+  "secrets": {
+    "zero": "host-credential"
+  },
   "llm": {
-    "providers": { "local": { "api": "openai-completions", "baseUrl": "http://127.0.0.1:11434/v1", "apiKey": "secretRef:llm.local" } },
-    "tiers": { "small": ["local/smoke"] },
-    "roles": { "main": "small", "summarize": "small" }
+    "providers": {
+      "local": {
+        "api": "openai-completions",
+        "baseUrl": "http://127.0.0.1:11434/v1",
+        "apiKey": "secretRef:llm.local"
+      }
+    },
+    "tiers": {
+      "small": [
+        "local/smoke"
+      ]
+    },
+    "roles": {
+      "main": "small",
+      "summarize": "small"
+    }
   }
 }
