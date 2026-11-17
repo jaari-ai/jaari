@@ -54,16 +54,36 @@ export const adapter: ChannelAdapter = {
   written the reply instructions into `msg.text`; with `buttons` or `quickReplies`, render
   `msg.prompt.options` natively and report a tap as `answer: { promptId, option }` (ADR-035).
 - Use only `ctx.secrets.get` for credentials, and never log them.
+- Hand each message to `ctx.emit` without waiting for it before you read the next one: ingress
+  may settle only after a whole turn, and the next message can be "stop" (ADR-116).
+- Pass `replyTo` (the platform's id of the replied-to message) and `threadId` when the transport
+  has them; never pass the quoted text. Declare `capabilities.replies` if you can send a
+  quote-reply (ADR-117).
 - Pass the shared contract suite (ADR-084) from your own tests, with a fake of your transport:
   ~~~ts
+  import { fileURLToPath } from "node:url";
   import { channelContract } from "@jaari/channels/contract";
-  import { adapter } from "./index.js";
-  import { fakeTransport } from "./fake-transport.js";
-  channelContract({ adapter, transport: fakeTransport });
+  import pkg from "../package.json" with { type: "json" };
+  import { createAdapter } from "./index.js";
+  import { createFakeTransport } from "./fake-transport.js";
+
+  channelContract({
+    manifest: pkg.jaari,
+    sources: fileURLToPath(new URL(".", import.meta.url)),   // scanned for forbidden imports
+    create() {
+      const transport = createFakeTransport();
+      return {
+        adapter: createAdapter(transport),
+        receive: (text) => transport.incoming(text),   // the owner writes; before start, a message already waiting
+        sent: async () => transport.outgoing(),        // texts the transport was asked to carry
+        ambiguous: () => transport.dropNextAnswer(),   // optional: the next send cannot tell if it went out
+      };
+    },
+  });
   ~~~
   It checks the manifest, start and stop (including abort), idempotent `send`, `ambiguous`
   pass-through, a fresh cursor that replays nothing, refused undeclared secrets, and forbidden
-  imports.
+  imports. The built-in CLI channel (`packages/channels/src/cli/adapter.test.ts`) is a full example.
 
 ## Registering
 A local path, as in the last entry below, is for development only and makes `jaari doctor`

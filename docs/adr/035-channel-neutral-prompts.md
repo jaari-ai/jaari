@@ -47,4 +47,6 @@ text-only channels such as iMessage and SMS).
   answer settles that prompt, like a tap; the reply id maps to the prompt id.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- Roadmap 0.8 (2026-11-17): `createPrompts` in `@jaari/channels` parses answers in code; open
+  prompts live in memory and are lost on restart until the gate persists them (Phase 3). The
+  gate stub has nothing to approve yet, so `onAnswer` is wired with the gate.

@@ -1,9 +1,10 @@
 // Starts the daemon's parts in order and refuses to start on any failure: secrets, egress, model
-// routing, the main session (ADR-015, ADR-065, ADR-079).
+// routing, the main session, then the channels: ingress and the CLI socket (ADR-015, ADR-021, ADR-065, ADR-079).
 import { chmod, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { MutableModels } from "@earendil-works/pi-ai";
-import { createSession, openEventLog, openStore, type Limits } from "@jaari/core";
+import { CLI_MANIFEST, createCliChannel, createIngress, socketPath } from "@jaari/channels";
+import { commandOf, createSession, openEventLog, openStore, type Limits } from "@jaari/core";
 import { createEgress, type EgressPolicy } from "@jaari/http";
 import { checkLlmConfig, createLlm, openUsageLog } from "@jaari/llm";
 import { createHostCredentialProvider, createOsKeychainProvider, resolveRef, type VaultProvider } from "@jaari/secrets";
@@ -55,6 +56,10 @@ export async function startDaemon(options: DaemonOptions) {
     });
   }
 
+  // The built-in CLI channel. Its socket sits in the owner-only data folder, so whoever reaches it is the owner
+  // (ADR-021, ADR-022). Made here because it checks the socket path's length, before anything is written.
+  const cli = createCliChannel({ socketPath: socketPath(dataDir) });
+
   // Created only after the checks, so a refused start leaves nothing behind.
   await mkdir(dataDir, { recursive: true, mode: 0o700 });
   await chmod(dataDir, 0o700); // `mkdir` leaves a folder that already exists as it is; the transcript is private
@@ -69,17 +74,33 @@ export async function startDaemon(options: DaemonOptions) {
     const policy: EgressPolicy = { allow: Object.values(providers).flatMap((p) => (p.baseUrl ? [hostPort(p.baseUrl)] : [])) };
     const llm = await createLlm({ config: config.llm, fetch: createEgress(policy).fetch, secrets, usage, ...(options.models ? { models: options.models } : {}) });
     const session = createSession({ store, events, llm, systemPrompt: SYSTEM_PROMPT, ...(config.limits ? { limits: config.limits } : {}) });
+    const ingress = createIngress({ session, refs: store.refs, events, isCommand: (text) => commandOf(text) !== undefined });
+    const abort = new AbortController();
+    await cli.start({
+      manifest: CLI_MANIFEST,
+      emit: ingress.channel(CLI_MANIFEST, cli, { owner: true }),
+      secrets: { get: async (name) => Promise.reject(new Error(`the CLI channel declares no secret "${name}"`)) },
+      // A plugin's log text may quote a message, and events never carry message text (ADR-032).
+      log: { info: () => {}, warn: () => events.write({ type: "channel.warn", channel: "cli" }), error: () => events.write({ type: "channel.error", channel: "cli" }) },
+      signal: abort.signal,
+    });
+    opened.push({ close: () => void cli.stop() });
     events.write({ type: "daemon.start" });
     let closing: Promise<void> | undefined;
     return {
       session,
-      // Lets a running turn settle, then closes the stores.
+      socketPath: socketPath(dataDir),
+      // Stops taking messages, lets a running turn and its delivery settle, then closes the stores.
       // Safe to call twice, for example on SIGINT then SIGTERM.
       close: () =>
-        (closing ??= session.idle().then(() => {
+        (closing ??= (async () => {
+          abort.abort();
+          await cli.stop();
+          await session.idle();
+          await ingress.close();
           events.write({ type: "daemon.stop" });
           opened.forEach((handle) => handle.close());
-        })),
+        })()),
     };
   } catch (error) {
     opened.forEach((handle) => handle.close());

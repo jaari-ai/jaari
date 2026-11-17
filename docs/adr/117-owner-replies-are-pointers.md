@@ -66,4 +66,6 @@ content.
   text, a reply to an approval in a group, and a brake that replies to a routine.
 - THREAT_MODEL gains a row: a forged quote from a client or another participant; mitigated by
   resolving the id against `message_ref` and ignoring delivered quote text.
-- Implementation lands with roadmap 0.8.
+- Roadmap 0.8 (2026-11-17): `message_ref` in the session store; ingress resolves `replyTo` before
+  prompts and the main session; the CLI client reads `>N text`. Routine and task origins arrive
+  with routines and children; until then a reply resolves to a turn or a prompt.

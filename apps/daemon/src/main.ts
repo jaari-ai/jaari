@@ -26,14 +26,7 @@ if (values.check) {
   await daemon.close();
   console.log("jaari-daemon: started and stopped cleanly");
 } else {
-  // shortcut: no channel can reach the session until the CLI channel ships (roadmap 0.8); the process
-  // only waits for a signal.
-  const keepAlive = setInterval(() => {}, 1 << 30);
-  for (const signal of ["SIGINT", "SIGTERM"] as const) {
-    process.once(signal, () => {
-      clearInterval(keepAlive);
-      void daemon.close();
-    });
-  }
-  console.log("jaari-daemon: running");
+  // The CLI socket keeps the process alive until a signal closes it.
+  for (const signal of ["SIGINT", "SIGTERM"] as const) process.once(signal, () => void daemon.close());
+  console.log(`jaari-daemon: running; chat with \`jaari chat --socket ${daemon.socketPath}\``);
 }

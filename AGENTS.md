@@ -3,7 +3,8 @@
 Jaari is a self-hosted, single-owner personal AI agent: git-backed Markdown memory,
 persona dials enforced in code, and digest-bound owner approval for every external
 effect. It is in **Phase 0 (Foundation)**: `@jaari/capabilities`, `@jaari/gate`,
-`@jaari/secrets`, `@jaari/http`, `@jaari/llm`, `@jaari/core`, and `apps/daemon` exist. Current status is in `docs/STATE.md`.
+`@jaari/secrets`, `@jaari/http`, `@jaari/llm`, `@jaari/core`, `@jaari/channels`, `apps/daemon`, and
+`apps/cli` exist. Current status is in `docs/STATE.md`.
 
 ## Hard rules
 - Never create, edit, or delete anything under `refs/`. Read only. Do not format,
@@ -34,7 +35,7 @@ effect. It is in **Phase 0 (Foundation)**: `@jaari/capabilities`, `@jaari/gate`,
 | `scripts/refs.sh` | Manages `refs/` (sync to pinned commits, lock, status, `refs/INDEX.md`) | Yes |
 | `scripts/merge_docs.py` | Merges README, AGENTS, docs, and config into one untracked context file for AI discussions; `--check` validates doc links and IDs | Yes |
 | `docs/` | Hand-maintained docs. `docs/adr/` is the authoritative ADR set. `docs/audits/` holds audit reports and the documentation index, which are navigation aids, not authoritative. | Yes, per conventions |
-| `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon`, `cli`, `node`, `hooks`); apps not created yet | Yes |
+| `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon` and `cli` exist; `node` and `hooks` not yet) | Yes |
 | Root config | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.claude/settings.json` | Yes |
 | `jaari.config.example.jsonc` | Example owner config (`owner`, `deployment`, `channels`, `secrets`, `persona`, `shadow`, `memory`, `llm`, `web`, `egress`, `backup`) | Yes |
 | `python/` | PyPI name-holder package (ADR-010, `docs/guides/namespaces.md`) | Yes |
