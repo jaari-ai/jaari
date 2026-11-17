@@ -3,7 +3,7 @@
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { socketPath } from "@jaari/channels";
-import { listSnapshots, restoreSnapshot, takeSnapshot } from "@jaari/core";
+import { listSnapshots, restoreSnapshot, restoring, takeSnapshot } from "@jaari/core";
 import { jaariPaths } from "@jaari/core/config";
 import type { Command } from "./io.js";
 import { createPrompter, InputEnded } from "./prompt.js";
@@ -21,10 +21,17 @@ export const run: Command = async (args, io) => {
     if (snapshots.length === 0) say("No snapshot yet. Jaari takes one before it migrates a store.");
     return 0;
   }
-  const latest = snapshots.at(-1);
-  if (!latest) return (say(`jaari: no snapshot in ${place.dataDir}; nothing to roll back to`), 1);
+  const unfinished = await restoring(place.dataDir);
+  const latest = unfinished ? snapshots.find((snapshot) => snapshot.name === unfinished) : snapshots.at(-1);
+  if (!latest) return (say(unfinished ? `jaari: the snapshot ${unfinished} that a rollback was restoring is gone; restore from a backup` : `jaari: no snapshot in ${place.dataDir}; nothing to roll back to`), 1);
   // A running daemon holds the stores open and would write over the restored ones.
-  if (await daemonRunning(socketPath(place.dataDir))) return (say("jaari: the daemon is running; stop it first, then run `jaari rollback` again"), 1);
+  if ((await daemonRunning(socketPath(place.dataDir))) !== "stopped") return (say("jaari: the daemon is running; stop it first, then run `jaari rollback` again"), 1);
+  if (unfinished) {
+    // The data as it was before that rollback is already a snapshot: finish the restore, take no new one.
+    say(`Finishing a rollback that was cut short: ${describe(latest)}`);
+    await restoreSnapshot(place, latest);
+    return (say("Restored. Run `jaari rollback` again to undo it."), 0);
+  }
   if (!values.yes) {
     // ADR-076: it replaces the owner's data, so a person confirms it.
     if (!io.isTTY) return (say("jaari: rollback replaces the current data; run it in a terminal, or pass --yes"), 2);

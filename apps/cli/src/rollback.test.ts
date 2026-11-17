@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { listSnapshots, openStore, takeSnapshot } from "@jaari/core";
 import { expect, it } from "vitest";
@@ -41,6 +41,23 @@ it("restores the stores and the config of the latest snapshot, and a second run 
   expect((await rollback(home, ["--yes"])).code).toBe(0); // the latest is now the data from before the rollback
   expect(said(data).join()).toContain("after");
   expect(await readFile(config, "utf8")).toContain("retentionDays");
+});
+
+it("finishes a rollback that was cut short, instead of undoing it, and the daemon refuses to start meanwhile", async () => {
+  const { home, data, config } = await withSnapshot();
+  const [original] = await listSnapshots(data);
+  // As if `jaari rollback` stopped after its own snapshot and the mark, before the stores were put back.
+  await takeSnapshot({ dataDir: data, configPath: config, reason: "before-rollback" });
+  await writeFile(join(data, "snapshots", "restoring"), original!.name + "\n");
+  await takeSnapshot({ dataDir: data, reason: "before-rollback" }); // a third: the one being restored must survive the pruning
+  expect((await listSnapshots(data)).map((snapshot) => snapshot.name)).toContain(original!.name);
+
+  const again = await rollback(home, ["--yes"]);
+  expect(again.code).toBe(0);
+  expect(again.shown).toContain("Finishing a rollback that was cut short");
+  expect(said(data).join()).not.toContain("after");
+  expect(await readFile(config, "utf8")).not.toContain("retentionDays");
+  expect((await rollback(home, ["--yes"])).shown).not.toContain("Finishing"); // the mark is gone
 });
 
 it("refuses while the daemon runs, without a snapshot, and without a person or --yes", async () => {

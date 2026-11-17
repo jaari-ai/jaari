@@ -165,6 +165,8 @@ ${command.map((a) => `    <string>${xml(a)}</string>`).join("\n")}
     return (say(`jaari: cannot read the credentials folder ${dir}; store secrets with \`jaari secret set\` first`), 1);
   }
   const encrypted = (await deps.exec("systemd-creds", ["--version"])).code === 0;
+  // `LoadCredential=` takes the path as written, with no quoting, so a space or a quote would change it.
+  if (!encrypted && names.length > 0 && /[\s"'\\]/.test(dir)) return (say(`jaari: without systemd-creds, the credentials folder must have no space or quote in its path: ${dir}`), 1);
   const credentials = names.map((name) =>
     encrypted ? `LoadCredentialEncrypted=${name}:${CREDSTORE}/${name}.cred` : `LoadCredential=${name}:${join(dir, name).replace(/%/g, "%%")}`);
   const text = `[Unit]

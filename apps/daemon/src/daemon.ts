@@ -2,9 +2,10 @@
 // routing, the main session, then the channels: ingress and the CLI socket (ADR-015, ADR-021, ADR-065, ADR-079).
 import { chmod, mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { isDeepStrictEqual } from "node:util";
 import type { MutableModels } from "@earendil-works/pi-ai";
 import { CLI_MANIFEST, createCliChannel, createIngress, socketPath } from "@jaari/channels";
-import { commandOf, createMarkers, createPowerWatch, createSession, LIMITS, openDatabase, openEventLog, openStore, ownerIdOf, randomMarker, SAFETY, STORE_MIGRATIONS, storeVersion, systemPrompt, takeSnapshot, type Config, type PowerDeps } from "@jaari/core";
+import { commandOf, createMarkers, createPowerWatch, createSession, LIMITS, openDatabase, openEventLog, openStore, ownerIdOf, randomMarker, SAFETY, STORE_MIGRATIONS, listSnapshots, restoring, storeVersion, systemPrompt, takeSnapshot, type Config, type PowerDeps } from "@jaari/core";
 import { createEgress, type EgressPolicy } from "@jaari/http";
 import { checkLlmConfig, createLlm, openUsageLog, USAGE_MIGRATIONS } from "@jaari/llm";
 import { createHostCredentialProvider, createOsKeychainProvider, resolveRef, type VaultProvider } from "@jaari/secrets";
@@ -63,11 +64,16 @@ export async function startDaemon(options: DaemonOptions) {
   const events = openEventLog(join(dataDir, "events.ndjson"), ownerId, config.events?.retentionDays);
   const opened: { close(): void }[] = [];
   try {
+    // Half-restored stores must not be opened, or migrated over.
+    if (await restoring(dataDir)) throw new Error("refusing to start: a `jaari rollback` did not finish; run `jaari rollback` again to finish it");
     // A store that this start will migrate is copied first, with the config, so `jaari rollback` can put it back
-    // (ADR-082, ADR-122). A store newer than this Jaari is refused below and needs no copy.
-    const migrates = ([file, steps]: readonly [string, readonly unknown[]]) => (storeVersion(join(dataDir, file)) ?? steps.length) < steps.length;
-    if (([["session.db", STORE_MIGRATIONS], ["usage.db", USAGE_MIGRATIONS]] as const).some(migrates)) {
-      const snapshot = await takeSnapshot({ dataDir, reason: "pre-migration", ...(options.configPath ? { configPath: options.configPath } : {}) });
+    // (ADR-082, ADR-122). A store newer than this Jaari is refused below and needs no copy. One copy per target: a
+    // start that fails after a migration and is restarted (launchd, systemd) must not prune the copy of the original.
+    const target = { "session.db": STORE_MIGRATIONS.length, "usage.db": USAGE_MIGRATIONS.length };
+    const migrates = Object.entries(target).some(([file, steps]) => (storeVersion(join(dataDir, file)) ?? steps) < steps);
+    const latest = (await listSnapshots(dataDir)).at(-1);
+    if (migrates && !(latest?.reason === "pre-migration" && isDeepStrictEqual(latest.target, target))) {
+      const snapshot = await takeSnapshot({ dataDir, reason: "pre-migration", target, ...(options.configPath ? { configPath: options.configPath } : {}) });
       events.write({ type: "snapshot", reason: snapshot.reason, name: snapshot.name });
     }
     // Each store refuses to open when it is newer than this Jaari or belongs to another owner (ADR-056, ADR-119).

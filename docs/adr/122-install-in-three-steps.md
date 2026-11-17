@@ -42,16 +42,25 @@ and [ADR-028](028-encryption-at-rest.md).
     `usage.db` is older than this Jaari, the daemon copies the stores and the config first.
     ADR-082 has `jaari update` take it; a store is migrated by whatever starts a newer Jaari
     (an update, `git pull`, a package manager), so the copy belongs to the start. `jaari
-    update` takes one more before the swap (0.18).
+    update` takes one more before the swap (0.18). It takes one per target: when the latest
+    snapshot is a pre-migration snapshot for the same store versions, a start that failed and is
+    restarted by launchd or systemd takes no new one, so the copy of the original data is never
+    pruned by restarts.
 8.  **What it holds:** a SQLite online backup of every `*.db` in the data folder, a copy of the
-    config, and a manifest with the store versions, written last. It lives in
-    `data/snapshots/<time>-<reason>`, folder 0700, files 0600; the last two are kept. The
+    config, and a manifest with the store versions, written last through a temporary file and
+    a rename. It lives in `data/snapshots/<sequence>-<time>-<reason>`, folder 0700, files 0600.
+    The sequence number orders the snapshots, so a clock set back does not make a new snapshot
+    look old. The last two are kept; a folder with a missing or unreadable manifest does not
+    count, and pruning removes only folders named like a snapshot. The
     memory git tag of ADR-082 joins with the memory repository (1.1). The event log is not
     copied.
 9.  **`jaari rollback` restores the latest snapshot:** the stores and the config. It refuses
     while the daemon answers on its socket, and it needs a person at a terminal or `--yes`
-    (ADR-076). It first snapshots the data as it is, so a second run undoes the first. Until
-    0.18 it does not swap the Jaari version: the owner starts the version of that time.
+    (ADR-076). It first snapshots the data as it is, so a second run undoes the first. It marks
+    the snapshot it restores in `data/snapshots/restoring` and removes the mark when done: a run
+    that was cut short is finished by the next run, pruning keeps the marked snapshot, and the
+    daemon refuses to start while the mark exists. Until 0.18 it does not swap the Jaari
+    version: the owner starts the version of that time.
 
 **`jaari doctor`, as built.**
 10. **Four levels: `ok`, `info`, `warn`, `FAIL`. Only `FAIL` sets exit code 1.** ADR-032 says
@@ -60,8 +69,10 @@ and [ADR-028](028-encryption-at-rest.md).
 11. **Phase 0 checks:** the Node version (ADR-105); the config, with the `llm` section and the
     owner id; the modes of the data folder and its files (ADR-028); the form of secret zero and
     whether each model key can be read (ADR-079); the version of each store against this
-    Jaari; the latest snapshot; whether the daemon answers; a failed power hold since the last
-    start (ADR-121); FileVault on macOS. Other checks arrive with their features.
+    Jaari, and a store that cannot be read; the latest snapshot and an unfinished rollback;
+    whether the daemon answers within 2 seconds, so a hung daemon is a failure and not a wait;
+    a failed power hold since the last start (ADR-121); FileVault on macOS. Other checks arrive
+    with their features. What it cannot read is a `FAIL` line, never a crash.
 12. **No warning for `env` and `file` providers.** ADR-018 asks for one. The config accepts
     only `os-keychain` and `host-credential` (ADR-079, ADR-118), so a config that names
     another provider fails the config check. The roadmap exit criterion says so now.
@@ -76,7 +87,8 @@ and [ADR-028](028-encryption-at-rest.md).
 15. **Linux: a systemd system unit**, written as root, that runs as the owner's account. With
     `systemd-creds`, each file of the credentials folder is encrypted into
     `/etc/jaari/credstore` and passed with `LoadCredentialEncrypted=`; without it, the plain
-    file is passed with `LoadCredential=`. The command never reads a value. It does not delete
+    file is passed with `LoadCredential=`, which cannot quote a path: a credentials folder with a
+    space or a quote is refused there. The command never reads a value. It does not delete
     the plain files: it tells the owner to do so after the first good start. It must run again
     after every `jaari secret set`. `os-keychain` is refused: a system service has no login
     keychain.
@@ -113,5 +125,8 @@ and [ADR-028](028-encryption-at-rest.md).
   about every 10 seconds; `~/Library/Logs/jaari-daemon.log` shows why.
 - A store created after a snapshot stays in place after a rollback; the Jaari of that time
   does not open it.
+- `jaari rollback` checks the daemon by its socket only. A daemon that has opened the stores
+  but does not listen yet (the first second of a start) is not seen; the owner stops the service
+  before a rollback, as the command says.
 - Roadmap 1.12 (the nightly snapshot) builds on `takeSnapshot`; the ADR-027 bundle replaces
   both in Phase 3.

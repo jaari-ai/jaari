@@ -2,11 +2,11 @@
 // fails (ADR-032). It changes nothing. A warning does not fail it: `jaari update` rolls back on a failure (ADR-122).
 // Checks are added as their features ship.
 import { execFile } from "node:child_process";
-import { readdir, readFile, stat } from "node:fs/promises";
+import { lstat, readdir, readFile, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { parseArgs, promisify } from "node:util";
 import { socketPath } from "@jaari/channels";
-import { listSnapshots, STORE_MIGRATIONS, storeVersion } from "@jaari/core";
+import { listSnapshots, restoring, STORE_MIGRATIONS, storeVersion } from "@jaari/core";
 import { ConfigError, credentialsDirOf, jaariPaths, loadConfig, ownerIdOf, type Config } from "@jaari/core/config";
 import { checkLlmConfig, USAGE_MIGRATIONS } from "@jaari/llm";
 import { createHostCredentialProvider, createOsKeychainProvider, resolveRef, type VaultProvider } from "@jaari/secrets";
@@ -65,7 +65,11 @@ export async function doctor(args: string[], io: Io, deps: DoctorDeps = systemDe
   if (!data) add("info", `data folder ${dataDir} does not exist yet; the daemon makes it at its first start`);
   else {
     const loose = open(data.mode) ? [dataDir] : [];
-    for (const entry of await readdir(dataDir, { withFileTypes: true })) if (open((await stat(join(dataDir, entry.name))).mode)) loose.push(join(dataDir, entry.name));
+    // lstat: a link's own mode says nothing, and a link that points nowhere must not stop the check.
+    for (const entry of await readdir(dataDir)) {
+      const file = await lstat(join(dataDir, entry));
+      if (!file.isSymbolicLink() && open(file.mode)) loose.push(join(dataDir, entry));
+    }
     if (loose.length > 0) add("FAIL", `open to other users: ${loose.join(", ")}; run: chmod -R go-rwx ${dataDir}`);
     else add("ok", `data folder ${dataDir} is private`);
   }
@@ -74,7 +78,13 @@ export async function doctor(args: string[], io: Io, deps: DoctorDeps = systemDe
 
   // ADR-056, ADR-119: a store newer than this Jaari is refused at start; an older one is migrated, after a snapshot.
   for (const [file, steps] of [["session.db", STORE_MIGRATIONS.length], ["usage.db", USAGE_MIGRATIONS.length]] as const) {
-    const version = storeVersion(join(dataDir, file));
+    let version: number | undefined;
+    try {
+      version = storeVersion(join(dataDir, file));
+    } catch (error) {
+      add("FAIL", `${file} cannot be read: ${(error as Error).message}; \`jaari rollback\` restores the latest snapshot`);
+      continue;
+    }
     if (version === undefined) continue;
     if (version > steps) add("FAIL", `${file} is at version ${version}, newer than this Jaari reads (${steps}); update Jaari, or run \`jaari rollback\``);
     else if (version < steps) add("warn", `${file} is at version ${version}; the next start migrates it to ${steps}, after a snapshot`);
@@ -83,8 +93,12 @@ export async function doctor(args: string[], io: Io, deps: DoctorDeps = systemDe
   const snapshot = (await listSnapshots(dataDir)).at(-1);
   if (snapshot) add("info", `latest snapshot: ${snapshot.at} (${snapshot.reason}); \`jaari rollback\` restores it`);
 
+  const unfinished = await restoring(dataDir);
+  if (unfinished) add("FAIL", `a rollback to ${unfinished} did not finish; run \`jaari rollback\` to finish it`);
   const running = await daemonRunning(socketPath(dataDir));
-  add(running ? "ok" : "FAIL", running ? "the daemon answers on its socket" : "the daemon is not running (start it: jaari-daemon, or `jaari service install`)");
+  if (running === "running") add("ok", "the daemon answers on its socket");
+  else if (running === "silent") add("FAIL", "something holds the daemon's socket but does not answer; restart the daemon");
+  else add("FAIL", "the daemon is not running (start it: jaari-daemon, or `jaari service install`)");
 
   // ADR-121: a hold that failed since the last start means the laptop is not kept awake.
   const events = (await readFile(join(dataDir, "events.ndjson"), "utf8").catch(() => "")).split("\n");
@@ -111,7 +125,6 @@ async function secrets(config: Config, at: { paths: ReturnType<typeof jaariPaths
   let provider: VaultProvider;
   if (zero === "os-keychain") {
     provider = deps.keychain();
-    add("ok", "secrets: OS keychain");
   } else {
     const unit = deps.platform === "linux" ? await readFile(deps.unitPath, "utf8").catch(() => "") : "";
     if (unit.includes("LoadCredential")) {
@@ -127,6 +140,7 @@ async function secrets(config: Config, at: { paths: ReturnType<typeof jaariPaths
   }
   const health = await provider.health?.() ?? { ok: true };
   if (!health.ok) return add("FAIL", `secrets: ${health.problem}`);
+  if (zero === "os-keychain") add("ok", "secrets: OS keychain");
   for (const [id, { apiKey }] of Object.entries(checkLlmConfig(config.llm).providers)) {
     if (!apiKey) continue;
     await resolveRef(apiKey, provider).then(() => add("ok", `the key of provider "${id}" can be read`), (error: unknown) => add("FAIL", `the key of provider "${id}": ${(error as Error).message}`));

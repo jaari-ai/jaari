@@ -147,6 +147,24 @@ describe("tier-1 smoke", () => {
     expect(await listSnapshots(join(fresh.root, "data"))).toEqual([]);
   });
 
+  it("keeps the copy of the original data across starts that fail after a migration, and waits for an unfinished rollback (ADR-122)", async () => {
+    const { root, boot } = await setup();
+    const data = join(root, "data");
+    await mkdir(data, { mode: 0o700 });
+    const session = new DatabaseSync(join(data, "session.db"));
+    session.exec("CREATE TABLE transcript (seq INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, message TEXT NOT NULL); CREATE TABLE state (key TEXT PRIMARY KEY, value TEXT NOT NULL)");
+    session.close();
+    const usage = new DatabaseSync(join(data, "usage.db")); // another owner's: refused after session.db has migrated
+    usage.exec("CREATE TABLE owner (id TEXT PRIMARY KEY); INSERT INTO owner VALUES ('22222222-2222-4222-8222-222222222222')");
+    usage.close();
+    for (let start = 0; start < 4; start++) await expect(boot()).rejects.toThrow("belongs to another owner"); // a service manager restarts it
+    const snapshots = await listSnapshots(data);
+    expect(snapshots.map((snapshot) => snapshot.stores["session.db"])).toEqual([0]); // the original, still there
+
+    await writeFile(join(data, "snapshots", "restoring"), snapshots[0]!.name + "\n");
+    await expect(boot()).rejects.toThrow("did not finish");
+  });
+
   it("refuses data that belongs to another owner, and a config with no owner id (ADR-119)", async () => {
     const { root, credentialsDir, boot } = await setup();
     await (await boot()).close();

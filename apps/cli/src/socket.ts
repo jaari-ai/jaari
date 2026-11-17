@@ -7,10 +7,11 @@ import { encode, ndjson, PROTOCOL_VERSION } from "@jaari/channels";
 export type Line = Record<string, unknown>;
 export type Connection = { send(line: object): void; lines: AsyncIterable<Line>; close(): void };
 
-export async function connect(path: string): Promise<Connection> {
+export async function connect(path: string, signal?: AbortSignal): Promise<Connection> {
   // A path is never a host and port, so this cannot reach the network.
   if (!isAbsolute(path)) throw new Error(`the daemon socket must be an absolute path: ${path}`);
   const socket = createConnection({ path });
+  signal?.addEventListener("abort", () => socket.destroy(), { once: true }); // ends the wait for "connect" or the hello
   await once(socket, "connect");
   socket.on("error", () => {}); // after the hello, a closed daemon only ends `lines`
   socket.write(encode({ hello: { versions: [PROTOCOL_VERSION] } }));
@@ -33,13 +34,16 @@ export async function connect(path: string): Promise<Connection> {
   return { send: (line) => void socket.write(encode(line)), lines: lines(), close: () => void socket.destroy() };
 }
 
-// True when something answers on the daemon's socket. A socket file that a crash left behind refuses the connection.
-export async function daemonRunning(path: string): Promise<boolean> {
+// "running": the daemon answered its hello. "stopped": nothing listens (a socket file that a crash left behind refuses
+// the connection). "silent": something listens but does not answer in time, such as a daemon that hangs.
+export async function daemonRunning(path: string, waitMs = 2_000): Promise<"running" | "stopped" | "silent"> {
+  const signal = AbortSignal.timeout(waitMs);
   try {
-    (await connect(path)).close();
-    return true;
+    (await connect(path, signal)).close();
+    return "running";
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
-    return code !== "ENOENT" && code !== "ECONNREFUSED"; // it answered, even if with a refusal
+    if (code === "ENOENT" || code === "ECONNREFUSED") return "stopped";
+    return signal.aborted ? "silent" : "running"; // it answered, even if with a refusal
   }
 }

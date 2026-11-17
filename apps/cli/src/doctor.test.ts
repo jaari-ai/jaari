@@ -70,6 +70,25 @@ it("warns without failing: FileVault off, a config others can read, a hold that 
   expect(fixed.shown).toContain("info  disk encryption: not checked on linux");
 });
 
+it("reports what it cannot read as a failure, never a crash: a dangling link, a damaged store, a silent socket", async () => {
+  const { home, data } = await install();
+  const { symlink } = await import("node:fs/promises");
+  await symlink(join(data, "gone"), join(data, "link"));
+  await writeFile(join(data, "session.db"), "not a database", { mode: 0o600 });
+  // holds the socket without answering, as a hung daemon would
+  const { createServer } = await import("node:net");
+  const { socketPath } = await import("@jaari/channels");
+  const server = createServer(() => {});
+  await new Promise<void>((done) => server.listen(socketPath(data), done));
+  await chmod(socketPath(data), 0o600);
+  const { code, shown } = await check(home);
+  server.close();
+  expect(code).toBe(1);
+  expect(shown).toMatch(/FAIL {2}session\.db cannot be read: .*`jaari rollback`/);
+  expect(shown).toContain("FAIL  something holds the daemon's socket but does not answer");
+  expect(shown).not.toContain("open to other users"); // the link's own mode is not the data's
+});
+
 it("reports the form of secret zero under systemd, a store newer than this Jaari, and the latest snapshot", async () => {
   const { home, data } = await install();
   const unitPath = join(await mkdtemp(join(tmpdir(), "jd-unit-")), "jaari.service");

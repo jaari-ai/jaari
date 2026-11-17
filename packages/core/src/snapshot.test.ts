@@ -34,7 +34,7 @@ describe("snapshot (ADR-082, ADR-122)", () => {
     const { dataDir, configPath, db } = await place();
     const snapshot = await takeSnapshot({ dataDir, configPath, reason: "pre-migration", now: at(0) }); // the store is still open
     db.close();
-    expect(snapshot.name).toBe("2026-11-17T12-00-00-000Z-pre-migration");
+    expect(snapshot.name).toBe("000001-2026-11-17T12-00-00-000Z-pre-migration");
     expect(snapshot).toMatchObject({ reason: "pre-migration", stores: { "session.db": 1 }, config: true });
     expect(notes(join(snapshot.dir, "session.db"))).toEqual(["before"]);
     expect(await readFile(join(snapshot.dir, "config.jsonc"), "utf8")).toContain("// mine");
@@ -67,11 +67,38 @@ describe("snapshot (ADR-082, ADR-122)", () => {
     db.close();
     for (const minute of [0, 1]) await takeSnapshot({ dataDir, reason: "pre-migration", now: at(minute) });
     const { mkdir } = await import("node:fs/promises");
-    await mkdir(join(dataDir, "snapshots", "2026-11-17T12-01-30-000Z-pre-migration")); // no manifest
+    await mkdir(join(dataDir, "snapshots", "000003-2026-11-17T12-01-30-000Z-pre-migration")); // no manifest
     await takeSnapshot({ dataDir, reason: "before-rollback", now: at(2) });
     expect((await listSnapshots(dataDir)).map((snapshot) => [snapshot.at.slice(14, 16), snapshot.reason, snapshot.config])).toEqual([["01", "pre-migration", false], ["02", "before-rollback", false]]);
     expect(await readdir(join(dataDir, "snapshots"))).toHaveLength(2);
     expect(await listSnapshots(join(dataDir, "nothing-here"))).toEqual([]);
+  });
+
+  it("orders by sequence, not by the clock, and keeps the new one when the clock went back", async () => {
+    const { dataDir, db } = await place();
+    db.close();
+    for (const year of [2030, 2031]) await takeSnapshot({ dataDir, reason: "pre-migration", now: new Date(Date.UTC(year, 0, 1)) });
+    const late = await takeSnapshot({ dataDir, reason: "before-rollback", now: at(0) }); // 2026: the clock was set back
+    const kept = await listSnapshots(dataDir);
+    expect(kept.map((snapshot) => snapshot.name)).toEqual([kept[0]!.name, late.name]);
+    expect(kept.at(-1)!.at.startsWith("2026")).toBe(true);
+    expect((await stat(late.dir)).isDirectory()).toBe(true);
+  });
+
+  it("skips a snapshot whose manifest is cut short or of the wrong shape, and never prunes what it does not name", async () => {
+    const { dataDir, db } = await place();
+    db.close();
+    const good = await takeSnapshot({ dataDir, reason: "pre-migration", now: at(0) });
+    const { mkdir } = await import("node:fs/promises");
+    for (const [name, text] of [["000007-2026-11-17T12-07-00-000Z-pre-migration", '{"at":"2026'], ["000008-2026-11-17T12-08-00-000Z-pre-migration", '{"at":"x","reason":"r","config":false,"stores":{"../x":1}}']] as const) {
+      await mkdir(join(dataDir, "snapshots", name));
+      await writeFile(join(dataDir, "snapshots", name, "manifest.json"), text);
+    }
+    await mkdir(join(dataDir, "snapshots", "notes")); // not a snapshot's name
+    expect((await listSnapshots(dataDir)).map((snapshot) => snapshot.name)).toEqual([good.name]);
+    const next = await takeSnapshot({ dataDir, reason: "pre-migration", now: at(1) });
+    expect(next.seq).toBe(9); // after every folder, complete or not
+    expect((await readdir(join(dataDir, "snapshots"))).sort()).toEqual([good.name, next.name, "notes"].sort());
   });
 
   it("reads a store's version without making or changing the file", async () => {

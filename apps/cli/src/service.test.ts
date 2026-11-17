@@ -163,10 +163,18 @@ WantedBy=multi-user.target
 
   it("falls back to plain LoadCredential when systemd-creds is missing", async () => {
     const exec = vi.fn(async (c: string) => ({ code: c === "systemd-creds" ? 127 : 0, stderr: "" }));
+    // `LoadCredential=` cannot quote a path, so a folder with a space is refused rather than written wrong.
+    const spaced = linux({ exec: vi.fn(async (c: string) => ({ code: c === "systemd-creds" ? 127 : 0, stderr: "" })) });
+    expect(await jaari(install("--user", "owner"), spaced.deps)).toMatchObject({ code: 1, text: expect.stringContaining("no space or quote") as string });
+    expect(spaced.deps.writeFile).not.toHaveBeenCalled();
+    const plain = join(root, "creds");
+    await mkdir(plain);
+    await writeFile(join(plain, "llm.faux"), SECRET_VALUE, { mode: 0o600 });
+    await writeFile(join(home, "config.jsonc"), `{"version":1,"secrets":{"zero":"host-credential","credentialsDir":"${plain}"},${LLM}}`);
     const { deps, files } = linux({ exec });
     const { code, text } = await jaari(install("--user", "owner"), deps);
     expect(code).toBe(0);
-    expect(files["/etc/systemd/system/jaari.service"]).toContain(`LoadCredential=llm.faux:${join(dir(), "llm.faux")}\n`);
+    expect(files["/etc/systemd/system/jaari.service"]).toContain(`LoadCredential=llm.faux:${join(plain, "llm.faux")}\n`);
     expect(exec.mock.calls.filter(([c]) => c === "systemd-creds")).toEqual([["systemd-creds", ["--version"]]]);
     expect(deps.mkdir).not.toHaveBeenCalled();
     expect(text).toContain("stay plain; make them readable by root only");
