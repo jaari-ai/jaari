@@ -1,7 +1,7 @@
 # ADR-042: Prompt versioning: versioned prompt files, locked safety prompts, a per-turn fingerprint, propose-and-approve persona edits
 
 - **Status:** Accepted
-- **Extended by:** [ADR-104](104-prompt-injection-defence-in-depth.md)
+- **Extended by:** [ADR-104](104-prompt-injection-defence-in-depth.md), [ADR-120](120-prompt-injection-floor-as-built.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -52,6 +52,8 @@ prompt store outside memory git (two histories to reconcile).
 
 ## Amendments
 - **ADR-104:** the locked safety section has a fixed content contract (who gives instructions, how labels look, what to do with instructions found in data); the canary is never in a form the model is asked to repeat.
+
+- **ADR-120:** the safety section is `packages/core/prompts/safety.md` with a version line; the per-turn fingerprint ships with context assembly (roadmap 1.3), and until then `daemon.start` logs the section's version and SHA-256.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -2,7 +2,7 @@
   "name": "@jaari/core",
   "version": "0.0.0",
   "private": true,
-  "description": "Agent loop on Pi: the persistent main session, its transcript, pause, stop, runaway limits, the event log, and the owner config loader (ADR-001, ADR-031, ADR-032, ADR-065, ADR-118)",
+  "description": "Agent loop on Pi: the persistent main session, its transcript, pause, stop, runaway limits, the event log, the owner config loader, and the prompt-injection floor: the locked safety prompt, fence, defuse, and the leak scan (ADR-001, ADR-031, ADR-032, ADR-065, ADR-104, ADR-118, ADR-120)",
   "license": "MIT",
   "type": "module",
   "exports": {

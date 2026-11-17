@@ -121,3 +121,4 @@
 | [117](117-owner-replies-are-pointers.md) | Owner replies are pointers resolved by code; a reply may widen a brake and may answer one approval | Accepted |
 | [118](118-owner-config-file.md) | The owner config: one JSONC file under `~/.jaari`, versioned, closed at the top, read through `@jaari/core/config` | Accepted |
 | [119](119-owner-id-and-versioned-stores.md) | The owner id comes from `jaari init`; every store is versioned, owned, and opened through one function | Accepted |
+| [120](120-prompt-injection-floor-as-built.md) | The prompt-injection floor as built: model calls are not scanned, the fence id lasts one run, the canary lives with the conversation, and an unlabelled turn is the owner | Accepted |

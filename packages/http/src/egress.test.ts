@@ -2,7 +2,7 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { Agent } from "undici";
-import { createEgress, createPolicyCheck, EgressRefused } from "./egress.js";
+import { createEgress, createPolicyCheck, EgressLeak, EgressRefused } from "./egress.js";
 
 // "rebind.invalid" stands for a public-looking name whose DNS answer points at this machine (DNS rebinding).
 // .invalid never resolves for real (RFC 6761), so a pass proves the connector dialled our checked address.
@@ -129,5 +129,70 @@ describe("createEgress fetch", () => {
   it("refuses the daemon's own port", async () => {
     const egress = createEgress({ allow: ["127.0.0.1"], ownPorts: [target.port] });
     expect((await refusedWith(egress.fetch(`http://127.0.0.1:${target.port}/`))).refusals[0]?.reason).toBe("own-port");
+  });
+
+  describe("the leak scan (ADR-104, ADR-120)", () => {
+    const MARKER = "canary".repeat(4);
+    const setup = async () => {
+      const bodies: string[] = [];
+      const echo = await listen((req, res) => {
+        let body = "";
+        req.on("data", (chunk: Buffer) => (body += chunk.toString("utf8")));
+        req.on("end", () => (bodies.push(body), res.end(body)));
+      });
+      const leaks: { host: string; marker: string }[] = [];
+      const egress = createEgress({
+        allow: [`127.0.0.1:${echo.port}`],
+        scan: (text) => (text.includes(MARKER) ? "canary" : undefined),
+        onLeak: (hit) => void leaks.push(hit),
+      });
+      return { url: `http://127.0.0.1:${echo.port}/`, bodies, leaks, egress, close: () => echo.server.close() };
+    };
+
+    it.each([
+      ["the URL", (url: string) => [`${url}?q=${MARKER}`, undefined] as const],
+      ["a header", (url: string) => [url, { headers: { "x-note": MARKER } }] as const],
+      ["a text body", (url: string) => [url, { method: "POST", body: `{"q":"${MARKER}"}` }] as const],
+      ["a binary body", (url: string) => [url, { method: "POST", body: new TextEncoder().encode(`a${MARKER}b`) }] as const],
+      ["a form body", (url: string) => [url, { method: "POST", body: new URLSearchParams({ q: MARKER }) }] as const],
+      ["a Request object", (url: string) => [new Request(url, { method: "POST", body: MARKER }), undefined] as const],
+    ])("blocks a marker in %s before anything is sent, and reports it", async (_, build) => {
+      const h = await setup();
+      const [input, init] = build(h.url);
+      const error = await h.egress.fetch(input, init).then(() => null, (thrown: unknown) => thrown);
+      h.close();
+      expect(error).toBeInstanceOf(EgressLeak);
+      expect((error as EgressLeak).message).not.toContain(MARKER);
+      expect(h.leaks).toEqual([{ host: new URL(h.url).host, marker: "canary" }]);
+      expect(h.bodies).toEqual([]); // the server saw no request
+    });
+
+    it("does not log a host name that carries the marker", async () => {
+      const h = await setup();
+      const error = await h.egress.fetch(`http://${MARKER}.example.invalid/`).then(() => null, (thrown: unknown) => thrown);
+      h.close();
+      expect(error).toBeInstanceOf(EgressLeak);
+      expect(JSON.stringify({ message: (error as Error).message, leaks: h.leaks })).not.toContain(MARKER);
+      expect(h.leaks).toEqual([{ host: "(a host name that carries the marker)", marker: "canary" }]);
+    });
+
+    it("stops reading a stream body when the caller aborts", async () => {
+      const h = await setup();
+      const abort = new AbortController();
+      const body = new ReadableStream({ start: (controller) => controller.enqueue(new TextEncoder().encode("never ends")) });
+      const pending = h.egress.fetch(h.url, { method: "POST", body, duplex: "half", signal: abort.signal } as RequestInit);
+      setTimeout(() => abort.abort(), 50);
+      await expect(pending).rejects.toThrow(/abort/i);
+      h.close();
+    });
+
+    it("sends a clean request with its body intact, and still checks the address", async () => {
+      const h = await setup();
+      const response = await h.egress.fetch(h.url, { method: "POST", body: "weather in Tunis" });
+      expect(await response.text()).toBe("weather in Tunis");
+      await refusedWith(h.egress.fetch(`http://127.0.0.1:${target.port}/`, { method: "POST", body: "x" }));
+      h.close();
+      expect(h.leaks).toEqual([]);
+    });
   });
 });

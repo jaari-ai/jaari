@@ -1,11 +1,11 @@
 # Jaari: State
 
-Last updated: 2026-11-16
+Last updated: 2026-11-17
 
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (119 ADRs, all Accepted)
+## Decided (120 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -35,7 +35,7 @@ The index is [adr/README.md](adr/README.md). By area:
   hardening, one capability vocabulary with a deny-all gate from Phase 0, standing grants,
   shadow mode, kill switch and limits, outside lineage, threat model, no payments in v1,
   prompt-injection defences (ADR-006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075,
-  079, 081, 090, 092, 095, 096, 104, 112).
+  079, 081, 090, 092, 095, 096, 104, 112, 120).
 - Models: role and tier routing, a pinned main session, local-only defaults decided at init,
   local-model qualification, a monthly budget, refusals in the pinned session; pi-ai 1.5.0 with keys
   only from `secretRef` and the usage log in `node:sqlite` (ADR-011, 019, 045, 046, 085, 114).
@@ -124,7 +124,7 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   an ambiguous send is never retried. The CLI channel listens on `jaari.sock` (mode 0600) in the
   data folder with NDJSON and a version hello; `apps/cli` adds `jaari chat`, which numbers
   messages and reads `>N text` as a reply. Open prompts live in memory until the gate (Phase 3).
-  Next: 0.16, 0.13, and the rest of 0.12.
+  Next: 0.13 and the rest of 0.12.
 - Config (0.6, 2026-11-17, ADR-118): one JSONC file, `~/.jaari/config.jsonc`, with a schema version
   and a closed top level, read through `@jaari/core/config`; the daemon refuses an invalid or
   newer config and names each problem. `jaari init` asks for the target, where secrets are kept,
@@ -137,6 +137,16 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   through `openDatabase`, which runs forward-only migration steps (one transaction each), refuses
   a store newer than the binary or owned by another id, and records the owner. Every row has
   `owner_id` and every event line has `ownerId`; existing data migrates on first start.
+- Prompt-injection floor (0.16, 2026-11-17, ADR-104, ADR-120): `@jaari/core` holds the locked
+  safety section (`packages/core/prompts/safety.md`, version 1), `fence()` and `defuse` with the
+  fence-escape corpus and a test that removes one `defuse` step at a time, the reply marker
+  filter, and `createMarkers` (the install's canary from `session.db`, a fence id that is new at
+  every start, and the leak scan). `@jaari/http` scans the URL, headers, and body of a request
+  when the egress is built with `scan`; the daemon's model egress has none. Delivery filters and
+  scans every outgoing message and every prompt before it opens. A hit writes `leak.blocked`
+  and the owner is told. Not built yet: harness notes on the reply line and the compaction
+  summary, and the per-turn prompt fingerprint (all 1.3); no tool calls `fence()` or the
+  scanned egress before Phase 4.
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript

@@ -1,6 +1,7 @@
 # ADR-104: Prompt injection: a locked prompt contract, unforgeable fences, a typed reader, argument provenance, and signals that only tighten
 
 - **Status:** Accepted
+- **Extended by:** [ADR-120](120-prompt-injection-floor-as-built.md)
 - **Date:** 2026-11-14
 
 Background and sources: [learning/13](../learning/13-prompt-injection-and-system-prompts.md).
@@ -227,7 +228,11 @@ Critic, with Jaari's escalate-only rule).
 - **A hosted detector API (Lakera and similar):** sends the owner's mail and pages to another
   provider; possible later as an owner-enabled package, never the default.
 
+## Amendments
+- **ADR-120:** model calls are not scanned, because the prompt they carry holds the canary and the fence id; an unlabelled owner turn is the owner, and `authority=owner` marks owner words that arrive another way; the fence id lasts one daemon run and is stated after the locked section; the canary is made by the daemon and kept in `session.db`; a hit writes a `leak.blocked` event and the owner is told in the active conversation; Phase 0 also ships the reply marker filter and the scan on the channel send path; `defuse` removes every Unicode format character.
+
 ## Consequences
+- **Roadmap 0.16 (2026-11-17):** sections 1, 2, and 6 built as ADR-120 records.
 _TODO: fill in as implementation reveals them._ Expected: more Allow-once cards in mail and
 research tasks until shadow-mode data tunes the private-data match; one detector pass per
 512-token window of untrusted content.

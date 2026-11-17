@@ -104,8 +104,8 @@ minutes; 5 for `email.send` and `publish`; overridable per capability.
 `secretRef` resolver and the `os-keychain` and `host-credential` providers (ADR-079) ship in
 Phase 0; `env` and `file` are
 for development and make `jaari doctor` warn. Third-party skills install disabled until
-the `reader` role exists. The locked safety section, `fence()`, and canary scanning ship in
-Phase 0 (ADR-104).
+the `reader` role exists. The locked safety section, `fence()`, the reply marker filter, and canary scanning ship in
+Phase 0 (ADR-104, ADR-120).
 
 ## Untrusted content
 Email, web pages, search snippets, and documents go through the tool-less `reader`
@@ -128,8 +128,9 @@ Prompt injection (ADR-104). Probabilistic layers may only tighten a decision, ne
   path or query, and URLs or search queries that match private data, are held.
 - A local injection detector (Llama Prompt Guard 2 86M by default, ProtectAI DeBERTa v2 as the
   licence-free fallback) flags blocks as `suspect`, which suspends grants for the turn.
-- A per-install canary and the session fence id are scanned for on every outbound path and in
-  replies; a hit is blocked and audited. Replies link only to URLs from the owner or the task.
+- A per-install canary and the fence id of the run are scanned for on every outbound path and in
+  replies; a hit is blocked and audited, and the owner is told. Model calls are the one
+  exception: the prompt they carry holds both markers (ADR-120). Replies link only to URLs from the owner or the task.
 
 ## Egress
 All network calls via `@jaari/http`; containers via an egress proxy that blocks private

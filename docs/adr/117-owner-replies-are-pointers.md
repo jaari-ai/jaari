@@ -1,6 +1,7 @@
 # ADR-117: Owner replies are pointers resolved by code; a reply may widen a brake and may answer one approval
 
 - **Status:** Accepted
+- **Extended by:** [ADR-120](120-prompt-injection-floor-as-built.md)
 - **Date:** 2026-11-17
 
 ## Context
@@ -60,6 +61,9 @@ content.
   participant's reply count (ADR-044). **Keeping the code always required:** safe but adds a step
   that a reply already makes unambiguous.
 - **The model chooses which message to quote** (gajae-way `[REPLY:id]`): it can invent or misplace ids.
+
+## Amendments
+- **ADR-120:** the reply line stays one bracketed line with its fixed prefix; it gets its harness note with context assembly (roadmap 1.3), not with roadmap 0.16.
 
 ## Consequences
 - The channel contract suite (ADR-084) tests: unknown reply ids, a reply to a prompt with extra

@@ -56,7 +56,7 @@ effect. Entry: none.
 | 0.13 | Laptop sleep and wake: detection, power assertion, battery pause, network re-probe (catch-up is 1.4) | 057, 082 | 0.5 | Planned |
 | 0.14 | `ownerId` in the data model; versioned stores that migrate on open and refuse newer or foreign data | 044, 056, 119 | 0.5, 0.6 | Delivered (2026-11-17) |
 | 0.15 | `@jaari/http` core: resolve, check, dial; the address-class table; the `direct` provider; the lint rule against other network clients | 016, 053, 080, 113 | 0.1 | Delivered (2026-11-16) |
-| 0.16 | Prompt-injection floor: the locked safety section, `fence()` and `defuse`, the reply marker filter, and canary and fence-id scanning in the `@jaari/http` core and channel send paths | 042, 104 | 0.5, 0.8, 0.15 | Planned |
+| 0.16 | Prompt-injection floor: the locked safety section, `fence()` and `defuse`, the reply marker filter, and canary and fence-id scanning in the `@jaari/http` core (model calls excepted, ADR-120) and channel send paths | 042, 104, 120 | 0.5, 0.8, 0.15 | Delivered (2026-11-17) |
 
 Exit criteria:
 - The tier-1 smoke test boots the daemon on the scripted engine in CI on every pull request,
@@ -88,7 +88,7 @@ Exit criteria:
   address-class tests deny metadata, link-local, and the daemon's own ports (ADR-016, ADR-080).
 - The fence-escape corpus (forged closers, look-alike brackets, zero-width splits, bidi, JSON
   breakouts) cannot open or close a fence, and an outbound call carrying the canary is blocked
-  with an audit row (ADR-104).
+  with an audit row; a model call is not scanned (ADR-104, ADR-120).
 
 No open question blocks this phase.
 Gate status: not passed.
@@ -101,7 +101,7 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 |---|---|---|---|---|
 | 1.1 | Memory repo, single writer, write path; pre-write secret scan of derived facts and files; binary files refused in git | 003, 026, 028, 081, 087, 100 | 0.5 | Planned |
 | 1.2 | Structured records, `records.query`, FTS5 search; sensitivity marking by type and rules | 023, 093 | 1.1 | Planned |
-| 1.3 | Context assembly with harness notes and authority labels (the ADR-117 reply line is labelled as Jaari's quoted words, not the owner's); session orientation and re-injection from state | 024, 065, 104, 117 | 1.2, 0.16 | Planned |
+| 1.3 | Context assembly with harness notes and authority labels (the ADR-117 reply line is labelled as Jaari's quoted words, not the owner's); harness notes on the reply line and the compaction summary, and the per-turn prompt fingerprint (ADR-042, ADR-120); session orientation and re-injection from state | 024, 042, 065, 104, 117, 120 | 1.2, 0.16 | Planned |
 | 1.4 | Job engine; catch-up after sleep (in `@jaari/core`); job-tree abort | 025, 057, 082, 086, 031, 087 | 0.5, 0.13 | Planned |
 | 1.5 | Routines: object, schedule and one-shot triggers, `jaari routine`, run history with job receipts, caps; code steps and one tool-less model step; no proactive delivery (in `@jaari/core`) | 064, 086, 089 | 1.4, 1.11 | Planned |
 | 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9 | Planned |
