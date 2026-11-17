@@ -222,7 +222,7 @@ and audit log.
 | 4.1 | Children and receipts; child limits and child abort; routine model steps run as children | 011, 061, 031, 087, 089, 097 | 1.4, OQ-93 | Planned |
 | 4.2 | `llm.escalate` | 011 | 4.1 | Planned |
 | 4.3 | `reader` role with typed results, outside lineage, argument provenance, the local injection detector, and the reply link policy | 075, 104 | 0.7, 0.16 | Planned |
-| 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core | 016, 053, 080 | 0.15, 2.12 | Planned |
+| 4.4 | `owner-exit` provider and per-capability host allowlists on the `@jaari/http` core; the exit is re-probed on `power.wake` and `network.change` (ADR-057, ADR-121) | 016, 053, 057, 080, 121 | 0.15, 2.12 | Planned |
 | 4.5 | `web.search` and `web.fetch` with pluggable rungs, provenance holds on model-built URLs and private-data queries; watcher triggers on web pages | 012, 049, 064, 089, 104 | 4.3, 4.4, 4.13, OQ-95 | Planned |
 | 4.6 | Optional Web Bot Auth signing for HTTP | 054 | 4.4 | Planned |
 | 4.7 | First sandbox backend: container or bubblewrap; under Compose, bubblewrap in the hardened daemon container with the install probe | 034, 036, 094 | 0.12 | Planned |

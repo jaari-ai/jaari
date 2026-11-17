@@ -1,6 +1,7 @@
 # ADR-082: Phase split for update and laptop catch-up
 
 - **Status:** Accepted
+- **Extended by:** [ADR-121](121-laptop-host-as-built.md)
 - **Date:** 2026-11-12
 
 ## Context
@@ -27,6 +28,12 @@ ADR-027 encrypted bundle. Automatic patch installs turn on with quiet hours and 
 ## Alternatives rejected
 Moving the job engine or backup into Phase 0 (pulls large items forward for a feature with no
 users yet); updating without a snapshot (ADR-056 rejects it).
+
+## Amendments
+- **ADR-121:** Phase 0 detects a wake by the clock gap and emits it as an event. OS wake events
+  (a macOS helper, logind) wait for a feature that needs a faster response. The network re-probe
+  waits for something to re-probe: reconnects with Telegram (2.8) and the overlay (2.12), the
+  egress re-probe with `owner-exit` (4.4).
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

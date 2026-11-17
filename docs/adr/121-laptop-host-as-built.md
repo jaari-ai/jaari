@@ -14,7 +14,7 @@ decided. This ADR decides what 0.13 ships. It amends ADR-057 and ADR-082.
     `power.hold.failed`, and `network.change`. The daemon writes each one to the event log.
     What reacts to an event ships with its own feature: catch-up with the job engine (1.4),
     the battery notice with the notification ledger (2.3), reconnects with the first network
-    channel (2.8) and the overlay (2.12).
+    channel (2.8) and the overlay (2.12), the egress re-probe with the `owner-exit` provider (4.4).
 2.  **Sleep is the larger of two clock gaps.** ADR-057 compares the monotonic and the wall
     clock. Node's monotonic clock stops during sleep on Linux and may count it on macOS, and
     the wall clock can be set back during sleep. So the gap between two ticks is measured on
@@ -49,6 +49,8 @@ decided. This ADR decides what 0.13 ships. It amends ADR-057 and ADR-082.
 9.  **A network change is a changed set of addresses.** Each tick compares the addresses of
     the interfaces that are not loopback or link-local. Phase 0 has nothing to reconnect or
     re-probe: the CLI socket is local, and the egress resolves each call by itself (ADR-080).
+    The first egress whose route depends on where the laptop is, `owner-exit` (4.4), re-probes
+    on `power.wake` and `network.change`.
 
 ## Alternatives rejected
 - **A native macOS helper now:** it needs the signing identity that 0.12 decides, for a
