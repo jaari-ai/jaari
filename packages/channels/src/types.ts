@@ -76,7 +76,7 @@ export type ChannelHealth = { ok: boolean; detail?: string };
 
 export type ChannelContext = {
   manifest: ChannelManifest; // checked by the host before the plugin loads
-  emit(message: InboundMessage): Promise<void>; // hand a message to ingress
+  emit(message: InboundMessage): Promise<void>; // hand a message to ingress; may settle only after the turn, so do not wait on it before reading the next message
   secrets: { get(name: string): Promise<string> }; // only the names in the manifest's `secrets`
   log: { info(message: string): void; warn(message: string): void; error(message: string): void };
   signal: AbortSignal; // aborted on stop()

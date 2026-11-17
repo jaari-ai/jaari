@@ -1,0 +1,22 @@
+{
+  "name": "@jaari/cli",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The `jaari` command: a thin terminal client for the daemon's local socket (ADR-021, ADR-117)",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@jaari/source": "./src/chat.ts",
+      "types": "./dist/chat.d.ts",
+      "default": "./dist/chat.js"
+    }
+  },
+  "bin": { "jaari": "./dist/main.js" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@jaari/channels": "workspace:*"
+  }
+}

@@ -14,11 +14,14 @@ const egress = "Network egress goes through @jaari/http (ADR-080).";
 // isIP and friends only parse a string.
 const HTTP_SERVER = ["createServer", "Server", "IncomingMessage", "ServerResponse"];
 const LISTEN = { http: HTTP_SERVER, https: HTTP_SERVER, net: ["createServer", "Server", "isIP", "isIPv4", "isIPv6"] };
-const NETWORK = [
+const network = (allowed) => [
   ...["http", "https", "net", "tls", "http2", "dgram"].flatMap((m) =>
-    [m, `node:${m}`].map((name) => ({ name, message: egress, ...(LISTEN[m] ? { allowImportNames: LISTEN[m] } : {}) }))),
+    [m, `node:${m}`].map((name) => ({ name, message: egress, ...(allowed[m] ? { allowImportNames: allowed[m] } : {}) }))),
   { name: "undici", message: egress },
 ];
+const NETWORK = network(LISTEN);
+// `jaari chat` dials the daemon's Unix socket; this one file refuses anything but an absolute path (ADR-080, ADR-021).
+const SOCKET_CLIENT = ["apps/cli/src/socket.ts"];
 const NETWORK_GLOBALS = ["fetch", "WebSocket", "EventSource"];
 
 // A later block replaces an earlier block's options for the same rule, so each set of files gets its whole list.
@@ -34,6 +37,7 @@ export default tseslint.config(
   { files: SOURCES, ignores: [...GATE, ...HTTP], rules: restrict([...HOST, ...NETWORK], DEEP) },
   { files: GATE, rules: restrict(NETWORK) },
   { files: HTTP, rules: restrict(HOST, DEEP) },
+  { files: SOCKET_CLIENT, rules: restrict([...HOST, ...network({ ...LISTEN, net: [...LISTEN.net, "createConnection"] })], DEEP) },
   {
     files: SOURCES,
     ignores: HTTP,

@@ -29,6 +29,15 @@ describe("egress lint rule", () => {
     expect(await rulesFired('import { connect } from "node:net";\nexport { connect };', "apps/daemon/src/x.ts")).toEqual(["no-restricted-imports"]);
   });
 
+  it("lets only the CLI's socket file dial the daemon's socket, and keeps every other rule there", async () => {
+    const code = 'import { createConnection } from "node:net";\nexport { createConnection };';
+    expect(await rulesFired(code, "apps/cli/src/socket.ts")).toEqual([]);
+    expect(await rulesFired(code, "apps/cli/src/chat.ts")).toEqual(["no-restricted-imports"]);
+    expect(await rulesFired('import { connect } from "node:net";\nexport { connect };', "apps/cli/src/socket.ts")).toEqual(["no-restricted-imports"]);
+    expect(await rulesFired('import { request } from "node:http";\nexport { request };', "apps/cli/src/socket.ts")).toEqual(["no-restricted-imports"]);
+    expect(await rulesFired('export const f = () => fetch("https://example.com");', "apps/cli/src/socket.ts")).toEqual(["no-restricted-globals"]);
+  });
+
   it("allows the same code inside @jaari/http", async () => {
     expect(await rulesFired('import { Agent } from "undici";\nexport const f = () => fetch("x", { dispatcher: new Agent() } as RequestInit);', "packages/http/src/x.ts")).toEqual([]);
   });
