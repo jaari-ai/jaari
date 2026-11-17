@@ -4,13 +4,13 @@ import { chmod, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { MutableModels } from "@earendil-works/pi-ai";
 import { CLI_MANIFEST, createCliChannel, createIngress, socketPath } from "@jaari/channels";
-import { commandOf, createSession, openEventLog, openStore, type Config } from "@jaari/core";
+import { commandOf, createSession, openDatabase, openEventLog, openStore, ownerIdOf, type Config } from "@jaari/core";
 import { createEgress, type EgressPolicy } from "@jaari/http";
-import { checkLlmConfig, createLlm, openUsageLog } from "@jaari/llm";
+import { checkLlmConfig, createLlm, openUsageLog, USAGE_MIGRATIONS } from "@jaari/llm";
 import { createHostCredentialProvider, createOsKeychainProvider, resolveRef, type VaultProvider } from "@jaari/secrets";
 
 // The sections of the owner's config (ADR-118) that the daemon reads in Phase 0. `llm` is checked by @jaari/llm.
-export type DaemonConfig = Pick<Config, "secrets" | "llm" | "limits" | "events">;
+export type DaemonConfig = Pick<Config, "owner" | "secrets" | "llm" | "limits" | "events">;
 
 export type DaemonOptions = {
   config: DaemonConfig;
@@ -37,6 +37,7 @@ function secretsFor(options: DaemonOptions): VaultProvider {
 
 export async function startDaemon(options: DaemonOptions) {
   const { config, dataDir } = options;
+  const ownerId = ownerIdOf(config); // first: nothing is stored without an owner (ADR-044, ADR-119)
   const secrets = secretsFor(options);
   // Unattended start fails here, before anything runs, when secret zero is unusable (ADR-079).
   const health = await secrets.health();
@@ -58,13 +59,15 @@ export async function startDaemon(options: DaemonOptions) {
   // Created only after the checks, so a refused start leaves nothing behind.
   await mkdir(dataDir, { recursive: true, mode: 0o700 });
   await chmod(dataDir, 0o700); // `mkdir` leaves a folder that already exists as it is; the transcript is private
-  const events = openEventLog(join(dataDir, "events.ndjson"), config.events?.retentionDays);
+  const events = openEventLog(join(dataDir, "events.ndjson"), ownerId, config.events?.retentionDays);
   const opened: { close(): void }[] = [];
   try {
-    const usage = openUsageLog(join(dataDir, "usage.db"));
-    opened.push(usage);
-    const store = openStore(join(dataDir, "session.db"));
+    // Each store refuses to open when it is newer than this Jaari or belongs to another owner (ADR-056, ADR-119).
+    // The conversation first: a wrong id is refused there before a missing usage log is created and claimed by it.
+    const store = openStore(join(dataDir, "session.db"), ownerId);
     opened.push(store);
+    const usage = openUsageLog(openDatabase(join(dataDir, "usage.db"), ownerId, USAGE_MIGRATIONS), ownerId);
+    opened.push(usage);
     // A model server the owner lists in config counts as allowed (ADR-080), so local models pass the egress check.
     const policy: EgressPolicy = { allow: Object.values(providers).flatMap((p) => (p.baseUrl ? [hostPort(p.baseUrl)] : [])) };
     const llm = await createLlm({ config: config.llm, fetch: createEgress(policy).fetch, secrets, usage, ...(options.models ? { models: options.models } : {}) });

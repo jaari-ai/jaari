@@ -2,7 +2,7 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { ConfigError, credentialsDirOf, expandHome, isInsideData, jaariPaths, loadConfig, parseConfig } from "./config.js";
+import { ConfigError, credentialsDirOf, expandHome, isInsideData, jaariPaths, loadConfig, ownerIdOf, parseConfig } from "./config.js";
 
 const llm = { providers: {}, tiers: {}, roles: {} };
 const problems = (text: string): string[] => {
@@ -77,8 +77,21 @@ describe("the owner config (ADR-056, ADR-118)", () => {
     expect(isInsideData("/home/owner/.jaari/data-old", paths)).toBe(false); // a sibling that starts the same
   });
 
+  it("reads a config with no owner id, so init can add it, but gives none to anything that stores data (ADR-119)", () => {
+    const id = "11111111-1111-4111-8111-111111111111";
+    expect(ownerIdOf(parseConfig(JSON.stringify({ version: 1, llm, owner: { id, timezone: "Europe/Paris" } })))).toBe(id);
+    for (const owner of [undefined, {}, { timezone: "Europe/Paris" }]) {
+      expect(() => ownerIdOf(parseConfig(JSON.stringify({ version: 1, llm, owner })))).toThrow("run `jaari init` once");
+    }
+    // An id that is not a lowercase UUID is a typo or a hand edit, never accepted.
+    for (const bad of ["", "owner", id.toUpperCase().replace(/1/g, "A"), `${id}0`]) {
+      expect(problems(JSON.stringify({ version: 1, llm, owner: { id: bad } }))[0]).toMatch(/^\/owner\/id/);
+    }
+  });
+
   it("keeps the smoke config that CI starts valid", async () => {
     const text = await readFile(join(import.meta.dirname, "../../../apps/daemon/smoke.config.json"), "utf8");
     expect(parseConfig(text).secrets?.zero).toBe("host-credential");
+    expect(ownerIdOf(parseConfig(text))).toMatch(/^[0-9a-f-]{36}$/);
   });
 });

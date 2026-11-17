@@ -34,6 +34,7 @@ export const isInsideData = (dir: string, paths: ReturnType<typeof jaariPaths>):
 };
 
 const closed = { additionalProperties: false } as const;
+const OWNER_ID = "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"; // a lowercase UUID
 // A section that belongs to a feature not built yet: its name is known, so a typo in a name still fails, and its
 // content is checked when the feature ships.
 const later = Type.Optional(Type.Unknown());
@@ -57,7 +58,10 @@ export const ConfigSchema = Type.Object(
     llm: Type.Unknown(), // checked by @jaari/llm, which owns its schema
     limits: Type.Optional(Type.Object(Object.fromEntries(Object.keys(LIMITS).map((name) => [name, Type.Optional(Type.Integer({ minimum: 1 }))])), closed)),
     events: Type.Optional(Type.Object({ retentionDays: Type.Optional(Type.Integer({ minimum: 1 })) }, closed)), // ADR-032
-    owner: later, channels: later, persona: later, shadow: later, memory: later, web: later, egress: later, backup: later,
+    // ADR-119: `id` is written once by `jaari init` and never changes; every record carries it (ADR-044). The other
+    // owner keys (time zone, quiet hours, phones) are checked when their features ship.
+    owner: Type.Optional(Type.Object({ id: Type.Optional(Type.String({ pattern: OWNER_ID })) }, { additionalProperties: true })),
+    channels: later, persona: later, shadow: later, memory: later, web: later, egress: later, backup: later,
   },
   closed,
 );
@@ -105,6 +109,14 @@ export function parseConfig(text: string): Config {
   for (let from = version as number; from < CONFIG_VERSION; from++) value = { ...MIGRATIONS[from - 1]!(value as Record<string, unknown>), version: from + 1 };
   if (!check.Check(value)) throw new ConfigError(check.Errors(value).flatMap(problemOf));
   return value as Config;
+}
+
+// The owner's id, for everything that stores a record. A config from before roadmap 0.14 has none: the loader still
+// reads it, so that `jaari init` can add the id, but nothing that stores data starts without it (ADR-119).
+export function ownerIdOf(config: Pick<Config, "owner">): string {
+  const id = config.owner?.id;
+  if (!id) throw new ConfigError(['"owner.id" is missing; run `jaari init` once: it adds the id and keeps everything else'], "The config has no owner id:");
+  return id;
 }
 
 export async function loadConfig(path: string): Promise<Config> {

@@ -10,6 +10,7 @@ import type { Limits } from "./limits.js";
 import { createSession, createWatchdog, selectCut } from "./session.js";
 import { openStore } from "./store.js";
 
+const OWNER = "11111111-1111-4111-8111-111111111111";
 const tool = (name: string, execute: AgentTool["execute"]): AgentTool => ({ name, label: name, description: name, parameters: { type: "object", properties: {} }, execute });
 const echo = tool("echo", async () => ({ content: [{ type: "text", text: "ok" }], details: undefined }));
 const broken = tool("broken", async () => { throw new Error("disk full"); });
@@ -32,7 +33,7 @@ async function setup(options: { path?: string; limits?: Partial<Limits>; tools?:
   });
   const path = options.path ?? join(dir, "session.db");
   const log = join(dir, "events.ndjson");
-  const session = createSession({ store: openStore(path), events: openEventLog(log), llm, systemPrompt: "You are Jaari.", tools: options.tools, limits: options.limits });
+  const session = createSession({ store: openStore(path, OWNER), events: openEventLog(log, OWNER), llm, systemPrompt: "You are Jaari.", tools: options.tools, limits: options.limits });
   const events = async () => (await readFile(log, "utf8")).trim().split("\n").map((line) => JSON.parse(line) as { type: string; limit?: string });
   return { faux, session, path, events };
 }
@@ -63,7 +64,7 @@ describe("the main session", () => {
     // A preface never turns a command into model input, and never hides one.
     expect(await session.send("stop", { preface: "[replying to Jaari: \"x\"]" })).toEqual({ status: "paused" });
 
-    const store = openStore(path);
+    const store = openStore(path, OWNER);
     const key = { channel: "cli", conversationId: "local", messageId: "m1" };
     expect(store.refs.put(key, "turn")).toBe(true);
     expect(store.refs.put(key, "turn")).toBe(false); // the same message delivered twice
@@ -158,7 +159,7 @@ describe("the main session", () => {
     expect(context).toContain("SUMMARY-1");
     expect(context).not.toContain("first question");
     expect(context).toContain("two two"); // the cut may now land on the model's last answer
-    expect(openStore(path).load().length).toBe(4);
+    expect(openStore(path, OWNER).load().length).toBe(4);
 
     const reopened = (await setup({ path, limits, window: 1_000 })).session;
     expect(seen({ messages: reopened.messages() })).toBe(context);
@@ -272,7 +273,7 @@ describe("review 2 of 0.5", () => {
     expect(context).not.toContain("one");
     expect(context).toContain("archived");
     expect((await session.send("five")).notice).toBeUndefined(); // told once
-    expect(openStore(path).load().length).toBeGreaterThan(6); // the old segment stays in the transcript
+    expect(openStore(path, OWNER).load().length).toBeGreaterThan(6); // the old segment stays in the transcript
   });
 
   it("compacts at open when the stored context no longer fits the model (ADR-065)", async () => {

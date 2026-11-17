@@ -5,7 +5,7 @@ import { DatabaseSync } from "node:sqlite";
 import { createModels, fauxAssistantMessage, fauxProvider, type AssistantMessage, type Context } from "@earendil-works/pi-ai";
 import { describe, expect, it, vi } from "vitest";
 import { createLlm, outcomeOf } from "./llm.js";
-import { openUsageLog, type UsageRow } from "./usage.js";
+import { openUsageLog, USAGE_MIGRATIONS, type UsageRow } from "./usage.js";
 
 const context: Context = { messages: [{ role: "user", content: "hi", timestamp: Date.now() }] };
 const refusal = (raw: string): AssistantMessage => ({ ...fauxAssistantMessage("", { stopReason: "error", errorMessage: "no" }), rawStopReason: raw });
@@ -137,12 +137,15 @@ describe("providers", () => {
 
 it("the usage log writes one row per call to SQLite", async () => {
   const path = join(await mkdtemp(join(tmpdir(), "jaari-usage-")), "usage.db");
-  const log = openUsageLog(path);
+  const owner = "11111111-1111-4111-8111-111111111111";
+  const opened = new DatabaseSync(path);
+  for (const step of USAGE_MIGRATIONS) step(opened, owner); // in the daemon, openDatabase from @jaari/core runs these
+  const log = openUsageLog(opened, owner);
   log.record({ role: "classify", provider: "faux", model: "a", input: 3, output: 5, cacheRead: 0, cacheWrite: 0, costUsd: 0.25, latencyMs: 12, outcome: "ok" });
   log.close();
   const db = new DatabaseSync(path);
-  expect(db.prepare("SELECT role, model, input, output, cost_usd, outcome FROM usage").all()).toEqual([
-    { role: "classify", model: "a", input: 3, output: 5, cost_usd: 0.25, outcome: "ok" },
+  expect(db.prepare("SELECT owner_id, role, model, input, output, cost_usd, outcome FROM usage").all()).toEqual([
+    { owner_id: owner, role: "classify", model: "a", input: 3, output: 5, cost_usd: 0.25, outcome: "ok" },
   ]);
   db.close();
 });

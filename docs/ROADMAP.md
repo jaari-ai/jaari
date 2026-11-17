@@ -52,9 +52,9 @@ effect. Entry: none.
 | 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084, 108, 109, 110 | 0.1 | Delivered (2026-11-16) |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Delivered (2026-11-16) |
 | 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079, 112 | 0.1 | Delivered (2026-11-16) |
-| 0.12 | Install, manual update with a local pre-update snapshot, rollback, and migrations; `jaari doctor` (checks are added as their features ship); `jaari config`, the `compose.yaml` that `jaari init` writes, and `jaari service install` with encrypted credentials (ADR-118) | 056, 032, 079, 082, 118 | 0.5, 0.6 | Planned |
+| 0.12 | Install, manual update with a local pre-update snapshot, rollback (store migrations on open shipped with 0.14, ADR-119; the pre-update snapshot protects them from here); `jaari doctor` (checks are added as their features ship); `jaari config`, the `compose.yaml` that `jaari init` writes, and `jaari service install` with encrypted credentials (ADR-118) | 056, 032, 079, 082, 118 | 0.5, 0.6 | Planned |
 | 0.13 | Laptop sleep and wake: detection, power assertion, battery pause, network re-probe (catch-up is 1.4) | 057, 082 | 0.5 | Planned |
-| 0.14 | `ownerId` in the data model | 044 | 0.5 | Planned |
+| 0.14 | `ownerId` in the data model; versioned stores that migrate on open and refuse newer or foreign data | 044, 056, 119 | 0.5, 0.6 | Delivered (2026-11-17) |
 | 0.15 | `@jaari/http` core: resolve, check, dial; the address-class table; the `direct` provider; the lint rule against other network clients | 016, 053, 080, 113 | 0.1 | Delivered (2026-11-16) |
 | 0.16 | Prompt-injection floor: the locked safety section, `fence()` and `defuse`, the reply marker filter, and canary and fence-id scanning in the `@jaari/http` core and channel send paths | 042, 104 | 0.5, 0.8, 0.15 | Planned |
 

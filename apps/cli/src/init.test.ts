@@ -133,3 +133,27 @@ it("writes through a link whose target does not exist yet", async () => {
   expect((await stat(join(root, "dotfiles", "jaari.jsonc"))).mode & 0o777).toBe(0o600);
   expect((await loadConfig(config)).version).toBe(1);
 });
+
+it("writes the owner id once, keeps it on later runs, and adds it to a config from before it existed (ADR-119)", async () => {
+  await answer(["", "", "", "", "", "claude-test"]);
+  const id = (await loadConfig(config)).owner?.id;
+  expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/); // a random UUID
+  await answer(["server", "", "", ""]);
+  expect((await loadConfig(config)).owner?.id).toBe(id); // the stores would refuse a new one
+
+  // A config as roadmap 0.6 wrote it: no owner section, and a comment to keep.
+  await writeFile(config, `{
+  // mine, by hand
+  "version": 1,
+  "deployment": { "target": "server" },
+  "secrets": { "zero": "os-keychain" },
+  "llm": { "providers": { "anthropic": { "apiKey": "secretRef:llm.anthropic" } }, "tiers": { "large": ["anthropic/claude-test"] }, "roles": { "main": "large", "summarize": "large" } }
+}
+`);
+  expect((await answer(["", "", "", ""])).code).toBe(0);
+  const added = await loadConfig(config);
+  expect(added.owner?.id).toMatch(/^[0-9a-f-]{36}$/);
+  expect(added.owner?.id).not.toBe(id);
+  expect(added.deployment?.target).toBe("server");
+  expect(await readFile(config, "utf8")).toContain("// mine, by hand");
+});

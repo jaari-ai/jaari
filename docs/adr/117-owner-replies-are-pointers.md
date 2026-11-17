@@ -74,3 +74,5 @@ content.
   the owner's words: memory capture (ADR-074, roadmap 1.8) strips the line before the evidence
   check, and context assembly (roadmap 1.3) labels it, so a fact is never drawn from Jaari's own
   quoted question.
+- Roadmap 0.14 (2026-11-17): `message_ref` rows carry `owner_id`, and a lookup is scoped to the
+  owner (ADR-119).

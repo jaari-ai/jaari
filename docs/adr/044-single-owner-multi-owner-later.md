@@ -39,4 +39,5 @@ process before isolation exists); no owner id in the data model (a later migrati
 store); replying to unknown senders (it confirms the bot exists and invites probing).
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- Roadmap 0.14 (2026-11-17): the id, the `owner_id` column, the `owner` table in each store, and
+  the refusal of a store that belongs to another owner are ADR-119.

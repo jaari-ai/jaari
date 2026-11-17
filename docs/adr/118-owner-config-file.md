@@ -59,3 +59,5 @@ of ADR-079 only reads a folder that a service manager supplies).
   `jaari llm eval` (roadmap 1.9); encrypted systemd credentials are set up by `jaari service
   install` (roadmap 0.12).
 - The example config is loaded by a test, so it cannot drift from the schema.
+- Roadmap 0.14 (2026-11-17): `owner.id` is checked (a lowercase UUID) and written once by
+  `jaari init`; the other `owner` keys stay unchecked until their features ship (ADR-119).
