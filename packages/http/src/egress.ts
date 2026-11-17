@@ -36,6 +36,12 @@ export class EgressLeak extends Error {
   }
 }
 
+const aborted = (signal: AbortSignal) =>
+  new Promise<never>((_, reject) => {
+    if (signal.aborted) reject(signal.reason);
+    signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+  });
+
 type Rule = { list: BlockList; port: number | null } | { name: string };
 
 // A DNS name with at least one letter (so "1.2.3:80" is not one), and a required port.
@@ -120,10 +126,13 @@ export function createEgress(policy: EgressPolicy = {}): { fetch: typeof globalT
     // shortcut: the body is read into memory once more for the scan, stream it when a tool uploads large files (roadmap 4.x)
     async fetch(input, init) {
       const request = new Request(input, init);
-      const body = request.body ? await request.clone().text() : "";
+      // The read stops when the caller aborts, as the unscanned fetch would.
+      const body = request.body ? await Promise.race([request.clone().text(), aborted(request.signal)]) : "";
       const marker = scan([request.url, ...[...request.headers].map(([name, value]) => `${name}: ${value}`), body].join("\n"));
       if (!marker) return send(request);
-      const { host } = new URL(request.url);
+      // The host name itself may carry the marker, and the host goes to the log and into the error.
+      const { host: name } = new URL(request.url);
+      const host = scan(name) ? "(a host name that carries the marker)" : name;
       policy.onLeak?.({ host, marker });
       throw new EgressLeak(host, marker);
     },

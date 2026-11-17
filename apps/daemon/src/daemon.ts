@@ -4,7 +4,7 @@ import { chmod, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { MutableModels } from "@earendil-works/pi-ai";
 import { CLI_MANIFEST, createCliChannel, createIngress, socketPath } from "@jaari/channels";
-import { commandOf, createMarkers, createSession, openDatabase, openEventLog, openStore, ownerIdOf, randomMarker, SAFETY, stripMarkers, systemPrompt, type Config } from "@jaari/core";
+import { commandOf, createMarkers, createSession, openDatabase, openEventLog, openStore, ownerIdOf, randomMarker, SAFETY, systemPrompt, type Config } from "@jaari/core";
 import { createEgress, type EgressPolicy } from "@jaari/http";
 import { checkLlmConfig, createLlm, openUsageLog, USAGE_MIGRATIONS } from "@jaari/llm";
 import { createHostCredentialProvider, createOsKeychainProvider, resolveRef, type VaultProvider } from "@jaari/secrets";
@@ -77,7 +77,7 @@ export async function startDaemon(options: DaemonOptions) {
     // Model calls are not scanned: the prompt they carry holds the canary and the fence id by design (ADR-120).
     const llm = await createLlm({ config: config.llm, fetch: createEgress(policy).fetch, secrets, usage, ...(options.models ? { models: options.models } : {}) });
     const session = createSession({ store, events, llm, systemPrompt: systemPrompt(markers), ...(config.limits ? { limits: config.limits } : {}) });
-    const ingress = createIngress({ session, refs: store.refs, events, isCommand: (text) => commandOf(text) !== undefined, guard: { strip: stripMarkers, leak: markers.leak } });
+    const ingress = createIngress({ session, refs: store.refs, events, isCommand: (text) => commandOf(text) !== undefined, guard: markers });
     // The egress for everything that is not a model call: a request that carries a marker is blocked, logged, and
     // reported to the owner (ADR-104). No tool uses it yet; the first one that fetches does (roadmap 4.5).
     const egress = createEgress({

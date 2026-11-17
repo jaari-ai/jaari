@@ -35,16 +35,24 @@ canary in the Stable part), and [ADR-117](117-owner-replies-are-pointers.md) (th
    the provider sees it in every call. A restored backup keeps its canary.
 5. **What a hit does.** The check runs before anything is sent. It writes one `leak.blocked`
    line to the event log with the path (`egress` or `channel`), the marker's name (`canary` or
-   `fence-id`), and the host or channel. The value is never logged. The event log is the audit
+   `fence-id`), and the host or channel. The value is never logged: a host name that itself
+   carries the marker is logged as "(a host name that carries the marker)". The event log is the audit
    record until the action log ships with the gate (Phase 3). The owner is told in the active
    conversation: a blocked reply is replaced by a fixed notice, and a blocked outbound call
    sends one through `ingress.tell`. That notice goes direct until the notification ledger
    exists (roadmap 2.3).
-6. **What the scan finds.** A marker as written, in another letter case, percent-encoded, or
-   split by invisible characters. It reads the URL, every header, and the body. It does not
-   find a base64, compressed, or reworded leak (THREAT_MODEL.md, "Any path out").
+6. **What the scan finds.** Both markers are base32, so the scan compares letters and digits
+   only. It finds a marker as written, in another letter case or in full-width letters,
+   percent-encoded (each `%xx` on its own, twice, so a stray `%` elsewhere does not hide it), or
+   split by any other characters: spaces, dots (a host name), hyphens, NUL bytes (UTF-16), or
+   invisible characters. It reads the URL, every header, and the body, and stops reading a body
+   when the caller aborts. It does not find a hex, base64, compressed, or reworded leak
+   (THREAT_MODEL.md, "Any path out").
 7. **The order on a channel.** The reply marker filter runs first, then the scan, then the
-   split into messages, so a marker cut in two cannot pass. A reply that held only markers is
+   split into messages, so a marker cut in two cannot pass. The filter removes a block of this
+   run's fence id whole. Any other marker loses only its header, so text between forged markers
+   stays. No opening or closing bracket of a marker is left, so the pieces cannot join into a
+   new one, and the filter is one pass, in linear time. A reply that held only markers is
    replaced by a fixed line. A prompt is scanned before it opens, so an answer word cannot
    settle a prompt that the owner never saw.
 8. **`defuse` removes every Unicode format character** (general category Cf) and every

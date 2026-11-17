@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createMarkers, defuse, DEFUSE_STEPS, randomMarker, stripMarkers } from "./fence.js";
+import { createMarkers, defuse, DEFUSE_STEPS, randomMarker } from "./fence.js";
 import { SAFETY, systemPrompt } from "./prompt.js";
 
 const CANARY = "canary".repeat(4);
@@ -58,12 +58,30 @@ describe("defuse and fence (ADR-104)", () => {
   });
 });
 
-describe("the reply marker filter (ADR-104)", () => {
-  it("removes an echoed block and any marker left alone", () => {
+describe("the reply marker filter (ADR-104, ADR-120)", () => {
+  const strip = markers.strip;
+  it("removes an echoed block of this run whole", () => {
     const block = markers.fence({ from: "web", kind: "page" }, "information", "page text");
-    expect(stripMarkers(`Here it is:\n${block}\nDone.`)).toBe("Here it is:\nDone.");
-    expect(stripMarkers(`a ${OPEN}/jaari:${FID}${CLOSE} b ${OPEN}jaari:zzz from=x`)).toBe("a  b ");
-    expect(stripMarkers("plain [text] stays")).toBe("plain [text] stays");
+    expect(strip(`Here it is:\n${block}\nDone.`)).toBe("Here it is:\nDone.");
+  });
+
+  it.each([
+    ["a lone opener and closer", `a ${OPEN}/jaari:${FID}${CLOSE} b ${OPEN}jaari:zzz from=x`, "a  b "],
+    ["a spliced marker", `${OPEN}${OPEN}jaari:${CLOSE}jaari:x${CLOSE} hi`, "jaari:x hi"],
+    ["a marker with a zero-width or a space after the bracket", `${OPEN}\u200Bjaari:a${CLOSE}x ${OPEN} jaari:a${CLOSE}y`, "x y"],
+    ["a block of another fence id: its markers go, its text stays", `${OPEN}jaari:a${CLOSE}keep ${OPEN}/jaari:zzz${CLOSE} tail`, "keep  tail"],
+    ["brackets that open no marker", `${OPEN}1${CLOSE} plain [text]`, "1 plain [text]"],
+  ])("leaves no bracket from %s", (_, input, expected) => {
+    expect(strip(input)).toBe(expected);
+    expect(strip(input)).not.toMatch(/[\u27E6\u27E7]/);
+  });
+
+  it("runs in linear time on a reply full of markers", () => {
+    for (const input of [`${OPEN}jaari:x${CLOSE}`.repeat(50_000), `${OPEN}jaari:${FID}`.repeat(50_000), `${OPEN}jaari:${FID}${CLOSE}x`.repeat(50_000)]) {
+      const started = performance.now();
+      expect(strip(input)).not.toMatch(/[\u27E6\u27E7]/);
+      expect(performance.now() - started).toBeLessThan(250);
+    }
   });
 });
 
@@ -75,6 +93,12 @@ describe("the leak scan (ADR-104)", () => {
     ["the canary split by a zero-width space", `${CANARY.slice(0, 5)}\u200B${CANARY.slice(5)}`, "canary"],
     ["the fence id", `https://example.com/${FID}/x`, "fence-id"],
     ["the fence id beside a broken percent sign", `100% ${FID}`, "fence-id"],
+    ["the canary percent-encoded beside a broken percent sign", `100% sure ${[...CANARY].map((c) => `%${c.charCodeAt(0).toString(16)}`).join("")} and %E0%A4%A`, "canary"],
+    ["the canary percent-encoded twice", [...CANARY].map((c) => `%25${c.charCodeAt(0).toString(16)}`).join(""), "canary"],
+    ["the canary as UTF-16", Buffer.from(CANARY, "utf16le").toString("latin1"), "canary"],
+    ["the canary split by dots, as in a host name", `${CANARY.slice(0, 8)}.${CANARY.slice(8)}.example.com`, "canary"],
+    ["the canary split by spaces and hyphens", [...CANARY].join(" -"), "canary"],
+    ["the canary in full-width letters", [...CANARY].map((c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0)).join(""), "canary"],
   ])("finds %s", (_, text, marker) => {
     expect(markers.leak(text)).toBe(marker);
   });

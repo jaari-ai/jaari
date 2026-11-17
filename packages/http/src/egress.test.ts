@@ -167,6 +167,25 @@ describe("createEgress fetch", () => {
       expect(h.bodies).toEqual([]); // the server saw no request
     });
 
+    it("does not log a host name that carries the marker", async () => {
+      const h = await setup();
+      const error = await h.egress.fetch(`http://${MARKER}.example.invalid/`).then(() => null, (thrown: unknown) => thrown);
+      h.close();
+      expect(error).toBeInstanceOf(EgressLeak);
+      expect(JSON.stringify({ message: (error as Error).message, leaks: h.leaks })).not.toContain(MARKER);
+      expect(h.leaks).toEqual([{ host: "(a host name that carries the marker)", marker: "canary" }]);
+    });
+
+    it("stops reading a stream body when the caller aborts", async () => {
+      const h = await setup();
+      const abort = new AbortController();
+      const body = new ReadableStream({ start: (controller) => controller.enqueue(new TextEncoder().encode("never ends")) });
+      const pending = h.egress.fetch(h.url, { method: "POST", body, duplex: "half", signal: abort.signal } as RequestInit);
+      setTimeout(() => abort.abort(), 50);
+      await expect(pending).rejects.toThrow(/abort/i);
+      h.close();
+    });
+
     it("sends a clean request with its body intact, and still checks the address", async () => {
       const h = await setup();
       const response = await h.egress.fetch(h.url, { method: "POST", body: "weather in Tunis" });

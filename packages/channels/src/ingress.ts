@@ -157,11 +157,11 @@ export function createIngress(deps: IngressDeps) {
     if (stripped !== item.text) events.write({ type: "reply.stripped", channel: to.channel });
     const marker = deps.guard.leak(stripped);
     if (marker) events.write({ type: "leak.blocked", path: "channel", channel: to.channel, marker });
-    const parts = split(marker ? LEAK : stripped.trim() ? stripped : ONLY_MARKERS, manifest.channel.maxMessageChars);
+    const parts = split(marker ? LEAK : stripped.trim() || stripped === item.text ? stripped : ONLY_MARKERS, manifest.channel.maxMessageChars);
     for (const [i, text] of parts.entries()) {
       const out: OutboundMessage = { channel: to.channel, conversationId: to.conversationId, idempotencyKey: `${base}:${i}`, text, threadId: to.threadId };
       if (i === 0 && replyTo) out.replyTo = replyTo;
-      if (item.prompt && i === parts.length - 1) out.prompt = item.prompt;
+      if (item.prompt && !marker && i === parts.length - 1) out.prompt = item.prompt;
       const id = await attempt(adapter, out);
       if (id === undefined) return; // the later parts would arrive with a gap
       refs.put({ channel: to.channel, conversationId: to.conversationId, messageId: id }, origin, i === 0 ? item.seq : undefined);

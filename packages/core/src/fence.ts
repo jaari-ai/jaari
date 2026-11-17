@@ -35,20 +35,21 @@ export const DEFUSE_STEPS: readonly { name: string; apply(text: string): string 
 
 export const defuse = (body: string, steps = DEFUSE_STEPS): string => steps.reduce((text, step) => step.apply(text), body);
 
-// The reply marker filter: a whole echoed block goes, then any marker left alone, closed or not.
-const BLOCK = /\u27E6jaari:[^\u27E7\n]*\u27E7[\s\S]*?\u27E6\/jaari:[^\u27E7\n]*\u27E7\n?/g;
-const LONE = /\u27E6\/?jaari:[^\u27E7\n]*\u27E7?/g;
-export const stripMarkers = (text: string): string => text.replace(BLOCK, "").replace(LONE, "");
-
 const TOKEN = /^[a-z0-9][a-z0-9._:-]{0,63}$/; // `from` and `kind` are set by code; a value from content would be refused here
-const decoded = (text: string): string => {
-  try {
-    return decodeURIComponent(text);
-  } catch {
-    return text; // not percent-encoded as a whole; the raw form is still checked
-  }
-};
+const OPENER = "\u27E6";
+const CLOSER = "\u27E7";
+const HEADER_CHARS = 200; // longer than any marker code writes
+// What a marker header looks like once invisible characters and spaces are gone: "jaari:\u2026" or "/jaari:\u2026".
+const MARKER_HEADER = /^\/?jaari:/i;
 
+// Text as a marker could hide in it: full-width letters folded, lower case, %xx decoded one byte at a time (so
+// one malformed "%" elsewhere cannot stop it), twice for a double encoding, then only letters and digits kept,
+// so a space, dot, hyphen, NUL (UTF-16), or invisible character between the letters does not split a marker.
+const comparable = (text: string): string => {
+  let plain = text.normalize("NFKC").toLowerCase();
+  for (let round = 0; round < 2; round++) plain = plain.replace(/%([0-7][0-9a-f])/g, (_, hex: string) => String.fromCharCode(parseInt(hex, 16)));
+  return plain.replace(/[^a-z0-9]/g, "");
+};
 // One per daemon run: the fence id is new at every start, and the canary is the install's (ADR-120).
 export function createMarkers(canary: string, fenceId = randomMarker(8)) {
   if (canary.length < 16 || fenceId.length < 8) throw new Error("the canary needs 16 characters and the fence id 8: a short marker is found by accident");
@@ -62,13 +63,39 @@ export function createMarkers(canary: string, fenceId = randomMarker(8)) {
       if (!AUTHORITIES.includes(authority)) throw new Error(`unknown authority ${JSON.stringify(authority)}`);
       return `\u27E6jaari:${fenceId} from=${source.from} kind=${source.kind} authority=${authority}\u27E7\n${JSON.stringify(defuse(body))}\n\u27E6/jaari:${fenceId}\u27E7`;
     },
-    // Which marker the text carries, if any. Found as written, in another case, percent-encoded, or split by
-    // invisible characters.
-    // shortcut: a base64, compressed, or reworded leak passes (THREAT_MODEL.md), add encodings when a tool can produce them (roadmap 4.x)
+    // Which marker the text carries, if any: as written, in another case or in full-width letters, percent-encoded,
+    // or split by any characters that are not letters or digits. Both markers are base32, so nothing is lost.
+    // shortcut: a hex, base64, compressed, or reworded leak passes (THREAT_MODEL.md), add encodings when a tool can produce them (roadmap 4.x)
     leak(text: string): "canary" | "fence-id" | undefined {
-      const plain = text.replace(INVISIBLE, "").toLowerCase();
-      const forms = [plain, decoded(plain)];
-      return hidden.find(([, marker]) => forms.some((form) => form.includes(marker)))?.[0];
+      const plain = comparable(text);
+      return hidden.find(([, marker]) => plain.includes(marker))?.[0];
+    },
+    // The reply marker filter. A block of this run's fence id goes whole. Any other marker loses its header, so
+    // its content stays as plain text. Every bracket that could open or close a marker goes, so nothing in the
+    // result can join into one. One pass, so a long reply full of brackets costs linear time.
+    strip(text: string): string {
+      const closeTag = `${OPENER}/jaari:${fenceId}${CLOSER}`;
+      let out = "";
+      let at = 0;
+      let nextClose = -2; // -2: not searched yet; -1: no closing tag after this point
+      for (let open = text.indexOf(OPENER); open !== -1; open = text.indexOf(OPENER, at)) {
+        out += text.slice(at, open);
+        // The header ends at a closing bracket, a line break, or the next opening bracket.
+        let end = open + 1;
+        while (end < text.length && end < open + 1 + HEADER_CHARS && !"\u27E6\u27E7\n".includes(text[end]!)) end++;
+        const header = text.slice(open + 1, end).replace(INVISIBLE, "").replace(/\s/g, "");
+        if (!MARKER_HEADER.test(header)) {
+          at = open + 1; // a lone bracket: drop it and keep what follows
+          continue;
+        }
+        at = text[end] === CLOSER ? end + 1 : end;
+        // Spaces are gone from `header`, so a real opener reads "jaari:<id>from=\u2026".
+        if (header === `jaari:${fenceId}` || header.startsWith(`jaari:${fenceId}from=`)) {
+          if (nextClose !== -1 && nextClose < at) nextClose = text.indexOf(closeTag, at);
+          if (nextClose !== -1) at = nextClose + closeTag.length + (text[nextClose + closeTag.length] === "\n" ? 1 : 0);
+        }
+      }
+      return (out + text.slice(at)).replaceAll(CLOSER, "");
     },
   };
 }
