@@ -1,5 +1,5 @@
 // The tier-1 smoke test (ADR-041): boots the real daemon on pi-ai's scripted provider, with no API calls.
-import { chmod, mkdir, mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 // eslint-disable-next-line no-restricted-imports -- the test plays `jaari chat`, so it dials the daemon's local socket
 import { createConnection } from "node:net";
@@ -138,6 +138,11 @@ describe("tier-1 smoke", () => {
     const other = { ...config, owner: { id: "22222222-2222-4222-8222-222222222222" } };
     await expect(startDaemon({ config: other, dataDir: join(root, "data"), credentialsDir })).rejects.toThrow(/belongs to another owner \(11111111-/);
     await (await boot()).close(); // the refused start changed nothing: the right owner still opens it
+    // A deleted usage log is not created and claimed by a wrong id: the conversation refuses it first.
+    await rm(join(root, "data", "usage.db"));
+    await expect(startDaemon({ config: other, dataDir: join(root, "data"), credentialsDir })).rejects.toThrow("belongs to another owner");
+    await expect(stat(join(root, "data", "usage.db"))).rejects.toThrow("ENOENT");
+    await (await boot()).close();
     await expect(startDaemon({ config: { ...config, owner: {} }, dataDir: join(root, "fresh"), credentialsDir })).rejects.toThrow("run `jaari init` once");
     await expect(stat(join(root, "fresh"))).rejects.toThrow("ENOENT"); // refused before anything was written
   });

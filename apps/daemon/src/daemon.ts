@@ -63,10 +63,11 @@ export async function startDaemon(options: DaemonOptions) {
   const opened: { close(): void }[] = [];
   try {
     // Each store refuses to open when it is newer than this Jaari or belongs to another owner (ADR-056, ADR-119).
-    const usage = openUsageLog(openDatabase(join(dataDir, "usage.db"), ownerId, USAGE_MIGRATIONS), ownerId);
-    opened.push(usage);
+    // The conversation first: a wrong id is refused there before a missing usage log is created and claimed by it.
     const store = openStore(join(dataDir, "session.db"), ownerId);
     opened.push(store);
+    const usage = openUsageLog(openDatabase(join(dataDir, "usage.db"), ownerId, USAGE_MIGRATIONS), ownerId);
+    opened.push(usage);
     // A model server the owner lists in config counts as allowed (ADR-080), so local models pass the egress check.
     const policy: EgressPolicy = { allow: Object.values(providers).flatMap((p) => (p.baseUrl ? [hostPort(p.baseUrl)] : [])) };
     const llm = await createLlm({ config: config.llm, fetch: createEgress(policy).fetch, secrets, usage, ...(options.models ? { models: options.models } : {}) });
