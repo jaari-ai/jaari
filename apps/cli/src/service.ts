@@ -1,7 +1,7 @@
 // `jaari service install [--home <dir>] [--daemon <path>] [--user <name>] [--print]`: start the daemon at login or boot
 // and restart it when it dies (ADR-056): a launchd user agent on macOS, a systemd system unit on Linux (ADR-079).
 import { spawn } from "node:child_process";
-import { chmod, mkdir, readdir, realpath, stat, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { homedir, userInfo } from "node:os";
 import { delimiter, isAbsolute, join, relative, resolve } from "node:path";
 import { parseArgs } from "node:util";
@@ -28,7 +28,6 @@ export type ServiceDeps = {
   mkdir: (path: string, mode: number) => Promise<void>;
   readdir: (path: string) => Promise<string[]>;
   isFile: (path: string) => Promise<boolean>;
-  realpath: (path: string) => Promise<string>;
 };
 
 export const systemDeps: ServiceDeps = {
@@ -55,7 +54,6 @@ export const systemDeps: ServiceDeps = {
   mkdir: async (path, mode) => void (await mkdir(path, { recursive: true, mode })),
   readdir: (path) => readdir(path),
   isFile: async (path) => (await stat(path).catch(() => null))?.isFile() === true,
-  realpath: (path) => realpath(path),
 };
 
 const xml = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -90,17 +88,18 @@ export async function service(args: string[], io: Io, deps: ServiceDeps = system
     return 1;
   }
 
-  let daemon: string | undefined;
-  for (const candidate of values.daemon ? [resolve(values.daemon)] : deps.path.split(delimiter).filter(Boolean).map((dir) => join(dir, "jaari-daemon"))) {
-    if (await deps.isFile(candidate)) {
-      daemon = await deps.realpath(candidate);
-      break;
-    }
-  }
+  // Paths are kept as found, never resolved through links: a link is what stays stable when Homebrew upgrades Node or
+  // `jaari update` moves its `current` link (ADR-122), while the folder it points to goes away.
+  const onPath = async (name: string) => {
+    for (const candidate of deps.path.split(delimiter).filter((dir) => isAbsolute(dir)).map((dir) => join(dir, name))) if (await deps.isFile(candidate)) return candidate;
+    return undefined;
+  };
+  const daemon = values.daemon ? ((await deps.isFile(resolve(values.daemon))) ? resolve(values.daemon) : undefined) : await onPath("jaari-daemon");
   if (!daemon) return (say(`jaari: no jaari-daemon ${values.daemon ? `at ${values.daemon}` : "on PATH"}; pass its path with --daemon <path>`), 1);
+  const node = (await onPath("node")) ?? deps.execPath; // process.execPath is already resolved: /opt/homebrew/Cellar/node/<version>/...
   // A newline in any value would add a line of its own to the generated file.
-  if ([paths.home, daemon, deps.execPath, values.user ?? ""].some((v) => [...v].some((c) => c < " " || c === "\x7f"))) return (say("jaari: a path or user name contains a control character"), 1);
-  const command = [deps.execPath, daemon, "--home", paths.home]; // absolute paths, so boot does not depend on PATH
+  if ([paths.home, daemon, node, values.user ?? ""].some((v) => [...v].some((c) => c < " " || c === "\x7f"))) return (say("jaari: a path or user name contains a control character"), 1);
+  const command = [node, daemon, "--home", paths.home]; // absolute paths, so boot does not depend on PATH
 
   if (deps.platform === "darwin") {
     // ADR-057: macOS privacy protection blocks a background process from these folders.
@@ -152,7 +151,7 @@ ${command.map((a) => `    <string>${xml(a)}</string>`).join("\n")}
   if (zero === "os-keychain") return (say('jaari: a system service has no login keychain; set "secrets": { "zero": "host-credential" } (ADR-079)'), 1);
   const user = values.user ?? (values.print ? deps.user : undefined);
   if (deps.uid !== 0 && !values.print) {
-    const again = [deps.execPath, deps.cliPath, "service", "install", "--home", paths.home, "--daemon", daemon, "--user", values.user ?? deps.user];
+    const again = [node, deps.cliPath, "service", "install", "--home", paths.home, "--daemon", daemon, "--user", values.user ?? deps.user];
     return (say(`jaari: a system service needs root; run it with sudo: sudo ${again.map(shell).join(" ")}`), 1);
   }
   if (!user) return (say("jaari: pass --user <name>: the account the daemon runs as"), 1);

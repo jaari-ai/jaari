@@ -28,14 +28,13 @@ function fakes(over: Partial<ServiceDeps> = {}) {
     user: "owner",
     homedir: "/Users/owner",
     path: "/opt/bin:/usr/local/bin",
-    execPath: "/usr/local/bin/node",
+    execPath: "/opt/homebrew/Cellar/node/26.13.1/bin/node", // resolved, as process.execPath is
     cliPath: "/usr/local/lib/jaari/cli.js",
     exec: vi.fn(async () => ({ code: 0, stderr: "" })),
     writeFile: vi.fn(async (path: string, text: string) => void (files[path] = text)),
     mkdir: vi.fn(async () => {}),
     readdir: vi.fn((path: string) => readdir(path)), // only inside the temp folder
-    isFile: vi.fn(async (path: string) => path === "/usr/local/bin/jaari-daemon"),
-    realpath: vi.fn(async (path: string) => path.replace("/usr/local/bin/jaari-daemon", "/usr/local/lib/jaari/daemon.js")),
+    isFile: vi.fn(async (path: string) => path === "/usr/local/bin/jaari-daemon" || path === "/usr/local/bin/node"),
     ...over,
   };
   return { deps, files, exec: deps.exec as ReturnType<typeof vi.fn> };
@@ -56,6 +55,15 @@ const nothingChanged = (deps: ServiceDeps) => {
 };
 
 describe("jaari service install on macOS", () => {
+  it("names node and the daemon by the paths found on PATH, never resolved through links (ADR-122)", async () => {
+    const found = await jaari(install("--print"), fakes().deps);
+    expect(found.text).toContain("<string>/usr/local/bin/node</string>\n    <string>/usr/local/bin/jaari-daemon</string>");
+    expect(found.text).not.toContain("Cellar"); // a Homebrew upgrade removes the versioned folder
+    // No node on PATH: the one that runs this command, as the last resort.
+    const fallback = await jaari(install("--print"), fakes({ isFile: async (path: string) => path === "/usr/local/bin/jaari-daemon" }).deps);
+    expect(fallback.text).toContain("<string>/opt/homebrew/Cellar/node/26.13.1/bin/node</string>");
+  });
+
   it("writes the launch agent and reloads it with launchctl", async () => {
     const { deps, files, exec } = fakes();
     const { code, text } = await jaari(install(), deps);
@@ -65,7 +73,7 @@ describe("jaari service install on macOS", () => {
     const log = "/Users/owner/Library/Logs/jaari-daemon.log";
     expect(files[plist]).toContain(`<array>
     <string>/usr/local/bin/node</string>
-    <string>/usr/local/lib/jaari/daemon.js</string>
+    <string>/usr/local/bin/jaari-daemon</string>
     <string>--home</string>
     <string>${home}</string>
   </array>`);
@@ -96,7 +104,7 @@ describe("jaari service install on macOS", () => {
     expect(text).toContain("Documents, Desktop or Downloads");
     nothingChanged(deps);
 
-    const daemon = fakes({ homedir: root, isFile: async () => true, realpath: async (p) => p });
+    const daemon = fakes({ homedir: root, isFile: async () => true });
     expect((await jaari(install("--daemon", join(root, "Downloads", "jaari-daemon")), daemon.deps)).code).toBe(1);
     nothingChanged(daemon.deps);
   });
@@ -142,7 +150,7 @@ Wants=network-online.target
 
 [Service]
 User=owner
-ExecStart="/usr/local/bin/node" "/usr/local/lib/jaari/daemon.js" "--home" "${home}"
+ExecStart="/usr/local/bin/node" "/usr/local/bin/jaari-daemon" "--home" "${home}"
 Restart=on-failure
 RestartSec=5
 NoNewPrivileges=yes
@@ -184,7 +192,7 @@ WantedBy=multi-user.target
     const { deps } = linux({ uid: 1000 });
     const { code, text } = await jaari(install(), deps);
     expect(code).toBe(1);
-    expect(text).toContain(`run it with sudo: sudo /usr/local/bin/node /usr/local/lib/jaari/cli.js service install --home '${home}' --daemon /usr/local/lib/jaari/daemon.js --user owner`);
+    expect(text).toContain(`run it with sudo: sudo /usr/local/bin/node /usr/local/lib/jaari/cli.js service install --home '${home}' --daemon /usr/local/bin/jaari-daemon --user owner`);
     nothingChanged(deps);
   });
 
@@ -212,7 +220,7 @@ WantedBy=multi-user.target
   });
 
   it("quotes %, $ and quotes for systemd", async () => {
-    const { text } = await jaari(install("--print", "--daemon", '/opt/50% $HOME "x"/jaari-daemon'), linux({ isFile: async () => true, realpath: async (p) => p }).deps);
+    const { text } = await jaari(install("--print", "--daemon", '/opt/50% $HOME "x"/jaari-daemon'), linux({ isFile: async () => true }).deps);
     expect(text).toContain(String.raw`"/opt/50%% $$HOME \"x\"/jaari-daemon"`);
   });
 });

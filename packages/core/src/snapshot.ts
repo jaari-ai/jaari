@@ -1,7 +1,7 @@
 // The local snapshot (ADR-082, ADR-122): a copy of the SQLite stores and the config, taken before anything changes
 // their shape, kept in the data folder, last two only. `jaari rollback` restores one. The encrypted backup of
 // ADR-027 replaces it in Phase 3.
-import { chmod, copyFile, mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { chmod, copyFile, mkdir, readdir, readFile, realpath, rename, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { backup, DatabaseSync } from "node:sqlite";
 import { storeVersion } from "./database.js";
@@ -73,7 +73,9 @@ export const restoring = (dataDir: string): Promise<string | undefined> => readF
 // snapshot stays where it is; the Jaari of that time does not open it.
 export async function restoreSnapshot(place: SnapshotPlace, snapshot: Snapshot): Promise<void> {
   await writeFile(MARK(place.dataDir), snapshot.name + "\n", { mode: 0o600 });
-  const put = async (from: string, to: string) => {
+  const put = async (from: string, link: string) => {
+    // Written through a link (a dotfiles manager keeps the config as one), so the link stays a link, as `jaari init` does.
+    const to = await realpath(link).catch(() => link);
     await copyFile(from, `${to}.restoring`);
     await rename(`${to}.restoring`, to); // one step, so a crash leaves the old file or the new one, never half
   };

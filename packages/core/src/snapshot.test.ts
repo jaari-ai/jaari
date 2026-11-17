@@ -62,6 +62,20 @@ describe("snapshot (ADR-082, ADR-122)", () => {
     expect((await readdir(dataDir)).filter((file) => file.includes("restoring") || file.endsWith("-wal"))).toEqual([]);
   });
 
+  it("restores a config that is a link through the link, so it stays a link", async () => {
+    const { dataDir, configPath, db } = await place();
+    db.close();
+    const { lstat, rename: move, symlink } = await import("node:fs/promises");
+    const kept = `${configPath}.dotfiles`;
+    await move(configPath, kept);
+    await symlink(kept, configPath);
+    const snapshot = await takeSnapshot({ dataDir, configPath, reason: "pre-migration", now: at(0) });
+    await writeFile(configPath, '{ "version": 2 }\n'); // writes through the link
+    await restoreSnapshot({ dataDir, configPath }, snapshot);
+    expect((await lstat(configPath)).isSymbolicLink()).toBe(true);
+    expect(await readFile(kept, "utf8")).toContain("// mine");
+  });
+
   it("keeps the last two, and removes one that was cut short", async () => {
     const { dataDir, db } = await place();
     db.close();

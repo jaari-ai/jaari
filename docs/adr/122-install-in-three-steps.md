@@ -54,7 +54,8 @@ and [ADR-028](028-encryption-at-rest.md).
     count, and pruning removes only folders named like a snapshot. The
     memory git tag of ADR-082 joins with the memory repository (1.1). The event log is not
     copied.
-9.  **`jaari rollback` restores the latest snapshot:** the stores and the config. It refuses
+9.  **`jaari rollback` restores the latest snapshot:** the stores and the config, written
+    through a link when the config is one, so a dotfiles link stays a link (as `jaari init`). It refuses
     while the daemon answers on its socket, and it needs a person at a terminal or `--yes`
     (ADR-076). It first snapshots the data as it is, so a second run undoes the first. It marks
     the snapshot it restores in `data/snapshots/restoring` and removes the mark when done: a run
@@ -92,8 +93,11 @@ and [ADR-028](028-encryption-at-rest.md).
     the plain files: it tells the owner to do so after the first good start. It must run again
     after every `jaari secret set`. `os-keychain` is refused: a system service has no login
     keychain.
-16. **The daemon is named by absolute path** (`--daemon`, or `jaari-daemon` on `PATH`) with the
-    Node that runs the command, so a start does not depend on `PATH`.
+16. **Node and the daemon are named by absolute path**, as found on `PATH` (`--daemon` for the
+    daemon; the running Node only when no `node` is on `PATH`), so a start does not depend on
+    `PATH`. The paths are never resolved through links: a link such as `/opt/homebrew/bin/node`
+    or the `current` link of 0.18 stays valid across an upgrade, while the versioned folder it
+    points to goes away.
 
 **Smaller points.**
 17. **`jaari config <deployment | secrets | llm>`** revisits one step of `jaari init` and
