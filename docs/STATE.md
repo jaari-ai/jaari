@@ -108,8 +108,7 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
 - `apps/daemon` (second half of 0.5, 2026-11-16): `startDaemon` refuses to start when secret zero or
   any model key cannot be read (ADR-079), then wires egress, the model router, and the main session;
   `jaari-daemon` runs from built `dist/` files (ADR-115). The tier-1 smoke test boots it on the
-  scripted provider in CI, and CI starts the built daemon once with `--check` (ADR-041). The config
-  is read as plain JSON until the loader (0.6).
+  scripted provider in CI, and CI starts the built daemon once with `--check` (ADR-041).
 - Owner commands (2026-11-16, ADR-116): code reads "stop", "wait", "hold on", and the other brake
   words in the owner's languages, with OpenMausBot's stop-word rule; a stop word pauses and a
   repeated one stops the turn.

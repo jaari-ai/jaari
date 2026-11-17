@@ -31,6 +31,10 @@ jobs:
           mkdir -m 700 "$RUNNER_TEMP/credentials"
           (umask 077 && echo smoke > "$RUNNER_TEMP/credentials/llm.local") # the start check reads it
           node apps/daemon/dist/main.js --check --config apps/daemon/smoke.config.json --data "$RUNNER_TEMP/jaari" --credentials "$RUNNER_TEMP/credentials"
+          # A refused start is one line for the owner and exit 1, not a stack trace (ADR-079).
+          if node apps/daemon/dist/main.js --check --config apps/daemon/smoke.config.json --data "$RUNNER_TEMP/refused" --credentials "$RUNNER_TEMP/missing" 2> "$RUNNER_TEMP/refused.err"; then exit 1; fi
+          cat "$RUNNER_TEMP/refused.err"
+          test "$(wc -l < "$RUNNER_TEMP/refused.err")" -eq 1
       - run: node scripts/check-licenses.mjs
       - run: python3 scripts/merge_docs.py --check
 

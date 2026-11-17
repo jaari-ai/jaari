@@ -24,7 +24,13 @@ const config = await loadConfig(values.config ?? paths.config).catch((error: unk
   console.error(`jaari-daemon: ${error.message}`);
   process.exit(1);
 });
-const daemon = await startDaemon({ config, dataDir: values.data ?? paths.data, credentialsDir: values.credentials ?? credentialsDirOf(config, paths) });
+// A refused start (a bad llm section, an unreadable key, a missing credentials folder) is a message for the owner,
+// not a crash: one line, exit 1 (ADR-079).
+const daemon = await startDaemon({ config, dataDir: values.data ?? paths.data, credentialsDir: values.credentials ?? credentialsDirOf(config, paths) })
+  .catch((error: unknown) => {
+    console.error(`jaari-daemon: ${error instanceof Error ? error.message : String(error)}`);
+    process.exit(1);
+  });
 if (values.check) {
   await daemon.close();
   console.log("jaari-daemon: started and stopped cleanly");
