@@ -123,3 +123,13 @@ it("writes through a config that is a link, so a dotfiles manager keeps its link
   expect((await lstat(config)).isSymbolicLink()).toBe(true);
   expect((await loadConfig(real)).deployment?.target).toBe("server");
 });
+
+it("writes through a link whose target does not exist yet", async () => {
+  await mkdir(home);
+  await mkdir(join(root, "dotfiles"));
+  await symlink(join(root, "dotfiles", "jaari.jsonc"), config); // dangling until init writes
+  expect((await answer(["", "", "", "", "", "claude-test"])).code).toBe(0);
+  expect((await lstat(config)).isSymbolicLink()).toBe(true);
+  expect((await stat(join(root, "dotfiles", "jaari.jsonc"))).mode & 0o777).toBe(0o600);
+  expect((await loadConfig(config)).version).toBe(1);
+});

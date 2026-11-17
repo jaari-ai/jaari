@@ -1,8 +1,8 @@
 // `jaari init [--home <dir>]`: ask a few questions and write the owner config (ADR-056). Run again, it revisits every
 // step with the current values as defaults and edits only what changed, so the owner's comments stay.
 import { randomBytes } from "node:crypto";
-import { mkdir, readFile, realpath, rename, rm, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { lstat, mkdir, readFile, readlink, realpath, rename, rm, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { isDeepStrictEqual, parseArgs } from "node:util";
 import { CONFIG_VERSION, ConfigError, credentialsDirOf, isInsideData, jaariPaths, parseConfig, type Config } from "@jaari/core/config";
 import { applyEdits, modify } from "jsonc-parser";
@@ -63,7 +63,9 @@ async function askModel(ask: ReturnType<typeof createPrompter>["ask"]): Promise<
 // A config that is a link (a dotfiles manager) is written through, so the link stays a link.
 async function writePrivately(home: string, link: string, text: string): Promise<void> {
   await mkdir(home, { recursive: true, mode: 0o700 });
-  const path = await realpath(link).catch(() => link);
+  // A link to a file not written yet has no real path: follow it by hand, or the rename would replace the link.
+  const path = await realpath(link).catch(async () =>
+    (await lstat(link).catch(() => null))?.isSymbolicLink() ? resolve(dirname(link), await readlink(link)) : link);
   const temp = `${path}.${randomBytes(6).toString("hex")}.tmp`;
   try {
     await writeFile(temp, text, { flag: "wx", mode: 0o600 });
