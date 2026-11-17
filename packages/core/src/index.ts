@@ -2,3 +2,5 @@ export * from "./commands.js";
 export * from "./events.js";
 export * from "./store.js";
 export * from "./session.js";
+export * from "./limits.js";
+export * from "./config.js";

@@ -45,3 +45,6 @@ ADR-086). The loader must check a manifest before any package code runs (ADR-084
 - A package whose import throws is reported by name (`<name>: import failed: <message>`) in the same
   `PackageLoadError`. Its top-level code, and that of the packages imported with it, has run by
   then; the daemon still refuses to start.
+- Roadmap 0.6 (2026-11-17): the config loader shipped without the check of a package's own
+  section, because no package declares a `config` schema yet; the check arrives with the first
+  one (roadmap 2.8, ADR-118).

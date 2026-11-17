@@ -46,13 +46,13 @@ effect. Entry: none.
 | 0.3 | Project process files: `SECURITY.md`, `CONTRIBUTING.md` | 043 | none | Delivered (2026-11-16) |
 | 0.4 | Namespaces and release: secure the npm and PyPI names, the `python/` pointer package, the release workflow ([guides/namespaces.md](guides/namespaces.md)). Placement | 010 | none | Delivered (2026-11-16; npm `jaari` and org `jaari`, PyPI `jaari` 0.0.0 via trusted publishing) |
 | 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement; pause, emergency stop, steps per turn, stall guard, watchdog, event log; the tier-1 smoke test in CI | 001, 065, 031, 032, 087, 041 | 0.1, 0.7 | Delivered (2026-11-16) |
-| 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship. `jaari secret set <name>` (masked input into `os-keychain` or `host-credential`; the ADR-081 notice points to it) | 017, 019, 056, 088 | 0.1, 0.11 | Planned |
+| 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship. `jaari secret set <name>` (masked input into `os-keychain` or `host-credential`; the ADR-081 notice points to it) | 017, 019, 056, 088, 118 | 0.1, 0.11 | Delivered (2026-11-17) |
 | 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains, refusal classification, usage log | 011, 019, 085, 032, 087, 114 | 0.1, 0.15 | Delivered (2026-11-16) |
 | 0.8 | `ChannelAdapter` contract and the shared contract suite, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081, 084, 116, 117 | 0.5, 0.9 | Delivered (2026-11-17) |
 | 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084, 108, 109, 110 | 0.1 | Delivered (2026-11-16) |
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Delivered (2026-11-16) |
 | 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079, 112 | 0.1 | Delivered (2026-11-16) |
-| 0.12 | Install, manual update with a local pre-update snapshot, rollback, and migrations; `jaari doctor` (checks are added as their features ship) | 056, 032, 082 | 0.5 | Planned |
+| 0.12 | Install, manual update with a local pre-update snapshot, rollback, and migrations; `jaari doctor` (checks are added as their features ship); `jaari config`, the `compose.yaml` that `jaari init` writes, and `jaari service install` with encrypted credentials (ADR-118) | 056, 032, 079, 082, 118 | 0.5, 0.6 | Planned |
 | 0.13 | Laptop sleep and wake: detection, power assertion, battery pause, network re-probe (catch-up is 1.4) | 057, 082 | 0.5 | Planned |
 | 0.14 | `ownerId` in the data model | 044 | 0.5 | Planned |
 | 0.15 | `@jaari/http` core: resolve, check, dial; the address-class table; the `direct` provider; the lint rule against other network clients | 016, 053, 080, 113 | 0.1 | Delivered (2026-11-16) |
@@ -107,7 +107,7 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 | 1.6 | Canonicalize every 6 hours, with its privacy bounds | 004, 047 | 1.1, 1.4, 1.9 | Planned |
 | 1.7 | Daily audit | 004 | 1.1, 1.4 | Planned |
 | 1.8 | Capture evidence; strip the ADR-117 reply line (`[The owner replied to …]`) from owner turns before the evidence check | 074, 081, 117 | 1.1, 0.8 | Planned |
-| 1.9 | Local-model qualification and the `jaari llm eval` qualification fixtures | 019, 045 | 0.7 | Planned |
+| 1.9 | Local-model qualification and the `jaari llm eval` qualification fixtures; the `jaari init` LLM presets and the local-only question (ADR-019, ADR-118) | 019, 045, 118 | 0.7, 0.6 | Planned |
 | 1.10 | Correct and forget (erase is 3.9). Placement | 029 | 1.1 | Planned |
 | 1.11 | Monthly LLM budget with the 100% prompt; spike alerts | 046, 031, 087 | 0.7, 0.8 | Planned |
 | 1.12 | Nightly local snapshot of memory, SQLite, and config (last 7) | 027, 082, 087 | 1.1, 0.12 | Planned |
@@ -148,7 +148,7 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 | 2.5 | Replay harness and golden threads | 041 | 0.2 | Planned |
 | 2.6 | Skills: built-in and owner (third-party is 4.10) (in `@jaari/core`) | 060, 086 | 1.1 | Planned |
 | 2.7 | Owner authentication: device registry, `jaari pair`, `jaari devices`. Placement | 022 | 0.8 | Planned |
-| 2.8 | Telegram channel. Placement; loop breaker for other bots | 021, 031, 087 | 0.8, 2.7 | Planned |
+| 2.8 | Telegram channel. Placement; loop breaker for other bots. The config loader checks a package's own config section against the schema in its manifest (ADR-109, ADR-118) | 021, 031, 087, 109, 118 | 0.8, 2.7 | Planned |
 | 2.9 | Owner panel: Home, Memory, Settings, Usage, Activity from the event log (Approvals, audit, and secret entry with 3.1 and 3.3) | 067, 088 | 2.7, 2.12 | Planned |
 | 2.10 | Onboarding; the close line states the real shadow setting | 070, 099 | 2.6 | Planned |
 | 2.11 | Voice notes and optional spoken replies (in `@jaari/llm`) | 037, 086 | 0.8 | Planned |

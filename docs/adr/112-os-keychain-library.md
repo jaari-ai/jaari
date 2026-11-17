@@ -30,3 +30,5 @@ provider needs either a library or the platform's own command-line tools.
   waits out the 7-day release age like any other package.
 - CI never talks to a real keychain: the tests replace the module with `vi.mock`. The first real
   read is a manual check on a macOS host.
+- Roadmap 0.6 (2026-11-17): the provider also writes, with `AsyncEntry.setPassword`, for
+  `jaari secret set` only (ADR-118). Executors still only read.

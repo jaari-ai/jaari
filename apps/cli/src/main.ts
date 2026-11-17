@@ -1,30 +1,28 @@
 #!/usr/bin/env node
-// `jaari chat --data <dir>` or `jaari chat --socket <path>`: attach this terminal to a running daemon.
-import { resolve } from "node:path";
-import { parseArgs } from "node:util";
-import { socketPath } from "@jaari/channels";
-import { chat } from "./chat.js";
-import { connect } from "./socket.js";
+// The `jaari` command. Each command loads only when it is used, so `jaari chat` never loads the config or keychain code.
+import type { Command } from "./io.js";
 
-const usage = () => {
-  console.error("usage: jaari chat (--data <dir> | --socket <path>)");
-  process.exit(2);
+const USAGE = `usage: jaari <command>
+  chat [--home <dir> | --data <dir> | --socket <path>]   talk to the running daemon
+  init [--home <dir>]                     write or revisit the config (~/.jaari/config.jsonc)
+  secret set <name> [--home <dir>] [--config <file>]   store a secret; typed, never an argument`;
+
+const COMMANDS: Record<string, () => Promise<{ run: Command }>> = {
+  chat: () => import("./chat-command.js"),
+  init: () => import("./init.js"),
+  secret: () => import("./secret.js"),
 };
 
-let parsed;
-try {
-  parsed = parseArgs({ allowPositionals: true, options: { data: { type: "string" }, socket: { type: "string" } } });
-} catch {
-  usage();
+const [name = "", ...args] = process.argv.slice(2);
+const load = Object.hasOwn(COMMANDS, name) ? COMMANDS[name] : undefined;
+if (!load) {
+  console.error(USAGE);
+  process.exit(2);
 }
-const { values, positionals } = parsed!;
-if (positionals.length !== 1 || positionals[0] !== "chat" || !values.data === !values.socket) usage();
-
-const path = values.socket ? resolve(values.socket) : socketPath(resolve(values.data!));
 try {
-  await chat({ socket: await connect(path), input: process.stdin, output: process.stdout });
+  const { run } = await load();
+  process.exitCode = await run(args, { input: process.stdin, output: process.stdout, isTTY: process.stdin.isTTY === true });
 } catch (error) {
-  const code = (error as NodeJS.ErrnoException).code;
-  console.error(code === "ENOENT" || code === "ECONNREFUSED" ? `jaari: the daemon is not running (no socket at ${path})` : `jaari: ${(error as Error).message}`);
-  process.exit(1);
+  console.error(`jaari: ${(error as Error).message}`);
+  process.exitCode = (error as { code?: string }).code?.startsWith("ERR_PARSE_ARGS") ? 2 : 1;
 }

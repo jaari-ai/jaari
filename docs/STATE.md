@@ -5,7 +5,7 @@ Last updated: 2026-11-16
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (117 ADRs, all Accepted)
+## Decided (118 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -108,8 +108,7 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
 - `apps/daemon` (second half of 0.5, 2026-11-16): `startDaemon` refuses to start when secret zero or
   any model key cannot be read (ADR-079), then wires egress, the model router, and the main session;
   `jaari-daemon` runs from built `dist/` files (ADR-115). The tier-1 smoke test boots it on the
-  scripted provider in CI, and CI starts the built daemon once with `--check` (ADR-041). The config
-  is read as plain JSON until the loader (0.6).
+  scripted provider in CI, and CI starts the built daemon once with `--check` (ADR-041).
 - Owner commands (2026-11-16, ADR-116): code reads "stop", "wait", "hold on", and the other brake
   words in the owner's languages, with OpenMausBot's stop-word rule; a stop word pauses and a
   repeated one stops the turn.
@@ -125,7 +124,14 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   an ambiguous send is never retried. The CLI channel listens on `jaari.sock` (mode 0600) in the
   data folder with NDJSON and a version hello; `apps/cli` adds `jaari chat`, which numbers
   messages and reads `>N text` as a reply. Open prompts live in memory until the gate (Phase 3).
-  Next: 0.6 (config loader and `jaari init`), 0.12 to 0.14, and 0.16.
+  Next: 0.12 to 0.14, and 0.16.
+- Config (0.6, 2026-11-17, ADR-118): one JSONC file, `~/.jaari/config.jsonc`, with a schema version
+  and a closed top level, read through `@jaari/core/config`; the daemon refuses an invalid or
+  newer config and names each problem. `jaari init` asks for the target, where secrets are kept,
+  and one model provider, and keeps the owner's comments when it runs again. `jaari secret set
+  <name>` reads a value with no echo into the OS keychain or the credentials folder (mode 0600).
+  Not built yet: `jaari config`, the `compose.yaml`, LLM presets (1.9), and the per-package
+  config check (2.8).
 - Monorepo scaffolding (0.1, 2026-11-16): root `package.json` and `pnpm-lock.yaml`, pnpm
   supply-chain settings in `pnpm-workspace.yaml` (exact pins, 7-day release age, install
   scripts off with the `allowBuilds` allowlist), and allowlisted ESLint (with the TypeScript
