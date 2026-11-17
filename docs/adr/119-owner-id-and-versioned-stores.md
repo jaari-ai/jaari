@@ -51,9 +51,8 @@ migration step that roadmap 0.12 lists.
   memory; the id must be written to the file once, which is init's job.
 
 ## Consequences
-- Until `jaari update` ships its pre-update snapshot (roadmap 0.12, ADR-082), a migration is
-  protected only by its transaction: it cannot leave a half-changed store, but there is no
-  copy from before it. The steps so far only add a column.
+- Until roadmap 0.12 a migration was protected by its transaction only. Since then the daemon
+  snapshots the stores before it migrates one, and `jaari rollback` restores them (ADR-122).
 - Event-log lines written before this ADR have no `ownerId`; they leave with the 30-day
   retention (ADR-032).
 - Stores that later phases add (memory index, jobs, audit, grants, files) open through

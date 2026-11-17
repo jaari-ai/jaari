@@ -54,10 +54,11 @@ of ADR-079 only reads a folder that a service manager supplies).
 ## Consequences
 - Not built yet, and scheduled: the check of a package's own config section against the schema in
   its manifest (ADR-109) arrives with the first package that declares one (roadmap 2.8);
-  `jaari config` as its own command and the `compose.yaml` that init writes arrive with install
-  (roadmap 0.12); the LLM presets, the budget question, and local-model qualification arrive with
-  `jaari llm eval` (roadmap 1.9); encrypted systemd credentials are set up by `jaari service
-  install` (roadmap 0.12).
+  the `compose.yaml` that init writes arrives with the release (roadmap 0.17, ADR-122); the LLM
+  presets, the budget question, and local-model qualification arrive with `jaari llm eval`
+  (roadmap 1.9).
+- Roadmap 0.12 (2026-11-17, ADR-122): `jaari config <step>` revisits one step, and `jaari service
+  install` sets up encrypted systemd credentials.
 - The example config is loaded by a test, so it cannot drift from the schema.
 - Roadmap 0.14 (2026-11-17): `owner.id` is checked (a lowercase UUID) and written once by
   `jaari init`; the other `owner` keys stay unchecked until their features ship (ADR-119).

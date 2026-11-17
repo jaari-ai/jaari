@@ -52,7 +52,7 @@ settle:
 - Custom endpoints get fixed limits (32k context, 4k output, text only) until `jaari llm eval`
   reads them (roadmap 1.9).
 - A provider adapter that refuses the injected `fetch` fails before `start`, so an unpinned role
-  moves on; `jaari doctor` naming such adapters (ADR-080) arrives with 0.12.
+  moves on; `jaari doctor` naming such adapters (ADR-080) arrives with the first such adapter; 0.12 has none to name (ADR-122).
 - Roadmap 0.5 (2026-11-16): pi-ai's OpenAI-style adapters refuse to send without a key, even to a
   keyless local server, although pi-ai's README shows that setup. A custom endpoint with no
   `apiKey` gets the placeholder key `unused`, the value pi-ai itself sends when a header carries

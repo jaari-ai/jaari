@@ -123,3 +123,4 @@
 | [119](119-owner-id-and-versioned-stores.md) | The owner id comes from `jaari init`; every store is versioned, owned, and opened through one function | Accepted |
 | [120](120-prompt-injection-floor-as-built.md) | The prompt-injection floor as built: model calls are not scanned, the fence id lasts one run, the canary lives with the conversation, and an unlabelled turn is the owner | Accepted |
 | [121](121-laptop-host-as-built.md) | The laptop host as built: sleep is a clock gap, OS tools instead of a native helper, and detectors that only emit events | Accepted |
+| [122](122-install-in-three-steps.md) | Install and update in three steps: the local commands first, npm and Compose as the Phase 0 channels, keyless signing, and a snapshot before every store migration | Accepted |

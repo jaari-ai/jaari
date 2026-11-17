@@ -8,6 +8,7 @@ import { DatabaseSync } from "node:sqlite";
 import { join } from "node:path";
 import { createModels, fauxAssistantMessage, fauxProvider } from "@earendil-works/pi-ai";
 import { describe, expect, it } from "vitest";
+import { listSnapshots } from "@jaari/core";
 import { startDaemon, type DaemonConfig } from "./daemon.js";
 
 // A terminal on the daemon's socket, as `jaari chat` would attach.
@@ -132,6 +133,36 @@ describe("tier-1 smoke", () => {
     used.close();
     const log = (await readFile(join(root, "data", "events.ndjson"), "utf8")).trim().split("\n").map((line) => JSON.parse(line) as { ownerId?: string });
     expect(log.every((line) => line.ownerId === OWNER)).toBe(true);
+
+    // The stores were copied before the migration touched them, once (ADR-082, ADR-122).
+    const snapshots = await listSnapshots(join(root, "data"));
+    expect(snapshots).toMatchObject([{ reason: "pre-migration", stores: { "session.db": 0, "usage.db": 0 } }]);
+    const kept = new DatabaseSync(join(snapshots[0]!.dir, "session.db"), { readOnly: true });
+    expect(kept.prepare("SELECT name FROM pragma_table_info('transcript')").all().map((row) => row.name)).not.toContain("owner_id");
+    kept.close();
+    await (await boot()).close(); // nothing left to migrate: no second snapshot
+    expect(await listSnapshots(join(root, "data"))).toHaveLength(1);
+    const fresh = await setup();
+    await (await fresh.boot()).close(); // a new install has nothing to protect
+    expect(await listSnapshots(join(fresh.root, "data"))).toEqual([]);
+  });
+
+  it("keeps the copy of the original data across starts that fail after a migration, and waits for an unfinished rollback (ADR-122)", async () => {
+    const { root, boot } = await setup();
+    const data = join(root, "data");
+    await mkdir(data, { mode: 0o700 });
+    const session = new DatabaseSync(join(data, "session.db"));
+    session.exec("CREATE TABLE transcript (seq INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, message TEXT NOT NULL); CREATE TABLE state (key TEXT PRIMARY KEY, value TEXT NOT NULL)");
+    session.close();
+    const usage = new DatabaseSync(join(data, "usage.db")); // another owner's: refused after session.db has migrated
+    usage.exec("CREATE TABLE owner (id TEXT PRIMARY KEY); INSERT INTO owner VALUES ('22222222-2222-4222-8222-222222222222')");
+    usage.close();
+    for (let start = 0; start < 4; start++) await expect(boot()).rejects.toThrow("belongs to another owner"); // a service manager restarts it
+    const snapshots = await listSnapshots(data);
+    expect(snapshots.map((snapshot) => snapshot.stores["session.db"])).toEqual([0]); // the original, still there
+
+    await writeFile(join(data, "snapshots", "restoring"), snapshots[0]!.name + "\n");
+    await expect(boot()).rejects.toThrow("did not finish");
   });
 
   it("refuses data that belongs to another owner, and a config with no owner id (ADR-119)", async () => {

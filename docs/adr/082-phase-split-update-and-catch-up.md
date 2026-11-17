@@ -1,7 +1,7 @@
 # ADR-082: Phase split for update and laptop catch-up
 
 - **Status:** Accepted
-- **Extended by:** [ADR-121](121-laptop-host-as-built.md)
+- **Extended by:** [ADR-121](121-laptop-host-as-built.md), [ADR-122](122-install-in-three-steps.md)
 - **Date:** 2026-11-12
 
 ## Context
@@ -34,6 +34,9 @@ users yet); updating without a snapshot (ADR-056 rejects it).
   (a macOS helper, logind) wait for a feature that needs a faster response. The network re-probe
   waits for something to re-probe: reconnects with Telegram (2.8) and the overlay (2.12), the
   egress re-probe with `owner-exit` (4.4).
+- **ADR-122:** the daemon takes the snapshot at start, before a store migration; `jaari update`
+  takes one more before the swap (0.18). The memory git tag joins with the memory repository
+  (1.1). `jaari rollback` restores data from 0.12 on and swaps the version from 0.18 on.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

@@ -97,4 +97,14 @@ describe("openDatabase (ADR-056, ADR-119)", () => {
     expect(db.prepare("SELECT text FROM note").all()).toEqual([{ text: "kept" }]);
     db.close();
   });
+
+  it("makes a store owner-only, a new one and one that was open to others (ADR-028)", async () => {
+    const { chmod, stat } = await import("node:fs/promises");
+    const path = join(await mkdtemp(join(tmpdir(), "jaari-db-mode-")), "s.db");
+    openDatabase(path, "11111111-1111-4111-8111-111111111111", []).close();
+    expect((await stat(path)).mode & 0o777).toBe(0o600);
+    await chmod(path, 0o644);
+    openDatabase(path, "11111111-1111-4111-8111-111111111111", []).close();
+    expect((await stat(path)).mode & 0o777).toBe(0o600);
+  });
 });

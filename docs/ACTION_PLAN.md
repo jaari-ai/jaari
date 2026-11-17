@@ -17,7 +17,7 @@ status and exit criteria live there.
    on `@earendil-works/pi-ai` with the tier/role config; the
    `jaari llm eval` qualification fixtures that `jaari init` uses arrive with Phase 1 (1.9;
    ADR-019, ADR-045).
-5. **Daemon and install** (0.5, 0.6, 0.12 to 0.14): `apps/daemon` with the persistent session,
+5. **Daemon and install** (0.5, 0.6, 0.12 to 0.14, 0.17, 0.18): `apps/daemon` with the persistent session,
    `jaari init` (target: VPS, remote server, home hardware, or laptop), `jaari doctor`,
    Compose, and the laptop sleep rule (ADR-017, ADR-056, ADR-057, ADR-065).
 6. **Define `ChannelAdapter` and ship the CLI channel** (0.8; ADR-021, ADR-035). The CLI talks
@@ -162,3 +162,4 @@ status and exit criteria live there.
 | [119](adr/119-owner-id-and-versioned-stores.md) | The owner id comes from `jaari init`; every store is versioned, owned, and opened through one function | Accepted |
 | [120](adr/120-prompt-injection-floor-as-built.md) | The prompt-injection floor as built: model calls are not scanned, the fence id lasts one run, the canary lives with the conversation, and an unlabelled turn is the owner | Accepted |
 | [121](adr/121-laptop-host-as-built.md) | The laptop host as built: sleep is a clock gap, OS tools instead of a native helper, and detectors that only emit events | Accepted |
+| [122](adr/122-install-in-three-steps.md) | Install and update in three steps: the local commands first, npm and Compose as the Phase 0 channels, keyless signing, and a snapshot before every store migration | Accepted |

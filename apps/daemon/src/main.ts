@@ -19,14 +19,15 @@ const { values } = parseArgs({
 });
 const paths = jaariPaths(values.home ? resolve(values.home) : undefined);
 
-const config = await loadConfig(values.config ?? paths.config).catch((error: unknown) => {
+const configPath = values.config ? resolve(values.config) : paths.config;
+const config = await loadConfig(configPath).catch((error: unknown) => {
   if (!(error instanceof ConfigError)) throw error;
   console.error(`jaari-daemon: ${error.message}`);
   process.exit(1);
 });
 // A refused start (a bad llm section, an unreadable key, a missing credentials folder) is a message for the owner,
 // not a crash: one line, exit 1 (ADR-079).
-const daemon = await startDaemon({ config, dataDir: values.data ?? paths.data, credentialsDir: values.credentials ?? credentialsDirOf(config, paths) })
+const daemon = await startDaemon({ config, configPath, dataDir: values.data ?? paths.data, credentialsDir: values.credentials ?? credentialsDirOf(config, paths) })
   .catch((error: unknown) => {
     console.error(`jaari-daemon: ${error instanceof Error ? error.message : String(error)}`);
     process.exit(1);

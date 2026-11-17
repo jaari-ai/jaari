@@ -1,6 +1,7 @@
 # ADR-079: Secret zero on a server: a `host-credential` provider fed by the service manager
 
 - **Status:** Accepted
+- **Extended by:** [ADR-122](122-install-in-three-steps.md)
 - **Date:** 2026-11-12
 
 ## Context
@@ -44,6 +45,12 @@ host. The damage is limited to the dedicated vault (ADR-050).
 The development `file` provider in production (no permission or location checks, and `doctor`
 warns about it); environment variables; Docker Swarm secrets (Jaari's install is plain
 Compose); a passphrase typed at every start as the default (no unattended restart).
+
+## Amendments
+- **ADR-122:** `jaari service install` encrypts each credential file into
+  `/etc/jaari/credstore`, leaves the plain files for the owner to delete, and runs again after
+  every `jaari secret set`. `jaari doctor` tells encrypted from plain; TPM-sealed is not told
+  apart yet.
 
 ## Consequences
 - **Roadmap 0.11 (2026-11-16):** `createHostCredentialProvider(dir, dataDir)` reads `<dir>/<name>`,

@@ -79,7 +79,11 @@ async function writePrivately(home: string, link: string, text: string): Promise
   }
 }
 
-export async function init(args: string[], io: Io, platform: NodeJS.Platform = process.platform): Promise<number> {
+// The steps of `jaari init`; `jaari config <step>` revisits one and leaves the others as they are (ADR-056).
+export const STEPS = ["deployment", "secrets", "llm"] as const;
+export type Step = (typeof STEPS)[number];
+
+export async function init(args: string[], io: Io, platform: NodeJS.Platform = process.platform, only?: Step): Promise<number> {
   const { values } = parseArgs({ args, options: { home: { type: "string" } } });
   const home = values.home ? resolve(values.home) : undefined; // an empty --home means the default, as everywhere
   const paths = jaariPaths(home);
@@ -95,18 +99,20 @@ export async function init(args: string[], io: Io, platform: NodeJS.Platform = p
     return 1;
   }
 
+  if (only !== undefined && current === undefined) return (say(`No config at ${paths.config}; run \`jaari init\` first.`), 1);
+  const wants = (step: Step) => only === undefined || only === step;
   const mac = platform === "darwin";
   const prompter = createPrompter(io);
-  let target: string, stayAwake: string | undefined, zero: string, credentialsDir: string | undefined, llm: Config["llm"] | undefined;
+  let target: string | undefined, stayAwake: string | undefined, zero: string | undefined, credentialsDir: string | undefined, llm: Config["llm"] | undefined;
   try {
-    target = await prompter.ask("Where does Jaari run (vps, server, home, laptop)?", { current: current?.deployment?.target ?? (mac ? "laptop" : "vps"), allowed: ["vps", "server", "home", "laptop"] });
+    if (wants("deployment")) target = await prompter.ask("Where does Jaari run (vps, server, home, laptop)?", { current: current?.deployment?.target ?? (mac ? "laptop" : "vps"), allowed: ["vps", "server", "home", "laptop"] });
     // ADR-057: asked only on a laptop; another host never sleeps by itself.
     if (target === "laptop") {
       say("While Jaari works on mains power, it can ask the laptop not to fall asleep by itself (a closed lid still sleeps).");
       stayAwake = await prompter.ask("Keep the laptop awake (working, never, always)?", { current: current?.power?.stayAwake ?? "working", allowed: ["working", "never", "always"] });
     }
-    say("A server has no keychain, so it keeps secrets in a folder of owner-only files (host-credential).");
-    zero = await prompter.ask("Where are secrets kept (os-keychain, host-credential)?", { current: current?.secrets?.zero ?? (mac ? "os-keychain" : "host-credential"), allowed: ["os-keychain", "host-credential"] });
+    if (wants("secrets")) say("A server has no keychain, so it keeps secrets in a folder of owner-only files (host-credential).");
+    if (wants("secrets")) zero = await prompter.ask("Where are secrets kept (os-keychain, host-credential)?", { current: current?.secrets?.zero ?? (mac ? "os-keychain" : "host-credential"), allowed: ["os-keychain", "host-credential"] });
     if (zero === "host-credential") {
       credentialsDir = await prompter.ask("Credentials folder", {
         current: current?.secrets?.credentialsDir ?? (home === undefined ? "~/.jaari/credentials" : paths.credentials),
@@ -114,8 +120,9 @@ export async function init(args: string[], io: Io, platform: NodeJS.Platform = p
         check: (answer) => (isInsideData(credentialsDirOf({ secrets: { credentialsDir: answer } }, paths), paths) ? `not inside the data folder ${paths.data}` : undefined),
       });
     }
-    const keep = current !== undefined && (await llmIsValid(current.llm))
-      && !/^n/i.test(await prompter.ask("Keep the current model settings? [Y/n]", { check: (a) => (/^(y|yes|n|no)?$/i.test(a) ? undefined : "answer y or n") }));
+    // `jaari config llm` asks at once: the owner came to change it.
+    const keep = !wants("llm") || (only === undefined && current !== undefined && (await llmIsValid(current.llm))
+      && !/^n/i.test(await prompter.ask("Keep the current model settings? [Y/n]", { check: (a) => (/^(y|yes|n|no)?$/i.test(a) ? undefined : "answer y or n") })));
     if (!keep) llm = await askModel(prompter.ask);
   } catch (error) {
     if (!(error instanceof InputEnded)) throw error;
@@ -136,10 +143,12 @@ export async function init(args: string[], io: Io, platform: NodeJS.Platform = p
   set(["version"], CONFIG_VERSION);
   // Made once and never replaced: the stores refuse to open under another id (ADR-119).
   set(["owner", "id"], current?.owner?.id ?? randomUUID());
-  set(["deployment", "target"], target);
+  if (target !== undefined) set(["deployment", "target"], target);
   if (stayAwake !== undefined) set(["power", "stayAwake"], stayAwake); // a host that is no laptop keeps what it had
-  set(["secrets", "zero"], zero);
-  set(["secrets", "credentialsDir"], credentialsDir);
+  if (zero !== undefined) {
+    set(["secrets", "zero"], zero);
+    set(["secrets", "credentialsDir"], credentialsDir);
+  }
   if (llm !== undefined) set(["llm"], llm);
 
   let config: Config;
@@ -154,6 +163,7 @@ export async function init(args: string[], io: Io, platform: NodeJS.Platform = p
   }
   await writePrivately(paths.home, paths.config, text);
 
+  if (only !== undefined && llm === undefined) return (say(`Wrote ${paths.config}. Restart the daemon to use it.`), 0);
   say(`Wrote ${paths.config}. Next:`);
   const providers = Object.values((config.llm as { providers: Record<string, { apiKey?: string }> }).providers);
   const where = home === undefined ? "" : ` --home ${paths.home}`;
