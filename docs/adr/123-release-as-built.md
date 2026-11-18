@@ -25,12 +25,14 @@ them and amends all four.
     account cannot publish alone. A version with a `-` goes to the `next` tag, any other to
     `latest`; the image follows the same rule.
 5.  **The image is signed by digest** with `cosign` and the workflow's identity, and the workflow
-    verifies the signature before it ends.
+    verifies the signature before it ends. A tag whose commit is not on `main` stops the release.
 6.  **`jaari init` writes `compose.yaml`** when the target is not a laptop and secrets are in
     `host-credential`. It runs the image of this exact version as the owner's numeric account, so
     the owner-only files keep their owner; `init` refuses to write it as root. It writes no file
     from a checkout (version `0.0.0`), and an edited file is kept, with the new one beside it as
-    `compose.yaml.new`.
+    `compose.yaml.new`. A server may also run Jaari under systemd, so `init` names both ways and
+    the unused file does no harm. Its messages name no path, because it may run inside the
+    container.
 7.  **One Compose secret per credential.** ADR-079 names one file, `jaari-secret-zero`. Phase 0 has
     no vault yet, so each model key is its own credential, mounted at `/run/secrets/<name>`, which
     is where `host-credential` reads it. The credentials folder itself is not mounted.
@@ -42,7 +44,8 @@ them and amends all four.
     no network, and the Jaari folder mounted. `docker compose run --rm admin doctor` works beside
     the running daemon, and `rollback` can replace the config, which the daemon cannot touch.
 10. **`jaari doctor` reads more without root:** whether the data folder is on an encrypted Linux
-    volume (`findmnt`, `lsblk`), whether `systemd-creds` has a TPM, and the credentials that Compose
+    volume (`findmnt`, `lsblk`), whether the host has a TPM (`systemd-creds has-tpm2`; it cannot tell
+    how an existing credential was sealed), and the credentials that Compose
     hands over (`$CREDENTIALS_DIRECTORY`).
 11. **PyPI is published only when its own version is the tag.** It holds the name (ADR-056), so a
     normal release skips it. This replaces the lockstep of ADR-043 for PyPI, and the private

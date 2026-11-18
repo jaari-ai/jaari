@@ -15,6 +15,8 @@ if (!/^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(version ?? "")) {
 const out = resolve(folder);
 const stage = join(out, "stage");
 rmSync(stage, { recursive: true, force: true });
+// The image installs every tarball it finds here, so one from an earlier run must not stay.
+for (const file of existsSync(out) ? readdirSync(out) : []) if (/^jaari-.*\.tgz$/.test(file)) rmSync(join(out, file));
 
 const read = (path) => JSON.parse(readFileSync(path, "utf8"));
 const workspace = new Map();
@@ -50,7 +52,7 @@ for (const name of bundled) {
   // No `dependencies`: npm would count what a bundled package depends on as bundled too, and never download it. The
   // root package lists them all, and they install beside the bundled packages.
   const { private: _private, dependencies: _deps, devDependencies: _dev, peerDependencies: _peer, peerDependenciesMeta: _meta, scripts: _scripts, bin: _bin, ...kept } = manifest;
-  writeFileSync(join(target, "package.json"), JSON.stringify({ ...kept, version, exports: built(manifest.exports) }, null, 2) + "\n");
+  writeFileSync(join(target, "package.json"), JSON.stringify({ ...kept, version, exports: built(manifest.exports), ...(manifest.jaari ? { jaari: { ...manifest.jaari, version } } : {}) }, null, 2) + "\n");
 }
 
 mkdirSync(join(stage, "bin"), { recursive: true });

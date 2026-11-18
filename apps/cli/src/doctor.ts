@@ -137,10 +137,10 @@ async function secrets(config: Config, at: { paths: ReturnType<typeof jaariPaths
   } else {
     const unit = deps.platform === "linux" ? await readFile(deps.unitPath, "utf8").catch(() => "") : "";
     if (unit.includes("LoadCredential")) {
-      // The keys themselves are checked by systemd at start. `systemd-creds` seals to the TPM when the host has one.
+      // The keys themselves are checked by systemd at start. `systemd-creds` uses a TPM by default when the host has one.
       if (!unit.includes("LoadCredentialEncrypted=")) return add("warn", "secrets: host-credential, plain files that systemd hands over; they must be readable by root only");
       const tpm = await deps.exec("systemd-creds", ["has-tpm2"]).then(() => true, () => false);
-      return add("ok", `secrets: host-credential, encrypted with systemd-creds${tpm ? " and sealed to the TPM" : ""}`);
+      return add("ok", `secrets: host-credential, encrypted with systemd-creds${tpm ? " (this host has a TPM)" : ""}`);
     }
     const dir = deps.credentialsDir ?? credentialsDirOf(config, at.paths);
     provider = createHostCredentialProvider(dir, at.dataDir);

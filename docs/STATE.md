@@ -1,6 +1,6 @@
 # Jaari: State
 
-Last updated: 2026-11-17
+Last updated: 2026-11-18
 
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).

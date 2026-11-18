@@ -7,7 +7,8 @@ export type ComposeOptions = { version: string; uid: number; gid: number; secret
 
 const list = (items: string[], indent: string) => items.map((item) => `${indent}- ${JSON.stringify(item)}\n`).join("");
 
-export function composeFile({ version, uid, gid, secrets }: ComposeOptions): string {
+export function composeFile({ version, uid, gid, secrets: all }: ComposeOptions): string {
+  const secrets = [...new Map(all.map((secret) => [secret.name, secret])).values()]; // two providers may share a key
   const names = secrets.map(({ name }) => name);
   const common = `    image: ${JSON.stringify(`${IMAGE}:${version}`)}
     user: "${uid}:${gid}"
@@ -41,5 +42,5 @@ ${common}    entrypoint: ["jaari"]
     network_mode: none
     volumes:
       - .:/home/jaari/.jaari
-${secrets.length > 0 ? `\nsecrets:\n${secrets.map(({ name, file }) => `  ${JSON.stringify(name)}:\n    file: ${JSON.stringify(file)}\n`).join("")}` : ""}`;
+${secrets.length > 0 ? `\nsecrets:\n${secrets.map(({ name, file }) => `  ${JSON.stringify(name)}:\n    file: ${JSON.stringify(file.replaceAll("$", "$$$$"))}\n`).join("")}` : ""}`;
 }

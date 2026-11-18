@@ -131,7 +131,7 @@ it("reports the form of secret zero under systemd, a store newer than this Jaari
   db.close();
   for (const file of ["session.db", "snapshots"]) await chmod(join(data, file), 0o700);
   const encrypted = await check(home, { platform: "linux", unitPath });
-  expect(encrypted.shown).toContain("ok    secrets: host-credential, encrypted with systemd-creds and sealed to the TPM");
+  expect(encrypted.shown).toContain("ok    secrets: host-credential, encrypted with systemd-creds (this host has a TPM)");
   expect(encrypted.shown).not.toContain("the key of provider"); // systemd reads the keys, not this user
   expect(encrypted.shown).toMatch(/FAIL {2}session\.db is at version 99, newer than this Jaari reads/);
   expect(encrypted.shown).toMatch(/info {2}latest snapshot: .* \(pre-migration\)/);

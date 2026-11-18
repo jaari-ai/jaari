@@ -135,7 +135,9 @@ publish. Lock that down first.
    - Workflow permissions: **Read repository contents and packages permissions**.
    - Uncheck **Allow GitHub Actions to create and approve pull requests**.
    - Allowed actions: **Allow enterprise/org actions, and select non-org actions**,
-     limited to `actions/*` and `pypa/gh-action-pypi-publish`.
+     limited to `actions/*`, `pypa/gh-action-pypi-publish@*`, `docker/setup-qemu-action@*`,
+     `docker/setup-buildx-action@*`, `docker/login-action@*`, `docker/build-push-action@*`, and
+     `sigstore/cosign-installer@*`.
 
 ### Repository `jaari-ai/jaari`
 1. Settings → **Rules → Rulesets → New branch ruleset** for `main`: require a pull
@@ -264,7 +266,9 @@ jobs:
       pypi: ${{ steps.version.outputs.pypi }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with: { persist-credentials: false }
+        with: { persist-credentials: false, fetch-depth: 0 }
+      - name: A release comes from main
+        run: git merge-base --is-ancestor "$GITHUB_SHA" origin/main
       - id: version
         name: Read the version from the tag
         run: |

@@ -107,7 +107,7 @@ async function writeCompose(config: Config, paths: ReturnType<typeof jaariPaths>
   const existing = await readExisting(path);
   if (existing === text) return true;
   await writePrivately(paths.home, existing === undefined ? path : `${path}.new`, text);
-  if (existing !== undefined) say(`${path} differs from what this Jaari writes, so it was kept; the new version is ${path}.new.`);
+  if (existing !== undefined) say("compose.yaml differs from what this Jaari writes, so it was kept; the new version is compose.yaml.new.");
   return true;
 }
 
@@ -193,13 +193,16 @@ export async function init(args: string[], io: Io, platform: NodeJS.Platform = p
 
   const compose = await writeCompose(config, paths, host, say);
   if (only !== undefined && llm === undefined) return (say(`Wrote ${paths.config}. Restart the daemon to use it.`), 0);
-  say(`Wrote ${paths.config}. Next:`);
+  // Under Compose this may run inside the container, where the paths are not the owner's, so none is printed.
+  say(compose ? "Wrote config.jsonc and compose.yaml in the Jaari folder. Next:" : `Wrote ${paths.config}. Next:`);
   const providers = Object.values((config.llm as { providers: Record<string, { apiKey?: string; baseUrl?: string }> }).providers);
   const where = home === undefined ? "" : ` --home ${paths.home}`;
   for (const { apiKey } of providers) if (apiKey?.startsWith("secretRef:")) say(`  jaari secret set ${apiKey.slice("secretRef:".length)}${where}`);
   if (compose) {
-    say(`  cd ${paths.home} && docker compose up -d`);
+    say("With Docker, in the Jaari folder:");
+    say("  docker compose up -d");
     say("  docker compose exec jaari jaari chat");
+    say(`Or, with Jaari installed on this host, without Docker: jaari service install${where}`);
     // Inside the container, localhost is the container.
     if (providers.some(({ baseUrl }) => baseUrl && /\/\/(localhost|127\.|\[::1\])/.test(baseUrl))) say("A model server on localhost cannot be reached from the container: use an address of this host in `baseUrl`.");
     return 0;

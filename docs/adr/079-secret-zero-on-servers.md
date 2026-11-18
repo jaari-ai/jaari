@@ -49,8 +49,8 @@ Compose); a passphrase typed at every start as the default (no unattended restar
 ## Amendments
 - **ADR-122:** `jaari service install` encrypts each credential file into
   `/etc/jaari/credstore`, leaves the plain files for the owner to delete, and runs again after
-  every `jaari secret set`. `jaari doctor` tells encrypted from plain; TPM-sealed is not told
-  apart yet.
+  every `jaari secret set`. `jaari doctor` tells encrypted from plain, and says when the host
+  has a TPM (ADR-123).
 - **ADR-123:** until a vault exists, Compose mounts one secret per credential at
   `/run/secrets/<name>`, not one `jaari-secret-zero` file.
 

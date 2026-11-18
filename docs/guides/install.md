@@ -31,7 +31,7 @@ jaari() { docker run --rm -it --user "$(id -u):$(id -g)" --env HOME=/home/jaari 
 jaari init                       # writes ~/.jaari/compose.yaml
 jaari secret set llm.anthropic   # the line `jaari init` prints, if your model needs a key
 cd ~/.jaari
-docker compose up -d
+docker compose up -d             # wait a few seconds for the daemon
 docker compose run --rm admin doctor
 docker compose exec jaari jaari chat
 ~~~

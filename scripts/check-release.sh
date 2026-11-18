@@ -38,4 +38,8 @@ if [ "$(uname)" = Linux ]; then
   for _ in $(seq 30); do [ -S "$work/home/data/jaari.sock" ] && break; sleep 1; done
   "${compose[@]}" run --rm admin doctor || { "${compose[@]}" logs; exit 1; }
 fi
+# The image installs every tarball in the folder, so a second pack must leave exactly one.
+node scripts/pack-release.mjs 0.0.0-check.2 >/dev/null
+test "$(ls dist/npm)" = jaari-0.0.0-check.2.tgz
+test "$(tar -xzOf dist/npm/jaari-0.0.0-check.2.tgz package/node_modules/@jaari/channels/package.json | grep -c '"version": "0.0.0-check.2"')" -eq 2 # the package and its manifest
 echo "release check passed"

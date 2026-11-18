@@ -6,6 +6,7 @@ import { loadConfig } from "@jaari/core/config";
 import { checkLlmConfig } from "@jaari/llm";
 import { afterEach, beforeEach, expect, it } from "vitest";
 import { run as configCommand } from "./config-command.js";
+import { composeFile } from "./compose.js";
 import { init } from "./init.js";
 
 let root: string;
@@ -215,8 +216,10 @@ it("writes compose.yaml on a server: pinned image, the owner's account, the cont
   ]) expect(text).toContain(line);
   expect((await stat(join(home, "compose.yaml"))).mode & 0o777).toBe(0o600);
   expect((await stat(join(home, "data"))).mode & 0o777).toBe(0o700); // made here, or Docker would make it as root
-  expect(shown).toContain("docker compose up -d");
+  expect(shown).toContain("  docker compose up -d");
+  expect(shown).toContain("without Docker: jaari service install"); // a server may run it under systemd
   expect(shown).not.toContain("  jaari-daemon");
+  expect(shown).not.toContain("cd /"); // this may run inside the container, whose paths mean nothing on the host
 });
 
 it("keeps an edited compose.yaml, and writes none for a laptop, the keychain, root, or a checkout", async () => {
@@ -246,4 +249,10 @@ it("warns when the model server is on localhost, which the container cannot reac
   const text = await readFile(join(home, "compose.yaml"), "utf8");
   expect(text).toContain("- /run/secrets:size=1m,mode=0700,uid=1000,gid=1001");
   expect(text).not.toContain("secrets:\n");
+});
+
+it("lists a key that two providers share once, and keeps a $ in a path from Compose's substitution", () => {
+  const text = composeFile({ version: "1.2.3", uid: 1000, gid: 1000, secrets: [{ name: "llm.a", file: "/srv/$x/llm.a" }, { name: "llm.a", file: "/srv/$x/llm.a" }] });
+  expect(text.match(/"llm\.a":/g)).toHaveLength(1);
+  expect(text).toContain('file: "/srv/$$x/llm.a"');
 });
