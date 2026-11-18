@@ -11,9 +11,12 @@ background, gets to know you at a pace you set, and never takes an external acti
 (send, publish) without an approval bound to the exact action. Payments are reserved, not
 in v1.
 
-> **Status: Phase 0 (Foundation). Design only, no runnable code yet.** The architecture,
-> decisions, and open questions are written down; packages are not scaffolded. See
-> [docs/STATE.md](docs/STATE.md).
+> **Status: Phase 0 (Foundation), early software.** The daemon, a chat in the terminal, and the
+> install commands work; memory, channels, and tools come in later phases. See
+> [docs/STATE.md](https://github.com/jaari-ai/jaari/blob/main/docs/STATE.md).
+>
+> Install: `npm install --global --ignore-scripts jaari`, then `jaari init`. On a server, see the
+> [install guide](https://github.com/jaari-ai/jaari/blob/main/docs/guides/install.md).
 
 ## Design in brief
 

@@ -2,7 +2,7 @@
 // The `jaari` command. Each command loads only when it is used, so `jaari chat` never loads the config or keychain code.
 import type { Command } from "./io.js";
 
-const USAGE = `usage: jaari <command>
+const USAGE = `usage: jaari <command> | --version
   chat [--home <dir> | --data <dir> | --socket <path>]   talk to the running daemon
   init [--home <dir>]                     write or revisit the config (~/.jaari/config.jsonc)
   config <deployment | secrets | llm> [--home <dir>]   revisit one step of init
@@ -22,6 +22,10 @@ const COMMANDS: Record<string, () => Promise<{ run: Command }>> = {
 };
 
 const [name = "", ...args] = process.argv.slice(2);
+if (name === "--version") {
+  console.log((await import("./version.js")).VERSION);
+  process.exit(0);
+}
 const load = Object.hasOwn(COMMANDS, name) ? COMMANDS[name] : undefined;
 if (!load) {
   console.error(USAGE);

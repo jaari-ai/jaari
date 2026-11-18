@@ -1,7 +1,7 @@
 # ADR-043: Project process: one contact address, DCO without a CLA, lockstep releases, hardened supply chain
 
 - **Status:** Accepted
-- **Extended by:** [ADR-106](106-one-address-for-registry-accounts.md), [ADR-107](107-dependabot-updates.md)
+- **Extended by:** [ADR-106](106-one-address-for-registry-accounts.md), [ADR-107](107-dependabot-updates.md), [ADR-123](123-release-as-built.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -60,6 +60,8 @@ main supply-chain attack paths).
 ## Amendments
 - **ADR-106:** registry accounts use `hello@jaari.org`; there is no separate `registry@jaari.org` inbox.
 - **ADR-107:** the DCO check exempts Dependabot's own commits on Dependabot pull requests; Dependabot version updates use a 7-day cooldown to match `minimumReleaseAge`.
+- **ADR-123:** one public npm package holds the internal ones; PyPI is published only when its own
+  version is tagged; `CHANGELOG.md` moves to roadmap 0.18.
 
 ## Consequences
 - pnpm 11 replaced `onlyBuiltDependencies` with `allowBuilds`. The allowlist is `allowBuilds`

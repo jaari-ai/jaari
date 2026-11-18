@@ -2,12 +2,14 @@
 // step with the current values as defaults and edits only what changed, so the owner's comments stay.
 import { randomBytes, randomUUID } from "node:crypto";
 import { lstat, mkdir, readFile, readlink, realpath, rename, rm, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { isDeepStrictEqual, parseArgs } from "node:util";
 import { CONFIG_VERSION, ConfigError, credentialsDirOf, isInsideData, jaariPaths, parseConfig, type Config } from "@jaari/core/config";
 import { applyEdits, modify } from "jsonc-parser";
+import { composeFile } from "./compose.js";
 import type { Command, Io } from "./io.js";
 import { createPrompter, InputEnded } from "./prompt.js";
+import { VERSION } from "./version.js";
 
 // Placeholders that the answers replace; only the comments survive as written.
 const TEMPLATE = `{
@@ -83,7 +85,33 @@ async function writePrivately(home: string, link: string, text: string): Promise
 export const STEPS = ["deployment", "secrets", "llm"] as const;
 export type Step = (typeof STEPS)[number];
 
-export async function init(args: string[], io: Io, platform: NodeJS.Platform = process.platform, only?: Step): Promise<number> {
+// What `compose.yaml` takes from this machine and this build; a test passes its own.
+export type Host = { version: string; uid: number; gid: number };
+const thisHost = (): Host => ({ version: VERSION, uid: process.getuid?.() ?? -1, gid: process.getgid?.() ?? -1 });
+
+// A server keeps its secrets in files, and Compose hands them to the daemon (ADR-056, ADR-079). The owner's own edits
+// are never overwritten: a different file goes beside it. A checkout has no published image, so it writes none.
+async function writeCompose(config: Config, paths: ReturnType<typeof jaariPaths>, host: Host, say: (line: string) => void): Promise<boolean> {
+  if (config.deployment?.target === "laptop" || config.secrets?.zero !== "host-credential" || host.version === "0.0.0") return false;
+  if (host.uid <= 0) return (say("compose.yaml was not written: run `jaari init` as the account that will own Jaari, not as root."), false);
+  const dir = credentialsDirOf(config, paths);
+  const providers = Object.values((config.llm as { providers: Record<string, { apiKey?: string }> }).providers);
+  const secrets = providers.flatMap(({ apiKey }) => (apiKey?.startsWith("secretRef:") ? [apiKey.slice("secretRef:".length)] : [])).map((name) => {
+    const inside = relative(paths.home, join(dir, name));
+    return { name, file: inside.startsWith("..") ? join(dir, name) : `./${inside}` };
+  });
+  const text = composeFile({ version: host.version, uid: host.uid, gid: host.gid, secrets });
+  // Docker would create a missing folder as root, and the daemon could not write to it.
+  await mkdir(paths.data, { recursive: true, mode: 0o700 });
+  const path = join(paths.home, "compose.yaml");
+  const existing = await readExisting(path);
+  if (existing === text) return true;
+  await writePrivately(paths.home, existing === undefined ? path : `${path}.new`, text);
+  if (existing !== undefined) say(`${path} differs from what this Jaari writes, so it was kept; the new version is ${path}.new.`);
+  return true;
+}
+
+export async function init(args: string[], io: Io, platform: NodeJS.Platform = process.platform, only?: Step, host: Host = thisHost()): Promise<number> {
   const { values } = parseArgs({ args, options: { home: { type: "string" } } });
   const home = values.home ? resolve(values.home) : undefined; // an empty --home means the default, as everywhere
   const paths = jaariPaths(home);
@@ -163,11 +191,19 @@ export async function init(args: string[], io: Io, platform: NodeJS.Platform = p
   }
   await writePrivately(paths.home, paths.config, text);
 
+  const compose = await writeCompose(config, paths, host, say);
   if (only !== undefined && llm === undefined) return (say(`Wrote ${paths.config}. Restart the daemon to use it.`), 0);
   say(`Wrote ${paths.config}. Next:`);
-  const providers = Object.values((config.llm as { providers: Record<string, { apiKey?: string }> }).providers);
+  const providers = Object.values((config.llm as { providers: Record<string, { apiKey?: string; baseUrl?: string }> }).providers);
   const where = home === undefined ? "" : ` --home ${paths.home}`;
   for (const { apiKey } of providers) if (apiKey?.startsWith("secretRef:")) say(`  jaari secret set ${apiKey.slice("secretRef:".length)}${where}`);
+  if (compose) {
+    say(`  cd ${paths.home} && docker compose up -d`);
+    say("  docker compose exec jaari jaari chat");
+    // Inside the container, localhost is the container.
+    if (providers.some(({ baseUrl }) => baseUrl && /\/\/(localhost|127\.|\[::1\])/.test(baseUrl))) say("A model server on localhost cannot be reached from the container: use an address of this host in `baseUrl`.");
+    return 0;
+  }
   say(`  jaari-daemon${where}`);
   say(`  jaari chat${where}`);
   return 0;

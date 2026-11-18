@@ -53,12 +53,12 @@ effect. Entry: none.
 | 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Delivered (2026-11-16) |
 | 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079, 112 | 0.1 | Delivered (2026-11-16) |
 | 0.12 | The local commands: `jaari doctor` (checks are added as their features ship), `jaari config <step>`, `jaari service install` (launchd; systemd with encrypted credentials), a snapshot before every store migration, and `jaari rollback` for data (ADR-122; the release is 0.17, `jaari update` 0.18) | 056, 032, 079, 082, 118, 122 | 0.5, 0.6 | Delivered (2026-11-17) |
-| 0.13 | Laptop sleep and wake: clock-gap detection, the power assertion for a turn, the battery pause state, and network-change detection, as events (ADR-121; catch-up is 1.4, the battery notice 2.3, OS wake events when a feature needs them) | 057, 082, 121 | 0.5 | Delivered (2026-11-17) |
+| 0.13 | Laptop sleep and wake: clock-gap detection, the power assertion for a turn, the battery pause state, and network-change detection, as events (ADR-121; catch-up is 1.4, the battery notice 2.3, OS wake events when a feature needs them) | 057, 082, 121 | 0.5 | Verified (2026-11-17, owner's lid-close test on a Mac: `power.wake` with a 202 s gap) |
 | 0.14 | `ownerId` in the data model; versioned stores that migrate on open and refuse newer or foreign data | 044, 056, 119 | 0.5, 0.6 | Delivered (2026-11-17) |
 | 0.15 | `@jaari/http` core: resolve, check, dial; the address-class table; the `direct` provider; the lint rule against other network clients | 016, 053, 080, 113 | 0.1 | Delivered (2026-11-16) |
 | 0.16 | Prompt-injection floor: the locked safety section, `fence()` and `defuse`, the reply marker filter, and canary and fence-id scanning in the `@jaari/http` core (model calls excepted, ADR-120) and channel send paths | 042, 104, 120 | 0.5, 0.8, 0.15 | Delivered (2026-11-17) |
-| 0.17 | Release: one public npm package `jaari` (daemon and command), a multi-arch image on the GitHub container registry, both signed without a stored key (npm provenance, cosign); the `compose.yaml` that `jaari init` writes; in `jaari doctor`, TPM-sealed credentials and Linux disk encryption | 010, 056, 079, 094, 122 | 0.12 | Planned |
-| 0.18 | `jaari update`: signature and provenance check, snapshot, versions kept side by side with a `current` link, `jaari doctor` after the swap, automatic rollback of data and version; `jaari uninstall` | 056, 082, 122 | 0.17 | Planned |
+| 0.17 | Release: one public npm package `jaari` (daemon and command), a multi-arch image on the GitHub container registry, both signed without a stored key (npm provenance, cosign); staged npm approval; the `compose.yaml` that `jaari init` writes; in `jaari doctor`, a TPM and Linux disk encryption | 010, 056, 079, 094, 122, 123 | 0.12 | Implemented (no version published yet) |
+| 0.18 | `jaari update`: signature and provenance check, snapshot, versions kept side by side with a `current` link, `jaari doctor` after the swap, automatic rollback of data and version; `jaari uninstall`; `CHANGELOG.md` and the release notes (ADR-123) | 043, 056, 082, 122, 123 | 0.17 | Planned |
 
 Exit criteria:
 - The tier-1 smoke test boots the daemon on the scripted engine in CI on every pull request,
@@ -80,6 +80,8 @@ Exit criteria:
 - A scripted refusal in the main session ends the turn with one notice and no model change; in a
   role that is not pinned it stops and is reported, until OQ-93 (ADR-085, ADR-114).
 - A clock gap over 2 minutes is detected as sleep (ADR-057, ADR-121).
+- The npm tarball installs from nothing and the daemon starts from it; on Linux the `compose.yaml`
+  that `jaari init` writes comes up and `jaari doctor` passes beside it (ADR-122, ADR-123).
 - A binary older than its data refuses to start (ADR-056).
 - "stop now" aborts the running turn and "pause" survives a restart; a turn stops at 25 steps
   (ADR-031, ADR-087).

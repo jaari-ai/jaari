@@ -243,6 +243,9 @@ __version__ = "0.0.0"
 (tag in the comment); Dependabot (part 5) proposes updates:
 
 ~~~yaml
+# The same text is shown in docs/guides/namespaces.md §6.3.
+# A `v*` tag builds one npm tarball and one image from it (ADR-122). Nothing is public until the `release`
+# environment is approved, and the npm version only after a second approval with 2FA on npm (`npm stage`).
 name: release
 on:
   push:
@@ -254,19 +257,43 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      npm_tag: ${{ steps.version.outputs.npm_tag }}
+      image_tags: ${{ steps.version.outputs.image_tags }}
+      pypi: ${{ steps.version.outputs.pypi }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: { persist-credentials: false }
+      - id: version
+        name: Read the version from the tag
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "not a release tag: $GITHUB_REF_NAME"; exit 1; }
+          image="ghcr.io/jaari-ai/jaari"
+          if [[ "$version" == *-* ]]; then npm_tag=next; tags="$image:$version"; else npm_tag=latest; tags="$image:$version,$image:latest"; fi
+          # PyPI `jaari` only holds the name (ADR-056): it is published when its own version is the one tagged.
+          pypi=false; grep -qx "version = \"$version\"" python/pyproject.toml && pypi=true
+          { echo "version=$version"; echo "npm_tag=$npm_tag"; echo "image_tags=$tags"; echo "pypi=$pypi"; } >> "$GITHUB_OUTPUT"
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with: { python-version: "3.12" }
       - run: python -m pip install build && python -m build python --outdir dist/pypi
-      # npm packages are added here in Phase 0: pnpm build, then
-      # pnpm pack into dist/npm/ for each publishable package.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with: { node-version: "26", package-manager-cache: false }
+      - run: npm install -g "$(node -p 'require("./package.json").packageManager')"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint && pnpm typecheck && pnpm test
+      - run: pnpm -r build
+      - run: scripts/check-release.sh
+      - run: node scripts/pack-release.mjs "$VERSION"
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with: { name: dist, path: dist/ }
 
   publish-pypi:
     needs: build
+    if: needs.build.outputs.pypi == 'true'
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
@@ -277,6 +304,65 @@ jobs:
         with: { name: dist, path: dist/ }
       - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3; attestations are on by default
         with: { packages-dir: dist/pypi/ }
+
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write # trusted publishing, which also adds the provenance
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with: { name: dist, path: dist/ }
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "26"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+      - run: npm stage publish "./dist/npm/jaari-$VERSION.tgz" --access public --tag "$NPM_TAG"
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          NPM_TAG: ${{ needs.build.outputs.npm_tag }}
+
+  publish-image:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      packages: write
+      id-token: write # the workflow's identity signs the image; no key is stored
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with: { name: dist, path: dist/ }
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - id: push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ needs.build.outputs.image_tags }}
+          provenance: mode=max
+          sbom: true
+      - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+      - name: Sign the image by digest, and prove the signature verifies
+        env:
+          IMAGE: ghcr.io/jaari-ai/jaari@${{ steps.push.outputs.digest }}
+          IDENTITY: https://github.com/${{ github.repository }}/.github/workflows/release.yml@${{ github.ref }}
+        run: |
+          cosign sign --yes "$IMAGE"
+          cosign verify "$IMAGE" --certificate-identity "$IDENTITY" --certificate-oidc-issuer https://token.actions.githubusercontent.com > /dev/null
 ~~~
 
 ### 6.4 First release
@@ -296,63 +382,24 @@ jobs:
 If the pending publisher was invalidated (someone registered `jaari` first), stop and
 open a PEP 541 request or pick a fallback name, then update ADR-010.
 
-## Part 7. npm trusted publishing (each package, when it exists)
+## Part 7. npm trusted publishing
 
-npm only offers trusted publishing on a package that already exists, and a new
-trusted-publisher configuration **expires if no publish succeeds within 2 days**. So for
-each new `@jaari/<name>` (and later for `jaari` itself):
+Only the unscoped `jaari` is published: it carries the `@jaari/*` packages inside it (ADR-122,
+ADR-123). It already exists on npm. A new trusted-publisher configuration **expires if no publish
+succeeds within 2 days**, so set it up right before the first release
+([install guide](install.md), "Cutting a release").
 
-1. **First publish by hand** (once per package), from a clean build of that package:
-
-   ~~~bash
-   npm login --auth-type=web
-   cd packages/<name> && pnpm build && pnpm pack
-   npm publish ./jaari-<name>-0.0.0.tgz --access public   # 2FA prompt
-   npm logout
-   ~~~
-
-   Its `package.json` must have `"repository": {"type": "git", "url":
-   "git+https://github.com/jaari-ai/jaari.git", "directory": "packages/<name>"}`;
-   provenance checks it against the repo.
-2. npmjs.com → package → **Settings** → **Trusted Publisher** → **GitHub Actions**:
+1. npmjs.com → package `jaari` → **Settings** → **Trusted Publisher** → **GitHub Actions**:
    - Organization or user: `jaari-ai`
    - Repository: `jaari`
    - Workflow filename: `release.yml`
    - Environment name: `release`
-   - Allowed actions: choose one model:
-     - **Staged (recommended):** allow only `npm stage publish`. CI stages the release and
-       you approve it with 2FA on npmjs.com or the CLI. This still holds if GitHub is
-       compromised. In the workflow, use `npm stage publish` instead of `npm publish`.
-     - **Direct:** allow `npm publish`; the GitHub `release` environment reviewer is
-       the only approval.
-   - Leave **Allow npm dist-tag** off.
+   - Allowed actions: `npm stage publish` only. Leave `npm publish` and **Allow npm dist-tag** off.
+
    Fields are case-sensitive and npm does not validate them on save.
-3. If `release.yml` has no npm job yet, add it (Phase 0 also adds the pnpm build and
-   `pnpm pack` into `dist/npm/` to the `build` job):
-
-   ~~~yaml
-     publish-npm:
-       needs: build
-       runs-on: ubuntu-latest
-       environment: release
-       permissions:
-         contents: read
-         id-token: write
-       steps:
-         - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-           with: { name: dist, path: dist/ }
-         - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-           with:
-             node-version: "26"
-             registry-url: "https://registry.npmjs.org"
-             package-manager-cache: false
-         - run: npm --version                    # must be >= 11.5.1
-         - run: for f in dist/npm/*.tgz; do npm publish "$f" --access public; done
-   ~~~
-
-   With the staged model, change the last line to `npm stage publish "$f" --access public`.
-4. Within 2 days, cut a real release through `release.yml`.
-5. Package → Settings → **Publishing access** → **Require two-factor authentication and
+2. Cut the release. CI stages it; approve it with 2FA: `npm stage list jaari`, then `npm stage
+   approve <stage-id>`.
+3. Package → Settings → **Publishing access** → **Require two-factor authentication and
    disallow tokens** → **Update Package Settings**.
 
 ## Part 8. Verify

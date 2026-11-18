@@ -1,7 +1,7 @@
 # ADR-056: Install, update, migrate: owner-chosen install method, automatic patch updates, migrations when a store opens
 
 - **Status:** Accepted
-- **Extended by:** [ADR-079](079-secret-zero-on-servers.md), [ADR-082](082-phase-split-update-and-catch-up.md), [ADR-094](094-sandbox-under-compose.md), [ADR-105](105-node-26-lts-runtime.md), [ADR-122](122-install-in-three-steps.md)
+- **Extended by:** [ADR-079](079-secret-zero-on-servers.md), [ADR-082](082-phase-split-update-and-catch-up.md), [ADR-094](094-sandbox-under-compose.md), [ADR-105](105-node-26-lts-runtime.md), [ADR-122](122-install-in-three-steps.md), [ADR-123](123-release-as-built.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -67,6 +67,8 @@ into the sandbox; migrations without a snapshot; letting an older binary open ne
   provenance, cosign). An install keeps each version in `~/.jaari/versions`, with a `current`
   link. The work is roadmap 0.12 (local commands), 0.17 (release), and 0.18 (`jaari update`,
   `jaari uninstall`). `jaari config` revisits one named step.
+- **ADR-123:** the npm package carries the internal packages and a shrinkwrap; the image is made
+  from it; `compose.yaml` is written only for a server with `host-credential`.
 
 ## Consequences
 - Roadmap 0.6 (2026-11-17): the config file, its version, and its checks are ADR-118. `jaari init`
