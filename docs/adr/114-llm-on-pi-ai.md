@@ -57,3 +57,8 @@ settle:
   keyless local server, although pi-ai's README shows that setup. A custom endpoint with no
   `apiKey` gets the placeholder key `unused`, the value pi-ai itself sends when a header carries
   the auth. Before this, no keyless local model could answer.
+- 2026-11-19 (Dependabot, PR #43): pi-ai and pi-agent-core move to 1.5.2, past the 7-day age. The
+  facts this ADR rests on were checked again in 1.5.2: a refusal is still `stopReason: "error"` with
+  `rawStopReason` kept and no category, so OQ-93 still holds. Anthropic message threads, new in
+  1.5.1, apply only to a call with a `sessionId`; Jaari passes none, so its requests are unchanged
+  (learning/15). `refs/pi` stays at 1.5.0 until `scripts/refs.sh bump pi` (ADR-083).

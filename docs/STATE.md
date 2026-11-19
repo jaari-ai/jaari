@@ -37,7 +37,7 @@ The index is [adr/README.md](adr/README.md). By area:
   prompt-injection defences (ADR-006, 007, 013, 016, 018, 031, 040, 050, 068, 069, 072, 075,
   079, 081, 090, 092, 095, 096, 104, 112, 120).
 - Models: role and tier routing, a pinned main session, local-only defaults decided at init,
-  local-model qualification, a monthly budget, refusals in the pinned session; pi-ai 1.5.0 with keys
+  local-model qualification, a monthly budget, refusals in the pinned session; pi-ai 1.5.2 with keys
   only from `secretRef` and the usage log in `node:sqlite` (ADR-011, 019, 045, 046, 085, 114).
 - Web and computer use: search, fetch ladder, neutral browser surface with adapters,
   commitment classifier, browser worker, egress pool, signed-agent identity, takeover, egress
@@ -94,13 +94,14 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   owner's allow list (addresses, ranges, or `name:port` for Compose services) and the daemon's own ports, and `createEgress(policy).fetch`: Node's `fetch`
   with an undici `Agent` whose connector resolves, checks, and dials only a checked address
   (ADR-113). A lint rule, checked by a test, refuses other network clients (ADR-080). 
-- `@jaari/llm` (0.7, delivered 2026-11-16): on pi-ai 1.5.0. The `llm` config section checked with
+- `@jaari/llm` (0.7, delivered 2026-11-16): on pi-ai 1.5.0, 1.5.2 since 2026-11-19 (ADR-114). The `llm` config section checked with
   TypeBox (local-only roles that reach an API fail at start); providers from config with keys only
   from `secretRef`; role chains with the main role pinned; a move down the chain only when the
   provider never accepted the request; refusals read from the raw stop reason and, until OQ-93,
   stopped and reported; the usage log in SQLite through `node:sqlite` (ADR-114). The egress core now
   tries each checked address in turn.
-- `@jaari/core` (first half of 0.5, 2026-11-16): the persistent main session on pi-agent-core 1.5.0.
+- `@jaari/core` (first half of 0.5, 2026-11-16): the persistent main session on pi-agent-core 1.5.0, 1.5.2 since
+  2026-11-19.
   The transcript and the pause flag in SQLite; one serial queue; steering; "pause", "stop now", and
   "resume" handled by code; the step limit, the stall guard, and the sleep-aware watchdog; compaction
   through the `summarize` role; the event log as NDJSON (ADR-031, ADR-032, ADR-065).

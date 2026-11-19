@@ -7,6 +7,11 @@ adapters, read to make the calls in ADR-114.
 |---|---|
 | `refs/pi` | `469d8651b59069d7bd907c7da84597865e114da6` (pi-ai 1.5.0) |
 
+The installed pi-ai is 1.5.2; `refs/pi` is still at 1.5.0. Checked again in 1.5.2 (2026-11-19, after Dependabot PR #43): the refusal mapping and
+`rawStopReason` are unchanged. New in 1.5.1, Anthropic message threads apply only to a call that
+carries a `sessionId` (`cacheSessionId` in `dist/api/anthropic-messages.js`); Jaari passes none, so its
+requests still send the whole conversation.
+
 ## 1. What pi-ai does
 - A `Models` collection holds providers; each provider owns its catalog, its auth, and its wire
   protocol (`refs/pi/packages/ai/README.md`, Providers and Models). `createProvider()` builds one for
