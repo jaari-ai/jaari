@@ -1,4 +1,4 @@
-import { lstat, mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -9,7 +9,7 @@ import { uninstall, type UninstallDeps } from "./uninstall.js";
 // A fake user home in a temp folder; exists and remove act on it, every other effect is a fake.
 let user: string, home: string;
 beforeEach(async () => {
-  user = await mkdtemp(join(tmpdir(), "jaari-uninstall-"));
+  user = await realpath(await mkdtemp(join(tmpdir(), "jaari-uninstall-"))); // macOS: /var is a link to /private/var
   home = join(user, ".jaari");
   await mkdir(join(home, "data"), { recursive: true });
   await mkdir(join(home, "credentials"));

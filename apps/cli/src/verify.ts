@@ -67,6 +67,10 @@ function attested(attestations: Attestation[], type: string, version: string, sh
   return statement;
 }
 
+// Exactly this repository's release workflow, at the tag of this version: a fork, another workflow, a branch, or
+// another tag does not pass.
+export const identityFor = (version: string): RegExp => new RegExp(`^${`${REPOSITORY}/${WORKFLOW}@refs/tags/v${version}`.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
+
 // `sha512` is the digest of the downloaded tarball. Returns the commit the release was built from.
 export function checkRelease(version: string, dist: Dist, attestations: Attestation[], sha512: Buffer, now = new Date()): { commit: string } {
   if (!VERSION_FORMAT.test(version)) throw new VerifyError(`${JSON.stringify(version)} is not a version`);
@@ -80,9 +84,7 @@ export function checkRelease(version: string, dist: Dist, attestations: Attestat
   if (!signed) throw new VerifyError("the npm registry signature is missing or does not verify; if npm changed its keys, install a newer Jaari by hand");
 
   attested(attestations, PUBLISH, version, sha512);
-  // Exactly this repository's release workflow, at the tag of this version: a fork or another workflow does not pass.
-  const identity = new RegExp(`^${`${REPOSITORY}/${WORKFLOW}@refs/tags/v${version}`.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
-  const provenance = attested(attestations, PROVENANCE, version, sha512, identity);
+  const provenance = attested(attestations, PROVENANCE, version, sha512, identityFor(version));
   return { commit: provenance.predicate?.buildDefinition?.resolvedDependencies?.[0]?.digest?.gitCommit ?? "unknown" };
 }
 

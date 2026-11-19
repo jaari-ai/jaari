@@ -39,11 +39,50 @@ async function apply(home: string, state: VersionState): Promise<void> {
   await rename(`${paths.state}.tmp`, paths.state);
 }
 
-// Makes `version` the active one and remembers the one before it.
-export async function activate(home: string, version: string): Promise<VersionState> {
-  const state = { current: version, previous: (await readState(home)).current };
+// Makes `version` the active one and remembers `before`: the version that ran, which the caller knows. The state file
+// may name a version whose folder is gone, and then the one that npm installed ran instead (`null`).
+export async function activate(home: string, version: string, before: string | null): Promise<VersionState> {
+  const state = { current: version, previous: before === version ? null : before };
   await apply(home, state);
   return state;
+}
+
+// Sets the state as given: a rollback writes the state it wants first, so a run that was cut short can finish it.
+export const setState = apply;
+export const pendingPath = (home: string) => join(versionPaths(home).dir, "rollback.json");
+export async function readPending(home: string): Promise<VersionState | undefined> {
+  const text = await readFile(pendingPath(home), "utf8").catch(() => undefined);
+  if (text === undefined) return undefined;
+  const state = JSON.parse(text) as VersionState;
+  const ok = (value: unknown) => value === null || (typeof value === "string" && VERSION_FORMAT.test(value));
+  if (!ok(state.current) || (state.previous !== undefined && !ok(state.previous))) throw new Error(`${pendingPath(home)} is damaged; remove it and run \`jaari rollback\` again`);
+  return state;
+}
+
+// One `jaari update` at a time. A lock whose process is gone is taken over. Returns the release, or undefined.
+export async function lock(home: string): Promise<(() => Promise<void>) | undefined> {
+  const path = join(versionPaths(home).dir, "update.lock");
+  await mkdir(versionPaths(home).dir, { recursive: true, mode: 0o700 });
+  for (let tries = 0; tries < 2; tries++) {
+    try {
+      await writeFile(path, `${process.pid}\n`, { flag: "wx", mode: 0o600 });
+      return () => rm(path, { force: true });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      const pid = Number((await readFile(path, "utf8").catch(() => "")).trim());
+      let alive = Number.isInteger(pid) && pid > 0;
+      if (alive) {
+        try {
+          process.kill(pid, 0);
+        } catch (gone) {
+          alive = (gone as NodeJS.ErrnoException).code === "EPERM";
+        }
+      }
+      if (alive) return undefined;
+      await rm(path, { force: true });
+    }
+  }
+  return undefined;
 }
 
 // Goes back to the version before the last update or the last swap; undefined when there is none.
@@ -60,7 +99,7 @@ export async function prune(home: string): Promise<void> {
   const paths = versionPaths(home);
   const { current, previous } = await readState(home);
   for (const entry of await readdir(paths.dir).catch(() => [])) {
-    if (entry === "state.json" || entry === current || entry === previous) continue;
+    if (entry === current || entry === previous) continue;
     if (VERSION_FORMAT.test(entry) || entry.endsWith(".installing") || entry.endsWith(".tgz")) await rm(join(paths.dir, entry), { recursive: true, force: true });
   }
 }

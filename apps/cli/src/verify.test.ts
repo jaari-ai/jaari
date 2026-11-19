@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { checkRelease, verifyRelease, VerifyError, type Attestation, type Dist } from "./verify.js";
+import { checkRelease, identityFor, verifyRelease, VerifyError, type Attestation, type Dist } from "./verify.js";
 
 // What npm and Sigstore really issued for jaari@0.1.0-beta.1, so a pass here is a pass against the real thing.
 const real = JSON.parse(await readFile(join(import.meta.dirname, "fixtures/jaari-0.1.0-beta.1.json"), "utf8")) as { version: string; dist: Dist; attestations: Attestation[] };
@@ -56,6 +56,24 @@ describe("release verification (ADR-056, ADR-124)", () => {
     const swapped = copy(real.attestations);
     swapped[1]!.bundle = swapped[0]!.bundle;
     refused(() => checkRelease(real.version, real.dist, swapped, sha512), "does not verify");
+  });
+
+  it("accepts only the release workflow of this repository at the tag of the version", () => {
+    const pattern = identityFor("0.1.0-beta.1");
+    expect(pattern.test("https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/tags/v0.1.0-beta.1")).toBe(true);
+    for (const other of [
+      "https://github.com/jaari-ai/jaari/.github/workflows/ci.yml@refs/tags/v0.1.0-beta.1", // another workflow
+      "https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/heads/main", // a branch
+      "https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/tags/v0.1.0-beta.10", // another tag
+      "https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/tags/v0.1.0-beta.1x",
+      "https://github.com/jaari-ai/jaari-fork/.github/workflows/release.yml@refs/tags/v0.1.0-beta.1", // a fork's name
+      "https://github.com/someone/jaari/.github/workflows/release.yml@refs/tags/v0.1.0-beta.1", // a fork
+      "https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/tags/v0.1.0-beta.1/extra",
+      "x https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/tags/v0.1.0-beta.1",
+      "https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/tags/v0x1x0-beta.1", // dots are not wildcards
+    ]) expect(pattern.test(other), other).toBe(false);
+    // The real certificate names exactly this identity, so the check above is the one that applies.
+    expect(() => checkRelease(real.version, real.dist, real.attestations, sha512)).not.toThrow();
   });
 
   it("refuses a version string that could widen the identity pattern", () => {

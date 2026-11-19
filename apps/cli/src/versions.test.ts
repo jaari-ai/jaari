@@ -20,19 +20,17 @@ describe("installed versions (ADR-122, ADR-124)", () => {
     expect(await swapBack(dir)).toBeUndefined(); // nothing to go back to before the first update
     await installed(dir, "0.1.0-beta.2");
     await installed(dir, "0.1.0-beta.3");
-    expect(await activate(dir, "0.1.0-beta.2")).toEqual({ current: "0.1.0-beta.2", previous: null });
+    expect(await activate(dir, "0.1.0-beta.2", null)).toEqual({ current: "0.1.0-beta.2", previous: null });
     expect(await readlink(versionPaths(dir).link)).toBe(join("versions", "0.1.0-beta.2")); // relative: the folder can move
-    await activate(dir, "0.1.0-beta.3");
+    await activate(dir, "0.1.0-beta.3", "0.1.0-beta.2");
     expect(await swapBack(dir)).toEqual({ current: "0.1.0-beta.2", previous: "0.1.0-beta.3" });
     expect(await activeRoot(dir)).toMatch(/versions\/0\.1\.0-beta\.2$/);
     expect(await swapBack(dir)).toEqual({ current: "0.1.0-beta.3", previous: "0.1.0-beta.2" }); // a second rollback undoes the first
 
-    await activate(dir, "0.1.0-beta.2");
-    await swapBack(dir);
-    await activate(dir, "0.1.0-beta.3"); // state is now beta.3 over beta.3's predecessor
+    expect(await activate(dir, "0.1.0-beta.3", "0.1.0-beta.3")).toEqual({ current: "0.1.0-beta.3", previous: null }); // never itself
     const base = await home();
     await installed(base, "1.0.0");
-    await activate(base, "1.0.0");
+    await activate(base, "1.0.0", null);
     expect(await swapBack(base)).toEqual({ current: null, previous: "1.0.0" }); // back to the version npm installed: no link
     expect(await activeRoot(base)).toBeUndefined();
     expect(await readdir(base)).not.toContain("current");
@@ -43,8 +41,7 @@ describe("installed versions (ADR-122, ADR-124)", () => {
     for (const version of ["0.1.0", "0.2.0", "0.3.0"]) await installed(dir, version);
     await mkdir(join(versionPaths(dir).dir, "0.4.0.installing"));
     await mkdir(join(versionPaths(dir).dir, "notes"));
-    await activate(dir, "0.2.0");
-    await activate(dir, "0.3.0");
+    await activate(dir, "0.3.0", "0.2.0");
     await prune(dir);
     expect((await readdir(versionPaths(dir).dir)).sort()).toEqual(["0.2.0", "0.3.0", "notes", "state.json"]);
   });
@@ -74,12 +71,35 @@ describe("the launcher (ADR-124)", () => {
     const argv = ["doctor", "--home", dir];
     expect(await entryOf("cli", argv, own)).toBe(own); // no update yet
     const main = await installed(dir, "0.2.0");
-    await activate(dir, "0.2.0");
+    await activate(dir, "0.2.0", null);
     expect(await entryOf("cli", argv, own)).toMatch(/versions\/0\.2\.0\/lib\/node_modules\/jaari\/node_modules\/@jaari\/cli\/dist\/main\.js$/);
     expect(await entryOf("cli", [`--home=${dir}`], own)).not.toBe(own);
     expect(await entryOf("cli", argv, main)).toBe(main); // already the active one: no loop
     expect(await entryOf("daemon", argv, own)).toBe(own); // that version has no such program
     expect(await entryOf("cli", ["--home", join(dir, "missing")], own)).toBe(own);
     expect(homeOf(["chat"])).toMatch(/\.jaari$/);
+    expect(homeOf(["x", "--home", "/a", "--home=/b"])).toBe("/b"); // the last one wins, as in parseArgs
+    expect(homeOf(["x", "--", "--home", "/a"])).toMatch(/\.jaari$/);
+    expect(homeOf(["x", "--home"])).toMatch(/\.jaari$/);
+  });
+
+  it("prefers a newer version that npm installed, and says when the active version is gone", async () => {
+    const dir = await home();
+    const at = (root: string, version: string) => writeFile(join(root, "..", "..", "package.json"), JSON.stringify({ version }));
+    const ownMain = mainOf(join(dir, "npm"), "cli");
+    await mkdir(join(ownMain, ".."), { recursive: true });
+    await writeFile(ownMain, "");
+    const active = await installed(dir, "0.2.0");
+    await at(active, "0.2.0");
+    await activate(dir, "0.2.0", null);
+    await at(ownMain, "0.1.0");
+    expect(await entryOf("cli", ["--home", dir], ownMain)).toMatch(/versions\/0\.2\.0/);
+    await at(ownMain, "0.3.0"); // `npm install -g jaari@0.3.0` after the update
+    expect(await entryOf("cli", ["--home", dir], ownMain)).toBe(ownMain);
+    const { rm: remove } = await import("node:fs/promises");
+    await remove(versionPaths(dir).of("0.2.0"), { recursive: true });
+    const warned: string[] = [];
+    expect(await entryOf("cli", ["--home", dir], ownMain, (line) => warned.push(line))).toBe(ownMain);
+    expect(warned[0]).toContain("the active version 0.2.0 is missing");
   });
 });

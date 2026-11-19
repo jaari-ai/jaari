@@ -53,7 +53,8 @@ export async function uninstall(args: string[], io: Io, deps: UninstallDeps = sy
     const real = await realpath(paths.home).catch(() => paths.home);
     const owner = await realpath(deps.homedir).catch(() => resolve(deps.homedir));
     if ([paths.home, real].some((dir) => dir === parse(dir).root || dir === resolve(deps.homedir) || dir === owner)) return (say(`jaari: refusing to purge ${paths.home}: it is not a Jaari folder`), 1);
-    if (!(await deps.exists(paths.config)) && !(await deps.exists(paths.data))) return (say(`jaari: refusing to purge ${paths.home}: it has no config.jsonc or data, so it is not a Jaari folder`), 1);
+    // `jaari init` always writes config.jsonc; a folder that only has a `data` folder may be any project.
+    if (!(await deps.exists(paths.config))) return (say(`jaari: refusing to purge ${paths.home}: it has no config.jsonc, so it is not a Jaari folder`), 1);
   }
 
   let removed = false;
@@ -73,7 +74,7 @@ export async function uninstall(args: string[], io: Io, deps: UninstallDeps = sy
     removed = true;
   }
   // A running daemon still uses the installed version and holds the stores open.
-  if ((await deps.daemonRunning(socketPath(paths.data))) !== "stopped") return (say("jaari: a daemon is still running; stop it, then run `jaari uninstall` again. Nothing else was removed."), 1);
+  if ((await deps.daemonRunning(socketPath(paths.data))) !== "stopped") return (say("jaari: a daemon is still running; stop it, then run `jaari uninstall` again. The installed versions and the data were not removed."), 1);
 
   for (const path of [join(paths.home, "current"), join(paths.home, "versions")]) {
     if (!(await deps.exists(path))) continue;
@@ -91,7 +92,9 @@ export async function uninstall(args: string[], io: Io, deps: UninstallDeps = sy
     return 0;
   }
 
-  say(`This deletes ${paths.home}: the conversation, the config and the credential files in it. They cannot be restored.`);
+  // A Jaari folder that is a link: the data is where it points, so that is what goes, and what the owner is shown.
+  const target = await realpath(paths.home).catch(() => paths.home);
+  say(`This deletes ${target}: the conversation, the config and the credential files in it. They cannot be restored.`);
   const cancelled = () => (say("Cancelled; the data was kept. The service and installed versions removed above stay removed."), 1);
   const prompter = createPrompter(io);
   try {
@@ -102,8 +105,9 @@ export async function uninstall(args: string[], io: Io, deps: UninstallDeps = sy
   } finally {
     prompter.close();
   }
-  await deps.remove(paths.home);
-  say(`Deleted ${paths.home}.`);
+  await deps.remove(target);
+  if (target !== paths.home) await deps.remove(paths.home);
+  say(`Deleted ${target}.`);
   if (deps.platform === "darwin" && (await deps.exists(log))) {
     await deps.remove(log);
     say(`Deleted ${log}.`);

@@ -20,7 +20,7 @@ const said = (data: string) => {
 };
 
 // An install on 0.1.0-beta.2 with one message, and a world of fakes around it.
-async function world(over: Partial<UpdateDeps> & { checkFails?: boolean; doctorFails?: boolean; tags?: Record<string, string>; daemon?: ("running" | "stopped")[] } = {}) {
+async function world(over: Partial<UpdateDeps> & { checkFails?: boolean; doctorFails?: boolean; installs?: string; tags?: Record<string, string>; daemon?: ("running" | "stopped")[] } = {}) {
   const made = await install();
   const store = openStore(join(made.data, "session.db"), OWNER);
   store.append({ role: "user", content: [{ type: "text", text: "before the update" }], timestamp: 1 });
@@ -40,8 +40,18 @@ async function world(over: Partial<UpdateDeps> & { checkFails?: boolean; doctorF
     verify: () => ({ commit: "46acb3db6c8406039ef547bbb7fc3512d7c1b9e2" }),
     exec: async (command, args) => {
       calls.push([command.replace(made.home, "~"), ...args.map((arg) => arg.replace(made.home, "~"))].join(" "));
-      if (command === "npm" && args[0] === "install") await mkdir(join(args[3]!, "bin"), { recursive: true });
-      if (command.endsWith("/bin/jaari") && args[0] === "--version") return { code: 0, output: `${command.includes(NEW) ? NEW : "?"}\n` };
+      // npm installs the package files; the verified tarball holds the same ones, unless a test says otherwise.
+      if (command === "npm" && args[0] === "install") {
+        await mkdir(join(args[3]!, "bin"), { recursive: true });
+        await mkdir(join(args[3]!, "lib", "node_modules", "jaari"), { recursive: true });
+        await writeFile(join(args[3]!, "lib", "node_modules", "jaari", "package.json"), over.installs ?? "the package");
+      }
+      if (command === "tar") {
+        await mkdir(join(args[3]!, "package"), { recursive: true });
+        await writeFile(join(args[3]!, "package", "package.json"), "the package");
+      }
+      // The staged launcher reads `--home`: given the staging folder, it reports its own version.
+      if (command.endsWith("/bin/jaari") && args[0] === "--version") return { code: 0, output: `${args[2]?.includes(NEW) ? NEW : "0.1.0-beta.2"}\n` };
       if (command.endsWith("/bin/jaari-daemon")) {
         // What a newer daemon does to the data at its first start, so a rollback has something to undo.
         const newer = openStore(join(made.data, "session.db"), OWNER);
@@ -77,8 +87,10 @@ describe("jaari update (ADR-056, ADR-082, ADR-124)", () => {
     expect((await listSnapshots(data)).map((snapshot) => snapshot.reason)).toEqual(["pre-update"]);
     expect(calls).toEqual([
       "npm --version",
-      `npm install --global --prefix ~/versions/${NEW}.installing --ignore-scripts --no-audit --no-fund ~/versions/jaari-${NEW}.tgz`,
-      `~/versions/${NEW}.installing/bin/jaari --version`,
+      // By name, so npm takes the dependencies from the shrinkwrap; then compared with the verified file.
+      `npm install --global --prefix ~/versions/${NEW}.installing --ignore-scripts --no-audit --no-fund jaari@${NEW}`,
+      `tar -xzf ~/versions/jaari-${NEW}.tgz -C ~/versions/jaari-${NEW}.tgz.files`,
+      `~/versions/${NEW}.installing/bin/jaari --version --home ~/versions/${NEW}.installing`,
       "~/current/bin/jaari-daemon --check --home ~",
       "~/current/bin/jaari doctor --home ~ --no-daemon", // the daemon is not started here: no service manager to ask
     ]);
@@ -122,6 +134,57 @@ describe("jaari update (ADR-056, ADR-082, ADR-124)", () => {
     expect(said(bad.data)).not.toContain("written by the new version");
   });
 
+  it("refuses what npm installed when it is not the verified file, and changes nothing", async () => {
+    const { home, data, calls, go } = await world({ installs: "something else" });
+    const { code, shown } = await go();
+    expect(code).toBe(1);
+    expect(shown).toContain("the installed package.json differs from the verified file");
+    expect(calls.some((call) => call.includes("--check"))).toBe(false);
+    expect(await readdir(home)).not.toContain("current");
+    expect((await readdir(join(home, "versions"))).filter((entry) => entry !== "state.json" && entry !== "update.lock")).toEqual([]);
+    expect(await listSnapshots(data)).toEqual([]);
+  });
+
+  it("runs one update at a time", async () => {
+    const { home, go } = await world();
+    await mkdir(join(home, "versions"), { recursive: true });
+    await writeFile(join(home, "versions", "update.lock"), `${process.pid}\n`); // this process is alive
+    expect((await go()).shown).toContain("another `jaari update` is running");
+    await writeFile(join(home, "versions", "update.lock"), "999999999\n"); // a process that is gone
+    expect((await go()).code).toBe(0);
+  });
+
+  it("starts the daemon again when something fails after it was stopped, and restores nothing under a daemon that runs", async () => {
+    const agentAt = async (made: { home: string }) => {
+      await mkdir(join(made.home, "..", "Library", "LaunchAgents"), { recursive: true });
+      await writeFile(join(made.home, "..", "Library", "LaunchAgents", "org.jaari.daemon.plist"), "");
+    };
+    const broken = await world({ platform: "darwin" });
+    await agentAt(broken);
+    broken.deps.exists = (path) => (path.endsWith("/data") ? Promise.reject(new Error("unable to open database file")) : readFile(path).then(() => true, () => false));
+    const failed = await broken.go();
+    expect(failed.code).toBe(1);
+    expect(failed.shown).toContain("unable to open database file");
+    expect(broken.calls.filter((call) => call.startsWith("launchctl")).map((call) => call.split(" ")[1])).toEqual(["bootout", "bootout", "bootstrap"]);
+    expect(await readdir(broken.home)).not.toContain("current");
+    expect((await readdir(join(broken.home, "versions"))).some((entry) => entry.endsWith(".installing"))).toBe(false);
+
+    const stuck = await world({ platform: "darwin", doctorFails: true, daemon: ["stopped", "stopped", "running", ...Array<"running">(40).fill("running")] });
+    await agentAt(stuck);
+    const { shown } = await stuck.go();
+    expect(shown).toContain("does not stop; nothing was put back");
+    expect(said(stuck.data)).toContain("written by the new version"); // not restored under a running daemon
+  });
+
+  it("goes back to the version npm installed when the state names a version whose folder is gone", async () => {
+    const { home, go } = await world({ doctorFails: true });
+    await mkdir(join(home, "versions"), { recursive: true });
+    await writeFile(join(home, "versions", "state.json"), JSON.stringify({ current: NEW }));
+    await go();
+    expect(await readState(home)).toEqual({ current: null, previous: NEW });
+    expect(await readdir(home)).not.toContain("current");
+  });
+
   it("installs nothing from a release that does not verify", async () => {
     const real = await world({ verify: verifyRelease });
     const { code, shown } = await real.go();
@@ -129,7 +192,7 @@ describe("jaari update (ADR-056, ADR-082, ADR-124)", () => {
     expect(shown).toContain("was not installed: the downloaded file is not the one the registry lists");
     expect(real.calls).toEqual(["npm --version"]); // npm never saw the file
     expect(await readdir(real.home)).not.toContain("current");
-    expect((await readdir(join(real.home, "versions"))).filter((entry) => entry !== "state.json")).toEqual([]);
+    expect((await readdir(join(real.home, "versions"))).filter((entry) => entry !== "state.json" && entry !== "update.lock")).toEqual([]);
     expect(await listSnapshots(real.data)).toEqual([]);
 
     const forged = await world({ verify: () => { throw new VerifyError("the attestation https://slsa.dev/provenance/v1 does not verify: certificate identity error"); } });

@@ -27,53 +27,66 @@ ADR-056, ADR-082, ADR-122, ADR-123, [ADR-043](043-project-process.md), and
     current. If npm or Sigstore rotates a key before an old Jaari is updated, the check fails
     closed, and the owner installs the new version by hand.
 4.  **The download address is fixed:** `https://registry.npmjs.org/jaari/-/jaari-<version>.tgz`.
-    A registry entry that names another address is refused. npm installs the verified file from
-    disk; its dependencies are fixed by the shrinkwrap inside it (ADR-123).
+    A registry entry that names another address is refused.
+5.  **npm installs by name, then the install is compared with the verified file.** npm honours
+    the shrinkwrap inside the tarball only for an install by name (`jaari@<version>`); from a
+    file it resolves the dependencies again. So npm downloads the package itself, takes every
+    dependency from the shrinkwrap with its checksum, and then every file of the verified
+    tarball must be in the installed copy, byte for byte. Install scripts stay off.
 
 **How a version is installed and swapped.**
-5.  **Side by side.** `npm install --global --prefix ~/.jaari/versions/<version>` installs each
+6.  **Side by side.** `npm install --global --prefix ~/.jaari/versions/<version>` installs each
     version. `~/.jaari/current` is a relative link to the active one, replaced in one step.
     `versions/state.json` records the active version and the one before it. The active one and
     the one before it are kept; older ones are removed.
-6.  **A launcher.** The `jaari` and `jaari-daemon` commands of the npm package first look for
+7.  **A launcher.** The `jaari` and `jaari-daemon` commands of the npm package first look for
     `~/.jaari/current` (or the folder of `--home`). When it is a link into `versions/`, they run
     that version; otherwise the one they belong to. So the commands on `PATH`, and the service
     that names them, follow an update and a rollback. `jaari service install` does not have to
-    run again.
-7.  **The version that npm installed is never replaced.** It stays as the way back when no other
+    run again. The launcher reads `--home` as the commands do (the last one wins; nothing after
+    `--`). When the owner installs a newer Jaari with npm, that one runs instead of an older
+    active version. When the active version's folder is gone, the launcher says so and runs its
+    own.
+8.  **The version that npm installed is never replaced.** It stays as the way back when no other
     version is active, and it holds the launcher.
 
 **The order of an update.**
-8.  Verify and install while the daemon still runs; stop the daemon; take a `pre-update`
+9.  Verify and install while the daemon still runs; stop the daemon; take a `pre-update`
     snapshot; switch the link; run the new `jaari-daemon --check`, which starts every part and
     runs the migrations; start the daemon; run the new `jaari doctor`. A failure at any step
     after the switch stops the daemon, switches back, restores the snapshot, and starts the old
     version. This is the "update lease" of ADR-056 in Phase 0: with one session and no jobs,
-    stopping the daemon lets the running turn finish (ADR-065) and nothing else can start.
-9.  **Only a launchd agent is stopped and started by the command.** Under systemd it needs
+    stopping the daemon lets the running turn finish (ADR-065) and nothing else can start. The
+    undo restores nothing while a daemon still answers: it says so and leaves the rest to
+    `jaari rollback`. Any error after the daemon was stopped undoes and starts it again. One
+    update runs at a time (`versions/update.lock`; a lock whose process is gone is taken over).
+    The version remembered as the one before is the one that ran, not the one the state file
+    names.
+10. **Only a launchd agent is stopped and started by the command.** Under systemd it needs
     root, and a daemon started by hand has no manager. There the owner stops the daemon first;
     the update refuses while it answers. The check is then `--check` and `jaari doctor
     --no-daemon`, and the owner starts the daemon again.
-10. **`jaari rollback` takes the version back with the data.** It swaps the active version and
+11. **`jaari rollback` takes the version back with the data.** It swaps the active version and
     the one before it; a second run swaps both again. Without an update it restores data only,
-    as before.
+    as before. It writes the version it switches to (`versions/rollback.json`) before it starts,
+    so a run that is cut short is finished by the next one, never undone by it.
 
 **The rest.**
-11. **Channels.** `update.channel` is `"stable"` (npm `latest`) or `"beta"` (also npm `next`,
+12. **Channels.** `update.channel` is `"stable"` (npm `latest`) or `"beta"` (also npm `next`,
     whichever is newer). Without the key, an install keeps the kind it has. An older version is
     installed only with `--to <version>`.
-12. **Release notes are the GitHub release.** The release workflow creates it from the titles of
+13. **Release notes are the GitHub release.** The release workflow creates it from the titles of
     the merged pull requests, and `jaari update` prints it. This is the `CHANGELOG.md` of
     ADR-043: a file in the repository would need the workflow to push to `main`.
-13. **Under Compose the image is the version.** `jaari update` refuses where npm is missing and
+14. **Under Compose the image is the version.** `jaari update` refuses where npm is missing and
     points to the guide: change the image tag, verify it with `cosign`, `docker compose up -d`,
     `admin doctor`, and go back with the old tag and `admin rollback`.
-14. **`jaari uninstall`** removes the service and the installed versions and keeps the data. It
+15. **`jaari uninstall`** removes the service and the installed versions and keeps the data. It
     refuses while the daemon answers. `--purge` deletes the Jaari folder after the owner types
     `delete` at a terminal; `--yes` does not replace that. It never purges `/`, the home folder,
     or a folder that is not a Jaari folder, and it leaves keychain entries alone. Under systemd
     it prints the root commands.
-15. **Telling the owner that an update exists** is `jaari update --check` for now. A message
+16. **Telling the owner that an update exists** is `jaari update --check` for now. A message
     from the daemon is proactive output and waits for the notification ledger (2.3).
 
 ## Alternatives rejected
