@@ -7,6 +7,10 @@ and the durable harness's compaction, read to build ADR-065 and ADR-031.
 |---|---|
 | `refs/pi` | `469d8651b59069d7bd907c7da84597865e114da6` (pi-agent-core 1.5.0) |
 
+The installed pi-agent-core is 1.5.2 (2026-11-19, Dependabot PR #43); `refs/pi` is still at 1.5.0.
+Jaari builds its `Agent` without a `sessionId`, so the Anthropic message threads added in 1.5.1 stay
+off (learning/15).
+
 ## 1. What pi-agent-core does
 - `Agent` holds the state (model, tools, messages) and runs one prompt at a time; a second
   `prompt()` during a run throws (`refs/pi/packages/agent/src/agent.ts`).
