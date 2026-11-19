@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@jaari/capabilities": "workspace:*",
-    "typebox": "1.4.6"
+    "typebox": "1.4.7"
   },
   "peerDependencies": {
     "vitest": "5.1.0"
