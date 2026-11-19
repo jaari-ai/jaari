@@ -120,7 +120,7 @@ that the docs cite exists.
 | `open-instinct` | `2e5e71b` | MIT | Reuse with attribution |
 | `openinstinct` | `213120c` | none found | Behavioural spec only |
 | `gajae-way` | `34cbd15` | AGPL-3.0 | Design reference only |
-| `pi` | `469d865` | MIT | Agent loop; reuse with attribution |
+| `pi` | `1e34c3b` (bumped 2026-11-19, ADR-083) | MIT | Agent loop; reuse with attribution |
 | `openmausbot` | `b802268` | Apache-2.0; `enterprise/` source-available | Design reference |
 
 These commits are pinned in `scripts/refs.sh` (ADR-083). No binary documents exist in the

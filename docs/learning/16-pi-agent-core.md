@@ -5,9 +5,12 @@ and the durable harness's compaction, read to build ADR-065 and ADR-031.
 
 | Ref | Pinned commit |
 |---|---|
-| `refs/pi` | `469d8651b59069d7bd907c7da84597865e114da6` (pi-agent-core 1.5.0) |
+| `refs/pi` | `469d8651b59069d7bd907c7da84597865e114da6` (pi-agent-core 1.5.0), when written |
+| `refs/pi` | `1e34c3b4c7df78e716a8f53ad0bcf3a00feceedc` (pi-agent-core 1.5.2), checked again 2026-11-19 |
 
-The installed pi-agent-core is 1.5.2 (2026-11-19, Dependabot PR #43); `refs/pi` is still at 1.5.0.
+The installed pi-agent-core is 1.5.2 (2026-11-19, Dependabot PR #43), as at the pin. At the new pin a
+second `prompt()` during a run still throws (`agent.ts:384`), and `finishTurn` and `steeringMode` are
+unchanged.
 Jaari builds its `Agent` without a `sessionId`, so the Anthropic message threads added in 1.5.1 stay
 off (learning/15).
 
