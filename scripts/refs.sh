@@ -20,7 +20,7 @@ DEPTH="${REFS_DEPTH:-1}"
 
 # name            url                                          ref (pinned full sha; move it only with `bump`, ADR-083)
 MANIFEST=$(cat <<'EOF'
-pi                https://github.com/earendil-works/pi.git            469d8651b59069d7bd907c7da84597865e114da6
+pi                https://github.com/earendil-works/pi.git            1e34c3b4c7df78e716a8f53ad0bcf3a00feceedc
 open-instinct     https://github.com/mariagorskikh/open-instinct.git          2e5e71b72622d1262e212da7deb0e785bd95facd
 openinstinct      https://github.com/Yeachan-Heo/openinstinct.git           213120cef0c0cb32ab069200e2214577a88ebd9c
 gajae-way         https://github.com/Yeachan-Heo/gajae-way.git              34cbd150c88aa7f5475882a9633236f77c02fcdd
