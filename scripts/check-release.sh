@@ -49,7 +49,7 @@ later="$work/later"
 mkdir -m 700 "$later"
 npm install --global --prefix "$later/versions/0.0.0-check.2" --ignore-scripts --no-audit --no-fund dist/npm/jaari-0.0.0-check.2.tgz >/dev/null
 cli="$work/prefix/lib/node_modules/jaari/node_modules/@jaari/cli/dist"
-node --input-type=module -e 'await (await import(process.argv[1])).activate(process.argv[2], "0.0.0-check.2")' "$cli/versions.js" "$later"
+node --input-type=module -e 'await (await import(process.argv[1])).activate(process.argv[2], "0.0.0-check.2", null)' "$cli/versions.js" "$later"
 test "$("$work/prefix/bin/jaari" --version --home "$later")" = 0.0.0-check.2
 "$work/prefix/bin/jaari-daemon" --check --home "$later" --config apps/daemon/smoke.config.json --data "$work/later-data" --credentials "$work/credentials"
 node --input-type=module -e 'await (await import(process.argv[1])).swapBack(process.argv[2])' "$cli/versions.js" "$later"
