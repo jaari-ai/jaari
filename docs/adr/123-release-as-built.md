@@ -72,3 +72,7 @@ them and amends all four.
 - A model server on `localhost` is out of reach from the container; `jaari init` says so.
 - `CHANGELOG.md` (ADR-043) is not generated yet; it moves to roadmap 0.18 with the release notes
   that `jaari update` shows.
+- First release (2026-11-19): `v0.1.0-beta.1`, npm `next` with SLSA provenance, and a signed image
+  that verifies. Two things the docs did not say: a trusted publisher whose fields do not match
+  fails as `E401` (the exchange error is logged only at `verbose`), and `npm audit signatures`
+  stops at the bundled packages, so the guide checks the provenance with `npm view`.

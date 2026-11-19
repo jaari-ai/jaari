@@ -17,8 +17,16 @@ jaari chat
 
 Pre-releases use the `next` tag: `npm install --global --ignore-scripts jaari@next`.
 
-Check where the package came from (run it in a project that depends on `jaari`):
-`npm audit signatures`.
+Check where the package came from. Its provenance names the repository, the workflow, and the commit
+that built it:
+
+~~~bash
+npm view jaari@next dist.attestations.provenance.predicateType   # https://slsa.dev/provenance/v1
+~~~
+
+The npm page of the version shows the same under "Provenance". `npm audit signatures` does not
+work for Jaari: it also looks up the `@jaari/*` packages inside the tarball, which are not
+published on their own (ADR-123), and stops at the first 404.
 
 ## On a Linux server: Compose
 
@@ -55,6 +63,8 @@ To roll the data back: `docker compose down`, then `docker compose run --rm admi
 4. In GitHub Actions, approve the `release` environment.
 5. Approve the staged version on npm with 2FA: `npm stage list jaari`, then
    `npm stage approve <stage-id>`.
-6. **First release only:** GitHub creates the image as private. Open the package
+6. If `npm stage approve` answers `409 ... automated review hasn't finished`, wait a few minutes
+   and run it again.
+7. **First release only:** GitHub creates the image as private. Open the package
    `jaari` under the `jaari-ai` organization, then Package settings, and change the visibility to
    Public.
