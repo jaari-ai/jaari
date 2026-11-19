@@ -8,6 +8,7 @@ import { jaariPaths } from "@jaari/core/config";
 import type { Command } from "./io.js";
 import { createPrompter, InputEnded } from "./prompt.js";
 import { daemonRunning } from "./socket.js";
+import { swapBack } from "./versions.js";
 
 export const run: Command = async (args, io) => {
   const { values } = parseArgs({ args, options: { home: { type: "string" }, config: { type: "string" }, data: { type: "string" }, list: { type: "boolean", default: false }, yes: { type: "boolean", default: false } } });
@@ -50,7 +51,9 @@ export const run: Command = async (args, io) => {
   await restoreSnapshot(place, latest);
   say(`Restored: ${describe(latest)}`);
   say("The data from just before this is kept as a snapshot: run `jaari rollback` again to undo.");
-  // shortcut: the Jaari version is not swapped back here; `jaari update` keeps the previous version and swaps it (roadmap 0.18)
-  say("Start the Jaari version of that time. A newer one migrates the stores again, after a new snapshot.");
+  // The version goes back with the data when `jaari update` installed one (ADR-124); a second run swaps both again.
+  const swapped = await swapBack(paths.home);
+  if (swapped) say(`The active version is now ${swapped.current ?? "the one npm installed"}. Start the daemon.`);
+  else say("Start the Jaari version of that time. A newer one migrates the stores again, after a new snapshot.");
   return 0;
 };

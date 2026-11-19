@@ -38,6 +38,8 @@ describe("the owner config (ADR-056, ADR-118)", () => {
     expect(found.some((line) => line.startsWith("/limits"))).toBe(true);
     expect(parseConfig(JSON.stringify({ version: 1, llm, power: { stayAwake: "always", batteryPausePercent: 30 } })).power?.stayAwake).toBe("always");
     expect(problems(JSON.stringify({ version: 1, llm, power: { stayAwake: "sometimes", batteryPausePercent: 0 } })).every((line) => line.startsWith("/power/"))).toBe(true);
+    expect(parseConfig(JSON.stringify({ version: 1, llm, update: { channel: "beta" } })).update?.channel).toBe("beta");
+    expect(problems(JSON.stringify({ version: 1, llm, update: { channel: "nightly" } }))[0]).toMatch(/^\/update\/channel/);
     expect(found.some((line) => line.startsWith("/secrets/zero"))).toBe(true); // `env` is development-only, never config (ADR-079)
   });
 
