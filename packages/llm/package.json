@@ -16,9 +16,9 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@earendil-works/pi-ai": "1.5.0",
+    "@earendil-works/pi-ai": "1.5.2",
     "@jaari/http": "workspace:*",
     "@jaari/secrets": "workspace:*",
-    "typebox": "1.4.6"
+    "typebox": "1.4.7"
   }
 }
