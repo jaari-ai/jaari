@@ -1,6 +1,6 @@
 # Jaari: State
 
-Last updated: 2026-11-18
+Last updated: 2026-11-19
 
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
@@ -124,7 +124,7 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   an ambiguous send is never retried. The CLI channel listens on `jaari.sock` (mode 0600) in the
   data folder with NDJSON and a version hello; `apps/cli` adds `jaari chat`, which numbers
   messages and reads `>N text` as a reply. Open prompts live in memory until the gate (Phase 3).
-  Next: the first release of 0.17, then 0.18 (`jaari update`).
+  Next: 0.18 (`jaari update`).
 - Config (0.6, 2026-11-17, ADR-118): one JSONC file, `~/.jaari/config.jsonc`, with a schema version
   and a closed top level, read through `@jaari/core/config`; the daemon refuses an invalid or
   newer config and names each problem. `jaari init` asks for the target, where secrets are kept,
@@ -141,8 +141,8 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   the internal packages and a shrinkwrap inside, and `docker/Dockerfile` makes the image from it.
   `release.yml` stages the npm version for approval with 2FA, and pushes a signed amd64 and arm64
   image to GHCR. `jaari init` writes `compose.yaml` on a server. CI proves the tarball and, on
-  Linux, the generated Compose file. Nothing is published yet: the first release needs the owner's
-  tag and approvals (`docs/guides/install.md`).
+  Linux, the generated Compose file. First release 2026-11-19: `v0.1.0-beta.1` on npm `next`
+  (`latest` stays `0.0.0`) and `ghcr.io/jaari-ai/jaari:0.1.0-beta.1`, both signed.
 - Local install commands (0.12, 2026-11-17, ADR-122): `jaari doctor` (levels `ok`, `info`,
   `warn`, `FAIL`; exit 1 only on `FAIL`), `jaari config <step>`, `jaari service install`
   (a launchd user agent; a systemd unit with `systemd-creds`), and `jaari rollback`. The daemon

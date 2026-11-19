@@ -410,7 +410,7 @@ succeeds within 2 days**, so set it up right before the first release
 
 ~~~bash
 npm view jaari --json | jq '.maintainers, .dist.attestations'
-npm audit signatures            # inside a project that depends on @jaari packages
+npm view jaari@next dist.attestations.provenance.predicateType  # not `npm audit signatures`: it stops at the bundled @jaari packages (install guide)
 curl -s https://pypi.org/pypi/jaari/json | jq '.info.version'
 ~~~
 
