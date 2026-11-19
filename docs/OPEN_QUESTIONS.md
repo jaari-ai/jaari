@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-13. Open: **0**.
+Last updated: 2026-11-16. Open: **3**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -14,8 +14,28 @@ conflict between accepted ADRs or a choice an ADR left open, and were decided on
 
 ## Open
 
-None. A new question takes the next unused id, in a table with the columns ID, Topic,
-Question, Blocks phase, and Leaning, with a line of context below it.
+A new question takes the next unused id, in a table with the columns ID, Topic, Question, Blocks
+phase, and Leaning, with a line of context below it.
+
+| ID | Topic | Question | Blocks phase | Leaning |
+|---|---|---|---|---|
+| OQ-92 | Package platforms | Which step checks a package manifest's `platforms` (OS and CPU) against the host, and what happens on a mismatch: the built-in loader, `jaari capability install`, the node when it advertises, or all three? | 6 | Fail closed in the loader on every host (a package that does not list the host's OS and CPU is a load problem), and refuse at install with a clear message |
+
+Context: ADR-071 lists `platforms` in the manifest, and the schema accepts it (ADR-108), but no ADR
+or roadmap item checks it. The first platform-specific package is `computer.use` with provider
+`macos` on a node (roadmap 6.8, 6.9); a built-in with `platforms` would load on any host today.
+
+| OQ-93 | Refusal categories | Which provider refusal categories count as ADR-011's off-limits ones (impersonation, CAPTCHA solving), how Jaari reads them when pi-ai drops them, and whether other refusals in unpinned roles then move to the next model? | 4 | Read the category through pi-ai's raw-event hook, collect real refusals in the usage log first, then map |
+
+Context: pi-ai 1.5.0 maps Anthropic's `refusal` to `stopReason: "error"` and drops the category
+(learning/15). Until this is decided, every refusal stops and is reported (ADR-114).
+
+| OQ-95 | A model reading owner messages | Code reads explicit commands (ADR-116). Should a model also read what code misses: an implicit brake ("ugh, not that one") during a long tool step, when the main model is not listening; whether a message is about the running task (steer) or another topic (follow-up); and plain-language approvals ("sure, go ahead")? If so, which model (the `classify` role, local or cheap), what may its labels trigger, and may it learn from the owner's confirmations? | 4 (item 4.5) | A side check only while a tool step runs, with four answers (stop or wait, this task, another topic, unsure); it may only pause and ask, steer, or queue, never approve or cut the turn; on failure it steers. Approvals stay code-only unless the owner turns on a "natural" level (ADR-037 precedent, Pally). Record each reading and its outcome from the start, so a learned classifier can be tested on real history later. ADR-117: a message that replies to an earlier one already names its target, so such a model would read only messages without a reply target |
+
+Context: no reference or commercial agent reads stop intent with a model (learning/17). The gap is
+real for long browser, search, and computer-use steps (Phase 4 and 6), and for channels without
+buttons. Building it before the first long-running tool means building it blind; record it in that
+item.
 
 ## Resolved
 
@@ -23,6 +43,7 @@ A later ADR can change a resolved answer; the row then names both ADRs.
 
 | ID | Decision | ADR |
 |---|---|---|
+| OQ-94 | A bare "stop" pauses and a second stop word within 10 seconds stops the turn; "wait" pauses; code reads the words in the owner's languages | [ADR-116](adr/116-owner-commands-in-code.md) |
 | OQ-22 (license part) | MIT | [ADR-014](adr/014-license-mit.md) |
 | OQ-10 (host part) | Daemon on an always-on host (VM, VPS, or server); laptop-only supported by configuration | [ADR-015](adr/015-control-plane-and-nodes.md) |
 | OQ-57 | Self-hosted on a VPS, remote server, or home hardware; egress pool with owner exit nodes. The placement rule (identity-bearing browsers on the owner's network identity) was replaced by ADR-098: any host, only home sites through an owner exit | [ADR-017](adr/017-self-hosted-anywhere.md), [ADR-098](adr/098-owner-accounts-on-any-host.md) |
@@ -209,3 +230,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-88 | MCP client and the active channel | Does a message from a paired MCP client make that client the active channel? If not, is `collect` a second output stream next to the one active channel? | 5 |
 | OQ-89 | Web budget | ADR-046 leaves search and fetch cost to "the separate web budget", and ADR-053 counts egress cost against it, but no ADR defines it. What is its default, and what happens at its limit? | 3 |
 | OQ-91 | Scope of `repo.write` and `publish` | No ADR decides what Jaari may push or publish (which repos, registries, and how) through the GitHub, npm, and PyPI integrations. | 5 |
+| OQ-94 | "Stop" and "wait" | ADR-065 says "stop", "wait", and "pause" are handled by code at once, but ADR-031 defines only "pause", "stop everything", and "stop now". What do a bare "stop" and "wait" do: pause, emergency stop, or a typed `confirm` prompt that asks which one? | 0 | 0 |

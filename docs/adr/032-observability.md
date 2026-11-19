@@ -1,7 +1,7 @@
 # ADR-032: Observability: three records, opt-in traces, `jaari doctor`
 
 - **Status:** Accepted
-- **Extended by:** [ADR-038](038-documents-and-files.md), [ADR-087](087-safety-pieces-ship-with-what-they-protect.md), [ADR-097](097-receipts-and-action-log-retention.md)
+- **Extended by:** [ADR-038](038-documents-and-files.md), [ADR-087](087-safety-pieces-ship-with-what-they-protect.md), [ADR-097](097-receipts-and-action-log-retention.md), [ADR-122](122-install-in-three-steps.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -46,6 +46,10 @@ stay small, chained, and authoritative); a raw provider tee left on permanently.
 - **ADR-087:** the event log and the usage log ship in Phase 0.
 - **ADR-097:** receipts and the browser action log also live in SQLite for 90 days; the event
   log stays 30 days.
+- **ADR-122:** `jaari doctor` has four levels, and only `FAIL` sets a non-zero exit code; the
+  Phase 0 checks are listed there.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- Roadmap 0.5 (2026-11-16): the event log drops lines older than the retention period each time it
+  opens (`events.retentionDays` in config, 30 by default). A daemon that runs for months keeps old
+  lines until its next restart. The log and its folder are private to the owner (mode 0600 and 0700).

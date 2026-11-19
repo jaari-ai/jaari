@@ -34,22 +34,22 @@
 ## Packages
 | Package | Responsibility |
 |---|---|
-| `@jaari/core` | Agent loop on Pi, sessions, children, tool registry; job engine (ADR-025), routines (ADR-064), skills (ADR-060), the `CliEngine` interface (ADR-077), the event log and the OpenTelemetry adapter (ADR-032) (ADR-086); the locked safety prompt, `fence()` and `defuse` (ADR-104) |
+| `@jaari/core` | Agent loop on Pi, sessions, children, tool registry; job engine (ADR-025), routines (ADR-064), skills (ADR-060), the `CliEngine` interface (ADR-077), the event log and the OpenTelemetry adapter (ADR-032) (ADR-086); the locked safety prompt, `fence()`, `defuse`, and the markers of a run (ADR-104, ADR-120); the laptop host's detector, `createPowerWatch`: sleep, power source, stay-awake hold, network change (ADR-057, ADR-121); the owner config loader, `@jaari/core/config` (ADR-118); `openDatabase`, the one way to open a versioned, owned SQLite store (ADR-119); the local snapshot, `takeSnapshot` and `restoreSnapshot` (ADR-082, ADR-122) |
 | `@jaari/capabilities` | Capability and package manifest schema, loader, and the daemon–node contract; the single capability vocabulary lives in SECURITY_MODEL.md (ADR-015, ADR-018, ADR-071) |
 | `@jaari/llm` | Wraps `@earendil-works/pi-ai`; tiers + fallback chains, role routing, escalation, budgets, local-only privacy, usage log, `jaari llm eval` (ADR-011); speech roles `stt` and `tts` (ADR-037, ADR-086) |
 | `@jaari/memory` | Git-backed memory repo, write path, canonicalize, daily audit, gap queue; file store (ADR-038, ADR-086) |
 | `@jaari/persona` | Curiosity/Proactivity dials, monitor, quiet hours, notification ledger |
-| `@jaari/gate` | Action digests, approvals, re-check at dispatch, hash-chained `audit.jsonl` (ADR-006, ADR-016) |
-| `@jaari/secrets` | `secretRef` resolution for executors only, through pluggable providers: `os-keychain` and `host-credential` from Phase 0 (ADR-018, ADR-079), then the vault providers (Bitwarden, 1Password; ADR-013, ADR-050); exact-value scrubbing of resolved secrets (ADR-016) |
-| `@jaari/http` | Egress gate: resolve, classify every address against one address-class table, dial only checked addresses; SOCKS5 listener for the browser; per-capability allowlists (ADR-016); egress providers `owner-exit`, `direct`, `mobile`, `residential-proxy`, `vpn` (ADR-017, ADR-030, ADR-053) |
+| `@jaari/gate` | The one dispatch entry point; it alone builds capability hosts (Phase 0: deny-all, read class only). Phase 3: action digests, approvals, re-check at dispatch, hash-chained `audit.jsonl` (ADR-006, ADR-016) |
+| `@jaari/secrets` | `secretRef` resolution for executors only, through pluggable providers: `os-keychain` and `host-credential` from Phase 0 (ADR-018, ADR-079), then the vault providers (Bitwarden, 1Password; ADR-013, ADR-050); scrubbing of resolved secrets by exact value and common encodings (ADR-016) |
+| `@jaari/http` | Egress gate: resolve, classify every address against one address-class table, dial only checked addresses; an optional scan of each request for the canary and the fence id (ADR-104, ADR-120); SOCKS5 listener for the browser; per-capability allowlists (ADR-016); egress providers `owner-exit`, `direct`, `mobile`, `residential-proxy`, `vpn` (ADR-017, ADR-030, ADR-053) |
 | `@jaari/web` | `web.search`, `web.fetch`, fetch escalation ladder (ADR-012) |
 | `@jaari/computer` | Browser/desktop control behind one neutral surface with pluggable adapters (Playwright MCP, Stagehand, remote CDP, remote desktop), local profile, takeover (ADR-005, ADR-048, ADR-055) |
-| `@jaari/channels` | `ChannelAdapter` contract and its shared contract suite (`@jaari/channels/contract`, ADR-084), ingress (principal resolution), delivery outbox, built-in adapters |
+| `@jaari/channels` | `ChannelAdapter` contract and its shared contract suite (`@jaari/channels/contract`, ADR-084), ingress (principal resolution), delivery outbox with the reply marker filter and the leak scan (ADR-104), built-in adapters |
 | `@jaari/integrations` | Email; mailbox adapters (ADR-063); OAuth broker, with tokens written through the gated vault write (ADR-062) (ADR-086) |
 | `@jaari/mcp` | MCP client for configured servers, with generated manifests (ADR-034); the two-tool MCP server for paired apps (ADR-076); served by `jaari mcp` (ADR-086) |
-| `apps/daemon` | Long-running process: scheduler tick, channels, jobs |
+| `apps/daemon` | Long-running process: scheduler tick, channels, jobs; runs from built `dist/` files (ADR-115) |
 | `apps/hooks` | Separate hook listener: the only optionally public port; checks signatures and hands verified events to the daemon over the local socket (ADR-073, ADR-086) |
-| `apps/cli` | `jaari init`, `jaari doctor`, `jaari llm eval`, `jaari llm usage`, `jaari pair` and `jaari devices` (ADR-022), `jaari secret set` (masked input, ADR-088), `jaari run`, `wait`, `status`, `export`, and `mcp` (ADR-076), admin commands; `jaari doctor` collects each package's `health` (ADR-032, ADR-086) |
+| `apps/cli` | `jaari chat` (0.8, the CLI channel's terminal: numbered messages, `>N` replies, ADR-117), `jaari init` and `jaari secret set` (0.6, ADR-118), `jaari doctor`, `jaari config`, `jaari service install`, and `jaari rollback` (0.12, ADR-122), the `compose.yaml` that `jaari init` writes (0.17, ADR-123), `jaari llm eval`, `jaari llm usage`, `jaari pair` and `jaari devices` (ADR-022), `jaari run`, `wait`, `status`, `export`, and `mcp` (ADR-076), admin commands; `jaari doctor` collects each package's `health` (ADR-032, ADR-086) |
 | `apps/node` | Capability host on an owner device: `jaari capability install <name>` pairs it as a `device`, it advertises installed capabilities, runs gate-approved actions, hosts takeover and live view. Capabilities on the daemon host run through the same contract in-process (ADR-015) |
 
 ## Channels
@@ -89,6 +89,7 @@ export interface ChannelManifest {
     media?: boolean; reactions?: boolean; typing?: boolean;
     groups?: boolean; readReceipts?: boolean; edits?: boolean;
     deletes?: boolean;               // can delete the owner's message (ADR-055, ADR-081)
+    replies?: boolean;               // can send a quote-reply (ADR-117)
   };
   identity: "carrier" | "account" | "device" | "none";  // see Identity binding
   prompts: "buttons" | "quickReplies" | "text";          // how the host renders a Prompt (ADR-035)
@@ -117,6 +118,8 @@ export interface InboundMessage {
   isGroup: boolean; participants?: string[];
   text?: string; attachments?: Attachment[];
   answer?: { promptId: string; option: string };  // a tap on a rendered Prompt
+  replyTo?: string;                  // id of the replied-to message, unique in conversationId (ADR-117)
+  threadId?: string;                 // forum topic or thread to deliver into; not a session
   sentAt: string; receivedAt: string; // ISO 8601
 }
 
@@ -124,7 +127,8 @@ export interface OutboundMessage {
   channel: string; conversationId: string;
   text?: string; attachments?: Attachment[];
   idempotencyKey: string;            // from the outbox; the adapter must dedupe on it
-  replyTo?: string;
+  replyTo?: string;                  // set by code, never by the model; dropped without `replies`
+  threadId?: string;
   prompt?: Prompt;                   // rendered by the host for this channel, never by the plugin
 }
 
@@ -137,7 +141,7 @@ export interface ChannelHealth { ok: boolean; detail?: string }
 
 export interface ChannelContext {
   manifest: ChannelManifest;         // checked by the host before the plugin loads
-  emit(msg: InboundMessage): Promise<void>;   // hand a message to ingress
+  emit(msg: InboundMessage): Promise<void>;   // hand a message to ingress; read the next one without waiting on it
   secrets: { get(ref: string): Promise<string> };  // this plugin's own secretRefs only
   log: { info(msg: string): void; warn(msg: string): void; error(msg: string): void };
   signal: AbortSignal;               // aborted on stop()

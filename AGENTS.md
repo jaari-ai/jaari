@@ -2,8 +2,9 @@
 
 Jaari is a self-hosted, single-owner personal AI agent: git-backed Markdown memory,
 persona dials enforced in code, and digest-bound owner approval for every external
-effect. It is in **Phase 0 (Foundation)**. The design is documented, but no packages
-exist yet.
+effect. It is in **Phase 0 (Foundation)**: `@jaari/capabilities`, `@jaari/gate`,
+`@jaari/secrets`, `@jaari/http`, `@jaari/llm`, `@jaari/core`, `@jaari/channels`, `apps/daemon`, and
+`apps/cli` exist. Current status is in `docs/STATE.md`.
 
 ## Hard rules
 - Never create, edit, or delete anything under `refs/`. Read only. Do not format,
@@ -34,13 +35,14 @@ exist yet.
 | `scripts/refs.sh` | Manages `refs/` (sync to pinned commits, lock, status, `refs/INDEX.md`) | Yes |
 | `scripts/merge_docs.py` | Merges README, AGENTS, docs, and config into one untracked context file for AI discussions; `--check` validates doc links and IDs | Yes |
 | `docs/` | Hand-maintained docs. `docs/adr/` is the authoritative ADR set. `docs/audits/` holds audit reports and the documentation index, which are navigation aids, not authoritative. | Yes, per conventions |
-| `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon`, `cli`, `node`, `hooks`); not created yet | Yes |
+| `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon` and `cli` exist; `node` and `hooks` not yet) | Yes |
 | Root config | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.claude/settings.json` | Yes |
-| `jaari.config.example.jsonc` | Example owner config (`owner`, `deployment`, `channels`, `secrets`, `persona`, `shadow`, `memory`, `llm`, `web`, `egress`, `backup`) | Yes |
+| `jaari.config.example.jsonc` | Example owner config (`owner`, `deployment`, `power`, `channels`, `secrets`, `persona`, `shadow`, `memory`, `llm`, `web`, `egress`, `backup`) | Yes |
 | `python/` | PyPI name-holder package (ADR-010, `docs/guides/namespaces.md`) | Yes |
 | `.github/workflows/ci.yml` | Pull request checks: lint, typecheck, tests, licences, docs, DCO, gitleaks (ADR-043) | Yes |
 | `scripts/check-licenses.mjs` | Fails CI on a dependency licence outside the ADR-014 allowlist | Yes |
 | `.github/workflows/release.yml` | Tag-triggered release workflow, actions pinned to commit SHAs; keep in sync with `docs/guides/namespaces.md` | Yes |
+| `scripts/pack-release.mjs`, `scripts/check-release.sh`, `docker/` | The npm tarball, its check, and the image made from it (ADR-123) | Yes |
 | `refs/` | Read-only reference repos, local only (`.git/info/exclude`) | Never |
 
 ## Docs workflow
@@ -102,6 +104,8 @@ python3 scripts/merge_docs.py           # rebuild the untracked context file (JA
 ## Stack and conventions
 - pnpm workspace (`packages/*`, `apps/*`), TypeScript strict, `module: NodeNext`, target
   ES2024, Node 26 LTS (ADR-105).
+- Workspace package `exports` list `"@jaari/source": "./src/index.ts"` first, so typecheck and
+  tests read source without a build (ADR-111; `docs/DEVELOPMENT.md`, Packages).
 - Tests: Vitest, colocated as `packages/*/src/**/*.test.ts` and `apps/*/src/**/*.test.ts`.
 - Lint: ESLint flat config. All tooling uses allowlists so `refs/` is never included.
   Keep it that way when adding config.

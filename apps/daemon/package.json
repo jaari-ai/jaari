@@ -1,0 +1,30 @@
+{
+  "name": "@jaari/daemon",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The long-running Jaari process: wires config, secrets, egress, model routing, and the main session (ADR-015, ADR-065)",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@jaari/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "jaari-daemon": "./dist/main.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "1.5.0",
+    "@jaari/channels": "workspace:*",
+    "@jaari/core": "workspace:*",
+    "@jaari/http": "workspace:*",
+    "@jaari/llm": "workspace:*",
+    "@jaari/secrets": "workspace:*"
+  }
+}

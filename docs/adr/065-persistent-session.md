@@ -1,7 +1,7 @@
 # ADR-065: Persistent session: one daemon-owned main session on pi-agent-core, one serial queue, Pi's compaction thresholds, no server-side state for the main session
 
 - **Status:** Accepted
-- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md)
+- **Extended by:** [ADR-081](081-secrets-pasted-in-chat.md), [ADR-116](116-owner-commands-in-code.md), [ADR-117](117-owner-replies-are-pointers.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -58,6 +58,35 @@ Experimental; pruning old transcripts by default.
 
 ## Amendments
 - **ADR-081:** the transcript stores the owner's message after the ingress secret scrub.
+- **ADR-116:** "stop" and "wait" are pause words read by code; a repeated stop word stops the turn.
+- **ADR-117:** a reply to an earlier message is a pointer within this one session, never a
+  separate thread session; the quote comes from the transcript.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+Built in `@jaari/core` (roadmap 0.5, 2026-11-16):
+- Pi's "turn" is one model response with its tool calls. Jaari calls that a step, and calls the
+  whole answer to one owner message a turn. Pi's `finishTurn` hook runs after every step.
+- The transcript table keeps every user, assistant, and tool-result message. System messages are
+  not stored: Pi rebuilds the leading one from the prompt and the tool list at each start.
+- A compaction is one state row (the summary, the first kept message, the last message at that
+  time); the context is the summary plus the kept messages. The summary comes from the `summarize`
+  role, so the session refuses to start without a model for it.
+- A model whose context window is not above the 16,384 reserved tokens is refused at start. On a
+  small window the kept part is at most half of what the window leaves after the reserve.
+- Token counts are the provider's last reported total plus 4 characters per token for later
+  messages. A failed compaction is logged and tried again after the next turn. After a context
+  failure the provider's word wins over the estimate, so the next compaction runs anyway.
+- The cut lands on an owner or a model message, never on a tool result. An empty summary counts as
+  a failed compaction. Pause and emergency stop abort a compaction in flight, and nothing is applied.
+- Compaction is its own job in the serial queue: the reply returns first, and the next turn waits
+  for the compaction. One compaction is also queued when the session opens, so a context stored
+  under a larger model fits the one configured now.
+- Rolling: after two turns in a row that failed on context length (pi-ai's `isContextOverflow`)
+  and a compaction that did not apply, the context restarts after the last stored message. The
+  transcript keeps the old segment; the event log gets `segment.roll`, and the next reply carries
+  a one-time `notice`.
+- Not built yet: the orientation block (1.3), re-injection from state (when approvals and tasks
+  exist), the versioned summary prompt (2.4), and keep-warm pings. Searching an archived segment
+  comes with transcript search.
+- "Stop" and "wait" are decided by ADR-116. Whether a model should also read what code misses is
+  OQ-95.

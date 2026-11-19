@@ -28,7 +28,19 @@ scripts/refs.sh lock             # re-apply chmod -R a-w
 python3 scripts/merge_docs.py --check           # validate docs
 pnpm install                                    # install the pinned dev tooling (Node 26+)
 pnpm check                                      # lint, typecheck, and tests
+pnpm -r build                                   # compile every package to dist/ (ADR-115)
+node apps/daemon/dist/main.js --check --config apps/daemon/smoke.config.json \
+  --data /tmp/jaari --credentials <dir, mode 700, holding llm.local, mode 600>   # start and stop the built daemon
 ~~~
+
+## Packages
+- A workspace package lives in `packages/<name>` (or `apps/<name>`), is named `@jaari/<name>`,
+  and keeps its tests next to the code as `src/**/*.test.ts`.
+- Its `exports["."]` lists `"@jaari/source": "./src/index.ts"` first, then `types` and `default`
+  pointing at `dist/`; copy `packages/capabilities/package.json` (ADR-111). Typecheck and tests
+  read the source through that condition, so `pnpm check` needs no build step.
+- Its own `tsconfig.json` extends `tsconfig.base.json` with `rootDir: src` and `outDir: dist`, and
+  `pnpm --filter @jaari/<name> build` writes `dist/` (ignored by git).
 
 ## Docs
 Docs are hand-maintained Markdown under `docs/`, plus `README.md`, `AGENTS.md`, and

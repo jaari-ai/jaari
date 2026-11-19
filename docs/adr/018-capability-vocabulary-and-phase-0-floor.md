@@ -1,7 +1,7 @@
 # ADR-018: Capability vocabulary, `@jaari/capabilities`, and the Phase 0 safety floor
 
 - **Status:** Accepted
-- **Extended by:** [ADR-034](034-mcp-servers.md), [ADR-039](039-personal-data.md), [ADR-071](071-capability-packages.md), [ADR-079](079-secret-zero-on-servers.md), [ADR-095](095-missing-capability-names.md), [ADR-103](103-no-repository-or-registry-integrations.md)
+- **Extended by:** [ADR-034](034-mcp-servers.md), [ADR-039](039-personal-data.md), [ADR-071](071-capability-packages.md), [ADR-079](079-secret-zero-on-servers.md), [ADR-095](095-missing-capability-names.md), [ADR-103](103-no-repository-or-registry-integrations.md), [ADR-122](122-install-in-three-steps.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -25,6 +25,17 @@ Per-host capability names (`browser.local` as a gate class: the policy would dep
   and `takeover.request` (the one capability of the `takeover` class).
 - **ADR-103 (resolves OQ-91):** `repo.write` and `publish` are reserved, like `pay`: no executor
   in v1, requests fail closed.
+- **ADR-122:** `jaari doctor` has no warning for `env` and `file` providers: the config refuses
+  them, so the config check fails instead.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- **Roadmap 0.10 (2026-11-16):** "no executor can be written around the gate" is enforced by
+  ownership and lint. `createGate(hostId, packages)` builds the in-process host itself and never
+  returns it, and an ESLint `no-restricted-imports` rule refuses `createInProcessHost` (and deep
+  imports of the capabilities source) outside `packages/gate`. Dynamic `import()` and
+  `eslint-disable` comments are not caught; real isolation comes with separate processes
+  (ADR-071). A refusal is a `failed` result (`denied by gate: …`), since the executor never
+  starts; Phase 3 adds an approval status. The gate decides on the checked copy from `receive()`
+  and dispatches that same copy, so a request cannot change between check and use.
+- **Roadmap 0.11 (2026-11-16):** point 4 ships as `@jaari/secrets` with `os-keychain` (ADR-112)
+  and `host-credential` (ADR-079). `env` and `file` are not built yet; tests use fakes instead.

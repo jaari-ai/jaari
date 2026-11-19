@@ -1,11 +1,50 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 
+const SOURCES = ["packages/*/src/**/*.ts", "apps/*/src/**/*.ts"];
+const GATE = ["packages/gate/src/**", "packages/capabilities/src/**"];
+const HTTP = ["packages/http/src/**"];
+
+// Only the gate builds a capability host, so no code can dispatch around it (ADR-018).
+const HOST = [{ name: "@jaari/capabilities", importNames: ["createInProcessHost"], message: "Dispatch through @jaari/gate (ADR-018)." }];
+const DEEP = [{ group: ["**/capabilities/src/**"], message: "Import @jaari/capabilities by name (ADR-111)." }];
+// All network egress goes through @jaari/http (ADR-080).
+const egress = "Network egress goes through @jaari/http (ADR-080).";
+// Listening is not egress: the daemon's local socket (ADR-021) and the hook listener (ADR-073) need servers.
+// isIP and friends only parse a string.
+const HTTP_SERVER = ["createServer", "Server", "IncomingMessage", "ServerResponse"];
+const LISTEN = { http: HTTP_SERVER, https: HTTP_SERVER, net: ["createServer", "Server", "isIP", "isIPv4", "isIPv6"] };
+const network = (allowed) => [
+  ...["http", "https", "net", "tls", "http2", "dgram"].flatMap((m) =>
+    [m, `node:${m}`].map((name) => ({ name, message: egress, ...(allowed[m] ? { allowImportNames: allowed[m] } : {}) }))),
+  { name: "undici", message: egress },
+];
+const NETWORK = network(LISTEN);
+// `jaari chat` dials the daemon's Unix socket; this one file refuses anything but an absolute path (ADR-080, ADR-021).
+const SOCKET_CLIENT = ["apps/cli/src/socket.ts"];
+const NETWORK_GLOBALS = ["fetch", "WebSocket", "EventSource"];
+
+// A later block replaces an earlier block's options for the same rule, so each set of files gets its whole list.
+const restrict = (paths, patterns = []) => ({ "no-restricted-imports": ["error", { paths, patterns }] });
+
 // Allowlist: only workspace sources and root config are linted; refs/ never is (ADR-002).
 export default tseslint.config(
   { ignores: ["refs/**", "**/dist/**", "**/node_modules/**", "python/**"] },
   {
-    files: ["packages/*/src/**/*.ts", "apps/*/src/**/*.ts", "*.config.{js,ts}"],
+    files: [...SOURCES, "*.config.{js,ts}"],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
+  },
+  { files: SOURCES, ignores: [...GATE, ...HTTP], rules: restrict([...HOST, ...NETWORK], DEEP) },
+  { files: GATE, rules: restrict(NETWORK) },
+  { files: HTTP, rules: restrict(HOST, DEEP) },
+  { files: SOCKET_CLIENT, rules: restrict([...HOST, ...network({ ...LISTEN, net: [...LISTEN.net, "createConnection"] })], DEEP) },
+  {
+    files: SOURCES,
+    ignores: HTTP,
+    rules: {
+      "no-restricted-globals": ["error", ...NETWORK_GLOBALS.map((name) => ({ name, message: egress }))],
+      "no-restricted-properties": ["error", ...["globalThis", "global"].flatMap((object) =>
+        NETWORK_GLOBALS.map((property) => ({ object, property, message: egress })))],
+    },
   },
 );

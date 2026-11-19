@@ -1,0 +1,21 @@
+{
+  "name": "@jaari/http",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Egress core: resolve, check, dial, with one address-class table the direct provider, and the leak scan of outbound requests (ADR-016, ADR-080, ADR-104)",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@jaari/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "undici": "8.12.4"
+  }
+}

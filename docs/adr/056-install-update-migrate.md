@@ -1,7 +1,7 @@
 # ADR-056: Install, update, migrate: owner-chosen install method, automatic patch updates, migrations when a store opens
 
 - **Status:** Accepted
-- **Extended by:** [ADR-079](079-secret-zero-on-servers.md), [ADR-082](082-phase-split-update-and-catch-up.md), [ADR-094](094-sandbox-under-compose.md), [ADR-105](105-node-26-lts-runtime.md)
+- **Extended by:** [ADR-079](079-secret-zero-on-servers.md), [ADR-082](082-phase-split-update-and-catch-up.md), [ADR-094](094-sandbox-under-compose.md), [ADR-105](105-node-26-lts-runtime.md), [ADR-122](122-install-in-three-steps.md), [ADR-123](123-release-as-built.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -62,6 +62,19 @@ into the sandbox; migrations without a snapshot; letting an older binary open ne
   daemon container, replacing "a rootless Podman sidecar or gVisor"; the container hardening is
   set there.
 - **ADR-105:** the npm install needs Node 26 LTS or later, not Node 22.
+- **ADR-122:** Phase 0 ships npm and Compose; the Homebrew tap, the single binary, and the
+  one-line installer move to roadmap 7.7. Releases are signed without a stored key (npm
+  provenance, cosign). An install keeps each version in `~/.jaari/versions`, with a `current`
+  link. The work is roadmap 0.12 (local commands), 0.17 (release), and 0.18 (`jaari update`,
+  `jaari uninstall`). `jaari config` revisits one named step.
+- **ADR-123:** the npm package carries the internal packages and a shrinkwrap; the image is made
+  from it; `compose.yaml` is written only for a server with `host-credential`.
 
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- Roadmap 0.6 (2026-11-17): the config file, its version, and its checks are ADR-118. `jaari init`
+  asks for the target, where secrets are kept, and one model provider; running it again revisits
+  every step. `jaari config`, the `compose.yaml`, and the other init steps are scheduled in
+  ADR-118's Consequences.
+- Roadmap 0.14 (2026-11-17): SQLite stores migrate when they open and refuse a newer
+  `user_version` (ADR-119). Until roadmap 0.12 each step was
+  protected by its transaction only; since then the daemon snapshots the stores first (ADR-122).

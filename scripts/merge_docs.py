@@ -27,7 +27,7 @@ DEFAULT_OUT = ROOT / "JAARI_CONTEXT.md"
 
 # Merge order: orientation first, then designs, then plan, then decisions, then history.
 FIRST = [
-    "README.md", "AGENTS.md",
+    "README.md", "AGENTS.md", "SECURITY.md", "CONTRIBUTING.md",
     "docs/STATE.md", "docs/ARCHITECTURE.md", "docs/SECURITY_MODEL.md", "docs/LLM.md",
     "docs/WEB.md", "docs/MEMORY.md", "docs/PERSONA.md", "docs/INTEGRATIONS.md",
     "docs/ROADMAP.md", "docs/ACTION_PLAN.md", "docs/OPEN_QUESTIONS.md", "docs/DEVELOPMENT.md",

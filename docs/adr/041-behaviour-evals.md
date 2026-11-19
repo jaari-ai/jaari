@@ -52,3 +52,6 @@ asking to save every exchange as a fixture.
 ## Consequences
 - The tier-1 smoke test moved from roadmap 0.2 to 0.5: it boots the daemon, which 0.5 creates.
   CI (0.2) shipped without it (2026-11-16).
+- The smoke test (0.5, `apps/daemon/src/smoke.test.ts`) boots `startDaemon` from source with pi-ai's
+  scripted provider: an answer, a restart over the transcript, and a pause that survives it. CI also
+  starts the built daemon once (ADR-115).

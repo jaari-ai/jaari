@@ -13,10 +13,11 @@ status and exit criteria live there.
 3. **Safety floor first** (0.9 to 0.11): `@jaari/capabilities`, `@jaari/gate` (deny-all stub),
    and `@jaari/secrets` (resolver + `os-keychain` and `host-credential`) with the first package
    (ADR-018, ADR-079).
-4. **Build `@jaari/llm`** (0.7) on `@earendil-works/pi-ai` with the tier/role config; the
+4. **Build the `@jaari/http` core, then `@jaari/llm`** (0.15, then 0.7; ADR-080). `@jaari/llm` is built
+   on `@earendil-works/pi-ai` with the tier/role config; the
    `jaari llm eval` qualification fixtures that `jaari init` uses arrive with Phase 1 (1.9;
    ADR-019, ADR-045).
-5. **Daemon and install** (0.5, 0.6, 0.12 to 0.14): `apps/daemon` with the persistent session,
+5. **Daemon and install** (0.5, 0.6, 0.12 to 0.14, 0.17, 0.18): `apps/daemon` with the persistent session,
    `jaari init` (target: VPS, remote server, home hardware, or laptop), `jaari doctor`,
    Compose, and the laptop sleep rule (ADR-017, ADR-056, ADR-057, ADR-065).
 6. **Define `ChannelAdapter` and ship the CLI channel** (0.8; ADR-021, ADR-035). The CLI talks
@@ -147,3 +148,19 @@ status and exit criteria live there.
 | [105](adr/105-node-26-lts-runtime.md) | Node 26 LTS is the minimum runtime; types and compile target follow it | Accepted |
 | [106](adr/106-one-address-for-registry-accounts.md) | Registry accounts use `hello@jaari.org`; no separate recovery inbox | Accepted |
 | [107](adr/107-dependabot-updates.md) | Dependabot version updates into `develop`; alerts on, security PRs off; bot exempt from DCO | Accepted |
+| [108](adr/108-manifest-validation-with-typebox.md) | The package manifest is validated with TypeBox; kind names and capability classes | Accepted |
+| [109](adr/109-built-in-package-loader.md) | The built-in loader checks every manifest first; `health` is a method; `config` is inline JSON Schema | Accepted |
+| [110](adr/110-daemon-node-contract.md) | The daemon–node contract is JSON data messages checked on receipt, with one final result per action | Accepted |
+| [111](adr/111-workspace-source-condition.md) | Workspace packages resolve to their TypeScript source through the `@jaari/source` export condition | Accepted |
+| [112](adr/112-os-keychain-library.md) | The `os-keychain` provider reads the keychain through `@napi-rs/keyring` | Accepted |
+| [113](adr/113-egress-on-node-fetch-and-undici.md) | The egress core is Node's `fetch` with an undici `Agent` that resolves, checks, and dials | Accepted |
+| [114](adr/114-llm-on-pi-ai.md) | `@jaari/llm` on pi-ai 1.5.0: keys only from `secretRef`, the usage log in `node:sqlite`, refusals stop until categories are mapped | Accepted |
+| [115](adr/115-daemon-runs-from-dist.md) | The daemon runs from built `dist/` files under plain Node; the smoke test and a CI start check prove both paths | Accepted |
+| [116](adr/116-owner-commands-in-code.md) | Owner commands are read by code in the owner's languages; a stop word pauses, and a repeated one stops the turn | Accepted |
+| [117](adr/117-owner-replies-are-pointers.md) | Owner replies are pointers resolved by code; a reply may widen a brake and may answer one approval | Accepted |
+| [118](adr/118-owner-config-file.md) | The owner config: one JSONC file under `~/.jaari`, versioned, closed at the top, read through `@jaari/core/config` | Accepted |
+| [119](adr/119-owner-id-and-versioned-stores.md) | The owner id comes from `jaari init`; every store is versioned, owned, and opened through one function | Accepted |
+| [120](adr/120-prompt-injection-floor-as-built.md) | The prompt-injection floor as built: model calls are not scanned, the fence id lasts one run, the canary lives with the conversation, and an unlabelled turn is the owner | Accepted |
+| [121](adr/121-laptop-host-as-built.md) | The laptop host as built: sleep is a clock gap, OS tools instead of a native helper, and detectors that only emit events | Accepted |
+| [122](adr/122-install-in-three-steps.md) | Install and update in three steps: the local commands first, npm and Compose as the Phase 0 channels, keyless signing, and a snapshot before every store migration | Accepted |
+| [123](adr/123-release-as-built.md) | The release as built: one npm tarball with its internal packages inside, an image made from that tarball, staged npm approval, and one Compose secret per credential | Accepted |

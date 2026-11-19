@@ -109,3 +109,19 @@
 | [105](105-node-26-lts-runtime.md) | Node 26 LTS is the minimum runtime; types and compile target follow it | Accepted |
 | [106](106-one-address-for-registry-accounts.md) | Registry accounts use `hello@jaari.org`; no separate recovery inbox | Accepted |
 | [107](107-dependabot-updates.md) | Dependabot version updates into `develop`; alerts on, security PRs off; bot exempt from DCO | Accepted |
+| [108](108-manifest-validation-with-typebox.md) | The package manifest is validated with TypeBox; kind names and capability classes | Accepted |
+| [109](109-built-in-package-loader.md) | The built-in loader checks every manifest first; `health` is a method; `config` is inline JSON Schema | Accepted |
+| [110](110-daemon-node-contract.md) | The daemon–node contract is JSON data messages checked on receipt, with one final result per action | Accepted |
+| [111](111-workspace-source-condition.md) | Workspace packages resolve to their TypeScript source through the `@jaari/source` export condition | Accepted |
+| [112](112-os-keychain-library.md) | The `os-keychain` provider reads the keychain through `@napi-rs/keyring` | Accepted |
+| [113](113-egress-on-node-fetch-and-undici.md) | The egress core is Node's `fetch` with an undici `Agent` that resolves, checks, and dials | Accepted |
+| [114](114-llm-on-pi-ai.md) | `@jaari/llm` on pi-ai 1.5.0: keys only from `secretRef`, the usage log in `node:sqlite`, refusals stop until categories are mapped | Accepted |
+| [115](115-daemon-runs-from-dist.md) | The daemon runs from built `dist/` files under plain Node; the smoke test and a CI start check prove both paths | Accepted |
+| [116](116-owner-commands-in-code.md) | Owner commands are read by code in the owner's languages; a stop word pauses, and a repeated one stops the turn | Accepted |
+| [117](117-owner-replies-are-pointers.md) | Owner replies are pointers resolved by code; a reply may widen a brake and may answer one approval | Accepted |
+| [118](118-owner-config-file.md) | The owner config: one JSONC file under `~/.jaari`, versioned, closed at the top, read through `@jaari/core/config` | Accepted |
+| [119](119-owner-id-and-versioned-stores.md) | The owner id comes from `jaari init`; every store is versioned, owned, and opened through one function | Accepted |
+| [120](120-prompt-injection-floor-as-built.md) | The prompt-injection floor as built: model calls are not scanned, the fence id lasts one run, the canary lives with the conversation, and an unlabelled turn is the owner | Accepted |
+| [121](121-laptop-host-as-built.md) | The laptop host as built: sleep is a clock gap, OS tools instead of a native helper, and detectors that only emit events | Accepted |
+| [122](122-install-in-three-steps.md) | Install and update in three steps: the local commands first, npm and Compose as the Phase 0 channels, keyless signing, and a snapshot before every store migration | Accepted |
+| [123](123-release-as-built.md) | The release as built: one npm tarball with its internal packages inside, an image made from that tarball, staged npm approval, and one Compose secret per credential | Accepted |

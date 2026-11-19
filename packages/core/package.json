@@ -1,0 +1,30 @@
+{
+  "name": "@jaari/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Agent loop on Pi: the persistent main session, its transcript, pause, stop, runaway limits, the event log, the owner config loader, and the prompt-injection floor: the locked safety prompt, fence, defuse, and the leak scan (ADR-001, ADR-031, ADR-032, ADR-065, ADR-104, ADR-118, ADR-120)",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@jaari/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./config": {
+      "@jaari/source": "./src/config.ts",
+      "types": "./dist/config.d.ts",
+      "default": "./dist/config.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@earendil-works/pi-agent-core": "1.5.0",
+    "@earendil-works/pi-ai": "1.5.0",
+    "@jaari/llm": "workspace:*",
+    "jsonc-parser": "3.3.1",
+    "typebox": "1.4.6"
+  }
+}

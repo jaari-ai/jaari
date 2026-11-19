@@ -1,6 +1,7 @@
 # ADR-079: Secret zero on a server: a `host-credential` provider fed by the service manager
 
 - **Status:** Accepted
+- **Extended by:** [ADR-122](122-install-in-three-steps.md), [ADR-123](123-release-as-built.md)
 - **Date:** 2026-11-12
 
 ## Context
@@ -45,5 +46,24 @@ The development `file` provider in production (no permission or location checks,
 warns about it); environment variables; Docker Swarm secrets (Jaari's install is plain
 Compose); a passphrase typed at every start as the default (no unattended restart).
 
+## Amendments
+- **ADR-122:** `jaari service install` encrypts each credential file into
+  `/etc/jaari/credstore`, leaves the plain files for the owner to delete, and runs again after
+  every `jaari secret set`. `jaari doctor` tells encrypted from plain, and says when the host
+  has a TPM (ADR-123).
+- **ADR-123:** until a vault exists, Compose mounts one secret per credential at
+  `/run/secrets/<name>`, not one `jaari-secret-zero` file.
+
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- **Roadmap 0.11 (2026-11-16):** `createHostCredentialProvider(dir, dataDir)` reads `<dir>/<name>`,
+  and checks the name itself (no `/`, no leading `.`), not only through `parseRef`.
+  The daemon passes `$CREDENTIALS_DIRECTORY` (systemd) or `/run/secrets` (Compose); the directory
+  path is not a secret. It refuses any mode bit for group or others (`& 0o077`, stricter than
+  "readable"), a file that resolves, after links, inside the data directory, a non-regular file,
+  and an empty file. The mode is checked on the open file handle. One trailing newline is dropped.
+  The "not in the backup set" check waits for backup (Phase 3).
+- **Roadmap 0.6 (2026-11-17, ADR-118):** the daemon takes the folder from `--credentials`, then
+  `$CREDENTIALS_DIRECTORY`, then `secrets.credentialsDir` in the config (default
+  `~/.jaari/credentials`); the fixed `/run/secrets` default is gone, so Compose passes
+  `--credentials /run/secrets`. `jaari secret set` writes a file there at mode 0600 and refuses a
+  folder inside the data directory or open to group or others.

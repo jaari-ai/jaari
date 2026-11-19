@@ -12,47 +12,21 @@
   `python3 scripts/merge_docs.py --check` after changing them. `JAARI_CONTEXT.md` is an
   untracked build artifact: never edit it, regenerate it.
 
+## Package documentation
+- Before you use or change a call to a third-party package, read its current documentation
+  through Context7 (`resolve-library-id`, then `query-docs`). Do not rely on memory: APIs change
+  between versions.
+- If Context7 has no entry for the package, or its entry does not cover the version pinned in
+  this repo, fall back to the package's own documentation, in this order: its README and docs
+  for the pinned version, its type declarations (`node_modules/<package>/**/*.d.ts`), then its
+  source code. Confirm the behaviour with a short run when the documentation is unclear.
+- Say in your update which source you used, so a wrong API can be traced.
+
 ## Ownership
 
 This codebase is yours: what it's for and how it's built are your call, and you'll keep building on it.
 
-## Working style: this project is a learning journey for me
-
-I'm using this project to grow as a developer, not just to get code written.
-Explaining well matters more to me than finishing fast.
-
-### Before you act
-- Before you start anything that isn't trivial, give me a short plan: what you'll do,
-  in what order, and why.
-- If my request could be read more than one way, ask me before you guess.
-
-### Explaining each step
-- For every meaningful change, tell me **what** you changed, **why**, and **how it works**.
-- Name the concepts, patterns or language features you use (e.g. "dependency injection",
-  "debouncing", "a SQL join"), and explain them briefly the first time they come up.
-- Explain shell commands, config files and tooling before you run or change them,
-  including what each flag or key does.
-- When you read existing code, walk me through the parts that matter: how data flows,
-  how the pieces connect, and why it's built that way.
-
-### Technical decisions: explore before choosing
-When there's a real choice to make (library, architecture, data model, approach, tool):
-1. Lay out 2–4 realistic options.
-2. For each one, cover how it works, pros and cons, complexity, performance, how well
-   it scales and how easy it is to maintain, plus when it is the right choice.
-3. Recommend one and explain your reasoning for *this* project specifically.
-4. Wait for my decision on significant choices before you implement. You can decide
-   small ones yourself, but tell me what you chose and why.
-
-### Depth and honesty
-- Don't skip details because they seem obvious. If something is a common pitfall,
-  a security concern or a best practice, say so.
-- Point out trade-offs and technical debt, even in your own suggestions.
-- If I suggest something that's a bad idea, tell me and explain why.
-- Link to official docs for anything worth reading further.
-
-### Help me learn actively
-- Every so often, suggest small pieces I could write myself, with hints rather than
-  full solutions.
-- After a larger task, sum up the key takeaways in a few bullets.
-- Look for chances to check my understanding (e.g. "what do you think happens if…?").
+## About me as a developer
+- My level: comfortable with HTML/CSS and JavaScript, new to TypeScript, midium level in nodejs, comfortable with sql but new to postgresql, comfortable with Docker and CI/CD
+- What I want to learn deeply in this project: API design, database modelling, testing, deployment, typescript, node, AI, llm and models
+- I work in mentor mode (Mentor output style): explain, don't quiz me.

@@ -1,16 +1,33 @@
 {
+  // ADR-056, ADR-118: the schema version of this file. `jaari init` writes it; migrations raise it.
+  "version": 1,
+
   // ADR-022: `owner.phones` lets a carrier-identity channel recognise the owner.
-  "owner": { "timezone": "America/New_York", "quietHours": ["22:00", "08:00"], "phones": ["secretRef:owner.phone"] },
+  // ADR-119: `id` is written once by `jaari init`; every record carries it. Never change it by hand.
+  "owner": { "id": "00000000-0000-4000-8000-000000000000", "timezone": "America/New_York", "quietHours": ["22:00", "08:00"], "phones": ["secretRef:owner.phone"] },
 
   // ADR-017: where this daemon runs. "vps" | "server" | "home" | "laptop"
   "deployment": { "target": "vps", "overlay": "tailscale" },
 
-  // ADR-021, ADR-084: channel packages; a local path is for development only.
-  "channels": ["@jaari/channel-cli", "@jaari/channel-web", "@jaari/channel-telegram"],
+  // ADR-057, ADR-121: a laptop host. `stayAwake`: "working" (while a turn runs on mains power; the default on a
+  // laptop) | "never" | "always". Below `batteryPausePercent` on battery, background work pauses.
+  "power": { "stayAwake": "working", "batteryPausePercent": 20 },
+
+  // ADR-021, ADR-084: channel packages; a local path is for development only. The CLI channel is
+  // built in and always on, so it is not listed.
+  "channels": ["@jaari/channel-web", "@jaari/channel-telegram"],
 
   // ADR-079: secret zero from the OS keychain ("os-keychain") or, on a server or in Compose,
   // a file the service manager supplies ("host-credential"). ADR-013, ADR-050: dedicated vault.
-  "secrets": { "zero": "host-credential", "vault": { "provider": "bitwarden", "collection": "jaari" } },
+  // ADR-118: `credentialsDir` is where `jaari secret set` writes and the daemon reads when no
+  // service manager supplies the files; it must be outside the data folder.
+  "secrets": { "zero": "host-credential", "credentialsDir": "~/.jaari/credentials", "vault": { "provider": "bitwarden", "collection": "jaari" } },
+
+  // ADR-031, ADR-065: runaway limits; each one is optional and has a default.
+  "limits": { "stepsPerTurn": 25, "watchdogMs": 300000 },
+
+  // ADR-032: how long the event log keeps its lines.
+  "events": { "retentionDays": 30 },
 
   "persona": { "curiosity": 2, "proactivity": 1 },
 

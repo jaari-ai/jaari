@@ -11,9 +11,12 @@ background, gets to know you at a pace you set, and never takes an external acti
 (send, publish) without an approval bound to the exact action. Payments are reserved, not
 in v1.
 
-> **Status: Phase 0 (Foundation). Design only, no runnable code yet.** The architecture,
-> decisions, and open questions are written down; packages are not scaffolded. See
-> [docs/STATE.md](docs/STATE.md).
+> **Status: Phase 0 (Foundation), early software.** The daemon, a chat in the terminal, and the
+> install commands work; memory, channels, and tools come in later phases. See
+> [docs/STATE.md](https://github.com/jaari-ai/jaari/blob/main/docs/STATE.md).
+>
+> Install: `npm install --global --ignore-scripts jaari`, then `jaari init`. On a server, see the
+> [install guide](https://github.com/jaari-ai/jaari/blob/main/docs/guides/install.md).
 
 ## Design in brief
 
@@ -50,6 +53,7 @@ in v1.
 
 ~~~
 README.md AGENTS.md CLAUDE.md   project and agent instructions
+SECURITY.md CONTRIBUTING.md     security policy and contribution guide
 jaari.config.example.jsonc      example owner config (owner, channels, secrets, llm, web, egress, backup, ...)
 pnpm-workspace.yaml tsconfig*.json eslint.config.js vitest.config.ts
                                 build config, allowlisted to packages/* and apps/*
@@ -85,6 +89,11 @@ Docs are hand-maintained Markdown. Follow the conventions in
 state), then run `python3 scripts/merge_docs.py --check`. To talk about the project with an AI
 agent, run `python3 scripts/merge_docs.py` and give it the resulting `JAARI_CONTEXT.md`
 (untracked, rebuilt on every run).
+
+## Contributing and security
+
+How to get a change merged, including DCO sign-off: [CONTRIBUTING.md](CONTRIBUTING.md). To
+report a vulnerability privately: [SECURITY.md](SECURITY.md).
 
 ## Lineage
 

@@ -1,7 +1,7 @@
 # ADR-080: Egress core in Phase 0: every outbound call goes through `@jaari/http` from the start
 
 - **Status:** Accepted
-- **Extended by:** [ADR-104](104-prompt-injection-defence-in-depth.md)
+- **Extended by:** [ADR-104](104-prompt-injection-defence-in-depth.md), [ADR-120](120-prompt-injection-floor-as-built.md)
 - **Date:** 2026-11-12
 
 ## Context
@@ -46,5 +46,28 @@ blocking every network call until Phase 4 (no model provider in Phases 0 to 3); 
 ## Amendments
 - **ADR-104:** the core scans outbound URLs and bodies for the canary and the session fence id, blocks a hit, writes an audit row, and alerts the owner. (Provenance holds on `web.fetch` and `web.search` arguments are decided at the tool call, before the gate, not in the core.)
 
+- **ADR-120:** the scan is an option of `createEgress`; the egress for model calls runs without it, because the prompt holds the canary and the fence id. The scan reads the URL, the headers, and the body before any connection opens.
+
 ## Consequences
-_TODO: fill in as implementation reveals them._
+- **Roadmap 0.15 (2026-11-16):** built on Node's `fetch` and an undici `Agent` (ADR-113).
+- A name may return some refused addresses: the core dials the first address that passed and
+  never a refused one (OpenMausBot refuses the whole connection instead; learning/14). This keeps
+  `localhost` working with one allowed loopback address.
+- The daemon's own ports are refused on every address that is not public, even when allowed.
+  The machine's own interface addresses form a `this-machine` class, treated like loopback.
+- The lint rule also refuses `node:http2`, `node:dgram`, and the `WebSocket` and `EventSource`
+  globals, which are network clients too. `globalThis.fetch` and `global.fetch` are caught; an
+  alias such as `const g = globalThis; g.fetch` is not.
+- A refusal is an `EgressRefused` error, the `cause` of the `TypeError` that `fetch` throws.
+- An allow entry can be `name:port` (port required), such as `ollama:11434`: a Compose service
+  gets a new address on each start. It allows the loopback, this-machine, or private addresses that
+  name resolves to, for that name and port only; metadata, link-local, reserved addresses and the
+  daemon's own ports stay refused.
+- Listening is not egress. The lint rule allows the server names of `node:http`, `node:https`
+  (`createServer`, `Server`, `IncomingMessage`, `ServerResponse`) and `node:net` (`createServer`,
+  `Server`, and the parsers `isIP`, `isIPv4`, `isIPv6`) everywhere, for the daemon's local socket (ADR-021) and the hook listener (ADR-073).
+  Client names stay refused. Roadmap 0.8 (2026-11-17): one file, `apps/cli/src/socket.ts`, may
+  import `createConnection`, and it refuses anything but an absolute path, so `jaari chat` reaches
+  only the daemon's Unix socket; a lint test checks that every other file still refuses it.
+- Roadmap 0.5 (2026-11-16): the daemon builds the allow list from every model provider with a
+  `baseUrl` in config, as `host:port`, so the owner's local model servers pass the check.

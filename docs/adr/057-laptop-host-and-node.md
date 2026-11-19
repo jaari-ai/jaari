@@ -1,7 +1,7 @@
 # ADR-057: Laptop as host and node: sleep detection and capped catch-up, power and battery rules, a published macOS permission matrix
 
 - **Status:** Accepted
-- **Extended by:** [ADR-082](082-phase-split-update-and-catch-up.md)
+- **Extended by:** [ADR-082](082-phase-split-update-and-catch-up.md), [ADR-121](121-laptop-host-as-built.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -62,6 +62,10 @@ permissions only when a capability fails.
 ## Amendments
 - **ADR-082:** catch-up of missed jobs ships with the job engine (Phase 1), asking again for
   expired approvals with the real gate (Phase 3); the rest of the Phase 0 list is unchanged.
+- **ADR-121:** sleep is the larger gap of the two clocks, not their difference. Phase 0 ships no
+  macOS helper and no logind listener; the power assertion uses `caffeinate` and
+  `systemd-inhibit` and covers a turn until the job engine exists. The battery notice waits for
+  the notification ledger (2.3), and reconnects wait for something to reconnect.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
