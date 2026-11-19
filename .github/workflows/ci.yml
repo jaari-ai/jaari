@@ -35,6 +35,8 @@ jobs:
           if node apps/daemon/dist/main.js --check --config apps/daemon/smoke.config.json --data "$RUNNER_TEMP/refused" --credentials "$RUNNER_TEMP/missing" 2> "$RUNNER_TEMP/refused.err"; then exit 1; fi
           cat "$RUNNER_TEMP/refused.err"
           test "$(wc -l < "$RUNNER_TEMP/refused.err")" -eq 1
+      - name: The npm package installs and starts, and the image runs from compose.yaml (ADR-122)
+        run: scripts/check-release.sh
       - run: node scripts/check-licenses.mjs
       - run: python3 scripts/merge_docs.py --check
 

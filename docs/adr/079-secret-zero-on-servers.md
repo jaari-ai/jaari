@@ -1,7 +1,7 @@
 # ADR-079: Secret zero on a server: a `host-credential` provider fed by the service manager
 
 - **Status:** Accepted
-- **Extended by:** [ADR-122](122-install-in-three-steps.md)
+- **Extended by:** [ADR-122](122-install-in-three-steps.md), [ADR-123](123-release-as-built.md)
 - **Date:** 2026-11-12
 
 ## Context
@@ -49,8 +49,10 @@ Compose); a passphrase typed at every start as the default (no unattended restar
 ## Amendments
 - **ADR-122:** `jaari service install` encrypts each credential file into
   `/etc/jaari/credstore`, leaves the plain files for the owner to delete, and runs again after
-  every `jaari secret set`. `jaari doctor` tells encrypted from plain; TPM-sealed is not told
-  apart yet.
+  every `jaari secret set`. `jaari doctor` tells encrypted from plain, and says when the host
+  has a TPM (ADR-123).
+- **ADR-123:** until a vault exists, Compose mounts one secret per credential at
+  `/run/secrets/<name>`, not one `jaari-secret-zero` file.
 
 ## Consequences
 - **Roadmap 0.11 (2026-11-16):** `createHostCredentialProvider(dir, dataDir)` reads `<dir>/<name>`,

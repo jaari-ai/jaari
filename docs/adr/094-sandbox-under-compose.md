@@ -1,6 +1,7 @@
 # ADR-094: Under Compose the sandbox is bubblewrap inside a hardened daemon container
 
 - **Status:** Accepted
+- **Extended by:** [ADR-123](123-release-as-built.md)
 - **Date:** 2026-11-12
 
 ## Context
@@ -35,6 +36,10 @@ Firecracker in Phase 7.
 ## Alternatives rejected
 A rootless Podman sidecar (gives the daemon a container-creating API); gVisor as the default
 (needs a host runtime install); mounting the Docker socket (ADR-056 rejects it).
+
+## Amendments
+- **ADR-123:** `compose.yaml` ships the limits that apply today; the seccomp and AppArmor profiles
+  for bubblewrap ship with the first sandbox (roadmap 4.7).
 
 ## Consequences
 _TODO: fill in as implementation reveals them._

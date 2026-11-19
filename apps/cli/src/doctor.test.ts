@@ -61,13 +61,42 @@ it("warns without failing: FileVault off, a config others can read, a hold that 
   const stop = await fakeDaemon(data);
   const off = await check(home, { exec: () => Promise.resolve("FileVault is Off.\n") });
   await writeFile(join(data, "events.ndjson"), event("power.hold.failed") + event("daemon.start"), { mode: 0o600 });
-  const fixed = await check(home, { platform: "linux" });
+  const fixed = await check(home, { platform: "linux", exec: () => Promise.reject(new Error("no lsblk")) });
   await stop();
   expect(off.code).toBe(0);
   expect(off.shown).toContain("Healthy, 3 warnings.");
   for (const line of ["warn  disk encryption: FileVault is off", "warn  config", "warn  the laptop is not kept awake: caffeinate"]) expect(off.shown).toContain(line);
   expect(fixed.shown).not.toContain("not kept awake"); // the failure was before the last start
-  expect(fixed.shown).toContain("info  disk encryption: not checked on linux");
+  expect(fixed.shown).toContain("info  disk encryption: could not be read here");
+});
+
+it("tells an encrypted Linux volume from a plain one, a host without a TPM, and reads the keys that Compose hands over", async () => {
+  const { home, credentials, config } = await install();
+  const unitPath = join(await mkdtemp(join(tmpdir(), "jd-unit-")), "jaari.service");
+  await writeFile(unitPath, "[Service]\nLoadCredentialEncrypted=llm.faux:/etc/jaari/credstore/llm.faux.cred\n");
+  const calls: string[][] = [];
+  const linux = (type: string): Partial<DoctorDeps> => ({
+    platform: "linux", unitPath,
+    exec: (command, args) => {
+      calls.push([command, ...args]);
+      if (command === "systemd-creds") return Promise.reject(new Error("no TPM"));
+      return Promise.resolve(command === "findmnt" ? "/dev/mapper/root[/var]\n" : type);
+    },
+  });
+  const encrypted = await check(home, linux("crypt\npart\ndisk\n"));
+  expect(encrypted.shown).toContain("ok    disk encryption: the data folder is on an encrypted volume");
+  expect(encrypted.shown).toMatch(/encrypted with systemd-creds\n/);
+  expect(calls).toContainEqual(["lsblk", "-s", "-n", "-o", "TYPE", "/dev/mapper/root"]); // no btrfs-style [/subvolume]
+  expect((await check(home, linux("part\ndisk\n"))).shown).toContain("warn  disk encryption: the data folder is not on an encrypted volume");
+
+  const elsewhere = await mkdtemp(join(tmpdir(), "jd-run-"));
+  await chmod(elsewhere, 0o700);
+  await writeFile(join(elsewhere, "llm.faux"), "scripted-key\n", { mode: 0o600 });
+  await rm(join(credentials, "llm.faux"));
+  await chmod(config, 0o600);
+  const compose = await check(home, { credentialsDir: elsewhere });
+  expect(compose.shown).toContain(`host-credential, plain owner-only files in ${elsewhere}`);
+  expect(compose.shown).toContain('ok    the key of provider "faux" can be read');
 });
 
 it("reports what it cannot read as a failure, never a crash: a dangling link, a damaged store, a silent socket", async () => {
@@ -102,7 +131,7 @@ it("reports the form of secret zero under systemd, a store newer than this Jaari
   db.close();
   for (const file of ["session.db", "snapshots"]) await chmod(join(data, file), 0o700);
   const encrypted = await check(home, { platform: "linux", unitPath });
-  expect(encrypted.shown).toContain("ok    secrets: host-credential, encrypted with systemd-creds");
+  expect(encrypted.shown).toContain("ok    secrets: host-credential, encrypted with systemd-creds (this host has a TPM)");
   expect(encrypted.shown).not.toContain("the key of provider"); // systemd reads the keys, not this user
   expect(encrypted.shown).toMatch(/FAIL {2}session\.db is at version 99, newer than this Jaari reads/);
   expect(encrypted.shown).toMatch(/info {2}latest snapshot: .* \(pre-migration\)/);

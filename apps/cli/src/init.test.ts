@@ -6,6 +6,7 @@ import { loadConfig } from "@jaari/core/config";
 import { checkLlmConfig } from "@jaari/llm";
 import { afterEach, beforeEach, expect, it } from "vitest";
 import { run as configCommand } from "./config-command.js";
+import { composeFile } from "./compose.js";
 import { init } from "./init.js";
 
 let root: string;
@@ -192,4 +193,66 @@ it("jaari config revisits one step and leaves the rest of the file as it was", a
   expect((await revisit("secrets", ["", ""])).code).toBe(0);
   expect(await readFile(config, "utf8")).toBe(text); // empty answers change nothing
   expect(await revisit("nope", [])).toMatchObject({ code: 2, shown: expect.stringContaining("usage: jaari config") as string });
+});
+
+const composeRun = async (lines: string[], host = { version: "1.2.3", uid: 1000, gid: 1001 }, platform: NodeJS.Platform = "linux") => {
+  const input = new PassThrough();
+  const output = new PassThrough();
+  let shown = "";
+  output.on("data", (chunk: Buffer) => (shown += chunk.toString()));
+  input.end(lines.map((line) => `${line}\n`).join(""));
+  return { code: await init(["--home", home], { input, output, isTTY: false }, platform, undefined, host), shown };
+};
+
+it("writes compose.yaml on a server: pinned image, the owner's account, the container limits, one secret per key (ADR-094, ADR-122)", async () => {
+  const { code, shown } = await composeRun(["", "", "", "", "", "claude-test"]);
+  expect(code).toBe(0);
+  const text = await readFile(join(home, "compose.yaml"), "utf8");
+  for (const line of [
+    'image: "ghcr.io/jaari-ai/jaari:1.2.3"', 'user: "1000:1001"', "read_only: true", "- ALL", "- no-new-privileges:true", "restart: unless-stopped",
+    "- ./config.jsonc:/home/jaari/.jaari/config.jsonc:ro", "- ./data:/home/jaari/.jaari/data", // no credentials folder, a read-only config
+    'profiles: ["admin"]', "network_mode: none", 'entrypoint: ["jaari"]',
+    '- "llm.anthropic"', '"llm.anthropic":\n    file: "./credentials/llm.anthropic"',
+  ]) expect(text).toContain(line);
+  expect((await stat(join(home, "compose.yaml"))).mode & 0o777).toBe(0o600);
+  expect((await stat(join(home, "data"))).mode & 0o777).toBe(0o700); // made here, or Docker would make it as root
+  expect(shown).toContain("  docker compose up -d");
+  expect(shown).toContain("without Docker: jaari service install"); // a server may run it under systemd
+  expect(shown).not.toContain("  jaari-daemon");
+  expect(shown).not.toContain("cd /"); // this may run inside the container, whose paths mean nothing on the host
+});
+
+it("keeps an edited compose.yaml, and writes none for a laptop, the keychain, root, or a checkout", async () => {
+  await composeRun(["", "", "", "", "", "claude-test"]);
+  const path = join(home, "compose.yaml");
+  await writeFile(path, "# mine\n");
+  const second = await composeRun(["", "", "", ""], { version: "1.2.4", uid: 1000, gid: 1001 });
+  expect(second.shown).toContain("so it was kept");
+  expect(await readFile(path, "utf8")).toBe("# mine\n");
+  expect(await readFile(`${path}.new`, "utf8")).toContain("jaari:1.2.4");
+
+  for (const [host, lines, platform] of [
+    [{ version: "0.0.0", uid: 1000, gid: 1000 }, ["", "", "", "", "", "m"], "linux"],
+    [{ version: "1.2.3", uid: 0, gid: 0 }, ["", "", "", "", "", "m"], "linux"],
+    [{ version: "1.2.3", uid: 1000, gid: 1000 }, ["", "", "", "", "", "m"], "darwin"],
+  ] as const) {
+    await rm(home, { recursive: true, force: true });
+    const { shown } = await composeRun([...lines], host, platform);
+    expect(await readdir(home)).not.toContain("compose.yaml");
+    expect(shown.includes("not as root")).toBe(host.uid === 0);
+  }
+});
+
+it("warns when the model server is on localhost, which the container cannot reach", async () => {
+  expect((await composeRun(["", "", "", "local", "", "qwen3:8b", ""])).shown).toContain("cannot be reached from the container");
+  // No key to hand over, but the daemon refuses to start when the credentials folder is missing.
+  const text = await readFile(join(home, "compose.yaml"), "utf8");
+  expect(text).toContain("- /run/secrets:size=1m,mode=0700,uid=1000,gid=1001");
+  expect(text).not.toContain("secrets:\n");
+});
+
+it("lists a key that two providers share once, and keeps a $ in a path from Compose's substitution", () => {
+  const text = composeFile({ version: "1.2.3", uid: 1000, gid: 1000, secrets: [{ name: "llm.a", file: "/srv/$x/llm.a" }, { name: "llm.a", file: "/srv/$x/llm.a" }] });
+  expect(text.match(/"llm\.a":/g)).toHaveLength(1);
+  expect(text).toContain('file: "/srv/$$x/llm.a"');
 });

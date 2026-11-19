@@ -20,6 +20,7 @@ export type DoctorDeps = {
   node: string; // process.versions.node
   exec(command: string, args: string[]): Promise<string>;
   unitPath: string; // the systemd unit that `jaari service install` writes
+  credentialsDir?: string; // what systemd or Compose hands over, as the daemon reads it
 };
 const systemDeps: DoctorDeps = {
   keychain: createOsKeychainProvider,
@@ -27,6 +28,7 @@ const systemDeps: DoctorDeps = {
   node: process.versions.node,
   exec: (command, args) => promisify(execFile)(command, args, { timeout: 5_000 }).then(({ stdout }) => stdout),
   unitPath: "/etc/systemd/system/jaari.service",
+  ...(process.env.CREDENTIALS_DIRECTORY ? { credentialsDir: process.env.CREDENTIALS_DIRECTORY } : {}),
 };
 
 type Level = "ok" | "info" | "warn" | "FAIL";
@@ -108,8 +110,15 @@ export async function doctor(args: string[], io: Io, deps: DoctorDeps = systemDe
   }
 
   // ADR-028: Jaari relies on the host's disk encryption and says what it can see.
-  // shortcut: macOS only; Linux needs root to tell LUKS from a plain disk, add it with the Compose install (roadmap 0.17)
-  if (deps.platform === "darwin") {
+  if (deps.platform === "linux") {
+    // What the data folder's disk is built on, read without root: an encrypted layer shows as `crypt`.
+    const layers = await deps.exec("findmnt", ["-n", "-o", "SOURCE", "--target", dataDir])
+      .then((source) => deps.exec("lsblk", ["-s", "-n", "-o", "TYPE", source.trim().replace(/\[.*$/, "")]))
+      .catch(() => undefined);
+    if (layers === undefined) add("info", "disk encryption: could not be read here (normal in a container); see docs/guides/securing-your-install.md");
+    else if (layers.split(/\s+/).includes("crypt")) add("ok", "disk encryption: the data folder is on an encrypted volume");
+    else add("warn", "disk encryption: the data folder is not on an encrypted volume (ADR-028)");
+  } else if (deps.platform === "darwin") {
     const status = await deps.exec("fdesetup", ["status"]).catch(() => "");
     if (status.includes("FileVault is On")) add("ok", "disk encryption: FileVault is on");
     else if (status.includes("FileVault is Off")) add("warn", "disk encryption: FileVault is off; turn it on in System Settings, Privacy & Security");
@@ -128,13 +137,12 @@ async function secrets(config: Config, at: { paths: ReturnType<typeof jaariPaths
   } else {
     const unit = deps.platform === "linux" ? await readFile(deps.unitPath, "utf8").catch(() => "") : "";
     if (unit.includes("LoadCredential")) {
-      // shortcut: TPM-sealed is not told apart from encrypted (it needs root); the keys are checked by systemd at start
-      add(unit.includes("LoadCredentialEncrypted=") ? "ok" : "warn", unit.includes("LoadCredentialEncrypted=")
-        ? "secrets: host-credential, encrypted with systemd-creds"
-        : "secrets: host-credential, plain files that systemd hands over; they must be readable by root only");
-      return;
+      // The keys themselves are checked by systemd at start. `systemd-creds` uses a TPM by default when the host has one.
+      if (!unit.includes("LoadCredentialEncrypted=")) return add("warn", "secrets: host-credential, plain files that systemd hands over; they must be readable by root only");
+      const tpm = await deps.exec("systemd-creds", ["has-tpm2"]).then(() => true, () => false);
+      return add("ok", `secrets: host-credential, encrypted with systemd-creds${tpm ? " (this host has a TPM)" : ""}`);
     }
-    const dir = credentialsDirOf(config, at.paths);
+    const dir = deps.credentialsDir ?? credentialsDirOf(config, at.paths);
     provider = createHostCredentialProvider(dir, at.dataDir);
     add("ok", `secrets: host-credential, plain owner-only files in ${dir}`);
   }

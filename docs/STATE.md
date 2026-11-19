@@ -1,11 +1,11 @@
 # Jaari: State
 
-Last updated: 2026-11-17
+Last updated: 2026-11-18
 
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (122 ADRs, all Accepted)
+## Decided (123 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -124,7 +124,7 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   an ambiguous send is never retried. The CLI channel listens on `jaari.sock` (mode 0600) in the
   data folder with NDJSON and a version hello; `apps/cli` adds `jaari chat`, which numbers
   messages and reads `>N text` as a reply. Open prompts live in memory until the gate (Phase 3).
-  Next: 0.17 (release), then 0.18 (`jaari update`).
+  Next: the first release of 0.17, then 0.18 (`jaari update`).
 - Config (0.6, 2026-11-17, ADR-118): one JSONC file, `~/.jaari/config.jsonc`, with a schema version
   and a closed top level, read through `@jaari/core/config`; the daemon refuses an invalid or
   newer config and names each problem. `jaari init` asks for the target, where secrets are kept,
@@ -137,20 +137,25 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   through `openDatabase`, which runs forward-only migration steps (one transaction each), refuses
   a store newer than the binary or owned by another id, and records the owner. Every row has
   `owner_id` and every event line has `ownerId`; existing data migrates on first start.
+- Release (0.17, 2026-11-18, ADR-123): `scripts/pack-release.mjs` makes the one npm package, with
+  the internal packages and a shrinkwrap inside, and `docker/Dockerfile` makes the image from it.
+  `release.yml` stages the npm version for approval with 2FA, and pushes a signed amd64 and arm64
+  image to GHCR. `jaari init` writes `compose.yaml` on a server. CI proves the tarball and, on
+  Linux, the generated Compose file. Nothing is published yet: the first release needs the owner's
+  tag and approvals (`docs/guides/install.md`).
 - Local install commands (0.12, 2026-11-17, ADR-122): `jaari doctor` (levels `ok`, `info`,
   `warn`, `FAIL`; exit 1 only on `FAIL`), `jaari config <step>`, `jaari service install`
   (a launchd user agent; a systemd unit with `systemd-creds`), and `jaari rollback`. The daemon
   snapshots the stores and the config into `data/snapshots` before it migrates a store (last
-  two kept). `openDatabase` makes each store 0600. Not yet run on a real host: loading the
-  launchd agent, and everything on Linux (owner tests). The release (0.17) and `jaari update`
-  (0.18) need the owner's setup on npm and GitHub.
+  two kept). `openDatabase` makes each store 0600. The owner ran the launchd agent and `doctor`
+  on a Mac (2026-11-17); the systemd path has not run on a real Linux host.
 - Laptop host (0.13, 2026-11-17, ADR-057, ADR-121): `createPowerWatch` in `@jaari/core` ticks
   every 30 seconds and emits `power.wake` (a gap over 2 minutes on either clock),
   `power.source`, `power.battery.low` (once per battery cycle), `power.hold.failed`, and
   `network.change`; the daemon writes them to the event log. While a turn runs, the daemon holds
   off idle sleep with `caffeinate` or `systemd-inhibit`, by the `power.stayAwake` choice that
   `jaari init` asks on a laptop. No native helper, no owner notice, and nothing reconnects yet.
-  Not yet tried on a real machine: a lid-close sleep and a charger change (owner test).
+  The owner's Mac test (2026-11-17) saw the lid-close sleep and the unplugging.
 - Prompt-injection floor (0.16, 2026-11-17, ADR-104, ADR-120): `@jaari/core` holds the locked
   safety section (`packages/core/prompts/safety.md`, version 1), `fence()` and `defuse` with the
   fence-escape corpus and a test that removes one `defuse` step at a time, the reply marker

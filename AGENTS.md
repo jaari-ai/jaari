@@ -42,6 +42,7 @@ effect. It is in **Phase 0 (Foundation)**: `@jaari/capabilities`, `@jaari/gate`,
 | `.github/workflows/ci.yml` | Pull request checks: lint, typecheck, tests, licences, docs, DCO, gitleaks (ADR-043) | Yes |
 | `scripts/check-licenses.mjs` | Fails CI on a dependency licence outside the ADR-014 allowlist | Yes |
 | `.github/workflows/release.yml` | Tag-triggered release workflow, actions pinned to commit SHAs; keep in sync with `docs/guides/namespaces.md` | Yes |
+| `scripts/pack-release.mjs`, `scripts/check-release.sh`, `docker/` | The npm tarball, its check, and the image made from it (ADR-123) | Yes |
 | `refs/` | Read-only reference repos, local only (`.git/info/exclude`) | Never |
 
 ## Docs workflow

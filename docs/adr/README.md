@@ -124,3 +124,4 @@
 | [120](120-prompt-injection-floor-as-built.md) | The prompt-injection floor as built: model calls are not scanned, the fence id lasts one run, the canary lives with the conversation, and an unlabelled turn is the owner | Accepted |
 | [121](121-laptop-host-as-built.md) | The laptop host as built: sleep is a clock gap, OS tools instead of a native helper, and detectors that only emit events | Accepted |
 | [122](122-install-in-three-steps.md) | Install and update in three steps: the local commands first, npm and Compose as the Phase 0 channels, keyless signing, and a snapshot before every store migration | Accepted |
+| [123](123-release-as-built.md) | The release as built: one npm tarball with its internal packages inside, an image made from that tarball, staged npm approval, and one Compose secret per credential | Accepted |
