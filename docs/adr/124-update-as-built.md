@@ -76,8 +76,10 @@ ADR-056, ADR-082, ADR-122, ADR-123, [ADR-043](043-project-process.md), and
     whichever is newer). Without the key, an install keeps the kind it has. An older version is
     installed only with `--to <version>`.
 13. **Release notes are the GitHub release.** The release workflow creates it from the titles of
-    the merged pull requests, and `jaari update` prints it. This is the `CHANGELOG.md` of
-    ADR-043: a file in the repository would need the workflow to push to `main`.
+    the merged pull requests, and `jaari update` prints it without control characters. This is
+    the `CHANGELOG.md` of ADR-043: a file in the repository would need the workflow to push to
+    `main`. It is a draft until the owner approves the version on npm, so a rejected version has
+    no public notes.
 14. **Under Compose the image is the version.** `jaari update` refuses where npm is missing and
     points to the guide: change the image tag, verify it with `cosign`, `docker compose up -d`,
     `admin doctor`, and go back with the old tag and `admin rollback`.
@@ -105,7 +107,12 @@ ADR-056, ADR-082, ADR-122, ADR-123, [ADR-043](043-project-process.md), and
 - The first version that can update is the first release after this ADR. `0.1.0-beta.1` has no
   `jaari update`; its owners install the next version with npm once.
 - The verification is tested against the real attestations of `jaari@0.1.0-beta.1`, kept as a
-  fixture. Changing any part of the expected identity makes that test fail.
+  fixture, and the expected identity is tested against the forms a forged one would take
+  (another workflow, a branch, another tag, a fork). A real end-to-end run updated a packed
+  build to the published `0.1.0-beta.1`: verified, installed by name, compared byte for byte,
+  then undone because that version lacks `doctor --no-daemon`.
+- ADR-123 point 2 holds for an install by name only: an install from a file resolves the
+  dependencies again. CI's `check-release.sh` installs from a file and is not pinned.
 - `scripts/check-release.sh` installs two versions, switches between them, and runs both
   commands through the launcher, in CI on every pull request.
 - A daemon under systemd must be stopped by the owner before an update; `jaari update` says so.

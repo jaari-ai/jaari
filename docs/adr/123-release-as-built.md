@@ -65,7 +65,8 @@ them and amends all four.
 
 ## Amendments
 - **ADR-124:** the two commands of the tarball are launchers, and the release workflow creates
-  the GitHub release whose notes `jaari update` shows.
+  the GitHub release whose notes `jaari update` shows, as a draft. The shrinkwrap pins the
+  dependencies only for an install by name, which `jaari update` and the guide use.
 
 ## Consequences
 - GitHub makes a new container package **private**. After the first release the owner makes

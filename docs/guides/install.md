@@ -108,6 +108,8 @@ npm uninstall --global jaari
    `npm stage approve <stage-id>`.
 6. If `npm stage approve` answers `409 ... automated review hasn't finished`, wait a few minutes
    and run it again.
-7. **First release only:** GitHub creates the image as private. Open the package
+7. Publish the release notes, a draft until now: `gh release edit vVERSION --draft=false`. If
+   you rejected the staged version instead, delete the draft: `gh release delete vVERSION`.
+8. **First release only:** GitHub creates the image as private. Open the package
    `jaari` under the `jaari-ai` organization, then Package settings, and change the visibility to
    Public.
