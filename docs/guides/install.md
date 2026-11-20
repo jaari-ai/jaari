@@ -17,8 +17,16 @@ jaari chat
 
 Pre-releases use the `next` tag: `npm install --global --ignore-scripts jaari@next`.
 
-Check where the package came from (run it in a project that depends on `jaari`):
-`npm audit signatures`.
+Check where the package came from. Its provenance names the repository, the workflow, and the commit
+that built it:
+
+~~~bash
+npm view jaari@next dist.attestations.provenance.predicateType   # https://slsa.dev/provenance/v1
+~~~
+
+The npm page of the version shows the same under "Provenance". `npm audit signatures` does not
+work for Jaari: it also looks up the `@jaari/*` packages inside the tarball, which are not
+published on their own (ADR-123), and stops at the first 404.
 
 ## On a Linux server: Compose
 
@@ -46,6 +54,49 @@ cosign verify ghcr.io/jaari-ai/jaari:VERSION \
 
 To roll the data back: `docker compose down`, then `docker compose run --rm admin rollback`.
 
+## Updating
+
+On a laptop (npm install):
+
+~~~bash
+jaari update --check   # what is available, and what changed
+jaari update           # verify, install beside the running version, check, and undo on failure
+~~~
+
+`jaari update` checks that the npm registry signed the package and that this repository's release
+workflow built it from the tag of that version. Under launchd it stops and starts the daemon by
+itself. Otherwise stop the daemon first (`sudo systemctl stop jaari.service`) and start it after.
+To go back later: stop the daemon, then `jaari rollback`. It restores the data and the version
+from before the update.
+
+Betas: set `"update": { "channel": "beta" }` in the config, or pass `--channel beta`.
+
+The first release, `0.1.0-beta.1`, has no `jaari update`: install the next one once with
+`npm install --global --ignore-scripts jaari@next`.
+
+Under Compose the image is the version. Replace `OLD` and `NEW`:
+
+~~~bash
+cd ~/.jaari
+cosign verify ghcr.io/jaari-ai/jaari:NEW \
+  --certificate-identity https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/tags/vNEW \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+sed -i.bak 's#jaari-ai/jaari:OLD#jaari-ai/jaari:NEW#' compose.yaml
+docker compose up -d                 # the new daemon snapshots the data before it migrates a store
+docker compose run --rm admin doctor
+~~~
+
+If `doctor` fails: `docker compose down`, `mv compose.yaml.bak compose.yaml`,
+`docker compose run --rm admin rollback --yes`, `docker compose up -d`.
+
+## Removing Jaari
+
+~~~bash
+jaari uninstall          # the service and the installed versions; the config and the data stay
+jaari uninstall --purge  # also the data, after you type "delete"
+npm uninstall --global jaari
+~~~
+
 ## Cutting a release (the owner)
 
 1. Merge `develop` into `main`.
@@ -55,6 +106,10 @@ To roll the data back: `docker compose down`, then `docker compose run --rm admi
 4. In GitHub Actions, approve the `release` environment.
 5. Approve the staged version on npm with 2FA: `npm stage list jaari`, then
    `npm stage approve <stage-id>`.
-6. **First release only:** GitHub creates the image as private. Open the package
+6. If `npm stage approve` answers `409 ... automated review hasn't finished`, wait a few minutes
+   and run it again.
+7. Publish the release notes, a draft until now: `gh release edit vVERSION --draft=false`. If
+   you rejected the staged version instead, delete the draft: `gh release delete vVERSION`.
+8. **First release only:** GitHub creates the image as private. Open the package
    `jaari` under the `jaari-ai` organization, then Package settings, and change the visibility to
    Public.

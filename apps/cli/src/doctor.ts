@@ -35,7 +35,8 @@ type Level = "ok" | "info" | "warn" | "FAIL";
 const open = (mode: number) => (mode & 0o077) !== 0; // group or others may read, write, or enter
 
 export async function doctor(args: string[], io: Io, deps: DoctorDeps = systemDeps): Promise<number> {
-  const { values } = parseArgs({ args, options: { home: { type: "string" }, config: { type: "string" }, data: { type: "string" } } });
+  // `--no-daemon`: `jaari update` checks a version before the daemon is started again (ADR-124).
+  const { values } = parseArgs({ args, options: { home: { type: "string" }, config: { type: "string" }, data: { type: "string" }, "no-daemon": { type: "boolean", default: false } } });
   const paths = jaariPaths(values.home ? resolve(values.home) : undefined);
   const configPath = values.config ? resolve(values.config) : paths.config;
   const dataDir = values.data ? resolve(values.data) : paths.data;
@@ -97,8 +98,9 @@ export async function doctor(args: string[], io: Io, deps: DoctorDeps = systemDe
 
   const unfinished = await restoring(dataDir);
   if (unfinished) add("FAIL", `a rollback to ${unfinished} did not finish; run \`jaari rollback\` to finish it`);
-  const running = await daemonRunning(socketPath(dataDir));
-  if (running === "running") add("ok", "the daemon answers on its socket");
+  const running = values["no-daemon"] ? "skipped" : await daemonRunning(socketPath(dataDir));
+  if (running === "skipped") add("info", "the daemon was not checked (--no-daemon)");
+  else if (running === "running") add("ok", "the daemon answers on its socket");
   else if (running === "silent") add("FAIL", "something holds the daemon's socket but does not answer; restart the daemon");
   else add("FAIL", "the daemon is not running (start it: jaari-daemon, or `jaari service install`)");
 

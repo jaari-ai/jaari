@@ -1,6 +1,7 @@
 # ADR-123: The release as built: one npm tarball with its internal packages inside, an image made from that tarball, staged npm approval, and one Compose secret per credential
 
 - **Status:** Accepted
+- **Extended by:** [ADR-124](124-update-as-built.md)
 - **Date:** 2026-11-18
 
 Roadmap 0.17 builds the release that [ADR-122](122-install-in-three-steps.md) planned. Building it
@@ -62,6 +63,11 @@ them and amends all four.
 - **A signing key in a secret:** see ADR-122.
 - **Mounting the credentials folder:** the daemon would see keys it was not given.
 
+## Amendments
+- **ADR-124:** the two commands of the tarball are launchers, and the release workflow creates
+  the GitHub release whose notes `jaari update` shows, as a draft. The shrinkwrap pins the
+  dependencies only for an install by name, which `jaari update` and the guide use.
+
 ## Consequences
 - GitHub makes a new container package **private**. After the first release the owner makes
   `jaari` public once, in the package settings (`docs/guides/install.md`).
@@ -72,3 +78,7 @@ them and amends all four.
 - A model server on `localhost` is out of reach from the container; `jaari init` says so.
 - `CHANGELOG.md` (ADR-043) is not generated yet; it moves to roadmap 0.18 with the release notes
   that `jaari update` shows.
+- First release (2026-11-19): `v0.1.0-beta.1`, npm `next` with SLSA provenance, and a signed image
+  that verifies. Two things the docs did not say: a trusted publisher whose fields do not match
+  fails as `E401` (the exchange error is logged only at `verbose`), and `npm audit signatures`
+  stops at the bundled packages, so the guide checks the provenance with `npm view`.

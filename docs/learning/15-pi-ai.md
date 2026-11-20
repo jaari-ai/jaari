@@ -5,7 +5,15 @@ adapters, read to make the calls in ADR-114.
 
 | Ref | Pinned commit |
 |---|---|
-| `refs/pi` | `469d8651b59069d7bd907c7da84597865e114da6` (pi-ai 1.5.0) |
+| `refs/pi` | `469d8651b59069d7bd907c7da84597865e114da6` (pi-ai 1.5.0), when written |
+| `refs/pi` | `1e34c3b4c7df78e716a8f53ad0bcf3a00feceedc` (pi-ai 1.5.2), checked again 2026-11-19 |
+
+The installed pi-ai is 1.5.2, as at the pin. Checked again in 1.5.2 (2026-11-19, after Dependabot PR #43): the refusal mapping and
+`rawStopReason` are unchanged. New in 1.5.1, Anthropic message threads apply only to a call that
+carries a `sessionId` (`cacheSessionId` in `dist/api/anthropic-messages.js`); Jaari passes none, so its
+requests still send the whole conversation. At the new pin the paths above are unchanged; the
+refusal mapping is at `anthropic-messages.ts:1952`, `rawStopReason` at `:1091`, and the thread rule at
+`:843-847`.
 
 ## 1. What pi-ai does
 - A `Models` collection holds providers; each provider owns its catalog, its auth, and its wire

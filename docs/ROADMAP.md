@@ -57,8 +57,8 @@ effect. Entry: none.
 | 0.14 | `ownerId` in the data model; versioned stores that migrate on open and refuse newer or foreign data | 044, 056, 119 | 0.5, 0.6 | Delivered (2026-11-17) |
 | 0.15 | `@jaari/http` core: resolve, check, dial; the address-class table; the `direct` provider; the lint rule against other network clients | 016, 053, 080, 113 | 0.1 | Delivered (2026-11-16) |
 | 0.16 | Prompt-injection floor: the locked safety section, `fence()` and `defuse`, the reply marker filter, and canary and fence-id scanning in the `@jaari/http` core (model calls excepted, ADR-120) and channel send paths | 042, 104, 120 | 0.5, 0.8, 0.15 | Delivered (2026-11-17) |
-| 0.17 | Release: one public npm package `jaari` (daemon and command), a multi-arch image on the GitHub container registry, both signed without a stored key (npm provenance, cosign); staged npm approval; the `compose.yaml` that `jaari init` writes; in `jaari doctor`, a TPM and Linux disk encryption | 010, 056, 079, 094, 122, 123 | 0.12 | Implemented (no version published yet) |
-| 0.18 | `jaari update`: signature and provenance check, snapshot, versions kept side by side with a `current` link, `jaari doctor` after the swap, automatic rollback of data and version; `jaari uninstall`; `CHANGELOG.md` and the release notes (ADR-123) | 043, 056, 082, 122, 123 | 0.17 | Planned |
+| 0.17 | Release: one public npm package `jaari` (daemon and command), a multi-arch image on the GitHub container registry, both signed without a stored key (npm provenance, cosign); staged npm approval; the `compose.yaml` that `jaari init` writes; in `jaari doctor`, a TPM and Linux disk encryption | 010, 056, 079, 094, 122, 123 | 0.12 | Verified (2026-11-19, `v0.1.0-beta.1`: npm `next` with provenance, signed GHCR image for amd64 and arm64, installed and started from npm) |
+| 0.18 | `jaari update`: registry signature and provenance checked offline, a snapshot, versions kept side by side with a `current` link and a launcher, `jaari-daemon --check` and `jaari doctor` after the swap, automatic rollback of data and version; `update.channel`; `jaari uninstall`; release notes from the GitHub release (ADR-124) | 043, 056, 082, 122, 123, 124 | 0.17 | Implemented (an update between two published versions is not shown yet) |
 
 Exit criteria:
 - The tier-1 smoke test boots the daemon on the scripted engine in CI on every pull request,
@@ -86,7 +86,9 @@ Exit criteria:
 - "stop now" aborts the running turn and "pause" survives a restart; a turn stops at 25 steps
   (ADR-031, ADR-087).
 - `jaari update` takes a local snapshot before the swap and rolls back automatically when
-  `jaari doctor` fails after it (ADR-056, ADR-082).
+  `jaari doctor` fails after it (ADR-056, ADR-082, ADR-124).
+- `jaari update` installs nothing from a release whose registry signature or provenance does not
+  verify (ADR-056, ADR-124).
 - A key, token, labelled password, or Luhn-valid card number in an owner message is replaced
   with `[secret removed: <kind>]` before the transcript and the daily log are written, and a
   commit hash is left alone (ADR-081).
@@ -150,7 +152,7 @@ beyond the CLI. Entry: Phase 1 memory and the job engine.
 |---|---|---|---|---|
 | 2.1 | Dials and monitor; repeated-failure and 7-day quiet rules | 008, 031, 087 | 0.5 | Planned |
 | 2.2 | Curiosity from the gap queue | 008 | 1.6, 2.1 | Planned |
-| 2.3 | Quiet hours, notification ledger, digests, delivery; automatic patch installs in quiet hours; 50% and 80% budget lines; routine delivery and reminders, marked late after sleep; the one battery notice per cycle (ADR-121) | 033, 056, 082, 046, 087, 064, 089, 121 | 2.1, 0.18, 1.5 | Planned |
+| 2.3 | Quiet hours, notification ledger, digests, delivery; automatic patch installs in quiet hours, and the notice that an update exists (ADR-124); 50% and 80% budget lines; routine delivery and reminders, marked late after sleep; the one battery notice per cycle (ADR-121) | 033, 056, 082, 046, 087, 064, 089, 121 | 2.1, 0.18, 1.5 | Planned |
 | 2.4 | Prompt versioning | 042 | 0.5 | Planned |
 | 2.5 | Replay harness and golden threads | 041 | 0.2 | Planned |
 | 2.6 | Skills: built-in and owner (third-party is 4.10) (in `@jaari/core`) | 060, 086 | 1.1 | Planned |

@@ -27,8 +27,8 @@ or roadmap item checks it. The first platform-specific package is `computer.use`
 
 | OQ-93 | Refusal categories | Which provider refusal categories count as ADR-011's off-limits ones (impersonation, CAPTCHA solving), how Jaari reads them when pi-ai drops them, and whether other refusals in unpinned roles then move to the next model? | 4 | Read the category through pi-ai's raw-event hook, collect real refusals in the usage log first, then map |
 
-Context: pi-ai 1.5.0 maps Anthropic's `refusal` to `stopReason: "error"` and drops the category
-(learning/15). Until this is decided, every refusal stops and is reported (ADR-114).
+Context: pi-ai 1.5.0, and 1.5.2 as installed, map Anthropic's `refusal` to `stopReason: "error"`
+and drop the category (learning/15). Until this is decided, every refusal stops and is reported (ADR-114).
 
 | OQ-95 | A model reading owner messages | Code reads explicit commands (ADR-116). Should a model also read what code misses: an implicit brake ("ugh, not that one") during a long tool step, when the main model is not listening; whether a message is about the running task (steer) or another topic (follow-up); and plain-language approvals ("sure, go ahead")? If so, which model (the `classify` role, local or cheap), what may its labels trigger, and may it learn from the owner's confirmations? | 4 (item 4.5) | A side check only while a tool step runs, with four answers (stop or wait, this task, another topic, unsure); it may only pause and ask, steer, or queue, never approve or cut the turn; on failure it steers. Approvals stay code-only unless the owner turns on a "natural" level (ADR-037 precedent, Pally). Record each reading and its outcome from the start, so a learned classifier can be tested on real history later. ADR-117: a message that replies to an earlier one already names its target, so such a model would read only messages without a reply target |
 

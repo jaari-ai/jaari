@@ -1,7 +1,7 @@
 # ADR-056: Install, update, migrate: owner-chosen install method, automatic patch updates, migrations when a store opens
 
 - **Status:** Accepted
-- **Extended by:** [ADR-079](079-secret-zero-on-servers.md), [ADR-082](082-phase-split-update-and-catch-up.md), [ADR-094](094-sandbox-under-compose.md), [ADR-105](105-node-26-lts-runtime.md), [ADR-122](122-install-in-three-steps.md), [ADR-123](123-release-as-built.md)
+- **Extended by:** [ADR-079](079-secret-zero-on-servers.md), [ADR-082](082-phase-split-update-and-catch-up.md), [ADR-094](094-sandbox-under-compose.md), [ADR-105](105-node-26-lts-runtime.md), [ADR-122](122-install-in-three-steps.md), [ADR-123](123-release-as-built.md), [ADR-124](124-update-as-built.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -69,6 +69,9 @@ into the sandbox; migrations without a snapshot; letting an older binary open ne
   `jaari uninstall`). `jaari config` revisits one named step.
 - **ADR-123:** the npm package carries the internal packages and a shrinkwrap; the image is made
   from it; `compose.yaml` is written only for a server with `host-credential`.
+- **ADR-124:** `jaari update` checks the registry signature and the provenance offline, installs
+  beside the running version, and is undone when `jaari-daemon --check` or `jaari doctor` fails.
+  The update lease is a stopped daemon in Phase 0. `jaari uninstall` is built.
 
 ## Consequences
 - Roadmap 0.6 (2026-11-17): the config file, its version, and its checks are ADR-118. `jaari init`

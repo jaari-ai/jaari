@@ -58,7 +58,8 @@ for (const name of bundled) {
 mkdirSync(join(stage, "bin"), { recursive: true });
 for (const [program, from] of [["jaari", "cli"], ["jaari-daemon", "daemon"]]) {
   const file = join(stage, "bin", `${program}.js`);
-  writeFileSync(file, `#!/usr/bin/env node\nimport "../node_modules/@jaari/${from}/dist/main.js";\n`);
+  // The launcher starts the version that `jaari update` made active, or this one (ADR-124).
+  writeFileSync(file, `#!/usr/bin/env node\nimport { launch } from "../node_modules/@jaari/cli/dist/launch.js";\nawait launch(${JSON.stringify(from)});\n`);
   chmodSync(file, 0o755);
 }
 for (const file of ["LICENSE", "NOTICE", "README.md"]) cpSync(join(ROOT, file), join(stage, file));

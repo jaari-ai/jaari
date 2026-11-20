@@ -1,7 +1,7 @@
 # ADR-080: Egress core in Phase 0: every outbound call goes through `@jaari/http` from the start
 
 - **Status:** Accepted
-- **Extended by:** [ADR-104](104-prompt-injection-defence-in-depth.md), [ADR-120](120-prompt-injection-floor-as-built.md)
+- **Extended by:** [ADR-104](104-prompt-injection-defence-in-depth.md), [ADR-120](120-prompt-injection-floor-as-built.md), [ADR-124](124-update-as-built.md)
 - **Date:** 2026-11-12
 
 ## Context
@@ -47,6 +47,8 @@ blocking every network call until Phase 4 (no model provider in Phases 0 to 3); 
 - **ADR-104:** the core scans outbound URLs and bodies for the canary and the session fence id, blocks a hit, writes an audit row, and alerts the owner. (Provenance holds on `web.fetch` and `web.search` arguments are decided at the tool call, before the gate, not in the core.)
 
 - **ADR-120:** the scan is an option of `createEgress`; the egress for model calls runs without it, because the prompt holds the canary and the fence id. The scan reads the URL, the headers, and the body before any connection opens.
+- **ADR-124:** `jaari update` reaches npm and GitHub through `@jaari/http`. `@sigstore/tuf` is a
+  dependency for the roots it carries; its network client is never called.
 
 ## Consequences
 - **Roadmap 0.15 (2026-11-16):** built on Node's `fetch` and an undici `Agent` (ADR-113).

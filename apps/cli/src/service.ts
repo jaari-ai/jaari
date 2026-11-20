@@ -10,9 +10,9 @@ import { isSecretName } from "@jaari/secrets";
 import type { Command, Io } from "./io.js";
 
 const USAGE = "usage: jaari service install [--home <dir>] [--daemon <path>] [--user <name>] [--print]";
-const LABEL = "org.jaari.daemon";
-const UNIT = "/etc/systemd/system/jaari.service";
-const CREDSTORE = "/etc/jaari/credstore";
+export const LABEL = "org.jaari.daemon";
+export const UNIT = "/etc/systemd/system/jaari.service";
+export const CREDSTORE = "/etc/jaari/credstore";
 
 // Every effect on the system, so a test hands over fakes and never reaches the real launchd, systemd, or files.
 export type ServiceDeps = {

@@ -367,6 +367,22 @@ jobs:
         run: |
           cosign sign --yes "$IMAGE"
           cosign verify "$IMAGE" --certificate-identity "$IDENTITY" --certificate-oidc-issuer https://token.actions.githubusercontent.com > /dev/null
+
+  notes:
+    needs: [build, publish-npm, publish-image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # creates the GitHub release as a draft; the owner publishes it after the npm approval (ADR-124)
+    steps:
+      - name: Publish the release notes, from the titles of the merged pull requests
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          NPM_TAG: ${{ needs.build.outputs.npm_tag }}
+        run: |
+          flags=(--repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes --title "$TAG" --draft)
+          [ "$NPM_TAG" = latest ] || flags+=(--prerelease)
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create "$TAG" "${flags[@]}"
 ~~~
 
 ### 6.4 First release
@@ -410,7 +426,7 @@ succeeds within 2 days**, so set it up right before the first release
 
 ~~~bash
 npm view jaari --json | jq '.maintainers, .dist.attestations'
-npm audit signatures            # inside a project that depends on @jaari packages
+npm view jaari@next dist.attestations.provenance.predicateType  # not `npm audit signatures`: it stops at the bundled @jaari packages (install guide)
 curl -s https://pypi.org/pypi/jaari/json | jq '.info.version'
 ~~~
 
