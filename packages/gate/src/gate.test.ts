@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { DispatchRequest, LoadedPackage } from "@jaari/capabilities";
+import { CAPABILITIES, CAPABILITY_NAMES, type DispatchRequest, type LoadedPackage } from "@jaari/capabilities";
 import { createGate } from "./gate.js";
 
 const execute = vi.fn(async () => ({ status: "ok" as const }));
@@ -25,6 +25,21 @@ describe("deny-all gate", () => {
     const result = await createGate("d", [pkg]).dispatch(request(capability));
     expect(result).toEqual({ status: "failed", error: `denied by gate: ${capability} is not a read capability` });
     expect(execute).not.toHaveBeenCalled();
+  });
+
+  it("runs every read-class capability and refuses every other one, without starting its executor (ADR-018)", async () => {
+    const gate = createGate("d", [{ ...pkg, manifest: { ...pkg.manifest, provides: CAPABILITY_NAMES } }]);
+    for (const capability of CAPABILITY_NAMES) {
+      execute.mockClear();
+      const result = await gate.dispatch(request(capability));
+      if (CAPABILITIES[capability] === "read") {
+        expect(result, capability).toEqual({ status: "ok" });
+        expect(execute, capability).toHaveBeenCalledOnce();
+      } else {
+        expect(result, capability).toEqual({ status: "failed", error: `denied by gate: ${capability} is not a read capability` });
+        expect(execute, capability).not.toHaveBeenCalled();
+      }
+    }
   });
 
   it("refuses an invalid request before it reaches the host", async () => {

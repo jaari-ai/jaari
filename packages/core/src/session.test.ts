@@ -6,7 +6,7 @@ import { createModels, fauxAssistantMessage, fauxProvider, fauxToolCall, type As
 import { createLlm } from "@jaari/llm";
 import { describe, expect, it, vi } from "vitest";
 import { openEventLog } from "./events.js";
-import type { Limits } from "./limits.js";
+import { LIMITS, type Limits } from "./limits.js";
 import { createSession, createWatchdog, selectCut } from "./session.js";
 import { openStore } from "./store.js";
 
@@ -21,13 +21,14 @@ const hang: FauxResponseStep = (_, options) =>
 // The text of every message the model was sent on one call.
 const seen = (context: { messages: readonly unknown[] }) => JSON.stringify(context.messages).replace(/"timestamp":\d+/g, "");
 
-async function setup(options: { path?: string; limits?: Partial<Limits>; tools?: AgentTool[]; window?: number } = {}) {
+// `chain`: the model ids of the main tier, in fallback order.
+async function setup(options: { path?: string; limits?: Partial<Limits>; tools?: AgentTool[]; window?: number; chain?: string[] } = {}) {
   const dir = await mkdtemp(join(tmpdir(), "jaari-core-"));
-  const faux = fauxProvider({ provider: "faux", models: [{ id: "a", contextWindow: options.window ?? 100_000 }] });
+  const faux = fauxProvider({ provider: "faux", models: (options.chain ?? ["a"]).map((id) => ({ id, contextWindow: options.window ?? 100_000 })) });
   const models = createModels();
   models.setProvider(faux.provider);
   const llm = await createLlm({
-    config: { providers: { faux: { apiKey: "secretRef:llm.faux" } }, tiers: { small: ["faux/a"] }, roles: { main: "small", summarize: "small" } },
+    config: { providers: { faux: { apiKey: "secretRef:llm.faux" } }, tiers: { small: (options.chain ?? ["a"]).map((id) => `faux/${id}`) }, roles: { main: "small", summarize: "small" } },
     fetch: vi.fn() as unknown as typeof globalThis.fetch, secrets: { resolve: async () => "", health: async () => ({ ok: true }) },
     usage: { record: () => {}, close: () => {} }, models,
   });
@@ -82,6 +83,14 @@ describe("the main session", () => {
     expect((await session.send("loop")).status).toBe("steps");
     expect(faux.state.callCount).toBe(3);
     expect(await events()).toContainEqual(expect.objectContaining({ type: "limit", limit: "steps" }));
+  });
+
+  it("stops a turn at 25 steps by default (ADR-031)", async () => {
+    expect(LIMITS.stepsPerTurn).toBe(25);
+    const { faux, session } = await setup({ tools: [echo] });
+    faux.setResponses(Array.from({ length: 30 }, () => callTool("echo")));
+    expect((await session.send("loop")).status).toBe("steps");
+    expect(faux.state.callCount).toBe(25);
   });
 
   it("ends a turn as stalled after two steps whose tool calls all failed", async () => {
@@ -143,6 +152,18 @@ describe("the main session", () => {
     faux.setResponses([refusal, fauxAssistantMessage("never")]);
     expect((await session.send("x")).status).toBe("refusal");
     expect(faux.state.callCount).toBe(1);
+  });
+
+  it("reports a refusal once and keeps the pinned model, even with a fallback in the tier (ADR-085, ADR-019)", async () => {
+    const { faux, session, events } = await setup({ chain: ["a", "b"] });
+    const used: string[] = [];
+    const refusal: AssistantMessage = { ...fauxAssistantMessage("", { stopReason: "error", errorMessage: "no" }), rawStopReason: "refusal" };
+    faux.setResponses([(_, __, ___, model) => (used.push(model.id), refusal), (_, __, ___, model) => (used.push(model.id), fauxAssistantMessage("Fine."))]);
+    // One reply with the refusal status; no extra notice rides on it. The channel turns it into one line (ingress.ts headOf).
+    expect(await session.send("x")).toEqual({ status: "refusal", text: "", seq: expect.any(Number) });
+    expect((await events()).filter((e) => e.type === "turn.end")).toEqual([expect.objectContaining({ status: "refusal" })]);
+    expect((await session.send("y")).text).toBe("Fine.");
+    expect(used).toEqual(["a", "a"]); // no fallback to "b", now or on the next turn
   });
 
   it("compacts the context after a turn and keeps the whole transcript (ADR-065)", async () => {

@@ -41,6 +41,7 @@ describe("the owner config (ADR-056, ADR-118)", () => {
     expect(parseConfig(JSON.stringify({ version: 1, llm, update: { channel: "beta" } })).update?.channel).toBe("beta");
     expect(problems(JSON.stringify({ version: 1, llm, update: { channel: "nightly" } }))[0]).toMatch(/^\/update\/channel/);
     expect(found.some((line) => line.startsWith("/secrets/zero"))).toBe(true); // `env` is development-only, never config (ADR-079)
+    expect(problems(JSON.stringify({ version: 1, llm, secrets: { zero: "file" } }))).toEqual([expect.stringMatching(/^\/secrets\/zero/)]); // `file` is refused too (ADR-018)
   });
 
   it("accepts a section of a feature that is not built yet, but not an unknown one", () => {

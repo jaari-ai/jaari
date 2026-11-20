@@ -241,7 +241,9 @@ describe("tier-1 smoke", () => {
     await first.close();
 
     const second = await boot();
-    await second.session.send("hello");
+    // A model call is not scanned (ADR-120): its prompt carries the canary, and the turn completes.
+    expect(await second.session.send("hello")).toMatchObject({ status: "done", text: "Hello again." });
+    expect(prompts[1]).toContain(canary);
     const again = await terminal(second.socketPath);
     again.say("summarize the page");
     await expect.poll(() => again.messages().length).toBe(1);
@@ -255,6 +257,7 @@ describe("tier-1 smoke", () => {
     expect(log).toContainEqual(expect.objectContaining({ type: "leak.blocked", path: "channel", channel: "cli", marker: "canary" }));
     expect(log).toContainEqual(expect.objectContaining({ type: "leak.blocked", path: "egress", host: "collect.invalid", marker: "fence-id" }));
     expect(log.find((line) => line.type === "daemon.start")).toMatchObject({ safetyVersion: 1, safetySha256: expect.stringMatching(/^[0-9a-f]{64}$/) });
+    expect(log.filter((line) => line.type === "leak.blocked").map((line) => line.path)).toEqual(["channel", "egress"]); // none for the model calls
     expect(JSON.stringify(log)).not.toContain(canary); // the audit rows name the marker, never its value
   });
 
