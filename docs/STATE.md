@@ -5,7 +5,7 @@ Last updated: 2026-11-20
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (126 ADRs, all Accepted)
+## Decided (127 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -22,7 +22,8 @@ The index is [adr/README.md](adr/README.md). By area:
   and laptop rules; the overlay binding in Phase 2 and the node link in Phase 6; the sandbox
   under Compose (ADR-015, 017, 030, 056, 057, 058, 082, 088, 094). The daemon runs on Linux,
   macOS, and Windows; Windows from Phase 0, as a per-user scheduled task with a named pipe and
-  Credential Manager (ADR-125). The update is tested from local builds, not releases (ADR-126).
+  Credential Manager (ADR-125). The update is tested from local builds, not releases (ADR-126). Under Docker the daemon has a health
+  check and starts with `up --wait`; Compose is for Linux hosts (ADR-127).
 - Channels and the owner: CLI, web panel, and Telegram in v1, email as input only; pairing and
   one active channel; typed prompts; the owner panel; one owner per Jaari (ADR-021, 022, 035,
   044, 067); a paired MCP client is not a channel (ADR-101).

@@ -167,3 +167,4 @@ status and exit criteria live there.
 | [124](adr/124-update-as-built.md) | `jaari update` as built: verification without the network, a launcher over side-by-side versions, a check before the daemon comes back, and release notes from GitHub | Accepted |
 | [125](adr/125-windows-host.md) | Windows is a host from Phase 0: Credential Manager, a named pipe, a per-user scheduled task, ACLs, and no shell | Accepted |
 | [126](adr/126-local-update-check.md) | The update is tested from local builds, with a script that never ships; releases are not test runs | Accepted |
+| [127](adr/127-docker-as-a-platform.md) | Docker as a platform: a health check, `up --wait` instead of a pause, a local image check, and Compose on Linux hosts only | Accepted |

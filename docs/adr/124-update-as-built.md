@@ -1,7 +1,7 @@
 # ADR-124: `jaari update` as built: verification without the network, a launcher over side-by-side versions, a check before the daemon comes back, and release notes from GitHub
 
 - **Status:** Accepted
-- **Extended by:** [ADR-125](125-windows-host.md), [ADR-126](126-local-update-check.md)
+- **Extended by:** [ADR-125](125-windows-host.md), [ADR-126](126-local-update-check.md), [ADR-127](127-docker-as-a-platform.md)
 - **Date:** 2026-11-19
 
 Roadmap 0.18 builds the update that [ADR-056](056-install-update-migrate.md),
@@ -107,6 +107,7 @@ ADR-056, ADR-082, ADR-122, ADR-123, [ADR-043](043-project-process.md), and
 ## Amendments
 - **ADR-125:** on Windows the npm layout is `{prefix}\node_modules` with the commands in `{prefix}`, `current` is a junction with an absolute target, and programs run as `node <script>`, never through `.cmd` shims.
 - **ADR-126:** the service name is a parameter (`--service-name`), and the update is tested from local builds by `scripts/check-update.mjs`, not by releases.
+- **ADR-127:** under Compose the image update waits with `docker compose up --wait`; a failed wait is the sign to go back.
 
 ## Consequences
 - The first version that can update is the first release after this ADR. `0.1.0-beta.1` has no

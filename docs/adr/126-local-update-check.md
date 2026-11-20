@@ -1,6 +1,7 @@
 # ADR-126: The update is tested from local builds, with a script that never ships; releases are not test runs
 
 - **Status:** Accepted
+- **Extended by:** [ADR-127](127-docker-as-a-platform.md)
 - **Date:** 2026-11-20
 
 ## Context
@@ -43,7 +44,8 @@ update itself: no stop, snapshot, check, start, doctor, or undo.
 5.  **CI runs it on Linux, macOS, and Windows** on every pull request, without a service, and with
     `--service` where the runner allows it (launchd on macOS; Task Scheduler on Windows; systemd on
     Linux with `sudo`).
-6.  **A release is made when the owner asks for one,** not to test a change. ADR-043 and ADR-123 are
+6.  **Docker too.** `--docker` runs the same check on two locally built images (ADR-127).
+7.  **A release is made when the owner asks for one,** not to test a change. ADR-043 and ADR-123 are
     unchanged for real releases.
 
 ## Alternatives rejected
