@@ -1,6 +1,6 @@
 # Jaari: State
 
-Last updated: 2026-11-19
+Last updated: 2026-11-20
 
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
@@ -144,8 +144,11 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   snapshots, switches the `current` link, runs `jaari-daemon --check` and `jaari doctor`, and
   undoes the version and the data on a failure. The npm commands are launchers that follow
   `current`. `jaari rollback` swaps the version back, `jaari uninstall` removes the app, and the
-  release workflow publishes notes as a GitHub release. Not shown yet: an update between two
-  published versions (`0.1.0-beta.1` has no `jaari update`).
+  release workflow publishes notes as a GitHub release. Released 2026-11-20 as `v0.1.0-beta.2`
+  on npm `next` (SLSA provenance) and `ghcr.io/jaari-ai/jaari:0.1.0-beta.2`, the first version
+  with `jaari update`. Its first notes listed every pull request since #1, because `beta.1` has no
+  GitHub release; they were made again from `v0.1.0-beta.1`. Not shown yet: an update between two
+  published versions (`v0.1.0-beta.3` is for that test, on macOS under launchd).
 - Release (0.17, 2026-11-18, ADR-123): `scripts/pack-release.mjs` makes the one npm package, with
   the internal packages and a shrinkwrap inside, and `docker/Dockerfile` makes the image from it.
   `release.yml` stages the npm version for approval with 2FA, and pushes a signed amd64 and arm64
