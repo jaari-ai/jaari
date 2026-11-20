@@ -58,10 +58,15 @@ async function setup() {
 }
 
 describe("tier-1 smoke", () => {
-  it("reaches a local model server listed in config through the egress check (ADR-080)", async () => {
+  it("reaches a local model server listed in config through the egress check, unscanned (ADR-080, ADR-120)", async () => {
     const { root, credentialsDir } = await setup();
     let hits = 0;
-    const server = createServer((_, res) => (hits++, res.writeHead(500).end("{}")));
+    const bodies: string[] = [];
+    const server = createServer((req, res) => {
+      let body = "";
+      req.on("data", (chunk: Buffer) => (body += chunk.toString("utf8")));
+      req.on("end", () => (hits++, bodies.push(body), res.writeHead(500).end("{}")));
+    });
     await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
     const { port } = server.address() as { port: number };
     const local: DaemonConfig = {
@@ -73,6 +78,13 @@ describe("tier-1 smoke", () => {
     await daemon.close();
     server.close();
     expect(hits).toBeGreaterThan(0);
+    // The real HTTP model call carries the canary in its prompt and is still sent: the model client's egress has no
+    // leak scan. A scanning egress would have blocked it before the server saw anything, and logged `leak.blocked`.
+    const db = new DatabaseSync(join(root, "data", "session.db"), { readOnly: true });
+    const canary = JSON.parse(String(db.prepare("SELECT value FROM state WHERE key = 'canary'").get()!.value)) as string;
+    db.close();
+    expect(bodies[0]).toContain(canary);
+    expect(await readFile(join(root, "data", "events.ndjson"), "utf8")).not.toContain("leak.blocked");
   });
 
   it("makes an existing data folder private (ADR-028)", async () => {
