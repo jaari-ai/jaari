@@ -11,10 +11,11 @@ rm -rf dist/npm
 tarball="$(node scripts/pack-release.mjs "$version")"
 
 npm install --global --prefix "$work/prefix" --ignore-scripts --no-audit --no-fund "$tarball" >/dev/null
-test "$("$work/prefix/bin/jaari" --version)" = "$version"
+# --home: an empty Jaari folder. Without it, the launcher would run the active version of the owner's own ~/.jaari.
+test "$("$work/prefix/bin/jaari" --version --home "$work/none")" = "$version"
 mkdir -m 700 "$work/credentials" "$work/data"
 (umask 077 && echo smoke > "$work/credentials/llm.local")
-"$work/prefix/bin/jaari-daemon" --check --config apps/daemon/smoke.config.json --data "$work/npm-data" --credentials "$work/credentials"
+"$work/prefix/bin/jaari-daemon" --check --home "$work/none" --config apps/daemon/smoke.config.json --data "$work/npm-data" --credentials "$work/credentials"
 
 command -v docker >/dev/null || { echo "docker is not installed: the image was not checked"; exit 0; }
 docker build --quiet --file docker/Dockerfile --tag jaari:check . >/dev/null
