@@ -50,7 +50,8 @@ modes, ADR-028, ADR-079), the version link and the npm layout of `jaari update` 
     (`ExecutionTimeLimit` `PT0S`; the default is three days), start and keep running on battery
     (`DisallowStartIfOnBatteries` and `StopIfGoingOnBatteries` `false`), restart on failure every
     minute, and priority 5, normal (the default, 7, is below normal: the same mistake as the launchd
-    `Background` job). `jaari update` stops and starts it with `schtasks /End` and `/Run`.
+    `Background` job). `jaari update` stops and starts it with `schtasks /End` and `/Run`, and waits
+    for the daemon as under launchd: 120 seconds by default, `--wait <seconds>` to change it.
 6.  **Power.** The stay-awake hold is a child `powershell.exe -NoProfile -NonInteractive` process
     that calls `SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED)` and exits when the
     daemon's process exits, as `caffeinate -w` does. The battery is read with `Get-CimInstance

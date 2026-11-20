@@ -22,9 +22,12 @@ mode of a socket in a folder shared from the host, so the data folder cannot be 
     `timeout` 20 s, `retries` 3, `start_period` 120 s, `start_interval` 2 s. During the first two
     minutes a failed check does not count, and the check runs every 2 seconds, so a fast start is
     healthy at once and a slow one has two minutes, as with launchd (ADR-124 Consequences) and
-    Windows (ADR-125). `start_interval` needs Docker Engine 25 or later.
+    Windows (ADR-125). `start_interval` needs Docker Engine 25 or later. On a slow host the owner
+    raises `start_period` in `compose.yaml`; `jaari init` keeps an edited file and writes the new one
+    beside it (ADR-123, point 6).
 2.  **The guide and `jaari init` say `docker compose up --wait --wait-timeout 180`,** never "wait a
-    few seconds". Then `admin doctor` runs against a daemon that answers. For an image update, a
+    few seconds". `--wait-timeout` is the owner's override, as `--wait` is for `jaari update`; it
+    should be longer than `start_period`. Then `admin doctor` runs against a daemon that answers. For an image update, a
     failed `up --wait` is the sign to go back: the old tag, `admin rollback --yes`, and `up --wait`.
 3.  **Compose is for Linux hosts.** On macOS and Windows, Jaari is installed with npm (ADR-125).
     Docker Desktop on those systems runs the Linux image in a virtual machine, where a bind-mounted
