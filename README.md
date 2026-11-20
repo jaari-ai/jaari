@@ -11,11 +11,12 @@ background, gets to know you at a pace you set, and never takes an external acti
 (send, publish) without an approval bound to the exact action. Payments are reserved, not
 in v1.
 
-> **Status: Phase 0 (Foundation), early software.** The daemon, a chat in the terminal, and the
+> **Status: Phase 0 (Foundation) is done; early software, pre-release.** The daemon, a chat in the terminal, and the
 > install commands work; memory, channels, and tools come in later phases. See
 > [docs/STATE.md](https://github.com/jaari-ai/jaari/blob/main/docs/STATE.md).
 >
-> Install: `npm install --global --ignore-scripts jaari`, then `jaari init`. On a server, see the
+> Install: `npm install --global --ignore-scripts jaari@next`, then `jaari init` (`@next`: only
+> pre-releases exist so far). On a server, see the
 > [install guide](https://github.com/jaari-ai/jaari/blob/main/docs/guides/install.md).
 
 ## Design in brief
@@ -78,9 +79,9 @@ python3 scripts/merge_docs.py --check   # docs links and IDs are consistent
 ~~~
 
 `pnpm install` sets up the workspace, and `pnpm check` runs lint, typecheck, and tests
-(Node 26 or later). No package exists yet. Runtime config will be read from a copy of
-[`jaari.config.example.jsonc`](jaari.config.example.jsonc); the config loader is a
-Phase 0 item.
+(Node 26 or later). The packages are listed in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+`jaari init` writes the runtime config; [`jaari.config.example.jsonc`](jaari.config.example.jsonc)
+shows every key.
 
 ## Changing the docs
 

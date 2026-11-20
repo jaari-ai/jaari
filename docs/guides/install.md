@@ -7,7 +7,7 @@ terminal.
 ## On a laptop: npm
 
 ~~~bash
-npm install --global --ignore-scripts jaari
+npm install --global --ignore-scripts jaari@next
 jaari init
 jaari secret set llm.anthropic   # the line `jaari init` prints, if your model needs a key
 jaari service install            # start at login
@@ -15,7 +15,8 @@ jaari doctor
 jaari chat
 ~~~
 
-Pre-releases use the `next` tag: `npm install --global --ignore-scripts jaari@next`.
+`@next` is the pre-release tag. Only pre-releases exist so far, and `jaari` without it installs an
+empty placeholder. After the first stable release, leave `@next` out.
 
 Check where the package came from. Its provenance names the repository, the workflow, and the commit
 that built it:
