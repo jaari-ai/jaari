@@ -202,9 +202,12 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   set in ADR-043.
 
 ## Now
-Phase 0: Foundation, in progress (0.1 to 0.5, 0.7, and 0.9 to 0.11, 0.15 delivered). Per-item status, needs, and exit criteria are in
+Phase 0: Foundation, gate passed on 2026-11-20: items 0.1 to 0.18 are Verified (0.3, documents, Delivered), and the 19 exit
+criteria pass with the evidence in [audits/phase-0-exit.md](audits/phase-0-exit.md). Not shown yet, and not an exit
+criterion: an install and `jaari update` under systemd, and `jaari rollback` after a real update. Next: Phase 1
+(Memory), from item 1.1. Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
-No open question blocks Phase 0.
+No open question blocks Phase 0 or Phase 1.
 
 ## Scheduled checks that ADRs defer
 - Phase 1: measure the candidate local models (ADR-045).

@@ -132,6 +132,12 @@ describe("ingress: commands (ADR-116)", () => {
     await h.receive("find flights");
     expect(h.texts()).toEqual(["Searched 2 of 5 sites."]);
   });
+
+  it("tells the owner of a model refusal in one message (ADR-085)", async () => {
+    const h = await setup({ replies: [{ status: "refusal", text: "" }] });
+    await h.receive("hello");
+    expect(h.texts()).toEqual(["The model refused to answer."]);
+  });
 });
 
 describe("ingress: reply pointers (ADR-117)", () => {

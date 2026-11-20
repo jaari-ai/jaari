@@ -98,6 +98,7 @@ title still says "sensitive files local-only"; ADR-078 replaced that rule.
 | `docs/learning/README.md` | Learning-log index and format | current |
 | `docs/00-research.md`, `docs/01-merge-plan.md` | Research capture; original merge reasoning | historical; corrected by pointer only |
 | `docs/audits/documentation-reconciliation.md` | Report of the 2026-11-12 audit, with the evidence ledger | dated record |
+| `docs/audits/phase-0-exit.md` | Phase 0 exit audit of 2026-11-20: the check that proves each exit criterion, and the threat model review | dated record |
 
 ## Topics described in more than one file
 

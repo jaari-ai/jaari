@@ -27,7 +27,8 @@ never "closed" by a calendar. This file carries the per-item status;
 
   A written design is never "Implemented", and "Verified" needs a passing check.
 - **Exit criteria** are the pass conditions that the ADRs already state for the phase's items.
-  A phase exits when every item in it is Verified and every exit criterion passes. Review
+  A phase exits when every item in it is Verified (Delivered, for an item that is only documents) and
+  every exit criterion passes. Review
   [THREAT_MODEL.md](THREAT_MODEL.md) at each phase exit (ADR-069).
 - **Placement** marks an item whose ADR states no phase; it is placed where its dependencies
   put it.
@@ -41,22 +42,22 @@ effect. Entry: none.
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 0.1 | Monorepo scaffolding: root `package.json`, lockfile, pnpm supply-chain settings | 002, 043 | none | Delivered (2026-11-16) |
-| 0.2 | CI on every pull request: lint, typecheck, tests, docs check, DCO check, gitleaks, licence check (`.github/workflows/ci.yml`) | 043 | 0.1 | Delivered (2026-11-16) |
+| 0.1 | Monorepo scaffolding: root `package.json`, lockfile, pnpm supply-chain settings | 002, 043 | none | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-16) |
+| 0.2 | CI on every pull request: lint, typecheck, tests, docs check, DCO check, gitleaks, licence check (`.github/workflows/ci.yml`) | 043 | 0.1 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-16) |
 | 0.3 | Project process files: `SECURITY.md`, `CONTRIBUTING.md` | 043 | none | Delivered (2026-11-16) |
-| 0.4 | Namespaces and release: secure the npm and PyPI names, the `python/` pointer package, the release workflow ([guides/namespaces.md](guides/namespaces.md)). Placement | 010 | none | Delivered (2026-11-16; npm `jaari` and org `jaari`, PyPI `jaari` 0.0.0 via trusted publishing) |
-| 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement; pause, emergency stop, steps per turn, stall guard, watchdog, event log; the tier-1 smoke test in CI | 001, 065, 031, 032, 087, 041 | 0.1, 0.7 | Delivered (2026-11-16) |
-| 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship. `jaari secret set <name>` (masked input into `os-keychain` or `host-credential`; the ADR-081 notice points to it) | 017, 019, 056, 088, 118 | 0.1, 0.11 | Delivered (2026-11-17) |
-| 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains, refusal classification, usage log | 011, 019, 085, 032, 087, 114 | 0.1, 0.15 | Delivered (2026-11-16) |
-| 0.8 | `ChannelAdapter` contract and the shared contract suite, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081, 084, 116, 117 | 0.5, 0.9 | Delivered (2026-11-17) |
-| 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084, 108, 109, 110 | 0.1 | Delivered (2026-11-16) |
-| 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Delivered (2026-11-16) |
-| 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079, 112 | 0.1 | Delivered (2026-11-16) |
-| 0.12 | The local commands: `jaari doctor` (checks are added as their features ship), `jaari config <step>`, `jaari service install` (launchd; systemd with encrypted credentials), a snapshot before every store migration, and `jaari rollback` for data (ADR-122; the release is 0.17, `jaari update` 0.18) | 056, 032, 079, 082, 118, 122 | 0.5, 0.6 | Delivered (2026-11-17) |
+| 0.4 | Namespaces and release: secure the npm and PyPI names, the `python/` pointer package, the release workflow ([guides/namespaces.md](guides/namespaces.md)). Placement | 010 | none | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); three releases through trusted publishing, `v0.1.0-beta.1` to `v0.1.0-beta.3`; delivered 2026-11-16; npm `jaari` and org `jaari`, PyPI `jaari` 0.0.0 via trusted publishing) |
+| 0.5 | `apps/daemon` and `@jaari/core`: agent loop on Pi and the persistent main session (session, serial queue, transcript, steering, compaction thresholds). Placement; pause, emergency stop, steps per turn, stall guard, watchdog, event log; the tier-1 smoke test in CI | 001, 065, 031, 032, 087, 041 | 0.1, 0.7 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-16) |
+| 0.6 | Config loader and `jaari init` (asks for the target). Later init steps appear as their features ship. `jaari secret set <name>` (masked input into `os-keychain` or `host-credential`; the ADR-081 notice points to it) | 017, 019, 056, 088, 118 | 0.1, 0.11 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-17) |
+| 0.7 | `@jaari/llm`: providers, tiers, roles, fallback chains, refusal classification, usage log | 011, 019, 085, 032, 087, 114 | 0.1, 0.15 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-16) |
+| 0.8 | `ChannelAdapter` contract and the shared contract suite, typed prompts, the CLI channel, and the ingress secret scrub | 021, 035, 081, 084, 116, 117 | 0.5, 0.9 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-17) |
+| 0.9 | `@jaari/capabilities`: manifest schema (the `jaari` key of `package.json`, with kind sections), built-in loader, daemon–node contract | 015, 018, 071, 084, 108, 109, 110 | 0.1 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-16) |
+| 0.10 | Deny-all `@jaari/gate` stub | 018 | 0.9 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-16) |
+| 0.11 | `@jaari/secrets` resolver with the `os-keychain` and `host-credential` providers | 007, 013, 018, 079, 112 | 0.1 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-16) |
+| 0.12 | The local commands: `jaari doctor` (checks are added as their features ship), `jaari config <step>`, `jaari service install` (launchd; systemd with encrypted credentials), a snapshot before every store migration, and `jaari rollback` for data (ADR-122; the release is 0.17, `jaari update` 0.18) | 056, 032, 079, 082, 118, 122 | 0.5, 0.6 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-17) |
 | 0.13 | Laptop sleep and wake: clock-gap detection, the power assertion for a turn, the battery pause state, and network-change detection, as events (ADR-121; catch-up is 1.4, the battery notice 2.3, OS wake events when a feature needs them) | 057, 082, 121 | 0.5 | Verified (2026-11-17, owner's lid-close test on a Mac: `power.wake` with a 202 s gap) |
-| 0.14 | `ownerId` in the data model; versioned stores that migrate on open and refuse newer or foreign data | 044, 056, 119 | 0.5, 0.6 | Delivered (2026-11-17) |
-| 0.15 | `@jaari/http` core: resolve, check, dial; the address-class table; the `direct` provider; the lint rule against other network clients | 016, 053, 080, 113 | 0.1 | Delivered (2026-11-16) |
-| 0.16 | Prompt-injection floor: the locked safety section, `fence()` and `defuse`, the reply marker filter, and canary and fence-id scanning in the `@jaari/http` core (model calls excepted, ADR-120) and channel send paths | 042, 104, 120 | 0.5, 0.8, 0.15 | Delivered (2026-11-17) |
+| 0.14 | `ownerId` in the data model; versioned stores that migrate on open and refuse newer or foreign data | 044, 056, 119 | 0.5, 0.6 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-17) |
+| 0.15 | `@jaari/http` core: resolve, check, dial; the address-class table; the `direct` provider; the lint rule against other network clients | 016, 053, 080, 113 | 0.1 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-16) |
+| 0.16 | Prompt-injection floor: the locked safety section, `fence()` and `defuse`, the reply marker filter, and canary and fence-id scanning in the `@jaari/http` core (model calls excepted, ADR-120) and channel send paths | 042, 104, 120 | 0.5, 0.8, 0.15 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-17) |
 | 0.17 | Release: one public npm package `jaari` (daemon and command), a multi-arch image on the GitHub container registry, both signed without a stored key (npm provenance, cosign); staged npm approval; the `compose.yaml` that `jaari init` writes; in `jaari doctor`, a TPM and Linux disk encryption | 010, 056, 079, 094, 122, 123 | 0.12 | Verified (2026-11-19, `v0.1.0-beta.1`: npm `next` with provenance, signed GHCR image for amd64 and arm64, installed and started from npm) |
 | 0.18 | `jaari update`: registry signature and provenance checked offline, a snapshot, versions kept side by side with a `current` link and a launcher, `jaari-daemon --check` and `jaari doctor` after the swap, automatic rollback of data and version; `update.channel`; `jaari uninstall`; release notes from the GitHub release (ADR-124) | 043, 056, 082, 122, 123, 124 | 0.17 | Verified (2026-11-20, `v0.1.0-beta.2` to `v0.1.0-beta.3` on macOS under launchd: verified signature and provenance, snapshot, `current` link switched, daemon running, `jaari doctor` healthy; the undo on a failed check shown with a packed build; systemd not shown yet) |
 
@@ -72,8 +73,8 @@ Exit criteria:
 - A store that a start will migrate is copied first, and `jaari rollback` puts it back (ADR-082,
   ADR-122).
 - On a host without a keychain, the daemon starts unattended with `host-credential`, and refuses
-  to start when the credential file is readable by others, in the data directory, or in the
-  backup set (ADR-079).
+  to start when the credential file is readable by others or in the data directory (ADR-079; the
+  backup-set check is a Phase 3 criterion, because backup ships there).
 - `SECURITY.md`, `CONTRIBUTING.md`, the DCO check, gitleaks, the licence check, and the pnpm
   settings are in the repo (ADR-043).
 - Every record carries an `ownerId` (ADR-044).
@@ -100,7 +101,7 @@ Exit criteria:
   with an audit row; a model call is not scanned (ADR-104, ADR-120).
 
 No open question blocks this phase.
-Gate status: not passed.
+Gate status: passed (2026-11-20). Evidence for each criterion: [Phase 0 exit audit](audits/phase-0-exit.md).
 
 ## Phase 1: Memory
 
@@ -216,6 +217,8 @@ Exit criteria:
 - Each degraded state is a tier-1 scenario: provider down, node down, disk full, vault
   unreachable (ADR-059).
 - Budget warnings fire at 50% and 80% (ADR-046).
+- The daemon refuses to start when the `host-credential` file is in the backup set (ADR-079;
+  moved from Phase 0, which has no backup).
 - 1Password plan eligibility and limits are checked on a real account (ADR-050).
 
 No open question blocks this phase.
