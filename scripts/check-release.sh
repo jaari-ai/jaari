@@ -34,8 +34,7 @@ if [ "$(uname)" = Linux ]; then
   printf '%s\n' server host-credential "" local "" smoke http://192.0.2.1:11434/v1 | "$work/prefix/bin/jaari" init --home "$work/home" >/dev/null
   compose=(docker compose --project-directory "$work/home" --file "$work/home/compose.yaml" --project-name jaari-check)
   trap '"${compose[@]}" down --volumes >/dev/null 2>&1 || true; docker rmi --force jaari:check "ghcr.io/jaari-ai/jaari:$version" >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
-  "${compose[@]}" up --detach --quiet-pull
-  for _ in $(seq 30); do [ -S "$work/home/data/jaari.sock" ] && break; sleep 1; done
+  "${compose[@]}" up --wait --wait-timeout 180 --quiet-pull || { "${compose[@]}" logs; exit 1; }
   "${compose[@]}" run --rm admin doctor || { "${compose[@]}" logs; exit 1; }
 fi
 # The image installs every tarball in the folder, so a second pack must leave exactly one.

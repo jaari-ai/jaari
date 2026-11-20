@@ -40,7 +40,7 @@ jaari() { docker run --rm -it --user "$(id -u):$(id -g)" --env HOME=/home/jaari 
 jaari init                       # writes ~/.jaari/compose.yaml
 jaari secret set llm.anthropic   # the line `jaari init` prints, if your model needs a key
 cd ~/.jaari
-docker compose up -d             # wait a few seconds for the daemon
+docker compose up --wait --wait-timeout 180
 docker compose run --rm admin doctor
 docker compose exec jaari jaari chat
 ~~~
@@ -95,12 +95,13 @@ cosign verify ghcr.io/jaari-ai/jaari:NEW \
   --certificate-identity https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/tags/vNEW \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 sed -i.bak 's#jaari-ai/jaari:OLD#jaari-ai/jaari:NEW#' compose.yaml
-docker compose up -d                 # the new daemon snapshots the data before it migrates a store
+docker compose up --wait --wait-timeout 180   # the new daemon snapshots the data before it migrates a store
 docker compose run --rm admin doctor
 ~~~
 
-If `doctor` fails: `docker compose down`, `mv compose.yaml.bak compose.yaml`,
-`docker compose run --rm admin rollback --yes`, `docker compose up -d`.
+If `up --wait` or `doctor` fails, go back: `docker compose down`, `mv compose.yaml.bak compose.yaml`,
+`docker compose run --rm admin rollback --yes`, `docker compose up --wait --wait-timeout 180`.
+On a slow host, raise `--wait-timeout`, and `start_period` in `compose.yaml` (`jaari init` keeps an edited file).
 
 ## Removing Jaari
 

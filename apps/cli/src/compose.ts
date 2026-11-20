@@ -25,13 +25,20 @@ ${names.length > 0 ? "" : `      - /run/secrets:size=1m,mode=0700,uid=${uid},gid
     pids_limit: 256
     mem_limit: 2g
 ${names.length > 0 ? `    secrets:\n${list(names, "      ")}` : ""}`;
-  return `# Written by \`jaari init\`. Start: docker compose up -d. Talk: docker compose exec jaari jaari chat
+  return `# Written by \`jaari init\`. Start: docker compose up --wait. Talk: docker compose exec jaari jaari chat
 # Admin commands, with the daemon's limits and no network: docker compose run --rm admin doctor
 services:
   jaari:
 ${common}    command: ["jaari-daemon"]
     init: true
     restart: unless-stopped
+    healthcheck: # ADR-127: \`up --wait\` waits until the daemon answers; a slow start has 2 minutes
+      test: ["CMD", "jaari", "doctor"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 120s
+      start_interval: 2s
     volumes:
       - ./config.jsonc:/home/jaari/.jaari/config.jsonc:ro
       - ./data:/home/jaari/.jaari/data
