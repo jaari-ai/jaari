@@ -40,9 +40,9 @@ modes, ADR-028, ADR-079), the version link and the npm layout of `jaari update` 
     not a file, so no mode guards it. The default security of a named pipe gives full control to the
     creating account, `SYSTEM`, and `Administrators`, and read access to everyone. The daemon
     writes nothing to a client before it has read the client's hello, so a client that can only read
-    receives nothing, and it cannot write a message. This is checked by a test on Windows in CI; if
-    the test shows that another account can write, the pipe gets an explicit access list before
-    Windows ships.
+    receives nothing, and it cannot write a message. A test checks this on a Windows machine of the
+    owner's; if the test shows that another account can write, the pipe gets an explicit access list
+    before Windows ships.
 5.  **The service is a scheduled task for the owner's account,** `\Jaari\daemon`, made with
     `schtasks /Create /XML`, with no administrator rights and no stored password: it starts at the
     owner's log-on and runs only while the owner is logged on, like the launchd agent. Its settings
@@ -69,8 +69,9 @@ modes, ADR-028, ADR-079), the version link and the npm layout of `jaari update` 
 9.  **`jaari doctor` on Windows** checks the folder ACL (FAIL on another account), the scheduled task
     and its settings, the pipe, and BitLocker on the data folder's drive, read without administrator
     rights through the Shell's `System.Volume.BitLockerProtection` property (a warning when off).
-10. **CI runs the tests on `ubuntu-latest`, `macos-latest`, and `windows-latest`,** and the release
-    check (`scripts/check-release.sh`) on all three; Docker runs only on Linux.
+10. **The tests and `scripts/check-update.mjs` run on a Windows machine of the owner's** before 0.19
+    is Verified. CI keeps its one `ubuntu-latest` runner. A Windows runner waits for the milestone
+    that the owner names; there is no new CI job until then.
 11. **Not in this item:** what later features need on Windows (screen capture and the permission
     matrix of ADR-057, computer use, the node). Each ADR that adds a host-facing feature states its
     Windows behaviour from now on.

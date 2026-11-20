@@ -17,9 +17,10 @@ packed tarball and switches between two versions through the launcher, but it do
 update itself: no stop, snapshot, check, start, doctor, or undo.
 
 ## Decision
-1.  **A script, `scripts/check-update.mjs`, runs the real update between two local builds.** It packs
-    two versions of the working tree with `scripts/pack-release.mjs` (`0.0.0-check.1` and
-    `0.0.0-check.2`), installs the first into a temporary prefix as an owner would, writes a config
+1.  **A script, `scripts/check-update.mjs`, runs the real update between local builds.** It packs
+    three versions of the working tree with `scripts/pack-release.mjs` (`0.0.0-check.1`, `.2`, and
+    `.3`): the update from `.1` to `.2` must pass, and `.3` is the build whose `jaari doctor` fails
+    (point 4). It installs the first into a temporary prefix as an owner would, writes a config
     in a temporary Jaari folder, and runs the `update` function of the installed first version,
     because an owner's update runs the code of the version that is active. Only three things are
     replaced, through the existing `UpdateDeps` injection:
@@ -32,18 +33,18 @@ update itself: no stop, snapshot, check, start, doctor, or undo.
 2.  **The script ships nowhere.** It is not in the npm tarball (`files` in the packed `package.json`)
     and not in the image. No option, environment variable, or config key of the shipped programs
     turns verification off.
-3.  **Two modes.** Without a service, the daemon is started and stopped by the script, which runs on
-    every platform and in CI. With `--service`, it installs a real service under a test name
-    (`org.jaari.daemon.check` under launchd, `\Jaari\daemon-check` in Task Scheduler,
-    `jaari-check.service` under systemd), so it never touches the owner's own daemon, runs the
-    update through it, and removes it at the end. The service name becomes a parameter of
-    `jaari service install`, `jaari update`, and `jaari uninstall` (`--service-name`); its default
-    is the current name.
-4.  **It also runs the failures:** a second build whose `jaari doctor` fails, which must be undone
-    with the data from before; and a start delayed past the old 15 seconds, which must pass.
-5.  **CI runs it on Linux, macOS, and Windows** on every pull request, without a service, and with
-    `--service` where the runner allows it (launchd on macOS; Task Scheduler on Windows; systemd on
-    Linux with `sudo`).
+3.  **Three modes.** Without a service, the script starts and stops the daemon itself, on Linux and
+    macOS. With `--service`, on macOS only, it installs a real launchd agent named `jaari-check`, so
+    it never touches the owner's own daemon, runs the update through it, and removes it at the end.
+    On Linux the update does not drive systemd (ADR-124, point 10), so there is no service to test.
+    Windows and Task Scheduler come with roadmap 0.19. With `--docker`, it runs the image check of
+    ADR-127. The service name becomes a parameter of `jaari service install`, `jaari update`, and
+    `jaari uninstall` (`--service-name`); its default is the current name.
+4.  **It also runs the failures:** the third build, whose `jaari doctor` fails, which must be undone
+    with the data from before; and, under `--service`, a start delayed past the old 15 seconds,
+    which must pass.
+5.  **It runs on the owner's machine and its local Docker Desktop,** not in CI. CI jobs for it wait
+    for the milestone that the owner names.
 6.  **Docker too.** `--docker` runs the same check on two locally built images (ADR-127).
 7.  **A release is made when the owner asks for one,** not to test a change. ADR-043 and ADR-123 are
     unchanged for real releases.
@@ -62,4 +63,6 @@ update itself: no stop, snapshot, check, start, doctor, or undo.
 - The script tests an install from a file, which resolves the dependencies again, while an owner's
   update installs by name with the shrinkwrap (ADR-124, point 5). The dependency pins are therefore
   shown only by a real release.
+- `--service-name` with a name other than `jaari` requires `--home`, so a test never acts on the
+  owner's own Jaari folder.
 - Amends ADR-124 (the service name is a parameter; testing the update no longer needs a release).

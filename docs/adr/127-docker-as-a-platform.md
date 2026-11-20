@@ -34,11 +34,11 @@ mode of a socket in a folder shared from the host, so the data folder cannot be 
     data folder cannot hold the chat socket with its mode. It serves the local image check below,
     with the data in a volume inside the virtual machine, and it is not a supported install.
 4.  **The local check covers the image (ADR-126).** `scripts/check-update.mjs --docker` builds two
-    local images from the two packed tarballs (`jaari:0.0.0-check.1` and `jaari:0.0.0-check.2`; no
+    local images from two packed tarballs (`jaari:0.0.0-check.1` and `jaari:0.0.0-check.2`; no
     registry, no push), starts the first with the file that `jaari init` writes, runs the image
     update as the guide does (change the tag, `up --wait`, `admin doctor`), then the way back with
-    the old tag and `admin rollback`. It runs where Docker runs: in CI on Linux, and on the owner's
-    Mac or Windows machine with Docker Desktop.
+    the old tag and `admin rollback`. It runs on the owner's machine, on Linux Docker and on Docker
+    Desktop, where the data folder is a volume inside Docker's Linux machine. There is no CI job.
 5.  **Every ADR that adds a host-facing feature states its behaviour on Linux, macOS, Windows, and
     Docker.**
 
