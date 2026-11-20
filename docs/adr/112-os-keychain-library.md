@@ -1,6 +1,7 @@
 # ADR-112: The `os-keychain` provider reads the keychain through `@napi-rs/keyring`
 
 - **Status:** Accepted
+- **Extended by:** [ADR-125](125-windows-host.md)
 - **Date:** 2026-11-16
 
 ## Context
@@ -24,6 +25,9 @@ provider needs either a library or the platform's own command-line tools.
   `secret-tool lookup` on Linux) through `execFile`: no dependency and no native code, but one
   branch per platform, `libsecret-tools` as an extra host package, and no Windows support.
 - **`keytar`:** archived by its maintainers.
+
+## Amendments
+- **ADR-125:** the Windows backend (Credential Manager) is used; `host-credential` is refused on Windows.
 
 ## Consequences
 - Native code from a third party is in the supply chain. Dependabot proposes updates; each one

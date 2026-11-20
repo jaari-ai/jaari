@@ -1,6 +1,7 @@
 # ADR-121: The laptop host as built: sleep is a clock gap, OS tools instead of a native helper, and detectors that only emit events
 
 - **Status:** Accepted
+- **Extended by:** [ADR-125](125-windows-host.md)
 - **Date:** 2026-11-17
 
 Roadmap 0.13 built the Phase 0 part of [ADR-057](057-laptop-host-and-node.md), as split by
@@ -62,6 +63,9 @@ decided. This ADR decides what 0.13 ships. It amends ADR-057 and ADR-082.
   would switch sleep detection off silently.
 - **Retrying a failed hold on every turn:** a missing tool stays missing, and each try starts
   a process.
+
+## Amendments
+- **ADR-125:** on Windows, the stay-awake hold is a PowerShell child that calls `SetThreadExecutionState`, and the battery is read with `Get-CimInstance Win32_Battery`.
 
 ## Consequences
 - The sleep-aware watchdog of the session (ADR-031) keeps its own wall-clock check; it runs

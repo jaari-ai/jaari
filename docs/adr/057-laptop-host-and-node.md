@@ -1,7 +1,7 @@
 # ADR-057: Laptop as host and node: sleep detection and capped catch-up, power and battery rules, a published macOS permission matrix
 
 - **Status:** Accepted
-- **Extended by:** [ADR-082](082-phase-split-update-and-catch-up.md), [ADR-121](121-laptop-host-as-built.md)
+- **Extended by:** [ADR-082](082-phase-split-update-and-catch-up.md), [ADR-121](121-laptop-host-as-built.md), [ADR-125](125-windows-host.md)
 - **Date:** 2026-11-11
 
 ## Decision
@@ -66,6 +66,7 @@ permissions only when a capability fails.
   macOS helper and no logind listener; the power assertion uses `caffeinate` and
   `systemd-inhibit` and covers a turn until the job engine exists. The battery notice waits for
   the notification ledger (2.3), and reconnects wait for something to reconnect.
+- **ADR-125:** Windows is a host from Phase 0, not later; its power and battery tools, service, and doctor checks are set there. The Windows permission matrix still comes with the features that need it.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
