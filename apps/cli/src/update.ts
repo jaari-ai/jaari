@@ -12,7 +12,7 @@ import { ConfigError, jaariPaths, loadConfig } from "@jaari/core/config";
 import { createEgress } from "@jaari/http";
 import type { Io } from "./io.js";
 import { createPrompter, InputEnded } from "./prompt.js";
-import { SERVICE_NAME, serviceOf } from "./service.js";
+import { serviceFromArgs } from "./service.js";
 import { daemonRunning } from "./socket.js";
 import { PACKAGE, VERSION_FORMAT, VerifyError, verifyRelease, type Attestation, type Dist } from "./verify.js";
 import { VERSION } from "./version.js";
@@ -24,6 +24,15 @@ const MAX_TARBALL_BYTES = 50_000_000;
 const USAGE = "usage: jaari update [--home <dir>] [--channel stable|beta] [--to <version>] [--wait <seconds>] [--service-name <name>] [--check] [--yes]";
 // How long a started daemon has to answer before the update counts it as failed. A busy machine can need half a minute.
 const WAIT_SECONDS = 120;
+const POLL_MS = 500;
+
+// `--wait`: whole seconds from 1 to 3600, or undefined for anything else (`Number` alone would take "", "1e3", "0x10").
+function waitOf(text: string | undefined): number | undefined {
+  if (text === undefined) return WAIT_SECONDS;
+  if (!/^\d{1,4}$/.test(text)) return undefined;
+  const seconds = Number(text);
+  return seconds >= 1 && seconds <= 3600 ? seconds : undefined;
+}
 
 // Everything outside the Jaari folder, so a test runs the whole flow with fakes: no network, no npm, no launchd.
 export type UpdateDeps = {
@@ -74,11 +83,11 @@ export async function update(args: string[], io: Io, deps: UpdateDeps = systemDe
   }
   if ((values.channel !== undefined && values.channel !== "stable" && values.channel !== "beta") || (values.to !== undefined && !VERSION_FORMAT.test(values.to))) return (say(USAGE), 2);
   // Whole seconds, 1 to 3600: an hour is more than any start needs, and a typo such as 1200000 is refused.
-  const waitSeconds = values.wait === undefined ? WAIT_SECONDS : /^\d{1,4}$/.test(values.wait) ? Number(values.wait) : NaN;
-  if (!(waitSeconds >= 1 && waitSeconds <= 3600)) return (say(`jaari: --wait takes whole seconds, 1 to 3600\n${USAGE}`), 2);
-  const named = values["service-name"] ?? "jaari";
-  if (!SERVICE_NAME.test(named)) return (say(`jaari: --service-name is jaari or jaari-<letters and digits>, not ${JSON.stringify(named)}`), 2);
-  const { label } = serviceOf(named);
+  const waitSeconds = waitOf(values.wait);
+  if (waitSeconds === undefined) return (say(`jaari: --wait takes whole seconds, 1 to 3600\n${USAGE}`), 2);
+  const svc = serviceFromArgs(values["service-name"], values.home);
+  if (typeof svc === "string") return (say(`jaari: ${svc}`), 2);
+  const { label } = svc;
   // A checkout has no release to compare with, and its programs are not the installed ones.
   if (deps.version === "0.0.0") return (say("jaari: this is a development checkout; update it with git"), 1);
 
@@ -126,7 +135,7 @@ export async function update(args: string[], io: Io, deps: UpdateDeps = systemDe
   const launchd = deps.platform === "darwin" && (await deps.exists(agent));
   const socket = socketPath(paths.data);
   if (!launchd && (await deps.daemonRunning(socket)) !== "stopped") {
-    return (say(`jaari: stop the daemon first, then run \`jaari update\` again${deps.platform === "linux" ? ` (sudo systemctl stop ${named}.service)` : ""}`), 1);
+    return (say(`jaari: stop the daemon first, then run \`jaari update\` again${deps.platform === "linux" ? ` (sudo systemctl stop ${svc.name}.service)` : ""}`), 1);
   }
   if (!values.yes) {
     if (!io.isTTY) return (say("jaari: update changes the installed version; run it in a terminal, or pass --yes"), 2);
@@ -221,16 +230,17 @@ async function install({ deps, say, paths, target, dist, running, launchd, agent
     return (await deps.daemonRunning(socket)) === "stopped";
   };
   const start = async () => (launchd ? (await launchctl("bootstrap", `gui/${deps.uid}`, agent)).code === 0 : true);
-  // A busy machine can take half a minute to start the daemon: a slow start is not a failed one. `--wait` sets the limit.
+  // A busy machine can take half a minute to start the daemon: a slow start is not a failed one. `--wait` sets the limit;
+  // after 5 s the owner is told, once, that the update is waiting.
   let told = false;
   const answers = async () => {
-    for (let tries = 0; tries < waitSeconds * 2; tries++) {
+    for (let waited = 0; waited < waitSeconds * 1000; waited += POLL_MS) {
       if ((await deps.daemonRunning(socket)) === "running") return true;
-      if (tries === 10 && !told) {
+      if (waited >= 5000 && !told) {
         told = true;
         say(`Waiting for the daemon to start (up to ${waitSeconds} s; \`--wait <seconds>\` changes it)…`);
       }
-      await deps.sleep(500);
+      await deps.sleep(POLL_MS);
     }
     return false;
   };
@@ -255,9 +265,10 @@ async function install({ deps, say, paths, target, dist, running, launchd, agent
     if (switched) await swapBack(paths.home);
     if (snapshot) await restoreSnapshot(place, snapshot);
     await rm(staging, { recursive: true, force: true });
-    const started = await start();
-    const back = launchd && started && (await answers());
-    say(`Back on Jaari ${running}, with the data from before the update.${launchd ? (back ? " The daemon runs again." : started ? " The daemon has not answered yet; check it with `jaari doctor`." : " Start the daemon: jaari service install") : " Start the daemon again."}`);
+    let after = "Start the daemon again."; // without launchd, the owner starts it (ADR-124, point 10)
+    if (launchd && !(await start())) after = "Start the daemon: jaari service install";
+    else if (launchd) after = (await answers()) ? "The daemon runs again." : "The daemon has not answered yet; check it with `jaari doctor`.";
+    say(`Back on Jaari ${running}, with the data from before the update. ${after}`);
     return 1;
   };
   try {

@@ -264,14 +264,19 @@ describe("jaari service install, common", () => {
     expect((await jaari(install("--service-name", "jaari-check"), user.deps)).text).toContain("--service-name jaari-check");
   });
 
-  it("refuses a --service-name that is not jaari or jaari-<letters and digits>, before anything changes", async () => {
+  it("refuses a --service-name that is not jaari or jaari-<lowercase letters and digits>, or one without --home, before anything changes", async () => {
     for (const name of ["other", "jaari-", "jaari-Check", "jaari-../x", "jaari-a.b", `jaari-${"x".repeat(21)}`]) {
       const { deps } = fakes();
       const { code, text } = await jaari(install("--service-name", name), deps);
       expect(code, name).toBe(2);
-      expect(text, name).toContain("--service-name is jaari or jaari-<letters and digits>");
+      expect(text, name).toContain("--service-name is jaari or jaari-<lowercase letters and digits>");
       nothingChanged(deps);
     }
+    const { deps } = fakes();
+    const { code, text } = await jaari(["install", "--service-name", "jaari-check"], deps);
+    expect(code).toBe(2);
+    expect(text).toContain("needs --home");
+    nothingChanged(deps);
   });
 
   it("prints usage for anything but install, and refuses other platforms", async () => {

@@ -2,7 +2,9 @@ import { lstat, mkdir, mkdtemp, realpath, rm, symlink, writeFile } from "node:fs
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CREDSTORE, UNIT } from "./service.js";
+import { serviceOf } from "./service.js";
+
+const { unit: UNIT, credstore: CREDSTORE } = serviceOf();
 import { terminal } from "./testing.js";
 import { uninstall, type UninstallDeps } from "./uninstall.js";
 
@@ -76,7 +78,7 @@ describe("jaari uninstall", () => {
     const check = join(user, "Library", "LaunchAgents", "org.jaari.daemon.check.plist");
     await writeFile(check, "<plist/>");
     const deps = fakes();
-    expect((await jaari(["--service-name", "jaari-check"], deps)).code).toBe(0);
+    expect((await jaari(["--home", home, "--service-name", "jaari-check"], deps)).code).toBe(0);
     expect(deps.exec).toHaveBeenCalledWith("launchctl", ["bootout", "gui/501/org.jaari.daemon.check"]);
     expect(deps.exec).not.toHaveBeenCalledWith("launchctl", ["bootout", "gui/501/org.jaari.daemon"]);
     expect(await there(check)).toBe(false);
@@ -84,7 +86,13 @@ describe("jaari uninstall", () => {
 
     const linux = fakes({ platform: "linux" }, ["/etc/systemd/system/jaari-check.service"]);
     expect((await jaari(["--home", home, "--yes", "--service-name", "jaari-check"], linux)).text).toContain("sudo systemctl disable --now jaari-check.service && sudo rm /etc/systemd/system/jaari-check.service");
-    expect((await jaari(["--service-name", "../x"], fakes())).code).toBe(2);
+    expect((await jaari(["--home", home, "--service-name", "../x"], fakes())).code).toBe(2);
+    // Without --home it would act on the owner's own ~/.jaari: refused before anything is removed.
+    const bare = fakes();
+    const refused = await jaari(["--service-name", "jaari-check"], bare);
+    expect(refused.code).toBe(2);
+    expect(refused.text).toContain("--service-name jaari-check needs --home");
+    expect(bare.remove).not.toHaveBeenCalled();
   });
 
   it("on Linux prints the sudo commands and does not run systemctl", async () => {

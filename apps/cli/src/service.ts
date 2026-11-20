@@ -12,7 +12,6 @@ import type { Command, Io } from "./io.js";
 const USAGE = "usage: jaari service install [--home <dir>] [--daemon <path>] [--user <name>] [--service-name <name>] [--print]";
 // The service's name (ADR-126): `jaari`, or a second one beside it, `jaari-<suffix>`, which `scripts/check-update.mjs`
 // installs as `jaari-check` so that a test never touches the owner's own daemon. Each platform's names come from it.
-export const SERVICE_NAME = /^jaari(-[a-z0-9]{1,20})?$/;
 export const serviceOf = (name = "jaari") => ({
   name,
   label: name === "jaari" ? "org.jaari.daemon" : `org.jaari.daemon.${name.slice("jaari-".length)}`, // launchd
@@ -20,9 +19,15 @@ export const serviceOf = (name = "jaari") => ({
   credstore: `/etc/${name}/credstore`,
   log: `${name}-daemon.log`, // macOS, in ~/Library/Logs
 });
-export const LABEL = serviceOf().label;
-export const UNIT = serviceOf().unit;
-export const CREDSTORE = serviceOf().credstore;
+
+// The `--service-name` of `service install`, `update`, and `uninstall`: the names, or why the value is refused. A second
+// name needs `--home`, so a test never acts on the owner's own Jaari folder.
+export function serviceFromArgs(name: string | undefined, home: string | undefined): ReturnType<typeof serviceOf> | string {
+  if (name === undefined || name === "jaari") return serviceOf();
+  if (!/^jaari-[a-z0-9]{1,20}$/.test(name)) return `--service-name is jaari or jaari-<lowercase letters and digits>, not ${JSON.stringify(name)}`;
+  if (home === undefined) return `--service-name ${name} needs --home, so that it never acts on your own Jaari folder`;
+  return serviceOf(name);
+}
 
 // Every effect on the system, so a test hands over fakes and never reaches the real launchd, systemd, or files.
 export type ServiceDeps = {
@@ -86,9 +91,8 @@ export async function service(args: string[], io: Io, deps: ServiceDeps = system
   }
   const { values, positionals } = parsed;
   if (positionals.length !== 1 || positionals[0] !== "install") return (say(USAGE), 2);
-  const named = values["service-name"] ?? "jaari";
-  if (!SERVICE_NAME.test(named)) return (say(`jaari: --service-name is jaari or jaari-<letters and digits>, not ${JSON.stringify(named)}`), 2);
-  const svc = serviceOf(named);
+  const svc = serviceFromArgs(values["service-name"], values.home);
+  if (typeof svc === "string") return (say(`jaari: ${svc}`), 2);
   if (deps.platform !== "darwin" && deps.platform !== "linux") return (say(`jaari: service install is not supported on ${deps.platform}`), 1);
 
   const paths = jaariPaths(values.home ? resolve(values.home) : join(deps.homedir, ".jaari")); // sudo's own home is not the owner's
@@ -166,7 +170,7 @@ ${command.map((a) => `    <string>${xml(a)}</string>`).join("\n")}
   if (zero === "os-keychain") return (say('jaari: a system service has no login keychain; set "secrets": { "zero": "host-credential" } (ADR-079)'), 1);
   const user = values.user ?? (values.print ? deps.user : undefined);
   if (deps.uid !== 0 && !values.print) {
-    const again = [node, deps.cliPath, "service", "install", "--home", paths.home, "--daemon", daemon, "--user", values.user ?? deps.user, ...(named === "jaari" ? [] : ["--service-name", named])];
+    const again = [node, deps.cliPath, "service", "install", "--home", paths.home, "--daemon", daemon, "--user", values.user ?? deps.user, ...(svc.name === "jaari" ? [] : ["--service-name", svc.name])];
     return (say(`jaari: a system service needs root; run it with sudo: sudo ${again.map(shell).join(" ")}`), 1);
   }
   if (!user) return (say("jaari: pass --user <name>: the account the daemon runs as"), 1);
@@ -214,19 +218,19 @@ WantedBy=multi-user.target
   }
   await deps.writeFile(svc.unit, text, 0o644);
   say(`Wrote ${svc.unit}.`);
-  for (const step of [["daemon-reload"], ["enable", "--now", `${named}.service`]]) {
+  for (const step of [["daemon-reload"], ["enable", "--now", `${svc.name}.service`]]) {
     const done = await deps.exec("systemctl", step);
     if (done.code !== 0) return (say(`jaari: systemctl ${step.join(" ")} failed: ${done.stderr.trim()}`), 1);
   }
-  say(`Enabled and started ${named}.service; it starts at boot and restarts when it fails.`);
+  say(`Enabled and started ${svc.name}.service; it starts at boot and restarts when it fails.`);
   if (names.length > 0) {
     say(encrypted
       ? `The plain files in ${dir} are still there: delete them after the first good start.`
       : `systemd-creds is not available: the files in ${dir} stay plain; make them readable by root only.`);
   }
   say("Run `jaari service install` again after every `jaari secret set`.");
-  say(`Check: systemctl status ${named}.service   Log: journalctl -u ${named}.service`);
-  say(`Remove: sudo systemctl disable --now ${named}.service && sudo rm ${svc.unit}${encrypted ? ` && sudo rm -r ${svc.credstore}` : ""}`);
+  say(`Check: systemctl status ${svc.name}.service   Log: journalctl -u ${svc.name}.service`);
+  say(`Remove: sudo systemctl disable --now ${svc.name}.service && sudo rm ${svc.unit}${encrypted ? ` && sudo rm -r ${svc.credstore}` : ""}`);
   return 0;
 }
 

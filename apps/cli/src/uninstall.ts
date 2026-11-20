@@ -8,7 +8,7 @@ import { socketPath } from "@jaari/channels";
 import { jaariPaths } from "@jaari/core/config";
 import type { Command, Io } from "./io.js";
 import { createPrompter, InputEnded } from "./prompt.js";
-import { SERVICE_NAME, serviceOf, systemDeps as serviceDeps } from "./service.js";
+import { serviceFromArgs, systemDeps as serviceDeps } from "./service.js";
 import { daemonRunning } from "./socket.js";
 
 const USAGE = "usage: jaari uninstall [--home <dir>] [--service-name <name>] [--purge] [--yes]";
@@ -43,9 +43,8 @@ export async function uninstall(args: string[], io: Io, deps: UninstallDeps = sy
     return (say(USAGE), 2);
   }
   const { values } = parsed;
-  const named = values["service-name"] ?? "jaari";
-  if (!SERVICE_NAME.test(named)) return (say(`jaari: --service-name is jaari or jaari-<letters and digits>, not ${JSON.stringify(named)}`), 2);
-  const svc = serviceOf(named);
+  const svc = serviceFromArgs(values["service-name"], values.home);
+  if (typeof svc === "string") return (say(`jaari: ${svc}`), 2);
   const paths = jaariPaths(values.home ? resolve(values.home) : join(deps.homedir, ".jaari"));
   const log = join(deps.homedir, "Library", "Logs", svc.log);
 
@@ -72,7 +71,7 @@ export async function uninstall(args: string[], io: Io, deps: UninstallDeps = sy
   }
   if (deps.platform === "linux" && (await deps.exists(svc.unit))) {
     say("The system service needs root to remove. Run:");
-    say(`  sudo systemctl disable --now ${named}.service && sudo rm ${svc.unit}`);
+    say(`  sudo systemctl disable --now ${svc.name}.service && sudo rm ${svc.unit}`);
     if (await deps.exists(svc.credstore)) say(`  sudo rm -r ${svc.credstore}`);
     removed = true;
   }
