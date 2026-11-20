@@ -1,7 +1,7 @@
 # ADR-122: Install and update in three steps: the local commands first, npm and Compose as the Phase 0 channels, keyless signing, and a snapshot before every store migration
 
 - **Status:** Accepted
-- **Extended by:** [ADR-123](123-release-as-built.md)
+- **Extended by:** [ADR-123](123-release-as-built.md), [ADR-124](124-update-as-built.md)
 - **Date:** 2026-11-17
 
 Roadmap 0.12 bundled everything of [ADR-056](056-install-update-migrate.md) that
@@ -125,6 +125,8 @@ and [ADR-028](028-encryption-at-rest.md).
 ## Amendments
 - **ADR-123:** records the release as built, and adds staged approval on npm.
   Point 13 was too cautious: `jaari doctor` reads a TPM and Linux disk encryption without root.
+- **ADR-124:** point 6 as built: a launcher in the npm package follows the `current` link, and
+  `jaari rollback` swaps the version back with the data (point 9).
 
 ## Consequences
 - The Linux unit, its quoting, and `systemd-creds` were built from the documentation and

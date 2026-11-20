@@ -13,6 +13,9 @@
   // laptop) | "never" | "always". Below `batteryPausePercent` on battery, background work pauses.
   "power": { "stayAwake": "working", "batteryPausePercent": 20 },
 
+  // ADR-124: which releases `jaari update` offers: "stable" | "beta". Without it, an install keeps the kind it has.
+  "update": { "channel": "stable" },
+
   // ADR-021, ADR-084: channel packages; a local path is for development only. The CLI channel is
   // built in and always on, so it is not listed.
   "channels": ["@jaari/channel-web", "@jaari/channel-telegram"],

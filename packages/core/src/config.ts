@@ -49,6 +49,9 @@ export const ConfigSchema = Type.Object(
     power: Type.Optional(
       Type.Object({ stayAwake: Type.Optional(Type.Enum(["working", "never", "always"])), batteryPausePercent: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })) }, closed),
     ),
+    // ADR-124: which releases `jaari update` offers: "stable" (npm `latest`) or "beta" (also npm `next`). Without it,
+    // an install keeps the kind it has.
+    update: Type.Optional(Type.Object({ channel: Type.Optional(Type.Enum(["stable", "beta"])) }, closed)),
     secrets: Type.Optional(
       Type.Object(
         {

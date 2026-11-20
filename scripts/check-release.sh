@@ -42,4 +42,16 @@ fi
 node scripts/pack-release.mjs 0.0.0-check.2 >/dev/null
 test "$(ls dist/npm)" = jaari-0.0.0-check.2.tgz
 test "$(tar -xzOf dist/npm/jaari-0.0.0-check.2.tgz package/node_modules/@jaari/channels/package.json | grep -c '"version": "0.0.0-check.2"')" -eq 2 # the package and its manifest
+
+# The launcher (ADR-124): install the second version where `jaari update` puts one and make it active. The commands
+# of the first install then run the second, and run their own again when the link is gone.
+later="$work/later"
+mkdir -m 700 "$later"
+npm install --global --prefix "$later/versions/0.0.0-check.2" --ignore-scripts --no-audit --no-fund dist/npm/jaari-0.0.0-check.2.tgz >/dev/null
+cli="$work/prefix/lib/node_modules/jaari/node_modules/@jaari/cli/dist"
+node --input-type=module -e 'await (await import(process.argv[1])).activate(process.argv[2], "0.0.0-check.2", null)' "$cli/versions.js" "$later"
+test "$("$work/prefix/bin/jaari" --version --home "$later")" = 0.0.0-check.2
+"$work/prefix/bin/jaari-daemon" --check --home "$later" --config apps/daemon/smoke.config.json --data "$work/later-data" --credentials "$work/credentials"
+node --input-type=module -e 'await (await import(process.argv[1])).swapBack(process.argv[2])' "$cli/versions.js" "$later"
+test "$("$work/prefix/bin/jaari" --version --home "$later")" = "$version"
 echo "release check passed"

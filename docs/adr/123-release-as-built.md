@@ -1,6 +1,7 @@
 # ADR-123: The release as built: one npm tarball with its internal packages inside, an image made from that tarball, staged npm approval, and one Compose secret per credential
 
 - **Status:** Accepted
+- **Extended by:** [ADR-124](124-update-as-built.md)
 - **Date:** 2026-11-18
 
 Roadmap 0.17 builds the release that [ADR-122](122-install-in-three-steps.md) planned. Building it
@@ -61,6 +62,11 @@ them and amends all four.
 - **Direct `npm publish`:** the GitHub reviewer would be the only approval.
 - **A signing key in a secret:** see ADR-122.
 - **Mounting the credentials folder:** the daemon would see keys it was not given.
+
+## Amendments
+- **ADR-124:** the two commands of the tarball are launchers, and the release workflow creates
+  the GitHub release whose notes `jaari update` shows, as a draft. The shrinkwrap pins the
+  dependencies only for an install by name, which `jaari update` and the guide use.
 
 ## Consequences
 - GitHub makes a new container package **private**. After the first release the owner makes

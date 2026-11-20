@@ -5,7 +5,7 @@ Last updated: 2026-11-19
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (123 ADRs, all Accepted)
+## Decided (124 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -125,7 +125,7 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   an ambiguous send is never retried. The CLI channel listens on `jaari.sock` (mode 0600) in the
   data folder with NDJSON and a version hello; `apps/cli` adds `jaari chat`, which numbers
   messages and reads `>N text` as a reply. Open prompts live in memory until the gate (Phase 3).
-  Next: 0.18 (`jaari update`).
+  Next: a second and a third pre-release, to show an update between two published versions.
 - Config (0.6, 2026-11-17, ADR-118): one JSONC file, `~/.jaari/config.jsonc`, with a schema version
   and a closed top level, read through `@jaari/core/config`; the daemon refuses an invalid or
   newer config and names each problem. `jaari init` asks for the target, where secrets are kept,
@@ -138,6 +138,14 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   through `openDatabase`, which runs forward-only migration steps (one transaction each), refuses
   a store newer than the binary or owned by another id, and records the owner. Every row has
   `owner_id` and every event line has `ownerId`; existing data migrates on first start.
+- Update (0.18, 2026-11-19, ADR-124): `jaari update` verifies a release offline (checksum, npm
+  registry signature, publish attestation, and SLSA provenance from this repository's release
+  workflow at the version's tag), installs it into `~/.jaari/versions`, stops the daemon,
+  snapshots, switches the `current` link, runs `jaari-daemon --check` and `jaari doctor`, and
+  undoes the version and the data on a failure. The npm commands are launchers that follow
+  `current`. `jaari rollback` swaps the version back, `jaari uninstall` removes the app, and the
+  release workflow publishes notes as a GitHub release. Not shown yet: an update between two
+  published versions (`0.1.0-beta.1` has no `jaari update`).
 - Release (0.17, 2026-11-18, ADR-123): `scripts/pack-release.mjs` makes the one npm package, with
   the internal packages and a shrinkwrap inside, and `docker/Dockerfile` makes the image from it.
   `release.yml` stages the npm version for approval with 2FA, and pushes a signed amd64 and arm64

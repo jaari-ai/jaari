@@ -37,7 +37,7 @@ effect. It is in **Phase 0 (Foundation)**: `@jaari/capabilities`, `@jaari/gate`,
 | `docs/` | Hand-maintained docs. `docs/adr/` is the authoritative ADR set. `docs/audits/` holds audit reports and the documentation index, which are navigation aids, not authoritative. | Yes, per conventions |
 | `packages/*`, `apps/*` | TypeScript workspace packages (`@jaari/<name>`) and apps (`daemon` and `cli` exist; `node` and `hooks` not yet) | Yes |
 | Root config | `pnpm-workspace.yaml`, `tsconfig*.json`, `eslint.config.js`, `vitest.config.ts`, `.claude/settings.json` | Yes |
-| `jaari.config.example.jsonc` | Example owner config (`owner`, `deployment`, `power`, `channels`, `secrets`, `persona`, `shadow`, `memory`, `llm`, `web`, `egress`, `backup`) | Yes |
+| `jaari.config.example.jsonc` | Example owner config (`owner`, `deployment`, `power`, `channels`, `secrets`, `persona`, `shadow`, `memory`, `llm`, `web`, `egress`, `backup`, `update`) | Yes |
 | `python/` | PyPI name-holder package (ADR-010, `docs/guides/namespaces.md`) | Yes |
 | `.github/workflows/ci.yml` | Pull request checks: lint, typecheck, tests, licences, docs, DCO, gitleaks (ADR-043) | Yes |
 | `scripts/check-licenses.mjs` | Fails CI on a dependency licence outside the ADR-014 allowlist | Yes |
