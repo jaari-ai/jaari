@@ -34,8 +34,8 @@ mode of a socket in a folder shared from the host, so the data folder cannot be 
     data folder cannot hold the chat socket with its mode. It serves the local image check below,
     with the data in a volume inside the virtual machine, and it is not a supported install.
 4.  **The local check covers the image (ADR-126).** `scripts/check-update.mjs --docker` builds two
-    local images from two packed tarballs (`jaari:0.0.0-check.1` and `jaari:0.0.0-check.2`; no
-    registry, no push), starts the first with the file that `jaari init` writes, runs the image
+    local images from two packed tarballs, tagged `ghcr.io/jaari-ai/jaari:0.0.0-check.1` and `.2` as
+    the file that `jaari init` writes names them (no registry, no push), starts the first with the file that `jaari init` writes, runs the image
     update as the guide does (change the tag, `up --wait`, `admin doctor`), then the way back with
     the old tag and `admin rollback`. It runs on the owner's machine, on Linux Docker and on Docker
     Desktop, where the data folder is a volume inside Docker's Linux machine. There is no CI job.
@@ -50,6 +50,10 @@ mode of a socket in a folder shared from the host, so the data folder cannot be 
   system that the host shares, which Docker Desktop does not give.
 - **A separate health endpoint in the daemon:** a port, or one more command; `jaari doctor` already
   checks that the daemon answers and that its files are private.
+
+## Flagged conflicts
+- [OQ-96](../OPEN_QUESTIONS.md): under Compose, the way back has a snapshot only when the new image
+  migrated a store; the guide skips `admin rollback` when there is none.
 
 ## Consequences
 - Roadmap 0.20 builds the health check, the guide change, and the Docker mode of the local check.

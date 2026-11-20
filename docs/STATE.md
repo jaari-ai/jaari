@@ -211,7 +211,7 @@ criterion: an install and `jaari update` under systemd, and `jaari rollback` aft
 owner added: 0.19, Windows as a host (ADR-125), and 0.20, testing `jaari update` from local builds
 instead of releases (ADR-126). Next: 0.20, then 0.19; then Phase 1 (Memory), from item 1.1. Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
-No open question blocks Phase 0 or Phase 1.
+OQ-96 blocks roadmap 0.20; no open question blocks Phase 1.
 
 ## Scheduled checks that ADRs defer
 - Phase 1: measure the candidate local models (ADR-045).
@@ -223,4 +223,4 @@ No open question blocks Phase 0 or Phase 1.
   leaving Experimental (ADR-025, ADR-065).
 
 ## Open questions
-3 open. OQ-92 (package platforms) blocks Phase 6; OQ-93 (refusal categories) blocks 4.1; OQ-95 (a model reading owner messages) blocks 4.5. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+4 open. OQ-92 (package platforms) blocks Phase 6; OQ-93 (refusal categories) blocks 4.1; OQ-95 (a model reading owner messages) blocks 4.5; OQ-96 (the way back under Compose) blocks 0.20. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

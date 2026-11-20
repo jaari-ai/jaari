@@ -3,10 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { serviceOf } from "./service.js";
-
-const { unit: UNIT, credstore: CREDSTORE } = serviceOf();
 import { terminal } from "./testing.js";
 import { uninstall, type UninstallDeps } from "./uninstall.js";
+
+const { unit: UNIT, credstore: CREDSTORE } = serviceOf();
 
 // A fake user home in a temp folder; exists and remove act on it, every other effect is a fake.
 let user: string, home: string;

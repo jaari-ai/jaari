@@ -102,7 +102,10 @@ docker compose run --rm admin doctor
 ~~~
 
 If `up --wait` or `doctor` fails, go back: `docker compose down`, `mv compose.yaml.bak compose.yaml`,
-`docker compose run --rm admin rollback --yes`, `docker compose up --wait --wait-timeout 180`.
+then `docker compose run --rm admin rollback --list`. When it shows a snapshot, the new image
+migrated a store before it failed: run `docker compose run --rm admin rollback --yes`. When it says
+"No snapshot yet", the data is in the form the old image reads, so skip that step. Then
+`docker compose up --wait --wait-timeout 180`.
 On a slow host, raise `--wait-timeout`, and `start_period` in `compose.yaml` (`jaari init` keeps an edited file).
 
 ## Removing Jaari

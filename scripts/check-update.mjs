@@ -14,7 +14,7 @@
 // --docker: two local images and the image update as the guide has it, then the way back. On Docker Desktop the data
 //   folder is a volume inside Docker's Linux machine (ADR-127, point 3).
 import { execFile, spawn } from "node:child_process";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -168,7 +168,7 @@ async function checkNpm(tarballs) {
 
 // The update of the active version, as the launcher would run it, with its real dependencies but three.
 async function update(tarballs, target, { failDoctor = false, slowStart = 0 }) {
-  const active = (await run("test", ["-e", join(home, "current")])).code === 0 ? join(home, "current") : prefix;
+  const active = (await stat(join(home, "current")).then(() => true, () => false)) ? join(home, "current") : prefix;
   const module = await import(pathToFileURL(join(installed(active), "node_modules", "@jaari", "cli", "dist", "update.js")).href);
   const real = module.systemDeps();
   const bytes = await readFile(tarballs[target]);
@@ -256,7 +256,8 @@ async function checkDocker(tarballs) {
   check((await compose(["down"])).code === 0, "`docker compose down` stops it");
   await tag(VERSIONS[1], VERSIONS[0]);
   const list = await compose(["run", "--rm", "admin", "rollback", "--list"]);
-  if (list.output.includes("No snapshot yet")) console.log("gap   no snapshot: under Compose, `admin rollback` has nothing to restore when no store migrated (open decision)");
+  // The guide's rule until OQ-96 is decided: no snapshot means no store migrated, so the data is the old image's.
+  if (list.output.includes("No snapshot yet")) console.log("gap   no snapshot to restore: the guide skips `admin rollback` (OQ-96)");
   else check((await compose(["run", "--rm", "admin", "rollback", "--yes"])).code === 0, "`admin rollback --yes` restores the latest snapshot");
   check(await up(), `${VERSIONS[0]} comes back up healthy`);
   check((await version()) === VERSIONS[0], `the daemon runs ${VERSIONS[0]} again`);
