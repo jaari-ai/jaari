@@ -229,7 +229,13 @@ async function install({ deps, say, paths, target, dist, running, launchd, agent
     for (let tries = 0; tries < 30 && (await deps.daemonRunning(socket)) !== "stopped"; tries++) await deps.sleep(500);
     return (await deps.daemonRunning(socket)) === "stopped";
   };
-  const start = async () => (launchd ? (await launchctl("bootstrap", `gui/${deps.uid}`, agent)).code === 0 : true);
+  // `bootout` can return while launchd still holds the job, and a `bootstrap` of a job that is still loaded fails: the
+  // undo then left the daemon stopped (about 1 run in 10 of scripts/check-update.mjs --service). So the job must be gone.
+  const start = async () => {
+    if (!launchd) return true;
+    for (let waited = 0; waited < 10_000 && (await launchctl("print", `gui/${deps.uid}/${label}`)).code === 0; waited += POLL_MS) await deps.sleep(POLL_MS);
+    return (await launchctl("bootstrap", `gui/${deps.uid}`, agent)).code === 0;
+  };
   // A busy machine can take half a minute to start the daemon: a slow start is not a failed one. `--wait` sets the limit;
   // after 5 s the owner is told, once, that the update is waiting.
   let told = false;

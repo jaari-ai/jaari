@@ -59,6 +59,8 @@ async function world(over: Partial<UpdateDeps> & { checkFails?: boolean; doctorF
         newer.close();
         return over.checkFails ? { code: 1, output: "jaari-daemon: session.db cannot be migrated" } : { code: 0, output: "" };
       }
+      // launchd's answer for a job that is not loaded: `bootout` is done, and `bootstrap` may follow.
+      if (command === "launchctl" && args[0] === "print") return { code: 113, output: "Could not find service" };
       if (command.endsWith("/bin/jaari") && args[0] === "doctor") return over.doctorFails ? { code: 1, output: "FAIL  the key of provider \"faux\"" } : { code: 0, output: "Healthy" };
       return { code: 0, output: "11.20.0" };
     },
@@ -122,7 +124,7 @@ describe("jaari update (ADR-056, ADR-082, ADR-124)", () => {
     await agent(good);
     expect((await good.go()).code).toBe(0);
     const launchctl = (calls: string[]) => calls.filter((call) => call.startsWith("launchctl") || call.includes("jaari-daemon") || call.includes("doctor")).map((call) => call.split(" ").slice(0, 2).join(" "));
-    expect(launchctl(good.calls)).toEqual(["launchctl bootout", "~/current/bin/jaari-daemon --check", "launchctl bootstrap", "~/current/bin/jaari doctor"]);
+    expect(launchctl(good.calls)).toEqual(["launchctl bootout", "~/current/bin/jaari-daemon --check", "launchctl print", "launchctl bootstrap", "~/current/bin/jaari doctor"]);
     expect(good.calls.at(-1)).toBe("~/current/bin/jaari doctor --home ~"); // with the daemon running: the full check
 
     // After the undo, the old daemon must answer before the owner is told it runs.
@@ -130,7 +132,7 @@ describe("jaari update (ADR-056, ADR-082, ADR-124)", () => {
     await agent(bad);
     const { code, shown } = await bad.go();
     expect(code).toBe(1);
-    expect(launchctl(bad.calls)).toEqual(["launchctl bootout", "~/current/bin/jaari-daemon --check", "launchctl bootstrap", "~/current/bin/jaari doctor", "launchctl bootout", "launchctl bootstrap"]);
+    expect(launchctl(bad.calls)).toEqual(["launchctl bootout", "~/current/bin/jaari-daemon --check", "launchctl print", "launchctl bootstrap", "~/current/bin/jaari doctor", "launchctl bootout", "launchctl print", "launchctl bootstrap"]);
     expect(shown).toContain("The daemon runs again.");
     expect(said(bad.data)).not.toContain("written by the new version");
 
@@ -171,15 +173,34 @@ describe("jaari update (ADR-056, ADR-082, ADR-124)", () => {
     expect(long.shown).toContain("up to 300 s");
   });
 
+  it("under launchd, starts the agent only after launchd has let go of it, also in the undo", async () => {
+    // `bootout` returned, but launchd still holds the job for two more checks; a `bootstrap` then would fail.
+    const racy = await world({ platform: "darwin", doctorFails: true, daemon: ["stopped", "stopped", "running", "stopped", "stopped", "running"] });
+    await mkdir(join(racy.home, "..", "Library", "LaunchAgents"), { recursive: true });
+    await writeFile(join(racy.home, "..", "Library", "LaunchAgents", "org.jaari.daemon.plist"), "");
+    const exec = racy.deps.exec;
+    let held = 0;
+    racy.deps.exec = async (command, args) => {
+      if (command === "launchctl" && args[0] === "bootout") held = 2;
+      if (command === "launchctl" && args[0] === "print") return held-- > 0 ? { code: 0, output: "state = exited" } : exec(command, args);
+      if (command === "launchctl" && args[0] === "bootstrap" && held > 0) return { code: 5, output: "Bootstrap failed: 5: Input/output error" };
+      return exec(command, args);
+    };
+    const { shown } = await racy.go();
+    expect(shown).toContain("The daemon runs again.");
+    expect(shown).not.toContain("Start the daemon: jaari service install");
+  });
+
   it("drives the service named by --service-name, and only that one (ADR-126)", async () => {
     const check = await world({ platform: "darwin", daemon: ["stopped", "stopped", "running"] });
     await mkdir(join(check.home, "..", "Library", "LaunchAgents"), { recursive: true });
     await writeFile(join(check.home, "..", "Library", "LaunchAgents", "org.jaari.daemon.check.plist"), "");
     expect((await check.go(["--yes", "--service-name", "jaari-check"])).code).toBe(0);
     const launchctl = check.calls.filter((call) => call.startsWith("launchctl"));
-    expect(launchctl.map((call) => call.split(" ").slice(0, 2).join(" "))).toEqual(["launchctl bootout", "launchctl bootstrap"]);
+    expect(launchctl.map((call) => call.split(" ").slice(0, 2).join(" "))).toEqual(["launchctl bootout", "launchctl print", "launchctl bootstrap"]);
     expect(launchctl[0]).toBe("launchctl bootout gui/501/org.jaari.daemon.check");
-    expect(launchctl[1]).toContain("org.jaari.daemon.check.plist");
+    expect(launchctl[1]).toBe("launchctl print gui/501/org.jaari.daemon.check");
+    expect(launchctl[2]).toContain("org.jaari.daemon.check.plist");
     expect(check.calls.join("\n")).not.toMatch(/org\.jaari\.daemon(\.plist|$)/m); // the owner's own agent is never touched
 
     const bad = await world();
@@ -232,7 +253,7 @@ describe("jaari update (ADR-056, ADR-082, ADR-124)", () => {
     const failed = await broken.go();
     expect(failed.code).toBe(1);
     expect(failed.shown).toContain("unable to open database file");
-    expect(broken.calls.filter((call) => call.startsWith("launchctl")).map((call) => call.split(" ")[1])).toEqual(["bootout", "bootout", "bootstrap"]);
+    expect(broken.calls.filter((call) => call.startsWith("launchctl")).map((call) => call.split(" ")[1])).toEqual(["bootout", "bootout", "print", "bootstrap"]);
     expect(await readdir(broken.home)).not.toContain("current");
     expect((await readdir(join(broken.home, "versions"))).some((entry) => entry.endsWith(".installing"))).toBe(false);
 
