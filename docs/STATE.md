@@ -147,8 +147,11 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   release workflow publishes notes as a GitHub release. Released 2026-11-20 as `v0.1.0-beta.2`
   on npm `next` (SLSA provenance) and `ghcr.io/jaari-ai/jaari:0.1.0-beta.2`, the first version
   with `jaari update`. Its first notes listed every pull request since #1, because `beta.1` has no
-  GitHub release; they were made again from `v0.1.0-beta.1`. Not shown yet: an update between two
-  published versions (`v0.1.0-beta.3` is for that test, on macOS under launchd).
+  GitHub release; they were made again from `v0.1.0-beta.1`. Shown 2026-11-20 on macOS under
+  launchd: `jaari update` from `v0.1.0-beta.2` (npm install) to `v0.1.0-beta.3` showed the notes,
+  verified the release, took a `pre-update` snapshot, linked `current` to `versions/0.1.0-beta.3`,
+  and the daemon came back with `jaari doctor` healthy. Not shown yet: the same under systemd, and
+  `jaari rollback` after a real update.
 - Release (0.17, 2026-11-18, ADR-123): `scripts/pack-release.mjs` makes the one npm package, with
   the internal packages and a shrinkwrap inside, and `docker/Dockerfile` makes the image from it.
   `release.yml` stages the npm version for approval with 2FA, and pushes a signed amd64 and arm64
