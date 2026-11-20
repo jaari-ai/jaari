@@ -212,6 +212,19 @@ async function install({ deps, say, paths, target, dist, running, launchd, agent
     return (await deps.daemonRunning(socket)) === "stopped";
   };
   const start = async () => (launchd ? (await launchctl("bootstrap", `gui/${deps.uid}`, agent)).code === 0 : true);
+  // A busy Mac can take half a minute to start a launchd agent: a slow start is not a failed one. Two minutes.
+  let told = false;
+  const answers = async () => {
+    for (let tries = 0; tries < 240; tries++) {
+      if ((await deps.daemonRunning(socket)) === "running") return true;
+      if (tries === 10 && !told) {
+        told = true;
+        say("Waiting for the daemon to start…");
+      }
+      await deps.sleep(500);
+    }
+    return false;
+  };
   // The version folder that runs now; none when it is the one npm installed, or when its folder is gone.
   const before = (await activeRoot(paths.home)) ? (await readState(paths.home)).current : null;
   if (launchd) {
@@ -233,8 +246,9 @@ async function install({ deps, say, paths, target, dist, running, launchd, agent
     if (switched) await swapBack(paths.home);
     if (snapshot) await restoreSnapshot(place, snapshot);
     await rm(staging, { recursive: true, force: true });
-    const back = await start();
-    say(`Back on Jaari ${running}, with the data from before the update.${launchd ? (back ? " The daemon runs again." : " Start the daemon: jaari service install") : " Start the daemon again."}`);
+    const started = await start();
+    const back = launchd && started && (await answers());
+    say(`Back on Jaari ${running}, with the data from before the update.${launchd ? (back ? " The daemon runs again." : started ? " The daemon has not answered yet; check it with `jaari doctor`." : " Start the daemon: jaari service install") : " Start the daemon again."}`);
     return 1;
   };
   try {
@@ -255,7 +269,7 @@ async function install({ deps, say, paths, target, dist, running, launchd, agent
     if (boots.code !== 0) reason = boots.output.trim() || "the daemon did not start";
     else if (launchd && !(await start())) reason = "launchd could not start the daemon";
     else {
-      if (launchd) for (let tries = 0; tries < 30 && (await deps.daemonRunning(socket)) !== "running"; tries++) await deps.sleep(500);
+      if (launchd) await answers(); // doctor then names what is wrong, when it does not answer
       const doctor = await deps.exec(binOf(versions.link, "jaari"), ["doctor", ...home, ...(launchd ? [] : ["--no-daemon"])]);
       if (doctor.code !== 0) reason = doctor.output.trim() || "jaari doctor failed";
     }

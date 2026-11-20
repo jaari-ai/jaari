@@ -117,3 +117,13 @@ ADR-056, ADR-082, ADR-122, ADR-123, [ADR-043](043-project-process.md), and
   commands through the launcher, in CI on every pull request.
 - A daemon under systemd must be stopped by the owner before an update; `jaari update` says so.
 - The launcher adds one `realpath` and one dynamic import to each start.
+- 2026-11-20, the update from `0.1.0-beta.3` to `0.1.0-beta.4` on a busy Mac (an Xcode build and
+  an Android emulator, load average 35 on 11 cores): the daemon took about 30 seconds to start,
+  `jaari doctor` ran after the 15 seconds the update waited, and the update undid itself. The undo
+  then said the daemon ran again before it answered. Two causes: `jaari service install` wrote
+  `ProcessType` `Background`, which launchd.plist(5) reserves for work the user did not ask for
+  (loading the daemon code took 0.6 s at normal priority and 7.4 s at background priority), and
+  the fixed wait. Since `0.1.0-beta.5` the service is `Standard`, the update waits up to two
+  minutes and says that it waits, and the undo says the daemon runs only once it answers. The
+  update runs the code of the active version, so owners update from an older version while the
+  Mac is not busy, then run `jaari service install` once.

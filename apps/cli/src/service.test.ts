@@ -77,7 +77,7 @@ describe("jaari service install on macOS", () => {
     <string>--home</string>
     <string>${home}</string>
   </array>`);
-    for (const part of ["<key>RunAtLoad</key>\n  <true/>", "<key>KeepAlive</key>\n  <true/>", "<string>Background</string>", `<key>StandardErrorPath</key>\n  <string>${log}</string>`]) {
+    for (const part of ["<key>RunAtLoad</key>\n  <true/>", "<key>KeepAlive</key>\n  <true/>", "<key>ProcessType</key>\n  <string>Standard</string>", `<key>StandardErrorPath</key>\n  <string>${log}</string>`]) {
       expect(files[plist]).toContain(part);
     }
     expect(exec.mock.calls).toEqual([

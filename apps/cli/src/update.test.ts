@@ -125,13 +125,36 @@ describe("jaari update (ADR-056, ADR-082, ADR-124)", () => {
     expect(launchctl(good.calls)).toEqual(["launchctl bootout", "~/current/bin/jaari-daemon --check", "launchctl bootstrap", "~/current/bin/jaari doctor"]);
     expect(good.calls.at(-1)).toBe("~/current/bin/jaari doctor --home ~"); // with the daemon running: the full check
 
-    const bad = await world({ platform: "darwin", doctorFails: true, daemon: ["stopped", "stopped", "running"] });
+    // After the undo, the old daemon must answer before the owner is told it runs.
+    const bad = await world({ platform: "darwin", doctorFails: true, daemon: ["stopped", "stopped", "running", "stopped", "stopped", "running"] });
     await agent(bad);
     const { code, shown } = await bad.go();
     expect(code).toBe(1);
     expect(launchctl(bad.calls)).toEqual(["launchctl bootout", "~/current/bin/jaari-daemon --check", "launchctl bootstrap", "~/current/bin/jaari doctor", "launchctl bootout", "launchctl bootstrap"]);
     expect(shown).toContain("The daemon runs again.");
     expect(said(bad.data)).not.toContain("written by the new version");
+
+    const silent = await world({ platform: "darwin", doctorFails: true, daemon: ["stopped", "stopped", "running"] }); // never answers after the undo
+    await agent(silent);
+    const quiet = await silent.go();
+    expect(quiet.shown).toContain("The daemon has not answered yet; check it with `jaari doctor`.");
+    expect(quiet.shown).not.toContain("The daemon runs again.");
+  });
+
+  it("under launchd, waits for a slow start instead of failing it (a busy Mac)", async () => {
+    // 30 s of no answer: longer than the old 15 s wait, inside the 2 minutes.
+    const slow = await world({ platform: "darwin", daemon: ["stopped", "stopped", ...Array<"stopped">(60).fill("stopped"), "running"] });
+    await mkdir(join(slow.home, "..", "Library", "LaunchAgents"), { recursive: true });
+    await writeFile(join(slow.home, "..", "Library", "LaunchAgents", "org.jaari.daemon.plist"), "");
+    // Like the real doctor: it fails while the daemon does not answer.
+    let answered = false;
+    const running = slow.deps.daemonRunning, exec = slow.deps.exec;
+    slow.deps.daemonRunning = async (path) => { const state = await running(path); answered ||= state === "running"; return state; };
+    slow.deps.exec = async (command, args) => (args[0] === "doctor" && !answered ? { code: 1, output: "FAIL  the daemon is not running" } : exec(command, args));
+    const { code, shown } = await slow.go();
+    expect(code).toBe(0);
+    expect(shown).toContain("Waiting for the daemon to start…");
+    expect(shown).toContain("Updated to Jaari");
   });
 
   it("refuses what npm installed when it is not the verified file, and changes nothing", async () => {
