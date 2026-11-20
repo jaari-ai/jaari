@@ -75,10 +75,12 @@ Betas: set `"update": { "channel": "beta" }` in the config, or pass `--channel b
 The first release, `0.1.0-beta.1`, has no `jaari update`: install the next one once with
 `npm install --global --ignore-scripts jaari@next`.
 
-Up to `0.1.0-beta.4`, `jaari service install` marked the daemon as a background job, which macOS
-slows down on a busy Mac, and `jaari update` waited only 15 seconds for it to start. From one of
-those versions, update while the Mac is not busy (no build or emulator running), then run
-`jaari service install` once with the new version, so that the service file is rewritten.
+On macOS, up to `0.1.0-beta.4`, `jaari service install` marked the daemon as a background job,
+which macOS slows down on a busy Mac, and `jaari update` waited only 15 seconds for it to start.
+From one of those versions, update while the Mac is not busy (no build or emulator running), then
+run `jaari service install` once with the new version, so that the service file is rewritten. On
+Linux the systemd unit runs at normal priority, and you stop and start the daemon yourself around
+an update, so nothing changes there.
 
 Under Compose the image is the version. Replace `OLD` and `NEW`:
 
