@@ -147,8 +147,11 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   release workflow publishes notes as a GitHub release. Released 2026-11-20 as `v0.1.0-beta.2`
   on npm `next` (SLSA provenance) and `ghcr.io/jaari-ai/jaari:0.1.0-beta.2`, the first version
   with `jaari update`. Its first notes listed every pull request since #1, because `beta.1` has no
-  GitHub release; they were made again from `v0.1.0-beta.1`. Not shown yet: an update between two
-  published versions (`v0.1.0-beta.3` is for that test, on macOS under launchd).
+  GitHub release; they were made again from `v0.1.0-beta.1`. Shown 2026-11-20 on macOS under
+  launchd: `jaari update` from `v0.1.0-beta.2` (npm install) to `v0.1.0-beta.3` showed the notes,
+  verified the release, took a `pre-update` snapshot, linked `current` to `versions/0.1.0-beta.3`,
+  and the daemon came back with `jaari doctor` healthy. Not shown yet: the same under systemd, and
+  `jaari rollback` after a real update.
 - Release (0.17, 2026-11-18, ADR-123): `scripts/pack-release.mjs` makes the one npm package, with
   the internal packages and a shrinkwrap inside, and `docker/Dockerfile` makes the image from it.
   `release.yml` stages the npm version for approval with 2FA, and pushes a signed amd64 and arm64
@@ -199,9 +202,12 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
   set in ADR-043.
 
 ## Now
-Phase 0: Foundation, in progress (0.1 to 0.5, 0.7, and 0.9 to 0.11, 0.15 delivered). Per-item status, needs, and exit criteria are in
+Phase 0: Foundation, gate passed on 2026-11-20: items 0.1 to 0.18 are Verified (0.3, documents, Delivered), and the 19 exit
+criteria pass with the evidence in [audits/phase-0-exit.md](audits/phase-0-exit.md). Not shown yet, and not an exit
+criterion: an install and `jaari update` under systemd, and `jaari rollback` after a real update. Next: Phase 1
+(Memory), from item 1.1. Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
-No open question blocks Phase 0.
+No open question blocks Phase 0 or Phase 1.
 
 ## Scheduled checks that ADRs defer
 - Phase 1: measure the candidate local models (ADR-045).
