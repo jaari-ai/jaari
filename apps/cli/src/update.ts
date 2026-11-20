@@ -1,4 +1,4 @@
-// `jaari update [--home <dir>] [--channel stable|beta] [--to <version>] [--check] [--yes]` (ADR-056, ADR-082, ADR-124):
+// `jaari update [--home <dir>] [--channel stable|beta] [--to <version>] [--wait <seconds>] [--check] [--yes]` (ADR-056, ADR-082, ADR-124):
 // find a newer release, verify it, install it beside the running one, snapshot the data, switch, check, and go back
 // by itself when the check fails. The daemon is stopped for the switch.
 import { execFile } from "node:child_process";
@@ -21,7 +21,9 @@ import { activate, activeRoot, binOf, compareVersions, lock, prune, readState, s
 const REGISTRY = "https://registry.npmjs.org";
 const NOTES = "https://api.github.com/repos/jaari-ai/jaari/releases/tags";
 const MAX_TARBALL_BYTES = 50_000_000;
-const USAGE = "usage: jaari update [--home <dir>] [--channel stable|beta] [--to <version>] [--check] [--yes]";
+const USAGE = "usage: jaari update [--home <dir>] [--channel stable|beta] [--to <version>] [--wait <seconds>] [--check] [--yes]";
+// How long a started daemon has to answer before the update counts it as failed. A busy machine can need half a minute.
+const WAIT_SECONDS = 120;
 
 // Everything outside the Jaari folder, so a test runs the whole flow with fakes: no network, no npm, no launchd.
 export type UpdateDeps = {
@@ -65,11 +67,14 @@ export async function update(args: string[], io: Io, deps: UpdateDeps = systemDe
   const say = (line: string) => io.output.write(`${line}\n`);
   let values;
   try {
-    ({ values } = parseArgs({ args, options: { home: { type: "string" }, channel: { type: "string" }, to: { type: "string" }, check: { type: "boolean", default: false }, yes: { type: "boolean", default: false } } }));
+    ({ values } = parseArgs({ args, options: { home: { type: "string" }, channel: { type: "string" }, to: { type: "string" }, wait: { type: "string" }, check: { type: "boolean", default: false }, yes: { type: "boolean", default: false } } }));
   } catch {
     return (say(USAGE), 2);
   }
   if ((values.channel !== undefined && values.channel !== "stable" && values.channel !== "beta") || (values.to !== undefined && !VERSION_FORMAT.test(values.to))) return (say(USAGE), 2);
+  // Whole seconds, 1 to 3600: an hour is more than any start needs, and a typo such as 1200000 is refused.
+  const waitSeconds = values.wait === undefined ? WAIT_SECONDS : /^\d{1,4}$/.test(values.wait) ? Number(values.wait) : NaN;
+  if (!(waitSeconds >= 1 && waitSeconds <= 3600)) return (say(`jaari: --wait takes whole seconds, 1 to 3600\n${USAGE}`), 2);
   // A checkout has no release to compare with, and its programs are not the installed ones.
   if (deps.version === "0.0.0") return (say("jaari: this is a development checkout; update it with git"), 1);
 
@@ -136,7 +141,7 @@ export async function update(args: string[], io: Io, deps: UpdateDeps = systemDe
   const unlock = await lock(paths.home);
   if (!unlock) return (say("jaari: another `jaari update` is running"), 1);
   try {
-    return await install({ deps, say, paths, target, dist, running, launchd, agent, socket, json });
+    return await install({ deps, say, paths, target, dist, running, launchd, agent, socket, json, waitSeconds });
   } finally {
     await unlock();
   }
@@ -144,7 +149,7 @@ export async function update(args: string[], io: Io, deps: UpdateDeps = systemDe
 
 type Install = {
   deps: UpdateDeps; say: (line: string) => void; paths: ReturnType<typeof jaariPaths>; target: string; dist: Dist; running: string;
-  launchd: boolean; agent: string; socket: string; json: <T>(url: string, what: string) => Promise<T>;
+  launchd: boolean; agent: string; socket: string; json: <T>(url: string, what: string) => Promise<T>; waitSeconds: number;
 };
 
 // Every file of the verified tarball must be in the installed copy, byte for byte. npm downloads the package again
@@ -169,7 +174,7 @@ async function sameAsVerified(tarball: string, installed: string, exec: UpdateDe
   }
 }
 
-async function install({ deps, say, paths, target, dist, running, launchd, agent, socket, json }: Install): Promise<number> {
+async function install({ deps, say, paths, target, dist, running, launchd, agent, socket, json, waitSeconds }: Install): Promise<number> {
   const versions = versionPaths(paths.home);
   // 1. Download and verify. Nothing is installed from a file that does not pass.
   await mkdir(versions.dir, { recursive: true, mode: 0o700 });
@@ -212,6 +217,19 @@ async function install({ deps, say, paths, target, dist, running, launchd, agent
     return (await deps.daemonRunning(socket)) === "stopped";
   };
   const start = async () => (launchd ? (await launchctl("bootstrap", `gui/${deps.uid}`, agent)).code === 0 : true);
+  // A busy machine can take half a minute to start the daemon: a slow start is not a failed one. `--wait` sets the limit.
+  let told = false;
+  const answers = async () => {
+    for (let tries = 0; tries < waitSeconds * 2; tries++) {
+      if ((await deps.daemonRunning(socket)) === "running") return true;
+      if (tries === 10 && !told) {
+        told = true;
+        say(`Waiting for the daemon to start (up to ${waitSeconds} s; \`--wait <seconds>\` changes it)…`);
+      }
+      await deps.sleep(500);
+    }
+    return false;
+  };
   // The version folder that runs now; none when it is the one npm installed, or when its folder is gone.
   const before = (await activeRoot(paths.home)) ? (await readState(paths.home)).current : null;
   if (launchd) {
@@ -233,8 +251,9 @@ async function install({ deps, say, paths, target, dist, running, launchd, agent
     if (switched) await swapBack(paths.home);
     if (snapshot) await restoreSnapshot(place, snapshot);
     await rm(staging, { recursive: true, force: true });
-    const back = await start();
-    say(`Back on Jaari ${running}, with the data from before the update.${launchd ? (back ? " The daemon runs again." : " Start the daemon: jaari service install") : " Start the daemon again."}`);
+    const started = await start();
+    const back = launchd && started && (await answers());
+    say(`Back on Jaari ${running}, with the data from before the update.${launchd ? (back ? " The daemon runs again." : started ? " The daemon has not answered yet; check it with `jaari doctor`." : " Start the daemon: jaari service install") : " Start the daemon again."}`);
     return 1;
   };
   try {
@@ -255,7 +274,7 @@ async function install({ deps, say, paths, target, dist, running, launchd, agent
     if (boots.code !== 0) reason = boots.output.trim() || "the daemon did not start";
     else if (launchd && !(await start())) reason = "launchd could not start the daemon";
     else {
-      if (launchd) for (let tries = 0; tries < 30 && (await deps.daemonRunning(socket)) !== "running"; tries++) await deps.sleep(500);
+      if (launchd) await answers(); // doctor then names what is wrong, when it does not answer
       const doctor = await deps.exec(binOf(versions.link, "jaari"), ["doctor", ...home, ...(launchd ? [] : ["--no-daemon"])]);
       if (doctor.code !== 0) reason = doctor.output.trim() || "jaari doctor failed";
     }

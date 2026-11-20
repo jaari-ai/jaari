@@ -72,8 +72,20 @@ from before the update.
 
 Betas: set `"update": { "channel": "beta" }` in the config, or pass `--channel beta`.
 
+After the switch, `jaari update` waits up to 120 seconds for the new daemon to answer before it
+counts the update as failed and undoes it. On a slow or busy machine, give it longer:
+`jaari update --wait 300`. On a fast one you can shorten it, for example `--wait 30`. The value is
+whole seconds, from 1 to 3600, and the undo waits as long.
+
 The first release, `0.1.0-beta.1`, has no `jaari update`: install the next one once with
 `npm install --global --ignore-scripts jaari@next`.
+
+On macOS, up to `0.1.0-beta.4`, `jaari service install` marked the daemon as a background job,
+which macOS slows down on a busy Mac, and `jaari update` waited only 15 seconds for it to start.
+From one of those versions, update while the Mac is not busy (no build or emulator running), then
+run `jaari service install` once with the new version, so that the service file is rewritten. On
+Linux the systemd unit runs at normal priority, and you stop and start the daemon yourself around
+an update, so nothing changes there.
 
 Under Compose the image is the version. Replace `OLD` and `NEW`:
 

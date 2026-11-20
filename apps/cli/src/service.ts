@@ -109,6 +109,8 @@ export async function service(args: string[], io: Io, deps: ServiceDeps = system
     const plist = join(deps.homedir, "Library", "LaunchAgents", `${LABEL}.plist`);
     // Not in the data folder: launchd makes the file readable by others, and the data folder holds only private files (ADR-028).
     const log = join(deps.homedir, "Library", "Logs", "jaari-daemon.log");
+    // ProcessType Standard: the daemon answers the owner. Background throttles it so much on a busy Mac that a start
+    // took 30 s, longer than `jaari update` waited (launchd.plist(5): Background is for work the user did not ask for).
     const text = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -124,7 +126,7 @@ ${command.map((a) => `    <string>${xml(a)}</string>`).join("\n")}
   <key>KeepAlive</key>
   <true/>
   <key>ProcessType</key>
-  <string>Background</string>
+  <string>Standard</string>
   <key>StandardOutPath</key>
   <string>${xml(log)}</string>
   <key>StandardErrorPath</key>

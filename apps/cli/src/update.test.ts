@@ -125,13 +125,64 @@ describe("jaari update (ADR-056, ADR-082, ADR-124)", () => {
     expect(launchctl(good.calls)).toEqual(["launchctl bootout", "~/current/bin/jaari-daemon --check", "launchctl bootstrap", "~/current/bin/jaari doctor"]);
     expect(good.calls.at(-1)).toBe("~/current/bin/jaari doctor --home ~"); // with the daemon running: the full check
 
-    const bad = await world({ platform: "darwin", doctorFails: true, daemon: ["stopped", "stopped", "running"] });
+    // After the undo, the old daemon must answer before the owner is told it runs.
+    const bad = await world({ platform: "darwin", doctorFails: true, daemon: ["stopped", "stopped", "running", "stopped", "stopped", "running"] });
     await agent(bad);
     const { code, shown } = await bad.go();
     expect(code).toBe(1);
     expect(launchctl(bad.calls)).toEqual(["launchctl bootout", "~/current/bin/jaari-daemon --check", "launchctl bootstrap", "~/current/bin/jaari doctor", "launchctl bootout", "launchctl bootstrap"]);
     expect(shown).toContain("The daemon runs again.");
     expect(said(bad.data)).not.toContain("written by the new version");
+
+    const silent = await world({ platform: "darwin", doctorFails: true, daemon: ["stopped", "stopped", "running"] }); // never answers after the undo
+    await agent(silent);
+    const quiet = await silent.go();
+    expect(quiet.shown).toContain("The daemon has not answered yet; check it with `jaari doctor`.");
+    expect(quiet.shown).not.toContain("The daemon runs again.");
+  });
+
+  // A launchd install whose daemon answers after `seconds` (each check waits 0.5 s), and whose doctor fails until then,
+  // like the real one. After the answer, the daemon keeps answering.
+  async function slowStart(seconds: number) {
+    const slow = await world({ platform: "darwin", daemon: ["stopped", "stopped", ...Array<"stopped">(seconds * 2).fill("stopped"), "running", ...Array<"running">(10).fill("running")] });
+    await mkdir(join(slow.home, "..", "Library", "LaunchAgents"), { recursive: true });
+    await writeFile(join(slow.home, "..", "Library", "LaunchAgents", "org.jaari.daemon.plist"), "");
+    let answered = false;
+    const running = slow.deps.daemonRunning, exec = slow.deps.exec;
+    slow.deps.daemonRunning = async (path) => { const state = await running(path); answered ||= state === "running"; return state; };
+    slow.deps.exec = async (command, args) => (args[0] === "doctor" && !answered ? { code: 1, output: "FAIL  the daemon is not running" } : exec(command, args));
+    return slow;
+  }
+
+  it("under launchd, waits for a slow start instead of failing it (a busy Mac)", async () => {
+    // 30 s of no answer: longer than the old 15 s wait, inside the default 2 minutes.
+    const { code, shown } = await (await slowStart(30)).go();
+    expect(code).toBe(0);
+    expect(shown).toContain("Waiting for the daemon to start (up to 120 s; `--wait <seconds>` changes it)…");
+    expect(shown).toContain("Updated to Jaari");
+  });
+
+  it("takes the wait from --wait: a shorter one fails the same start, a longer one passes a slower one", async () => {
+    const short = await (await slowStart(30)).go(["--yes", "--wait", "10"]);
+    expect(short.code).toBe(1);
+    expect(short.shown).toContain("did not pass its check, so the update is undone");
+    const long = await (await slowStart(200)).go(["--yes", "--wait", "300"]);
+    expect(long.code).toBe(0);
+    expect(long.shown).toContain("up to 300 s");
+  });
+
+  it("refuses a --wait that is not whole seconds from 1 to 3600, before anything changes", async () => {
+    for (const wait of ["0", "3601", "1.5", "abc", ""]) {
+      const { calls, go } = await world();
+      const { code, shown } = await go(["--yes", "--wait", wait]);
+      expect(code, wait).toBe(2);
+      expect(shown, wait).toContain("--wait takes whole seconds, 1 to 3600");
+      expect(calls, wait).toEqual([]);
+    }
+    // parseArgs reads "-5" as an option it does not know: the usage line, and still nothing changes.
+    const negative = await world();
+    expect((await negative.go(["--yes", "--wait", "-5"])).code).toBe(2);
+    expect(negative.calls).toEqual([]);
   });
 
   it("refuses what npm installed when it is not the verified file, and changes nothing", async () => {

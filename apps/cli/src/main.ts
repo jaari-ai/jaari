@@ -9,7 +9,7 @@ const USAGE = `usage: jaari <command> | --version
   secret set <name> [--home <dir>] [--config <file>]   store a secret; typed, never an argument
   doctor [--home <dir>]                   check the install; exits 1 when a check fails
   service install [--home <dir>] [--daemon <path>] [--print]   start the daemon at login or boot
-  update [--home <dir>] [--channel stable|beta] [--check] [--yes]   install a newer release, verified; undone if its check fails
+  update [--home <dir>] [--channel stable|beta] [--to <version>] [--wait <seconds>] [--check] [--yes]   install a newer release, verified; undone if its check fails
   rollback [--home <dir>] [--list] [--yes]   restore the latest snapshot, and the version from before the last update
   uninstall [--home <dir>] [--purge]      remove the service and the installed versions; --purge also deletes the data`;
 
