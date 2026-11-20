@@ -1,4 +1,4 @@
-// `jaari uninstall [--home <dir>] [--purge] [--yes]`: remove the app and keep the data; `--purge` also deletes the
+// `jaari uninstall [--home <dir>] [--service-name <name>] [--purge] [--yes]`: remove the app and keep the data; `--purge` also deletes the
 // data after a typed confirmation (ADR-056).
 import { lstat, realpath, rm } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -8,10 +8,10 @@ import { socketPath } from "@jaari/channels";
 import { jaariPaths } from "@jaari/core/config";
 import type { Command, Io } from "./io.js";
 import { createPrompter, InputEnded } from "./prompt.js";
-import { CREDSTORE, LABEL, systemDeps as serviceDeps, UNIT } from "./service.js";
+import { SERVICE_NAME, serviceOf, systemDeps as serviceDeps } from "./service.js";
 import { daemonRunning } from "./socket.js";
 
-const USAGE = "usage: jaari uninstall [--home <dir>] [--purge] [--yes]";
+const USAGE = "usage: jaari uninstall [--home <dir>] [--service-name <name>] [--purge] [--yes]";
 
 // Every effect on the system, so a test hands over fakes and never reaches the real launchd or files.
 export type UninstallDeps = {
@@ -38,13 +38,16 @@ export async function uninstall(args: string[], io: Io, deps: UninstallDeps = sy
   const say = (line: string) => io.output.write(`${line}\n`);
   let parsed;
   try {
-    parsed = parseArgs({ args, options: { home: { type: "string" }, purge: { type: "boolean", default: false }, yes: { type: "boolean", default: false } } });
+    parsed = parseArgs({ args, options: { home: { type: "string" }, "service-name": { type: "string" }, purge: { type: "boolean", default: false }, yes: { type: "boolean", default: false } } });
   } catch {
     return (say(USAGE), 2);
   }
   const { values } = parsed;
+  const named = values["service-name"] ?? "jaari";
+  if (!SERVICE_NAME.test(named)) return (say(`jaari: --service-name is jaari or jaari-<letters and digits>, not ${JSON.stringify(named)}`), 2);
+  const svc = serviceOf(named);
   const paths = jaariPaths(values.home ? resolve(values.home) : join(deps.homedir, ".jaari"));
-  const log = join(deps.homedir, "Library", "Logs", "jaari-daemon.log");
+  const log = join(deps.homedir, "Library", "Logs", svc.log);
 
   if (values.purge) {
     // ADR-076: deleting the owner's data needs a person; --yes does not stand in for one.
@@ -59,18 +62,18 @@ export async function uninstall(args: string[], io: Io, deps: UninstallDeps = sy
 
   let removed = false;
   if (deps.platform === "darwin") {
-    const plist = join(deps.homedir, "Library", "LaunchAgents", `${LABEL}.plist`);
+    const plist = join(deps.homedir, "Library", "LaunchAgents", `${svc.label}.plist`);
     if (await deps.exists(plist)) {
-      await deps.exec("launchctl", ["bootout", `gui/${deps.uid}/${LABEL}`]); // fails when not loaded, which is fine
+      await deps.exec("launchctl", ["bootout", `gui/${deps.uid}/${svc.label}`]); // fails when not loaded, which is fine
       await deps.remove(plist);
-      say(`Stopped the service ${LABEL} and removed ${plist}.`);
+      say(`Stopped the service ${svc.label} and removed ${plist}.`);
       removed = true;
     }
   }
-  if (deps.platform === "linux" && (await deps.exists(UNIT))) {
+  if (deps.platform === "linux" && (await deps.exists(svc.unit))) {
     say("The system service needs root to remove. Run:");
-    say(`  sudo systemctl disable --now jaari.service && sudo rm ${UNIT}`);
-    if (await deps.exists(CREDSTORE)) say(`  sudo rm -r ${CREDSTORE}`);
+    say(`  sudo systemctl disable --now ${named}.service && sudo rm ${svc.unit}`);
+    if (await deps.exists(svc.credstore)) say(`  sudo rm -r ${svc.credstore}`);
     removed = true;
   }
   // A running daemon still uses the installed version and holds the stores open.

@@ -1,4 +1,4 @@
-// `jaari update [--home <dir>] [--channel stable|beta] [--to <version>] [--wait <seconds>] [--check] [--yes]` (ADR-056, ADR-082, ADR-124):
+// `jaari update [--home <dir>] [--channel stable|beta] [--to <version>] [--wait <seconds>] [--service-name <name>] [--check] [--yes]` (ADR-056, ADR-082, ADR-124):
 // find a newer release, verify it, install it beside the running one, snapshot the data, switch, check, and go back
 // by itself when the check fails. The daemon is stopped for the switch.
 import { execFile } from "node:child_process";
@@ -12,7 +12,7 @@ import { ConfigError, jaariPaths, loadConfig } from "@jaari/core/config";
 import { createEgress } from "@jaari/http";
 import type { Io } from "./io.js";
 import { createPrompter, InputEnded } from "./prompt.js";
-import { LABEL } from "./service.js";
+import { SERVICE_NAME, serviceOf } from "./service.js";
 import { daemonRunning } from "./socket.js";
 import { PACKAGE, VERSION_FORMAT, VerifyError, verifyRelease, type Attestation, type Dist } from "./verify.js";
 import { VERSION } from "./version.js";
@@ -21,7 +21,7 @@ import { activate, activeRoot, binOf, compareVersions, lock, prune, readState, s
 const REGISTRY = "https://registry.npmjs.org";
 const NOTES = "https://api.github.com/repos/jaari-ai/jaari/releases/tags";
 const MAX_TARBALL_BYTES = 50_000_000;
-const USAGE = "usage: jaari update [--home <dir>] [--channel stable|beta] [--to <version>] [--wait <seconds>] [--check] [--yes]";
+const USAGE = "usage: jaari update [--home <dir>] [--channel stable|beta] [--to <version>] [--wait <seconds>] [--service-name <name>] [--check] [--yes]";
 // How long a started daemon has to answer before the update counts it as failed. A busy machine can need half a minute.
 const WAIT_SECONDS = 120;
 
@@ -38,7 +38,8 @@ export type UpdateDeps = {
   daemonRunning(path: string): Promise<"running" | "stopped" | "silent">;
   sleep(ms: number): Promise<void>;
 };
-const systemDeps = (): UpdateDeps => ({
+// Exported for scripts/check-update.mjs (ADR-126), which keeps every one of them but fetch, verify, and the npm install.
+export const systemDeps = (): UpdateDeps => ({
   version: VERSION,
   platform: process.platform,
   uid: process.getuid?.() ?? -1,
@@ -67,7 +68,7 @@ export async function update(args: string[], io: Io, deps: UpdateDeps = systemDe
   const say = (line: string) => io.output.write(`${line}\n`);
   let values;
   try {
-    ({ values } = parseArgs({ args, options: { home: { type: "string" }, channel: { type: "string" }, to: { type: "string" }, wait: { type: "string" }, check: { type: "boolean", default: false }, yes: { type: "boolean", default: false } } }));
+    ({ values } = parseArgs({ args, options: { home: { type: "string" }, channel: { type: "string" }, to: { type: "string" }, wait: { type: "string" }, "service-name": { type: "string" }, check: { type: "boolean", default: false }, yes: { type: "boolean", default: false } } }));
   } catch {
     return (say(USAGE), 2);
   }
@@ -75,6 +76,9 @@ export async function update(args: string[], io: Io, deps: UpdateDeps = systemDe
   // Whole seconds, 1 to 3600: an hour is more than any start needs, and a typo such as 1200000 is refused.
   const waitSeconds = values.wait === undefined ? WAIT_SECONDS : /^\d{1,4}$/.test(values.wait) ? Number(values.wait) : NaN;
   if (!(waitSeconds >= 1 && waitSeconds <= 3600)) return (say(`jaari: --wait takes whole seconds, 1 to 3600\n${USAGE}`), 2);
+  const named = values["service-name"] ?? "jaari";
+  if (!SERVICE_NAME.test(named)) return (say(`jaari: --service-name is jaari or jaari-<letters and digits>, not ${JSON.stringify(named)}`), 2);
+  const { label } = serviceOf(named);
   // A checkout has no release to compare with, and its programs are not the installed ones.
   if (deps.version === "0.0.0") return (say("jaari: this is a development checkout; update it with git"), 1);
 
@@ -118,11 +122,11 @@ export async function update(args: string[], io: Io, deps: UpdateDeps = systemDe
   // In the Compose image there is no npm, and the image is the version: the guide has the steps.
   if ((await deps.exec("npm", ["--version"])).code !== 0) return (say("jaari: npm is not available here. Under Compose, change the image version: see docs/guides/install.md, Updating."), 1);
   // The daemon is stopped for the switch. Only a launchd agent can be stopped and started from here without root.
-  const agent = join(deps.homedir, "Library", "LaunchAgents", `${LABEL}.plist`);
+  const agent = join(deps.homedir, "Library", "LaunchAgents", `${label}.plist`);
   const launchd = deps.platform === "darwin" && (await deps.exists(agent));
   const socket = socketPath(paths.data);
   if (!launchd && (await deps.daemonRunning(socket)) !== "stopped") {
-    return (say(`jaari: stop the daemon first, then run \`jaari update\` again${deps.platform === "linux" ? " (sudo systemctl stop jaari.service)" : ""}`), 1);
+    return (say(`jaari: stop the daemon first, then run \`jaari update\` again${deps.platform === "linux" ? ` (sudo systemctl stop ${named}.service)` : ""}`), 1);
   }
   if (!values.yes) {
     if (!io.isTTY) return (say("jaari: update changes the installed version; run it in a terminal, or pass --yes"), 2);
@@ -141,7 +145,7 @@ export async function update(args: string[], io: Io, deps: UpdateDeps = systemDe
   const unlock = await lock(paths.home);
   if (!unlock) return (say("jaari: another `jaari update` is running"), 1);
   try {
-    return await install({ deps, say, paths, target, dist, running, launchd, agent, socket, json, waitSeconds });
+    return await install({ deps, say, paths, target, dist, running, launchd, agent, label, socket, json, waitSeconds });
   } finally {
     await unlock();
   }
@@ -149,7 +153,7 @@ export async function update(args: string[], io: Io, deps: UpdateDeps = systemDe
 
 type Install = {
   deps: UpdateDeps; say: (line: string) => void; paths: ReturnType<typeof jaariPaths>; target: string; dist: Dist; running: string;
-  launchd: boolean; agent: string; socket: string; json: <T>(url: string, what: string) => Promise<T>; waitSeconds: number;
+  launchd: boolean; agent: string; label: string; socket: string; json: <T>(url: string, what: string) => Promise<T>; waitSeconds: number;
 };
 
 // Every file of the verified tarball must be in the installed copy, byte for byte. npm downloads the package again
@@ -174,7 +178,7 @@ async function sameAsVerified(tarball: string, installed: string, exec: UpdateDe
   }
 }
 
-async function install({ deps, say, paths, target, dist, running, launchd, agent, socket, json, waitSeconds }: Install): Promise<number> {
+async function install({ deps, say, paths, target, dist, running, launchd, agent, label, socket, json, waitSeconds }: Install): Promise<number> {
   const versions = versionPaths(paths.home);
   // 1. Download and verify. Nothing is installed from a file that does not pass.
   await mkdir(versions.dir, { recursive: true, mode: 0o700 });
@@ -233,7 +237,7 @@ async function install({ deps, say, paths, target, dist, running, launchd, agent
   // The version folder that runs now; none when it is the one npm installed, or when its folder is gone.
   const before = (await activeRoot(paths.home)) ? (await readState(paths.home)).current : null;
   if (launchd) {
-    await launchctl("bootout", `gui/${deps.uid}/${LABEL}`); // fails when it is not loaded, which is fine
+    await launchctl("bootout", `gui/${deps.uid}/${label}`); // fails when it is not loaded, which is fine
     if (!(await stopped())) {
       await rm(staging, { recursive: true, force: true });
       await start();
@@ -246,7 +250,7 @@ async function install({ deps, say, paths, target, dist, running, launchd, agent
   // would be written over.
   const undo = async (why: string): Promise<number> => {
     say(`jaari: Jaari ${target} did not pass its check, so the update is undone:\n${why}`);
-    if (launchd) await launchctl("bootout", `gui/${deps.uid}/${LABEL}`);
+    if (launchd) await launchctl("bootout", `gui/${deps.uid}/${label}`);
     if (!(await stopped())) return (say(`jaari: the daemon of ${target} does not stop; nothing was put back. Stop it, then run \`jaari rollback\`.`), 1);
     if (switched) await swapBack(paths.home);
     if (snapshot) await restoreSnapshot(place, snapshot);

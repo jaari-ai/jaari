@@ -171,6 +171,22 @@ describe("jaari update (ADR-056, ADR-082, ADR-124)", () => {
     expect(long.shown).toContain("up to 300 s");
   });
 
+  it("drives the service named by --service-name, and only that one (ADR-126)", async () => {
+    const check = await world({ platform: "darwin", daemon: ["stopped", "stopped", "running"] });
+    await mkdir(join(check.home, "..", "Library", "LaunchAgents"), { recursive: true });
+    await writeFile(join(check.home, "..", "Library", "LaunchAgents", "org.jaari.daemon.check.plist"), "");
+    expect((await check.go(["--yes", "--service-name", "jaari-check"])).code).toBe(0);
+    const launchctl = check.calls.filter((call) => call.startsWith("launchctl"));
+    expect(launchctl.map((call) => call.split(" ").slice(0, 2).join(" "))).toEqual(["launchctl bootout", "launchctl bootstrap"]);
+    expect(launchctl[0]).toBe("launchctl bootout gui/501/org.jaari.daemon.check");
+    expect(launchctl[1]).toContain("org.jaari.daemon.check.plist");
+    expect(check.calls.join("\n")).not.toMatch(/org\.jaari\.daemon(\.plist|$)/m); // the owner's own agent is never touched
+
+    const bad = await world();
+    expect((await bad.go(["--yes", "--service-name", "other"])).code).toBe(2);
+    expect(bad.calls).toEqual([]);
+  });
+
   it("refuses a --wait that is not whole seconds from 1 to 3600, before anything changes", async () => {
     for (const wait of ["0", "3601", "1.5", "abc", ""]) {
       const { calls, go } = await world();

@@ -71,6 +71,22 @@ describe("jaari uninstall", () => {
     expect(text).toContain("npm uninstall --global jaari");
   });
 
+  it("removes only the service named by --service-name, and leaves the owner's agent (ADR-126)", async () => {
+    await macService(); // the owner's own agent
+    const check = join(user, "Library", "LaunchAgents", "org.jaari.daemon.check.plist");
+    await writeFile(check, "<plist/>");
+    const deps = fakes();
+    expect((await jaari(["--service-name", "jaari-check"], deps)).code).toBe(0);
+    expect(deps.exec).toHaveBeenCalledWith("launchctl", ["bootout", "gui/501/org.jaari.daemon.check"]);
+    expect(deps.exec).not.toHaveBeenCalledWith("launchctl", ["bootout", "gui/501/org.jaari.daemon"]);
+    expect(await there(check)).toBe(false);
+    expect(await there(plist())).toBe(true);
+
+    const linux = fakes({ platform: "linux" }, ["/etc/systemd/system/jaari-check.service"]);
+    expect((await jaari(["--home", home, "--yes", "--service-name", "jaari-check"], linux)).text).toContain("sudo systemctl disable --now jaari-check.service && sudo rm /etc/systemd/system/jaari-check.service");
+    expect((await jaari(["--service-name", "../x"], fakes())).code).toBe(2);
+  });
+
   it("on Linux prints the sudo commands and does not run systemctl", async () => {
     const deps = fakes({ platform: "linux" }, [UNIT, CREDSTORE]);
     const { code, text } = await jaari(["--home", home, "--yes"], deps);
