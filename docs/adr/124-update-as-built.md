@@ -124,7 +124,7 @@ ADR-056, ADR-082, ADR-122, ADR-123, [ADR-043](043-project-process.md), and
   `ProcessType` `Background`, which launchd.plist(5) reserves for work the user did not ask for
   (loading the daemon code took 0.6 s at normal priority and 7.4 s at background priority), and
   the fixed wait. From the next release the launchd job is `Standard`, the update waits up to two
-  minutes and says that it waits, and the undo says the daemon runs only once it answers. The
+  minutes by default (`--wait <seconds>`, 1 to 3600, changes it) and says that it waits, and the undo says the daemon runs only once it answers. The
   update runs the code of the active version, so owners update from an older version while the
   Mac is not busy, then run `jaari service install` once. Linux is not affected: the systemd unit
   sets no lower priority, and there the owner stops and starts the daemon. Windows (ADR-125) sets

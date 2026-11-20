@@ -72,6 +72,11 @@ from before the update.
 
 Betas: set `"update": { "channel": "beta" }` in the config, or pass `--channel beta`.
 
+After the switch, `jaari update` waits up to 120 seconds for the new daemon to answer before it
+counts the update as failed and undoes it. On a slow or busy machine, give it longer:
+`jaari update --wait 300`. On a fast one you can shorten it, for example `--wait 30`. The value is
+whole seconds, from 1 to 3600, and the undo waits as long.
+
 The first release, `0.1.0-beta.1`, has no `jaari update`: install the next one once with
 `npm install --global --ignore-scripts jaari@next`.
 
