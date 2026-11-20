@@ -5,7 +5,7 @@ Last updated: 2026-11-20
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
 
-## Decided (124 ADRs, all Accepted)
+## Decided (126 ADRs, all Accepted)
 The index is [adr/README.md](adr/README.md). By area:
 - Identity, licence, process: `jaari.org`, GitHub org `jaari-ai`, MIT; one contact address,
   DCO, lockstep releases, hardened supply chain; registry accounts on `hello@jaari.org`
@@ -20,7 +20,9 @@ The index is [adr/README.md](adr/README.md). By area:
 - Hosting: one daemon on a VPS, remote server, home hardware, or laptop; capabilities installed
   where they run; nodes over a pinned link; the owner's choice of overlay; install, update,
   and laptop rules; the overlay binding in Phase 2 and the node link in Phase 6; the sandbox
-  under Compose (ADR-015, 017, 030, 056, 057, 058, 082, 088, 094).
+  under Compose (ADR-015, 017, 030, 056, 057, 058, 082, 088, 094). The daemon runs on Linux,
+  macOS, and Windows; Windows from Phase 0, as a per-user scheduled task with a named pipe and
+  Credential Manager (ADR-125). The update is tested from local builds, not releases (ADR-126).
 - Channels and the owner: CLI, web panel, and Telegram in v1, email as input only; pairing and
   one active channel; typed prompts; the owner panel; one owner per Jaari (ADR-021, 022, 035,
   044, 067); a paired MCP client is not a channel (ADR-101).
@@ -204,8 +206,9 @@ The owner can talk to the daemon through `jaari chat` on its local socket (0.8).
 ## Now
 Phase 0: Foundation, gate passed on 2026-11-20: items 0.1 to 0.18 are Verified (0.3, documents, Delivered), and the 19 exit
 criteria pass with the evidence in [audits/phase-0-exit.md](audits/phase-0-exit.md). Not shown yet, and not an exit
-criterion: an install and `jaari update` under systemd, and `jaari rollback` after a real update. Next: Phase 1
-(Memory), from item 1.1. Per-item status, needs, and exit criteria are in
+criterion: an install and `jaari update` under systemd, and `jaari rollback` after a real update. Reopened the same day for two items the
+owner added: 0.19, Windows as a host (ADR-125), and 0.20, testing `jaari update` from local builds
+instead of releases (ADR-126). Next: 0.20, then 0.19; then Phase 1 (Memory), from item 1.1. Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
 No open question blocks Phase 0 or Phase 1.
 

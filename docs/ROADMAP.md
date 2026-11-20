@@ -60,6 +60,8 @@ effect. Entry: none.
 | 0.16 | Prompt-injection floor: the locked safety section, `fence()` and `defuse`, the reply marker filter, and canary and fence-id scanning in the `@jaari/http` core (model calls excepted, ADR-120) and channel send paths | 042, 104, 120 | 0.5, 0.8, 0.15 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-17) |
 | 0.17 | Release: one public npm package `jaari` (daemon and command), a multi-arch image on the GitHub container registry, both signed without a stored key (npm provenance, cosign); staged npm approval; the `compose.yaml` that `jaari init` writes; in `jaari doctor`, a TPM and Linux disk encryption | 010, 056, 079, 094, 122, 123 | 0.12 | Verified (2026-11-19, `v0.1.0-beta.1`: npm `next` with provenance, signed GHCR image for amd64 and arm64, installed and started from npm) |
 | 0.18 | `jaari update`: registry signature and provenance checked offline, a snapshot, versions kept side by side with a `current` link and a launcher, `jaari-daemon --check` and `jaari doctor` after the swap, automatic rollback of data and version; `update.channel`; `jaari uninstall`; release notes from the GitHub release (ADR-124) | 043, 056, 082, 122, 123, 124 | 0.17 | Verified (2026-11-20, `v0.1.0-beta.2` to `v0.1.0-beta.3` on macOS under launchd: verified signature and provenance, snapshot, `current` link switched, daemon running, `jaari doctor` healthy; the undo on a failed check shown with a packed build; systemd not shown yet) |
+| 0.19 | Windows host: `os-keychain` on Credential Manager, the named-pipe chat channel, a per-user scheduled task with explicit settings, the folder ACL, the PowerShell power hold, `node <script>` instead of shims and System32 tools by full path, the npm layout and a junction for `current`, the doctor checks; CI on Windows (ADR-125) | 057, 112, 121, 122, 124, 125 | 0.12, 0.18, 0.20 | Planned |
+| 0.20 | Local update check: `scripts/check-update.mjs` runs the real `jaari update` between two local builds, with and without a real service under a test name, and its undo; `--service-name`; CI on Linux, macOS, and Windows (ADR-126) | 124, 126 | 0.18 | Planned |
 
 Exit criteria:
 - The tier-1 smoke test boots the daemon on the scripted engine in CI on every pull request,
@@ -100,8 +102,15 @@ Exit criteria:
   breakouts) cannot open or close a fence, and an outbound call carrying the canary is blocked
   with an audit row; a model call is not scanned (ADR-104, ADR-120).
 
+- On Windows, the CI test job passes, the daemon starts from the npm tarball, the chat works over
+  the named pipe, another account cannot write to it, and `jaari doctor` fails when an account other
+  than the owner, `SYSTEM`, and `Administrators` can read the Jaari folder (ADR-125).
+- `scripts/check-update.mjs` updates between two local builds and undoes a build whose `jaari
+  doctor` fails, with the data from before, on Linux, macOS, and Windows in CI (ADR-126).
+
 No open question blocks this phase.
-Gate status: passed (2026-11-20). Evidence for each criterion: [Phase 0 exit audit](audits/phase-0-exit.md).
+Gate status: passed for 0.1 to 0.18 (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md)); reopened for 0.19
+and 0.20, which the owner added on 2026-11-20 (ADR-125, ADR-126).
 
 ## Phase 1: Memory
 
@@ -362,8 +371,7 @@ Gate status: not passed.
 
 Live calls and a phone number (ADR-037, ADR-063); payments rail (`pay` is reserved, ADR-040);
 face recognition, image similarity search, and albums (ADR-066); WhatsApp and iMessage
-channels (ADR-021); a multi-owner instance (ADR-044); embeddings (ADR-023); Windows
-(ADR-057); a node relay (ADR-058); trust tiers and the agent network (non-goals for v1,
+channels (ADR-021); a multi-owner instance (ADR-044); embeddings (ADR-023); a node relay (ADR-058); trust tiers and the agent network (non-goals for v1,
 ADR-020).
 
 ## Egress in steps

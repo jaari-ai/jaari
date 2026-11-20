@@ -11,7 +11,8 @@ background, gets to know you at a pace you set, and never takes an external acti
 (send, publish) without an approval bound to the exact action. Payments are reserved, not
 in v1.
 
-> **Status: Phase 0 (Foundation) is done; early software, pre-release.** The daemon, a chat in the terminal, and the
+> **Status: Phase 0 (Foundation), early software, pre-release.** Linux and macOS work today; Windows
+> support is being built. The daemon, a chat in the terminal, and the
 > install commands work; memory, channels, and tools come in later phases. See
 > [docs/STATE.md](https://github.com/jaari-ai/jaari/blob/main/docs/STATE.md).
 >
