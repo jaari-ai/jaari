@@ -159,6 +159,17 @@ describe("tier-1 smoke", () => {
     expect(await listSnapshots(join(fresh.root, "data"))).toEqual([]);
   });
 
+  it("opens the memory repo and its writer at start, private, with its intent store (ADR-026, ADR-132)", async () => {
+    const { root, boot } = await setup();
+    const daemon = await boot();
+    expect(await daemon.memory.submit({ files: [{ path: "profile/owner.md", content: "- Likes tea\n" }], message: "Note", actor: "test" })).toMatchObject({ ok: true });
+    expect(await daemon.memory.submit({ files: [{ path: "profile/owner.md", content: "token sk-ant-api03-abcdefghijklmnopqrstuvwxyz0123456789" }], message: "Leak", actor: "test" })).toMatchObject({ ok: false });
+    await daemon.close();
+    expect((await stat(join(root, "data", "memory"))).mode & 0o777).toBe(0o700);
+    expect((await stat(join(root, "data", "memory.db"))).mode & 0o777).toBe(0o600);
+    expect(await readFile(join(root, "data", "memory", "profile", "owner.md"), "utf8")).toBe("- Likes tea\n");
+  });
+
   it("copies the data once when a new version starts, so the way back after an image update has it (OQ-96)", async () => {
     const { root, boot } = await setup();
     const data = join(root, "data");

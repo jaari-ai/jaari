@@ -127,7 +127,7 @@ Purpose: Jaari remembers, recalls, and tidies its memory on a schedule. Entry: 0
 
 | ID | Item | ADRs | Needs | Status |
 |---|---|---|---|---|
-| 1.1 | Memory repo, single writer, write path; pre-write secret scan of derived facts and files; binary files refused in git | 003, 026, 028, 081, 087, 100 | 0.5 | Planned |
+| 1.1 | Memory repo, single writer, write path; pre-write secret scan of derived facts and files; binary files refused in git | 003, 026, 028, 081, 087, 100, 132 | 0.5 | Implemented (2026-11-21: `packages/memory/src/writer.test.ts`, the daemon smoke test; the exit criteria on half-done intents and on a secret in a derived fact have tests) |
 | 1.2 | Structured records, `records.query`, FTS5 search; sensitivity marking by type and rules | 023, 093 | 1.1 | Planned |
 | 1.3 | Context assembly with harness notes and authority labels (the ADR-117 reply line is labelled as Jaari's quoted words, not the owner's); harness notes on the reply line and the compaction summary, and the per-turn prompt fingerprint (ADR-042, ADR-120); session orientation and re-injection from state | 024, 042, 065, 104, 117, 120 | 1.2, 0.16 | Planned |
 | 1.4 | Job engine; catch-up after sleep on `power.wake`, the power assertion per job, and background jobs that pause on `backgroundPaused()` (in `@jaari/core`, ADR-121); job-tree abort | 025, 057, 082, 086, 031, 087, 121 | 0.5, 0.13 | Planned |

@@ -4,6 +4,10 @@ FROM node:26.13.1-trixie-slim@sha256:e6bedef217677b276c591795e169840edd9096dbf13
 LABEL org.opencontainers.image.source="https://github.com/jaari-ai/jaari" \
       org.opencontainers.image.description="Jaari, a self-hosted, single-owner personal AI agent" \
       org.opencontainers.image.licenses="MIT"
+# git for the memory repo (ADR-132), from the base image's own Debian release; the lists are removed in the same layer.
+RUN apt-get update \
+ && apt-get install --yes --no-install-recommends git \
+ && rm -rf /var/lib/apt/lists/*
 COPY dist/npm/jaari-*.tgz /tmp/
 RUN npm install --global --ignore-scripts --no-audit --no-fund /tmp/jaari-*.tgz \
  && rm /tmp/jaari-*.tgz \

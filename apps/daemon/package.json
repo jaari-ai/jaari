@@ -25,6 +25,7 @@
     "@jaari/core": "workspace:*",
     "@jaari/http": "workspace:*",
     "@jaari/llm": "workspace:*",
+    "@jaari/memory": "workspace:*",
     "@jaari/secrets": "workspace:*"
   }
 }

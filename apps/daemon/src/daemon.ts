@@ -10,6 +10,7 @@ import { CLI_MANIFEST, createCliChannel, createIngress, socketPath } from "@jaar
 import { commandOf, createMarkers, createPowerWatch, createSession, LIMITS, openDatabase, openEventLog, openStore, ownerIdOf, randomMarker, SAFETY, STORE_MIGRATIONS, listSnapshots, restoring, storeVersion, systemPrompt, takeSnapshot, type Config, type PowerDeps } from "@jaari/core";
 import { createEgress, type EgressPolicy } from "@jaari/http";
 import { checkLlmConfig, createLlm, openUsageLog, USAGE_MIGRATIONS } from "@jaari/llm";
+import { MEMORY_MIGRATIONS, openMemory } from "@jaari/memory";
 import { createHostCredentialProvider, createOsKeychainProvider, resolveRef, type VaultProvider } from "@jaari/secrets";
 
 // The sections of the owner's config (ADR-118) that the daemon reads in Phase 0. `llm` is checked by @jaari/llm.
@@ -76,7 +77,7 @@ export async function startDaemon(options: DaemonOptions) {
     // A store that this start will migrate is copied first, with the config, so `jaari rollback` can put it back
     // (ADR-082, ADR-122). A store newer than this Jaari is refused below and needs no copy. One copy per target: a
     // start that fails after a migration and is restarted (launchd, systemd) must not prune the copy of the original.
-    const target = { "session.db": STORE_MIGRATIONS.length, "usage.db": USAGE_MIGRATIONS.length };
+    const target = { "session.db": STORE_MIGRATIONS.length, "usage.db": USAGE_MIGRATIONS.length, "memory.db": MEMORY_MIGRATIONS.length };
     const migrates = Object.entries(target).some(([file, steps]) => (storeVersion(join(dataDir, file)) ?? steps) < steps);
     const latest = (await listSnapshots(dataDir)).at(-1);
     // A version other than the one that ran last also copies the data first, so the way back after an image update
@@ -97,6 +98,9 @@ export async function startDaemon(options: DaemonOptions) {
     opened.push(store);
     const usage = openUsageLog(openDatabase(join(dataDir, "usage.db"), ownerId, USAGE_MIGRATIONS), ownerId);
     opened.push(usage);
+    // The memory repo and its single writer (ADR-026): a write cut short by a crash is finished or quarantined here.
+    const memory = await openMemory({ dir: join(dataDir, "memory"), dbPath: join(dataDir, "memory.db"), ownerId, events });
+    opened.push({ close: () => void memory.close() });
     // The canary belongs to the install: made once, kept with the conversation, so a restored backup keeps it. The
     // fence id is new at every start (ADR-104, ADR-120).
     const canary = store.get<string>("canary") ?? randomMarker(24);
@@ -149,6 +153,7 @@ export async function startDaemon(options: DaemonOptions) {
     let closing: Promise<void> | undefined;
     return {
       session,
+      memory,
       egress,
       power,
       socketPath: socketPath(dataDir),

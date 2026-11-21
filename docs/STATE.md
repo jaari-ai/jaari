@@ -212,7 +212,8 @@ criterion passes, with the evidence in [audits/phase-0-exit.md](audits/phase-0-e
 when a new version starts (ADR-129), and Docker Compose is the main install, with the data in a named volume where the
 host's folder cannot hold the chat socket (ADR-130). Phase gates check Docker only; host-specific work (launchd,
 systemd, Windows, the former item 0.19) is a checklist in [HOSTS.md](HOSTS.md), outside the phases (ADR-131).
-Next: Phase 1 (Memory), from item 1.1. Per-item status, needs, and exit criteria are in
+Phase 1 (Memory) started: 1.1, the memory repo and its single writer, is Implemented (ADR-132), with `git` in the
+image. Next: 1.2 (structured records and search). Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
 No open question blocks Phase 0 or Phase 1.
 

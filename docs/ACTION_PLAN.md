@@ -172,3 +172,4 @@ status and exit criteria live there.
 | [129](adr/129-snapshot-on-version-change.md) | The daemon copies the data when a new version starts, and the copy names that version | Accepted |
 | [130](adr/130-compose-on-every-host.md) | Docker Compose on every host as built: a socket probe, the data in a named volume where the host's folder cannot hold the socket, and a root step that only sets its owner | Accepted |
 | [131](adr/131-gates-are-docker-only.md) | Phase gates check Docker only; host-specific work lives in HOSTS.md, outside the roadmap phases | Accepted |
+| [132](adr/132-memory-writer-as-built.md) | The memory writer as built: the git program, run with hooks off, an intent store, and trailers | Accepted |

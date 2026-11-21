@@ -1,0 +1,22 @@
+{
+  "name": "@jaari/memory",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The git-backed Markdown memory and its single writer: the closure ladder, the owner's edits, the pre-write secret scan, and no binary files in git (ADR-003, ADR-026, ADR-028, ADR-100, ADR-132)",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@jaari/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@jaari/channels": "workspace:*",
+    "@jaari/core": "workspace:*"
+  }
+}

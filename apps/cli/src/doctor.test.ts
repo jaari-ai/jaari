@@ -8,7 +8,7 @@ import { fakeDaemon, install, OWNER, terminal } from "./testing.js";
 
 const deps = (over: Partial<DoctorDeps> = {}): DoctorDeps => ({
   keychain: () => ({ resolve: () => Promise.reject(new Error("no entry")), health: () => Promise.resolve({ ok: true }) }),
-  platform: "darwin", node: "26.13.1", unitPath: "/nonexistent/jaari.service",
+  platform: "darwin", node: "26.13.1", unitPath: "/nonexistent/jaari.service", gitPath: "/usr/bin/git",
   exec: () => Promise.resolve("FileVault is On.\n"),
   ...over,
 });
@@ -27,7 +27,7 @@ it("passes a healthy install, and shows no secret", async () => {
   await stop();
   expect(shown).toContain("Healthy, 0 warnings.");
   expect(code).toBe(0);
-  for (const line of ["ok    Node 26.13.1", 'ok    the key of provider "faux" can be read', "ok    session.db is at version", "ok    the daemon answers", "ok    disk encryption: FileVault is on", "host-credential, plain owner-only files"]) expect(shown).toContain(line);
+  for (const line of ["ok    Node 26.13.1", 'ok    the key of provider "faux" can be read', "ok    session.db is at version", "ok    the daemon answers", "ok    git at /usr/bin/git, for the memory repo", "ok    disk encryption: FileVault is on", "host-credential, plain owner-only files"]) expect(shown).toContain(line);
   expect(shown).not.toContain("scripted-key");
 });
 
@@ -41,6 +41,13 @@ it("fails when the daemon is down, a key is missing, or the data is open to othe
   expect(shown).toMatch(/FAIL {2}the key of provider "faux"/);
   expect(shown).toMatch(/FAIL {2}open to other users: .*events\.ndjson/);
   expect(shown).toContain("3 failed");
+});
+
+it("fails without the git that the memory writer runs (ADR-132)", async () => {
+  const { home } = await install();
+  const { code, shown } = await check(home, { gitPath: "/nonexistent/git" });
+  expect(code).toBe(1);
+  expect(shown).toContain("FAIL  no git at /nonexistent/git: the daemon needs it for the memory repo");
 });
 
 it("stops at a config it cannot read, and names each problem", async () => {
