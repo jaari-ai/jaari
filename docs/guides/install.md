@@ -5,11 +5,12 @@ check runs there (ADR-128). Installing it from npm on the host, under launchd or
 until it is confirmed for that system ([HOSTS.md](../HOSTS.md)). It is early software: Phase 0 gives
 you the daemon and a chat in the terminal.
 
-## With Docker (Linux, macOS, Windows)
+## With Docker Compose (Linux, macOS, Windows)
 
-You need Docker Engine 25 or later with Compose on Linux, or Docker Desktop on macOS or Windows. On
-Windows, run the commands in a WSL 2 shell with Docker Desktop's WSL integration turned on (not tested
-yet). Run them as the account that will own Jaari, not as root. Replace `VERSION`. When `jaari init`
+You need a Docker engine with Compose, Engine 25 or later: Docker Engine on Linux; on macOS and
+Windows an engine that runs Linux in a virtual machine, such as Docker Desktop (the one tested). On
+Windows, run the commands in a WSL 2 shell, with Docker Desktop's WSL integration or Docker Engine
+inside WSL (not tested yet). Run them as the account that will own Jaari, not as root. Replace `VERSION`. When `jaari init`
 asks where Jaari runs, answer `server` or `home`: the laptop features (keeping the computer awake for
 a turn, the battery) do not work in a container.
 
@@ -33,8 +34,8 @@ cosign verify ghcr.io/jaari-ai/jaari:VERSION \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ~~~
 
-On Docker Desktop, `jaari init` puts the data folder in a Docker volume, because a folder shared from
-macOS or Windows cannot keep the chat socket private (ADR-130). You don't see the data in Finder or
+On macOS, and in a folder shared from Windows, `jaari init` puts the data folder in a Docker volume,
+because such a folder cannot keep the chat socket private (ADR-130). You don't see the data in Finder or
 Explorer; `docker compose run --rm admin …` reaches it. `docker compose down --volumes` deletes that
 volume, and with it the data: use it only to remove Jaari.
 

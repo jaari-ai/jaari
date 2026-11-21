@@ -91,7 +91,8 @@ export type Step = (typeof STEPS)[number];
 export type Host = { version: string; uid: number; gid: number; dataVolume?: boolean };
 const thisHost = (): Host => ({ version: VERSION, uid: process.getuid?.() ?? -1, gid: process.getgid?.() ?? -1 });
 
-// Docker Desktop shares folders from macOS or Windows, where a socket's mode cannot be set (EINVAL): the chat socket
+// An engine on macOS or Windows shares the host's folders into its Linux machine, where a socket's mode cannot be set
+// (EINVAL): the chat socket
 // cannot be private there, so the data goes in a volume inside Docker's Linux machine (ADR-128).
 async function socketsKeepMode(dir: string): Promise<boolean> {
   const path = join(dir, `.probe-${process.pid}.sock`);

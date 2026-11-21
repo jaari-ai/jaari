@@ -3,8 +3,8 @@
 // shortcut: Docker's default seccomp profile; the profile for bubblewrap ships with the first sandbox (roadmap 4.7)
 export const IMAGE = "ghcr.io/jaari-ai/jaari";
 
-// `dataVolume`: the data in a named volume, for Docker Desktop, whose folders shared from macOS or Windows cannot hold the
-// chat socket's mode (ADR-128).
+// `dataVolume`: the data in a named volume, for an engine that shares the host's folders into its Linux machine (macOS,
+// Windows), where they cannot hold the chat socket's mode (ADR-130).
 export type ComposeOptions = { version: string; uid: number; gid: number; secrets: { name: string; file: string }[]; dataVolume?: boolean };
 
 const DATA = "/home/jaari/.jaari/data";

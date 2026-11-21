@@ -30,7 +30,8 @@ test "$("${run[@]}" jaari:check jaari --version)" = "$version"
 "${run[@]}" jaari:check jaari-daemon --check
 
 # The file an owner gets, run as an owner runs it: `jaari init` inside the image, `docker compose up`, then `doctor`
-# beside the daemon. On Docker Desktop, init puts the data in a named volume (ADR-130).
+# beside the daemon. Where the host folder is shared into Docker's Linux machine (macOS, Windows), init puts the data
+# in a named volume (ADR-130).
 docker tag jaari:check "ghcr.io/jaari-ai/jaari:$version"
 mkdir -m 700 "$work/home"
 printf '%s\n' server host-credential "" local "" smoke http://192.0.2.1:11434/v1 | docker run --rm -i --user "$(id -u):$(id -g)" \

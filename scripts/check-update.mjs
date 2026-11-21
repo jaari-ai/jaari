@@ -11,8 +11,8 @@
 //      with the data from before.
 // --service (macOS): the same through a real launchd agent under the test name `jaari-check`, never the owner's own;
 //   the first update also sees a start that answers only after 20 s, past the old 15 s wait.
-// --docker: two local images and the image update as the guide has it, then the way back. On Docker Desktop the data
-//   folder is a volume inside Docker's Linux machine (ADR-127, point 3).
+// --docker: two local images and the image update as the guide has it, then the way back. On macOS and Windows the
+//   data folder is a volume inside Docker's Linux machine (ADR-130).
 import { execFile, spawn } from "node:child_process";
 import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -219,15 +219,15 @@ async function checkDocker(tarballs) {
     await must("docker", ["build", "--quiet", "--file", join(ROOT, "docker", "Dockerfile"), "--tag", image(version), context]);
   }
   // As the guide runs it: inside the image, as the owner's account, on the Jaari folder of the host. There it finds
-  // whether that folder can hold the chat socket (Docker Desktop cannot), and writes the data volume if not (ADR-128).
+  // whether that folder can hold the chat socket (a folder shared from macOS or Windows cannot), and writes the data volume if not (ADR-128).
   // The answers check-release.sh gives: a server, host-credential, a local model with no key.
   await mkdir(home, { recursive: true, mode: 0o700 });
   const init = spawn("docker", ["run", "--rm", "-i", "--user", `${process.getuid()}:${process.getgid()}`, "--env", "HOME=/home/jaari", "--volume", `${home}:/home/jaari/.jaari`, image(VERSIONS[0]), "jaari", "init"], { stdio: ["pipe", "ignore", "inherit"] });
   init.stdin.end(["server", "host-credential", "", "local", "", "check", "http://192.0.2.1:11434/v1", ""].join("\n"));
   check((await new Promise((done) => init.once("exit", done))) === 0, "`jaari init` writes compose.yaml");
-  // Docker Desktop runs on macOS and Windows; Docker on Linux shares the host's own file system.
+  // On macOS and Windows the engine shares the host's folder into its Linux machine; on Linux it is the host's own.
   const volume = (await readFile(join(home, "compose.yaml"), "utf8").catch(() => "")).includes("        source: data\n");
-  check(volume === (process.platform !== "linux"), volume ? "the data is in a named volume, as Docker Desktop needs" : "the data is in the host folder, as on Linux");
+  check(volume === (process.platform !== "linux"), volume ? "the data is in a named volume, as a shared host folder needs" : "the data is in the host folder, as on Linux");
 
   const file = join(home, "compose.yaml");
   const tag = async (from, to) => writeFile(file, (await readFile(file, "utf8")).replace(image(from), image(to)));

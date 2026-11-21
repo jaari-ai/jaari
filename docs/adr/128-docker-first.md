@@ -1,7 +1,7 @@
 # ADR-128: Docker is the main way to run and test Jaari; a real host is optional until the owner confirms it
 
 - **Status:** Accepted
-- **Extended by:** [ADR-130](130-compose-on-docker-desktop.md)
+- **Extended by:** [ADR-130](130-compose-on-every-host.md)
 - **Date:** 2026-11-21
 
 ## Context
@@ -49,7 +49,7 @@ when the owner asks for it; a host joins the supported installs once the owner c
   jobs until a big milestone (ADR-126).
 
 ## Amendments
-- **ADR-130:** point 1 as built: the socket probe, the `nocopy` volume, and the `data` step.
+- **ADR-130:** point 1 as built: any Docker engine with Compose on each host, not only Docker Desktop; the socket probe, the `nocopy` volume, and the `data` step.
 
 ## Consequences
 - Phase 0 waits for 0.20 (Docker mode of the local check) and 0.21 (Compose on Docker Desktop), not

@@ -226,7 +226,7 @@ it("writes compose.yaml on a server: pinned image, the owner's account, the cont
   expect(shown).not.toContain("cd /"); // this may run inside the container, whose paths mean nothing on the host
 });
 
-it("keeps the data in a named volume where a socket's mode cannot be set, as on Docker Desktop (ADR-128)", async () => {
+it("keeps the data in a named volume where a socket's mode cannot be set, as in a folder shared from macOS or Windows (ADR-130)", async () => {
   expect((await composeRun(["", "", "", "", "", "claude-test"], { version: "1.2.3", uid: 501, gid: 20, dataVolume: true })).code).toBe(0);
   const text = await readFile(join(home, "compose.yaml"), "utf8");
   expect(text).not.toContain("./data:");

@@ -1,7 +1,7 @@
 # Jaari: Hosts
 
-Docker is the one install that covers every host: Linux, macOS, and Windows run the same Linux image
-with Compose, and every check runs there (ADR-128). Bare metal, where Jaari runs from npm under the
+Docker Compose is the one install that covers every host: Linux, macOS, and Windows run the same
+Linux image with Compose, on any Docker engine, and every check runs there (ADR-128). Bare metal, where Jaari runs from npm under the
 system's own service manager, is for later: this file keeps what each system needs and what was
 found, so that the work can start from it when the owner asks for a host. Then its list below becomes
 a roadmap item, and once its checks pass on the owner's machine it is marked confirmed here, with the
@@ -9,11 +9,11 @@ date and the evidence (ADR-128, point 4).
 
 ## Docker: every host
 
-| Host | Docker | Notes | Shown |
+| Host | Engine with Compose | Notes | Shown |
 |---|---|---|---|
 | Linux | Docker Engine 25 or later with Compose | The data in `./data` in the Jaari folder | `check-release.sh` in CI on every pull request; the Phase 0 exit ([audits/phase-0-exit.md](audits/phase-0-exit.md)) |
-| macOS | Docker Desktop | The data in a named volume (ADR-130) | 2026-11-21: `check-release.sh`, `check-update.mjs --docker` with the way back (ADR-129), and an install with a key file |
-| Windows | Docker Desktop, commands in a WSL 2 shell | In the WSL file system the data stays in `./data`; in a folder shared from Windows, `jaari init` picks the volume | Not run yet |
+| macOS | An engine that runs Linux in a virtual machine (Docker Desktop tested) | The data in a named volume (ADR-130) | 2026-11-21: `check-release.sh`, `check-update.mjs --docker` with the way back (ADR-129), and an install with a key file |
+| Windows | An engine with WSL 2 (Docker Desktop, or Docker Engine inside WSL), commands in a WSL 2 shell | In the WSL file system the data stays in `./data`; in a folder shared from Windows, `jaari init` picks the volume | Not run yet |
 
 Found on Docker, and handled:
 - A folder shared from macOS or Windows keeps file and folder modes but cannot set a socket's mode
@@ -28,7 +28,7 @@ Found on Docker, and handled:
   detection of sleep works there (ADR-128).
 
 Open:
-- [ ] Run `check-release.sh` and `check-update.mjs --docker` on Docker Desktop for Windows.
+- [ ] Run `check-release.sh` and `check-update.mjs --docker` on Windows.
 - [ ] A chat with a real model key under Compose (`docker compose exec jaari jaari chat`).
 
 ## Bare metal: for later

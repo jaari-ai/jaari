@@ -1,7 +1,7 @@
 # ADR-127: Docker as a platform: a health check, `up --wait` instead of a pause, a local image check, and Compose on Linux hosts only
 
 - **Status:** Accepted
-- **Extended by:** [ADR-128](128-docker-first.md), [ADR-129](129-snapshot-on-version-change.md), [ADR-130](130-compose-on-docker-desktop.md)
+- **Extended by:** [ADR-128](128-docker-first.md), [ADR-129](129-snapshot-on-version-change.md), [ADR-130](130-compose-on-every-host.md)
 - **Date:** 2026-11-20
 
 ## Context
@@ -55,7 +55,7 @@ mode of a socket in a folder shared from the host, so the data folder cannot be 
 ## Amendments
 - **ADR-128:** Compose on Docker Desktop, with the data folder in a named volume, is a supported install on macOS and Windows (roadmap 0.21); point 3 no longer holds.
 - **ADR-129:** the way back under Compose restores the latest snapshot when `admin rollback --list` shows it by the new version (OQ-96 resolved).
-- **ADR-130:** on Docker Desktop `compose.yaml` keeps the data in a named volume, chosen by a socket probe in `jaari init`, with a one-off root step that only sets its owner.
+- **ADR-130:** Compose runs on every host; where the host's folder cannot hold the chat socket, `compose.yaml` keeps the data in a named volume, chosen by a socket probe in `jaari init`, with a one-off root step that only sets its owner.
 
 ## Consequences
 - Roadmap 0.20 builds the health check, the guide change, and the Docker mode of the local check.
