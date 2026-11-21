@@ -170,3 +170,4 @@ status and exit criteria live there.
 | [127](adr/127-docker-as-a-platform.md) | Docker as a platform: a health check, `up --wait` instead of a pause, a local image check, and Compose on Linux hosts only | Accepted |
 | [128](adr/128-docker-first.md) | Docker is the main way to run and test Jaari; a real host is optional until the owner confirms it | Accepted |
 | [129](adr/129-snapshot-on-version-change.md) | The daemon copies the data when a new version starts, and the copy names that version | Accepted |
+| [130](adr/130-compose-on-docker-desktop.md) | Compose on Docker Desktop as built: a socket probe, the data in a named volume, and a root step that only sets its owner | Accepted |

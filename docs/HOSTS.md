@@ -23,7 +23,7 @@ lists it. A new host-facing feature adds its task for each host that is not *Mai
 | Host | Install | Status | Roadmap |
 |---|---|---|---|
 | Linux, Docker Engine | Compose | Main | 0.17, 0.20 |
-| macOS, Docker Desktop | Compose | Main once 0.21 is Verified | 0.21 |
+| macOS, Docker Desktop | Compose | Main once 0.21 is Verified (code in, shown 2026-11-21) | 0.21 |
 | Windows, Docker Desktop | Compose | Main once 0.21 is Verified | 0.21 |
 | macOS, launchd | npm | Optional | 0.12, 0.13, 0.18 |
 | Linux, systemd | npm | Optional | 0.12, 0.18 |
@@ -45,8 +45,10 @@ Tasks:
 - [x] 0.20: the way back under Compose (ADR-129); `check-update.mjs --docker` passes on Docker
       Desktop (2026-11-21).
 - [ ] `check-update.mjs --docker` passes on Linux Docker Engine.
-- [ ] 0.21: the data folder in a named volume on Docker Desktop, `jaari init` writes `compose.yaml`
-      there, and the guide puts Compose first.
+- [x] 0.21: the data folder in a named volume on Docker Desktop, chosen by `jaari init`, and the
+      guide puts Compose first (ADR-130). Shown on macOS on 2026-11-21: `check-update.mjs --docker`,
+      and an install with a key file (healthy, `admin doctor` passes).
+- [ ] 0.21: the chat with a real model on Docker Desktop (`docker compose exec jaari jaari chat`).
 - [ ] 0.21: `scripts/check-release.sh` and `check-update.mjs --docker` pass on Docker Desktop on
       Windows.
 

@@ -1,7 +1,8 @@
 // `jaari init [--home <dir>]`: ask a few questions and write the owner config (ADR-056). Run again, it revisits every
 // step with the current values as defaults and edits only what changed, so the owner's comments stay.
 import { randomBytes, randomUUID } from "node:crypto";
-import { lstat, mkdir, readFile, readlink, realpath, rename, rm, writeFile } from "node:fs/promises";
+import { chmod, lstat, mkdir, readFile, readlink, realpath, rename, rm, writeFile } from "node:fs/promises";
+import { createServer } from "node:net";
 import { dirname, join, relative, resolve } from "node:path";
 import { isDeepStrictEqual, parseArgs } from "node:util";
 import { CONFIG_VERSION, ConfigError, credentialsDirOf, isInsideData, jaariPaths, parseConfig, type Config } from "@jaari/core/config";
@@ -86,8 +87,24 @@ export const STEPS = ["deployment", "secrets", "llm"] as const;
 export type Step = (typeof STEPS)[number];
 
 // What `compose.yaml` takes from this machine and this build; a test passes its own.
-export type Host = { version: string; uid: number; gid: number };
+// `dataVolume`: whether the data goes in a named volume; found by `socketsKeepMode` unless a test sets it.
+export type Host = { version: string; uid: number; gid: number; dataVolume?: boolean };
 const thisHost = (): Host => ({ version: VERSION, uid: process.getuid?.() ?? -1, gid: process.getgid?.() ?? -1 });
+
+// Docker Desktop shares folders from macOS or Windows, where a socket's mode cannot be set (EINVAL): the chat socket
+// cannot be private there, so the data goes in a volume inside Docker's Linux machine (ADR-128).
+async function socketsKeepMode(dir: string): Promise<boolean> {
+  const path = join(dir, `.probe-${process.pid}.sock`);
+  const server = createServer();
+  // A socket that cannot be made at all (a path too long) tells nothing: the folder stays, as before.
+  const made = await new Promise<boolean>((done) => server.once("error", () => done(false)).listen(path, () => done(true)));
+  try {
+    return !made || (await chmod(path, 0o600).then(() => true, () => false));
+  } finally {
+    if (made) await new Promise((done) => server.close(done));
+    await rm(path, { force: true });
+  }
+}
 
 // A server keeps its secrets in files, and Compose hands them to the daemon (ADR-056, ADR-079). The owner's own edits
 // are never overwritten: a different file goes beside it. A checkout has no published image, so it writes none.
@@ -100,9 +117,11 @@ async function writeCompose(config: Config, paths: ReturnType<typeof jaariPaths>
     const inside = relative(paths.home, join(dir, name));
     return { name, file: inside.startsWith("..") ? join(dir, name) : `./${inside}` };
   });
-  const text = composeFile({ version: host.version, uid: host.uid, gid: host.gid, secrets });
+  await mkdir(paths.home, { recursive: true, mode: 0o700 });
+  const dataVolume = host.dataVolume ?? !(await socketsKeepMode(paths.home));
+  const text = composeFile({ version: host.version, uid: host.uid, gid: host.gid, secrets, dataVolume });
   // Docker would create a missing folder as root, and the daemon could not write to it.
-  await mkdir(paths.data, { recursive: true, mode: 0o700 });
+  if (!dataVolume) await mkdir(paths.data, { recursive: true, mode: 0o700 });
   const path = join(paths.home, "compose.yaml");
   const existing = await readExisting(path);
   if (existing === text) return true;
