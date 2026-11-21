@@ -1,6 +1,8 @@
 // Starts the daemon's parts in order and refuses to start on any failure: secrets, egress, model
 // routing, the main session, then the channels: ingress and the CLI socket (ADR-015, ADR-021, ADR-065, ADR-079).
-import { chmod, mkdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { join } from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import type { MutableModels } from "@earendil-works/pi-ai";
@@ -17,10 +19,15 @@ export type DaemonOptions = {
   config: DaemonConfig;
   dataDir: string;
   configPath?: string; // copied into a snapshot with the stores (ADR-122)
+  version?: string; // this Jaari's version; the smoke test passes its own
   credentialsDir?: string; // host-credential: $CREDENTIALS_DIRECTORY under systemd, /run/secrets under Compose
   power?: Partial<PowerDeps>; // the smoke test replaces the clocks and the OS tools
   models?: MutableModels; // the smoke test passes pi-ai's scripted provider here (ADR-041)
 };
+
+// The release sets this package's version (scripts/pack-release.mjs); it is 0.0.0 in the repo.
+const VERSION = (createRequire(import.meta.url)("../package.json") as { version: string }).version;
+const LAST_VERSION = "last-version"; // in the data folder: the version that started last
 
 const EGRESS_LEAK = "Jaari blocked an outbound call: it carried an internal marker. Something Jaari read may have tried to make it send its instructions out. Nothing was sent.";
 
@@ -72,10 +79,18 @@ export async function startDaemon(options: DaemonOptions) {
     const target = { "session.db": STORE_MIGRATIONS.length, "usage.db": USAGE_MIGRATIONS.length };
     const migrates = Object.entries(target).some(([file, steps]) => (storeVersion(join(dataDir, file)) ?? steps) < steps);
     const latest = (await listSnapshots(dataDir)).at(-1);
-    if (migrates && !(latest?.reason === "pre-migration" && isDeepStrictEqual(latest.target, target))) {
-      const snapshot = await takeSnapshot({ dataDir, reason: "pre-migration", target, ...(options.configPath ? { configPath: options.configPath } : {}) });
+    // A version other than the one that ran last also copies the data first, so the way back after an image update
+    // always has the data from before (OQ-96). Written down at once: a restarted failing start takes no second copy.
+    const version = options.version ?? VERSION;
+    const ranLast = await readFile(join(dataDir, LAST_VERSION), "utf8").then((text) => text.trim(), () => undefined);
+    const changed = ranLast !== version && existsSync(join(dataDir, "session.db"));
+    const repeat = latest?.reason === "pre-migration" && isDeepStrictEqual(latest.target, target);
+    if ((migrates && !repeat) || (changed && !migrates)) {
+      const place = { dataDir, version, ...(options.configPath ? { configPath: options.configPath } : {}) };
+      const snapshot = await takeSnapshot(migrates ? { ...place, reason: "pre-migration", target } : { ...place, reason: "version-change" });
       events.write({ type: "snapshot", reason: snapshot.reason, name: snapshot.name });
     }
+    if (ranLast !== version) await writeFile(join(dataDir, LAST_VERSION), version + "\n", { mode: 0o600 });
     // Each store refuses to open when it is newer than this Jaari or belongs to another owner (ADR-056, ADR-119).
     // The conversation first: a wrong id is refused there before a missing usage log is created and claimed by it.
     const store = openStore(join(dataDir, "session.db"), ownerId);

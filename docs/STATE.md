@@ -213,9 +213,9 @@ criterion: an install and `jaari update` under systemd, and `jaari rollback` aft
 owner added: 0.19, Windows as a host (ADR-125), and 0.20, testing `jaari update` from local builds
 instead of releases (ADR-126). On 2026-11-21 the owner made Docker the main install and test target (ADR-128): 0.21
 (Compose on Docker Desktop) joined the gate, and 0.19 is On request, with each host's tasks in [HOSTS.md](HOSTS.md).
-Next: 0.20 (PR #56, then OQ-96), then 0.21; then Phase 1 (Memory), from item 1.1. Per-item status, needs, and exit criteria are in
+Next: 0.20 (the daemon copies the data when a new version starts, ADR-129), then 0.21; then Phase 1 (Memory), from item 1.1. Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
-OQ-96 blocks roadmap 0.20; no open question blocks Phase 1.
+No open question blocks Phase 0 or Phase 1.
 
 ## Scheduled checks that ADRs defer
 - Phase 1: measure the candidate local models (ADR-045).
@@ -227,4 +227,4 @@ OQ-96 blocks roadmap 0.20; no open question blocks Phase 1.
   leaving Experimental (ADR-025, ADR-065).
 
 ## Open questions
-4 open. OQ-92 (package platforms) blocks Phase 6; OQ-93 (refusal categories) blocks 4.1; OQ-95 (a model reading owner messages) blocks 4.5; OQ-96 (the way back under Compose) blocks 0.20. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+3 open. OQ-92 (package platforms) blocks Phase 6; OQ-93 (refusal categories) blocks 4.1; OQ-95 (a model reading owner messages) blocks 4.5. OQ-96 (the way back under Compose) was resolved on 2026-11-21 (ADR-129). See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

@@ -130,3 +130,4 @@
 | [126](126-local-update-check.md) | The update is tested from local builds, with a script that never ships; releases are not test runs | Accepted |
 | [127](127-docker-as-a-platform.md) | Docker as a platform: a health check, `up --wait` instead of a pause, a local image check, and Compose on Linux hosts only | Accepted |
 | [128](128-docker-first.md) | Docker is the main way to run and test Jaari; a real host is optional until the owner confirms it | Accepted |
+| [129](129-snapshot-on-version-change.md) | The daemon copies the data when a new version starts, and the copy names that version | Accepted |

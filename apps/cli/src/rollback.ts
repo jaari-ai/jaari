@@ -17,10 +17,10 @@ export const run: Command = async (args, io) => {
   const paths = jaariPaths(values.home ? resolve(values.home) : undefined);
   const place = { dataDir: values.data ? resolve(values.data) : paths.data, configPath: values.config ? resolve(values.config) : paths.config };
   const snapshots = await listSnapshots(place.dataDir);
-  const describe = (s: (typeof snapshots)[number]) => `${s.at}  ${s.reason}  ${Object.entries(s.stores).map(([file, version]) => `${file} v${version}`).join(", ")}${s.config ? ", config" : ""}`;
+  const describe = (s: (typeof snapshots)[number]) => `${s.at}  ${s.reason}  ${Object.entries(s.stores).map(([file, version]) => `${file} v${version}`).join(", ")}${s.config ? ", config" : ""}${s.version ? `  by ${s.version}` : ""}`;
   if (values.list) {
     for (const snapshot of snapshots) say(describe(snapshot));
-    if (snapshots.length === 0) say("No snapshot yet. Jaari takes one before it migrates a store.");
+    if (snapshots.length === 0) say("No snapshot yet. Jaari takes one before it migrates a store, and when a new version starts.");
     return 0;
   }
   const unfinished = await restoring(place.dataDir);

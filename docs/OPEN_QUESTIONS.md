@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-20. Open: **4**.
+Last updated: 2026-11-21. Open: **3**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -37,20 +37,13 @@ real for long browser, search, and computer-use steps (Phase 4 and 6), and for c
 buttons. Building it before the first long-running tool means building it blind; record it in that
 item.
 
-| OQ-96 | The way back under Compose | After an image update, how does the owner get the data from before? `admin rollback` restores the latest snapshot, but under Compose a snapshot exists only when the new image migrated a store (ADR-122). Should the daemon take a snapshot when it starts as a version other than the one that ran last, should `jaari` gain a snapshot command the guide runs before the tag change, or is the data of an image that migrated nothing safe to keep? | 0 | A snapshot by the daemon when its version changes: it also covers a manual `npm install`, and the owner cannot forget it |
-
-Context: found on 2026-11-20 by `scripts/check-update.mjs --docker` (ADR-127, point 4). Two images
-that migrate no store leave no snapshot, so the guide's `admin rollback --yes` stops with "no
-snapshot". `jaari update` takes its own `pre-update` snapshot (ADR-124), so the npm install is not
-affected. Until this is decided, the guide runs the rollback only when `admin rollback --list`
-shows a snapshot.
-
 ## Resolved
 
 A later ADR can change a resolved answer; the row then names both ADRs.
 
 | ID | Decision | ADR |
 |---|---|---|
+| OQ-96 | The daemon copies the data when it starts as a version other than the one that started last, and the copy names that version; the way back under Compose restores it when the latest snapshot is by the new version | [ADR-129](adr/129-snapshot-on-version-change.md) |
 | OQ-94 | A bare "stop" pauses and a second stop word within 10 seconds stops the turn; "wait" pauses; code reads the words in the owner's languages | [ADR-116](adr/116-owner-commands-in-code.md) |
 | OQ-22 (license part) | MIT | [ADR-014](adr/014-license-mit.md) |
 | OQ-10 (host part) | Daemon on an always-on host (VM, VPS, or server); laptop-only supported by configuration | [ADR-015](adr/015-control-plane-and-nodes.md) |
@@ -239,3 +232,4 @@ the only wording. Some questions had been narrowed by an earlier partial decisio
 | OQ-89 | Web budget | ADR-046 leaves search and fetch cost to "the separate web budget", and ADR-053 counts egress cost against it, but no ADR defines it. What is its default, and what happens at its limit? | 3 |
 | OQ-91 | Scope of `repo.write` and `publish` | No ADR decides what Jaari may push or publish (which repos, registries, and how) through the GitHub, npm, and PyPI integrations. | 5 |
 | OQ-94 | "Stop" and "wait" | ADR-065 says "stop", "wait", and "pause" are handled by code at once, but ADR-031 defines only "pause", "stop everything", and "stop now". What do a bare "stop" and "wait" do: pause, emergency stop, or a typed `confirm` prompt that asks which one? | 0 | 0 |
+| OQ-96 | The way back under Compose | After an image update, how does the owner get the data from before? `admin rollback` restores the latest snapshot, but under Compose a snapshot exists only when the new image migrated a store (ADR-122). Should the daemon take a snapshot when it starts as a version other than the one that ran last, should `jaari` gain a snapshot command the guide runs before the tag change, or is the data of an image that migrated nothing safe to keep? | 0 |
