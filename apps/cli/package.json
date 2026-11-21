@@ -23,6 +23,7 @@
     "@jaari/core": "workspace:*",
     "@jaari/http": "workspace:*",
     "@jaari/llm": "workspace:*",
+    "@jaari/memory": "workspace:*",
     "@jaari/secrets": "workspace:*",
     "@sigstore/bundle": "5.0.1",
     "@sigstore/protobuf-specs": "0.5.2",

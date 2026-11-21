@@ -1,7 +1,7 @@
 # ADR-123: The release as built: one npm tarball with its internal packages inside, an image made from that tarball, staged npm approval, and one Compose secret per credential
 
 - **Status:** Accepted
-- **Extended by:** [ADR-124](124-update-as-built.md), [ADR-127](127-docker-as-a-platform.md), [ADR-128](128-docker-first.md)
+- **Extended by:** [ADR-124](124-update-as-built.md), [ADR-127](127-docker-as-a-platform.md), [ADR-128](128-docker-first.md), [ADR-132](132-memory-writer-as-built.md)
 - **Date:** 2026-11-18
 
 Roadmap 0.17 builds the release that [ADR-122](122-install-in-three-steps.md) planned. Building it
@@ -69,6 +69,7 @@ them and amends all four.
   dependencies only for an install by name, which `jaari update` and the guide use.
 - **ADR-127:** the daemon service in `compose.yaml` has a health check (`jaari doctor`), the guide starts it with `docker compose up --wait`, and Compose is for Linux hosts only.
 - **ADR-128:** Compose is the main install on every system, Docker Desktop included; the npm install is for the optional real hosts.
+- **ADR-132:** the image has the `git` program from its Debian release, for the memory repo.
 
 ## Consequences
 - GitHub makes a new container package **private**. After the first release the owner makes

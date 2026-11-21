@@ -199,6 +199,9 @@ importers:
       '@jaari/llm':
         specifier: workspace:*
         version: link:../../packages/llm
+      '@jaari/memory':
+        specifier: workspace:*
+        version: link:../../packages/memory
       '@jaari/secrets':
         specifier: workspace:*
         version: link:../../packages/secrets
@@ -235,6 +238,9 @@ importers:
       '@jaari/llm':
         specifier: workspace:*
         version: link:../../packages/llm
+      '@jaari/memory':
+        specifier: workspace:*
+        version: link:../../packages/memory
       '@jaari/secrets':
         specifier: workspace:*
         version: link:../../packages/secrets
@@ -305,6 +311,15 @@ importers:
       typebox:
         specifier: 1.4.7
         version: 1.4.7
+
+  packages/memory:
+    dependencies:
+      '@jaari/channels':
+        specifier: workspace:*
+        version: link:../channels
+      '@jaari/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/secrets:
     dependencies:

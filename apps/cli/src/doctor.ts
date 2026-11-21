@@ -2,13 +2,15 @@
 // fails (ADR-032). It changes nothing. A warning does not fail it: `jaari update` rolls back on a failure (ADR-122).
 // Checks are added as their features ship.
 import { execFile } from "node:child_process";
-import { lstat, readdir, readFile, stat } from "node:fs/promises";
+import { constants } from "node:fs";
+import { access, lstat, readdir, readFile, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { parseArgs, promisify } from "node:util";
 import { socketPath } from "@jaari/channels";
 import { listSnapshots, restoring, STORE_MIGRATIONS, storeVersion } from "@jaari/core";
 import { ConfigError, credentialsDirOf, jaariPaths, loadConfig, ownerIdOf, type Config } from "@jaari/core/config";
 import { checkLlmConfig, USAGE_MIGRATIONS } from "@jaari/llm";
+import { GIT, MEMORY_MIGRATIONS } from "@jaari/memory";
 import { createHostCredentialProvider, createOsKeychainProvider, resolveRef, type VaultProvider } from "@jaari/secrets";
 import type { Io } from "./io.js";
 import { daemonRunning } from "./socket.js";
@@ -20,6 +22,7 @@ export type DoctorDeps = {
   node: string; // process.versions.node
   exec(command: string, args: string[]): Promise<string>;
   unitPath: string; // the systemd unit that `jaari service install` writes
+  gitPath: string; // the git that the memory writer runs (ADR-132)
   credentialsDir?: string; // what systemd or Compose hands over, as the daemon reads it
 };
 const systemDeps: DoctorDeps = {
@@ -28,6 +31,7 @@ const systemDeps: DoctorDeps = {
   node: process.versions.node,
   exec: (command, args) => promisify(execFile)(command, args, { timeout: 5_000 }).then(({ stdout }) => stdout),
   unitPath: "/etc/systemd/system/jaari.service",
+  gitPath: GIT,
   ...(process.env.CREDENTIALS_DIRECTORY ? { credentialsDir: process.env.CREDENTIALS_DIRECTORY } : {}),
 };
 
@@ -79,8 +83,12 @@ export async function doctor(args: string[], io: Io, deps: DoctorDeps = systemDe
 
   await secrets(config, { paths, dataDir }, deps, add);
 
+  // ADR-132: memory is a git repo, and the daemon refuses to start without the git it runs.
+  if (await access(deps.gitPath, constants.X_OK).then(() => true, () => false)) add("ok", `git at ${deps.gitPath}, for the memory repo`);
+  else add("FAIL", `no git at ${deps.gitPath}: the daemon needs it for the memory repo; install git`);
+
   // ADR-056, ADR-119: a store newer than this Jaari is refused at start; an older one is migrated, after a snapshot.
-  for (const [file, steps] of [["session.db", STORE_MIGRATIONS.length], ["usage.db", USAGE_MIGRATIONS.length]] as const) {
+  for (const [file, steps] of [["session.db", STORE_MIGRATIONS.length], ["usage.db", USAGE_MIGRATIONS.length], ["memory.db", MEMORY_MIGRATIONS.length]] as const) {
     let version: number | undefined;
     try {
       version = storeVersion(join(dataDir, file));

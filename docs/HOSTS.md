@@ -56,7 +56,8 @@ update` with the launcher. Nothing in a phase waits for it.
 
 ### macOS, launchd
 
-Needs: macOS on Apple silicon or Intel, Node 26 and npm, the login keychain for `os-keychain`.
+Needs: macOS on Apple silicon or Intel, Node 26 and npm, the login keychain for `os-keychain`, and the Command Line
+Tools for `/usr/bin/git` (the memory repo, ADR-132).
 
 Found:
 - launchd slows a job marked `ProcessType` `Background` on a busy Mac, which undid the beta.3 to
@@ -73,7 +74,7 @@ Left: `check-update.mjs --service` as an owner's check, and `jaari rollback` aft
 
 ### Linux, systemd
 
-Needs: systemd with `systemd-creds` (ADR-122), Node 26 and npm, a TPM for credentials bound to the
+Needs: systemd with `systemd-creds` (ADR-122), Node 26 and npm, git at `/usr/bin/git` (ADR-132), a TPM for credentials bound to the
 machine (optional, `jaari doctor` reports it, ADR-123).
 
 Found:

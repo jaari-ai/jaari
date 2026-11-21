@@ -1,7 +1,7 @@
 # ADR-026: Memory writes go through one writer; the owner's edits win
 
 - **Status:** Accepted
-- **Extended by:** [ADR-100](100-file-store-backup-and-erase.md)
+- **Extended by:** [ADR-100](100-file-store-backup-and-erase.md), [ADR-132](132-memory-writer-as-built.md)
 - **Date:** 2026-11-10
 
 ## Decision
@@ -38,6 +38,7 @@ is the authority on their own memory).
 
 ## Amendments
 - **ADR-100:** the single writer refuses binary files and files over 1 MiB in a memory commit.
+- **ADR-132:** as built: the intent journal in `memory.db`, the trailers `Jaari-Mutation-Id`, `Jaari-Actor`, and `Jaari-Session`, and recovery before the owner's edits are read.
 
 ## Consequences
 _TODO: fill in as implementation reveals them._
