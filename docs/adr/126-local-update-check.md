@@ -1,7 +1,7 @@
 # ADR-126: The update is tested from local builds, with a script that never ships; releases are not test runs
 
 - **Status:** Accepted
-- **Extended by:** [ADR-127](127-docker-as-a-platform.md)
+- **Extended by:** [ADR-127](127-docker-as-a-platform.md), [ADR-128](128-docker-first.md)
 - **Date:** 2026-11-20
 
 ## Context
@@ -57,6 +57,9 @@ update itself: no stop, snapshot, check, start, doctor, or undo.
 - **Unit tests only:** the beta.4 bug was in the interaction with launchd, which a fake does not
   have.
 - **Releasing a beta for each test:** slow, public, and npm keeps every version.
+
+## Amendments
+- **ADR-128:** the gate run is `--docker` on local Docker; the runs on the owner's Linux, macOS, and Windows machines are tasks in `docs/HOSTS.md`, done when the owner asks for a host.
 
 ## Consequences
 - Roadmap 0.20 builds it. It is the way to test roadmap 0.19 (ADR-125) without a release.
