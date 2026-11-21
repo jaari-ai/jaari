@@ -213,10 +213,14 @@ it("writes compose.yaml on a server: pinned image, the owner's account, the cont
     "- ./config.jsonc:/home/jaari/.jaari/config.jsonc:ro", "- ./data:/home/jaari/.jaari/data", // no credentials folder, a read-only config
     'profiles: ["admin"]', "network_mode: none", 'entrypoint: ["jaari"]',
     '- "llm.anthropic"', '"llm.anthropic":\n    file: "./credentials/llm.anthropic"',
+    "Start: docker compose up --wait.",
+    "    healthcheck: # ADR-127", '\n      test: ["CMD", "jaari", "doctor"]\n      interval: 30s\n      timeout: 20s\n      retries: 3\n      start_period: 120s\n      start_interval: 2s\n',
   ]) expect(text).toContain(line);
+  expect(text.indexOf("healthcheck:")).toBeLessThan(text.indexOf("  admin:")); // the daemon's, not the admin's
+  expect(text.split("healthcheck:")).toHaveLength(2);
   expect((await stat(join(home, "compose.yaml"))).mode & 0o777).toBe(0o600);
   expect((await stat(join(home, "data"))).mode & 0o777).toBe(0o700); // made here, or Docker would make it as root
-  expect(shown).toContain("  docker compose up -d");
+  expect(shown).toContain("  docker compose up --wait --wait-timeout 180");
   expect(shown).toContain("without Docker: jaari service install"); // a server may run it under systemd
   expect(shown).not.toContain("  jaari-daemon");
   expect(shown).not.toContain("cd /"); // this may run inside the container, whose paths mean nothing on the host

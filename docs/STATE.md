@@ -1,6 +1,6 @@
 # Jaari: State
 
-Last updated: 2026-11-20
+Last updated: 2026-11-21
 
 Goal: a self-hosted personal agent like the commercial ones, run on a VPS, a remote server,
 home hardware, or a laptop (ADR-017). Phases are a soft plan (ADR-020).
@@ -21,9 +21,11 @@ The index is [adr/README.md](adr/README.md). By area:
   where they run; nodes over a pinned link; the owner's choice of overlay; install, update,
   and laptop rules; the overlay binding in Phase 2 and the node link in Phase 6; the sandbox
   under Compose (ADR-015, 017, 030, 056, 057, 058, 082, 088, 094). The daemon runs on Linux,
-  macOS, and Windows; Windows from Phase 0, as a per-user scheduled task with a named pipe and
+  macOS, and Windows; Windows (on request) as a per-user scheduled task with a named pipe and
   Credential Manager (ADR-125). The update is tested from local builds, not releases (ADR-126). Under Docker the daemon has a health
-  check and starts with `up --wait`; Compose is for Linux hosts (ADR-127).
+  check and starts with `up --wait` (ADR-127). Docker is the main install on every system and the checks run
+  on local Docker; a real host (launchd, systemd, Windows) is optional until the owner confirms it, tracked in
+  [HOSTS.md](HOSTS.md) (ADR-128).
 - Channels and the owner: CLI, web panel, and Telegram in v1, email as input only; pairing and
   one active channel; typed prompts; the owner panel; one owner per Jaari (ADR-021, 022, 035,
   044, 067); a paired MCP client is not a channel (ADR-101).
@@ -209,9 +211,11 @@ Phase 0: Foundation, gate passed on 2026-11-20: items 0.1 to 0.18 are Verified (
 criteria pass with the evidence in [audits/phase-0-exit.md](audits/phase-0-exit.md). Not shown yet, and not an exit
 criterion: an install and `jaari update` under systemd, and `jaari rollback` after a real update. Reopened the same day for two items the
 owner added: 0.19, Windows as a host (ADR-125), and 0.20, testing `jaari update` from local builds
-instead of releases (ADR-126). Next: 0.20, then 0.19; then Phase 1 (Memory), from item 1.1. Per-item status, needs, and exit criteria are in
+instead of releases (ADR-126). On 2026-11-21 the owner made Docker the main install and test target (ADR-128): 0.21
+(Compose on Docker Desktop) joined the gate, and 0.19 is On request, with each host's tasks in [HOSTS.md](HOSTS.md).
+Next: 0.20 (PR #56, then OQ-96), then 0.21; then Phase 1 (Memory), from item 1.1. Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
-No open question blocks Phase 0 or Phase 1.
+OQ-96 blocks roadmap 0.20; no open question blocks Phase 1.
 
 ## Scheduled checks that ADRs defer
 - Phase 1: measure the candidate local models (ADR-045).
@@ -223,4 +227,4 @@ No open question blocks Phase 0 or Phase 1.
   leaving Experimental (ADR-025, ADR-065).
 
 ## Open questions
-3 open. OQ-92 (package platforms) blocks Phase 6; OQ-93 (refusal categories) blocks 4.1; OQ-95 (a model reading owner messages) blocks 4.5. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+4 open. OQ-92 (package platforms) blocks Phase 6; OQ-93 (refusal categories) blocks 4.1; OQ-95 (a model reading owner messages) blocks 4.5; OQ-96 (the way back under Compose) blocks 0.20. See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

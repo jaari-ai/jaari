@@ -82,8 +82,8 @@ ADR-056, ADR-082, ADR-122, ADR-123, [ADR-043](043-project-process.md), and
     `main`. It is a draft until the owner approves the version on npm, so a rejected version has
     no public notes.
 14. **Under Compose the image is the version.** `jaari update` refuses where npm is missing and
-    points to the guide: change the image tag, verify it with `cosign`, `docker compose up -d`,
-    `admin doctor`, and go back with the old tag and `admin rollback`.
+    points to the guide: change the image tag, verify it with `cosign`, `docker compose up --wait`
+    (ADR-127), `admin doctor`, and go back with the old tag and `admin rollback`.
 15. **`jaari uninstall`** removes the service and the installed versions and keeps the data. It
     refuses while the daemon answers. `--purge` deletes the Jaari folder after the owner types
     `delete` at a terminal; `--yes` does not replace that. It never purges `/`, the home folder,

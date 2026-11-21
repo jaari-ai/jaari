@@ -200,7 +200,7 @@ export async function init(args: string[], io: Io, platform: NodeJS.Platform = p
   for (const { apiKey } of providers) if (apiKey?.startsWith("secretRef:")) say(`  jaari secret set ${apiKey.slice("secretRef:".length)}${where}`);
   if (compose) {
     say("With Docker, in the Jaari folder:");
-    say("  docker compose up -d");
+    say("  docker compose up --wait --wait-timeout 180");
     say("  docker compose exec jaari jaari chat");
     say(`Or, with Jaari installed on this host, without Docker: jaari service install${where}`);
     // Inside the container, localhost is the container.

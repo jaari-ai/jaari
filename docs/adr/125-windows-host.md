@@ -1,6 +1,7 @@
 # ADR-125: Windows is a host from Phase 0: Credential Manager, a named pipe, a per-user scheduled task, ACLs, and no shell
 
 - **Status:** Accepted
+- **Extended by:** [ADR-128](128-docker-first.md)
 - **Date:** 2026-11-20
 
 ## Context
@@ -40,9 +41,9 @@ modes, ADR-028, ADR-079), the version link and the npm layout of `jaari update` 
     not a file, so no mode guards it. The default security of a named pipe gives full control to the
     creating account, `SYSTEM`, and `Administrators`, and read access to everyone. The daemon
     writes nothing to a client before it has read the client's hello, so a client that can only read
-    receives nothing, and it cannot write a message. This is checked by a test on Windows in CI; if
-    the test shows that another account can write, the pipe gets an explicit access list before
-    Windows ships.
+    receives nothing, and it cannot write a message. A test checks this on a Windows machine of the
+    owner's; if the test shows that another account can write, the pipe gets an explicit access list
+    before Windows ships.
 5.  **The service is a scheduled task for the owner's account,** `\Jaari\daemon`, made with
     `schtasks /Create /XML`, with no administrator rights and no stored password: it starts at the
     owner's log-on and runs only while the owner is logged on, like the launchd agent. Its settings
@@ -69,8 +70,9 @@ modes, ADR-028, ADR-079), the version link and the npm layout of `jaari update` 
 9.  **`jaari doctor` on Windows** checks the folder ACL (FAIL on another account), the scheduled task
     and its settings, the pipe, and BitLocker on the data folder's drive, read without administrator
     rights through the Shell's `System.Volume.BitLockerProtection` property (a warning when off).
-10. **CI runs the tests on `ubuntu-latest`, `macos-latest`, and `windows-latest`,** and the release
-    check (`scripts/check-release.sh`) on all three; Docker runs only on Linux.
+10. **The tests and `scripts/check-update.mjs` run on a Windows machine of the owner's** before 0.19
+    is Verified. CI keeps its one `ubuntu-latest` runner. A Windows runner waits for the milestone
+    that the owner names; there is no new CI job until then.
 11. **Not in this item:** what later features need on Windows (screen capture and the permission
     matrix of ADR-057, computer use, the node). Each ADR that adds a host-facing feature states its
     Windows behaviour from now on.
@@ -85,6 +87,9 @@ modes, ADR-028, ADR-079), the version link and the npm layout of `jaari update` 
   tool every supported Windows has.
 - **Running the `.cmd` shims with `shell: true`:** a shell parses the arguments, which reopens the
   injection that Node closed.
+
+## Amendments
+- **ADR-128:** Windows is On request: it is not part of the Phase 0 gate, and its tasks are kept in `docs/HOSTS.md` until the owner asks for it.
 
 ## Consequences
 - Roadmap 0.19 builds this. Phase 0 is not finished until it is Verified.

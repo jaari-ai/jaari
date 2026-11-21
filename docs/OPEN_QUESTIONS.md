@@ -1,6 +1,6 @@
 # Jaari: Open questions
 
-Last updated: 2026-11-16. Open: **3**.
+Last updated: 2026-11-20. Open: **4**.
 
 How to resolve one: decide → write or update an ADR → move the row to *Resolved* with
 the ADR link and keep its original wording in *Original questions*. "Leaning" is a
@@ -36,6 +36,14 @@ Context: no reference or commercial agent reads stop intent with a model (learni
 real for long browser, search, and computer-use steps (Phase 4 and 6), and for channels without
 buttons. Building it before the first long-running tool means building it blind; record it in that
 item.
+
+| OQ-96 | The way back under Compose | After an image update, how does the owner get the data from before? `admin rollback` restores the latest snapshot, but under Compose a snapshot exists only when the new image migrated a store (ADR-122). Should the daemon take a snapshot when it starts as a version other than the one that ran last, should `jaari` gain a snapshot command the guide runs before the tag change, or is the data of an image that migrated nothing safe to keep? | 0 | A snapshot by the daemon when its version changes: it also covers a manual `npm install`, and the owner cannot forget it |
+
+Context: found on 2026-11-20 by `scripts/check-update.mjs --docker` (ADR-127, point 4). Two images
+that migrate no store leave no snapshot, so the guide's `admin rollback --yes` stops with "no
+snapshot". `jaari update` takes its own `pre-update` snapshot (ADR-124), so the npm install is not
+affected. Until this is decided, the guide runs the rollback only when `admin rollback --list`
+shows a snapshot.
 
 ## Resolved
 

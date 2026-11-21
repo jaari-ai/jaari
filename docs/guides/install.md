@@ -40,7 +40,7 @@ jaari() { docker run --rm -it --user "$(id -u):$(id -g)" --env HOME=/home/jaari 
 jaari init                       # writes ~/.jaari/compose.yaml
 jaari secret set llm.anthropic   # the line `jaari init` prints, if your model needs a key
 cd ~/.jaari
-docker compose up -d             # wait a few seconds for the daemon
+docker compose up --wait --wait-timeout 180
 docker compose run --rm admin doctor
 docker compose exec jaari jaari chat
 ~~~
@@ -72,10 +72,12 @@ from before the update.
 
 Betas: set `"update": { "channel": "beta" }` in the config, or pass `--channel beta`.
 
-After the switch, `jaari update` waits up to 120 seconds for the new daemon to answer before it
-counts the update as failed and undoes it. On a slow or busy machine, give it longer:
-`jaari update --wait 300`. On a fast one you can shorten it, for example `--wait 30`. The value is
-whole seconds, from 1 to 3600, and the undo waits as long.
+On macOS (launchd), the update starts the daemon itself after the switch. There, `jaari update`
+waits up to 120 seconds for the new daemon to answer before it counts the update as failed and
+undoes it. On a slow or busy machine, give it longer: `jaari update --wait 300`. On a fast one
+you can shorten it, for example `--wait 30`. The value is whole seconds, from 1 to 3600, and the
+undo waits as long. Under systemd, or without a service, you start the daemon yourself after the
+update, so there is nothing to wait for.
 
 The first release, `0.1.0-beta.1`, has no `jaari update`: install the next one once with
 `npm install --global --ignore-scripts jaari@next`.
@@ -95,12 +97,16 @@ cosign verify ghcr.io/jaari-ai/jaari:NEW \
   --certificate-identity https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/tags/vNEW \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 sed -i.bak 's#jaari-ai/jaari:OLD#jaari-ai/jaari:NEW#' compose.yaml
-docker compose up -d                 # the new daemon snapshots the data before it migrates a store
+docker compose up --wait --wait-timeout 180   # the new daemon snapshots the data before it migrates a store
 docker compose run --rm admin doctor
 ~~~
 
-If `doctor` fails: `docker compose down`, `mv compose.yaml.bak compose.yaml`,
-`docker compose run --rm admin rollback --yes`, `docker compose up -d`.
+If `up --wait` or `doctor` fails, go back: `docker compose down`, `mv compose.yaml.bak compose.yaml`,
+then `docker compose run --rm admin rollback --list`. When it shows a snapshot, the new image
+migrated a store before it failed: run `docker compose run --rm admin rollback --yes`. When it says
+"No snapshot yet", the data is in the form the old image reads, so skip that step. Then
+`docker compose up --wait --wait-timeout 180`.
+On a slow host, raise `--wait-timeout`, and `start_period` in `compose.yaml` (`jaari init` keeps an edited file).
 
 ## Removing Jaari
 

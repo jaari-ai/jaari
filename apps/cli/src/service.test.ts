@@ -242,6 +242,43 @@ describe("jaari service install, common", () => {
     nothingChanged(deps);
   });
 
+  it("installs a second service beside the owner's under --service-name, with its own names (ADR-126)", async () => {
+    const mac = fakes();
+    expect((await jaari(install("--service-name", "jaari-check"), mac.deps)).code).toBe(0);
+    const plist = "/Users/owner/Library/LaunchAgents/org.jaari.daemon.check.plist";
+    expect(mac.files[plist]).toContain("<key>Label</key>\n  <string>org.jaari.daemon.check</string>");
+    expect(mac.files[plist]).toContain("<string>/Users/owner/Library/Logs/jaari-check-daemon.log</string>");
+    expect(mac.exec.mock.calls).toEqual([
+      ["launchctl", ["bootout", "gui/501/org.jaari.daemon.check"]],
+      ["launchctl", ["bootstrap", "gui/501", plist]],
+    ]);
+
+    const linux = fakes({ platform: "linux", uid: 0, homedir: "/home/owner" });
+    expect((await jaari(install("--user", "owner", "--service-name", "jaari-check"), linux.deps)).code).toBe(0);
+    expect(Object.keys(linux.files)).toEqual(["/etc/systemd/system/jaari-check.service"]);
+    expect(linux.files["/etc/systemd/system/jaari-check.service"]).toContain("LoadCredentialEncrypted=llm.faux:/etc/jaari-check/credstore/llm.faux.cred");
+    expect(linux.exec.mock.calls).toContainEqual(["systemctl", ["enable", "--now", "jaari-check.service"]]);
+
+    // Without root, the sudo command it prints keeps the name.
+    const user = fakes({ platform: "linux", uid: 1000, homedir: "/home/owner" });
+    expect((await jaari(install("--service-name", "jaari-check"), user.deps)).text).toContain("--service-name jaari-check");
+  });
+
+  it("refuses a --service-name that is not jaari or jaari-<lowercase letters and digits>, or one without --home, before anything changes", async () => {
+    for (const name of ["other", "jaari-", "jaari-Check", "jaari-../x", "jaari-a.b", `jaari-${"x".repeat(21)}`]) {
+      const { deps } = fakes();
+      const { code, text } = await jaari(install("--service-name", name), deps);
+      expect(code, name).toBe(2);
+      expect(text, name).toContain("--service-name is jaari or jaari-<lowercase letters and digits>");
+      nothingChanged(deps);
+    }
+    const { deps } = fakes();
+    const { code, text } = await jaari(["install", "--service-name", "jaari-check"], deps);
+    expect(code).toBe(2);
+    expect(text).toContain("needs --home");
+    nothingChanged(deps);
+  });
+
   it("prints usage for anything but install, and refuses other platforms", async () => {
     expect((await jaari(["uninstall"], fakes().deps)).code).toBe(2);
     expect((await jaari([], fakes().deps)).code).toBe(2);
