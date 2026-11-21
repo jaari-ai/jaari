@@ -1,11 +1,12 @@
 # Jaari: Hosts
 
-Docker Compose is the one install that covers every host: Linux, macOS, and Windows run the same
-Linux image with Compose, on any Docker engine, and every check runs there (ADR-128). Bare metal, where Jaari runs from npm under the
-system's own service manager, is for later: this file keeps what each system needs and what was
-found, so that the work can start from it when the owner asks for a host. Then its list below becomes
-a roadmap item, and once its checks pass on the owner's machine it is marked confirmed here, with the
-date and the evidence (ADR-128, point 4).
+The checklist for each host, outside the roadmap phases (ADR-131). Phase gates check Docker only:
+the image under Docker Compose, in CI and on the owner's local Docker. Nothing here holds a gate.
+
+Docker Compose is the one install for every host (ADR-128). Bare metal, where Jaari runs from npm under
+the system's own service manager, is for later. For each host this file keeps what it needs, what was
+found, what is left, and how to run its checks. When the owner asks for a host, its list is the work.
+A check that passes is ticked here with the date and the evidence (ADR-128, point 4).
 
 ## Docker: every host
 
@@ -27,10 +28,26 @@ Found on Docker, and handled:
 - A container cannot keep the computer awake for a turn or read the battery (ADR-121). The clock-gap
   detection of sleep works there (ADR-128).
 
-Open:
-- [ ] Run `check-release.sh` and `check-update.mjs --docker` on Windows.
+Not covered by the checks:
 - [ ] A chat with a real model key under Compose. The chat itself through `docker compose exec` is
-      shown by `check-release.sh` (`pause` and `resume`, answered by code).
+      checked by `check-release.sh` (`pause` and `resume`, answered by code).
+
+## Docker Compose on a given host: checklist
+
+Run these from a clone of the repository, with the engine running:
+
+~~~bash
+pnpm install && pnpm -r build
+bash scripts/check-release.sh            # the tarball, the image, Compose with the chat
+node scripts/check-update.mjs --docker   # the image update and the way back
+~~~
+
+- [x] macOS, Docker Desktop (2026-11-21): both pass; the data is in the named volume.
+- [x] Linux, Docker Engine: `check-release.sh` in CI on every pull request.
+- [ ] Linux, Docker Engine: `check-update.mjs --docker`.
+- [ ] Windows: both, in a WSL 2 shell (Docker Desktop's WSL integration, or Docker Engine inside WSL),
+      from a clone in the WSL file system and from one in a folder shared from Windows (`/mnt/c/...`),
+      which should pick the volume.
 
 ## Bare metal: for later
 
@@ -68,7 +85,7 @@ Left: `jaari service install` with encrypted credentials on a real host; a syste
 `check-update.mjs`, which covers launchd only; `jaari update`, its undo, and `jaari rollback` under
 systemd.
 
-### Windows, scheduled task
+### Windows, scheduled task (was roadmap 0.19)
 
 Needs: Windows 11 or Windows 10 22H2, x64 or arm64, Node 26 and npm (ADR-125, point 1).
 
@@ -79,7 +96,7 @@ Found (from the Node.js and npm documentation, ADR-125):
 - `current` must be a junction; the global npm layout differs (`{prefix}\node_modules`); Node
   refuses to run `.cmd` shims without a shell.
 
-Left: all of roadmap 0.19 (ADR-125, points 2 to 10): Credential Manager, the folder ACL and its
+Left (ADR-125, points 2 to 10): Credential Manager, the folder ACL and its
 `jaari doctor` check, the named pipe (another account must not write to it,
 [THREAT_MODEL.md](THREAT_MODEL.md)), the scheduled task `\Jaari\daemon`, the PowerShell power hold
 and battery reading, `node <script>` and System32 tools by full path, the npm layout and the junction,

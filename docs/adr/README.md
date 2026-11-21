@@ -132,3 +132,4 @@
 | [128](128-docker-first.md) | Docker is the main way to run and test Jaari; a real host is optional until the owner confirms it | Accepted |
 | [129](129-snapshot-on-version-change.md) | The daemon copies the data when a new version starts, and the copy names that version | Accepted |
 | [130](130-compose-on-every-host.md) | Docker Compose on every host as built: a socket probe, the data in a named volume where the host's folder cannot hold the socket, and a root step that only sets its owner | Accepted |
+| [131](131-gates-are-docker-only.md) | Phase gates check Docker only; host-specific work lives in HOSTS.md, outside the roadmap phases | Accepted |

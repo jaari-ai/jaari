@@ -2,9 +2,9 @@
 
 Jaari is a self-hosted, single-owner personal AI agent: git-backed Markdown memory,
 persona dials enforced in code, and digest-bound owner approval for every external
-effect. It is in **Phase 0 (Foundation)**: items 0.1 to 0.18 passed their gate, and the local
-update check (0.20) and Docker Compose on every host (0.21) remain. Docker is the main install and test
-target; real hosts (launchd, systemd, Windows 0.19) wait until the owner asks (ADR-128, `docs/HOSTS.md`). `@jaari/capabilities`, `@jaari/gate`,
+effect. **Phase 0 (Foundation)** passed its gate (2026-11-21); Phase 1 (Memory) is next. Docker Compose is the
+main install and test target, and phase gates check Docker only. Host-specific work (launchd,
+systemd, Windows) is a checklist in `docs/HOSTS.md`, outside the phases (ADR-128, ADR-131). `@jaari/capabilities`, `@jaari/gate`,
 `@jaari/secrets`, `@jaari/http`, `@jaari/llm`, `@jaari/core`, `@jaari/channels`, `apps/daemon`, and
 `apps/cli` exist. Current status is in `docs/STATE.md`.
 
