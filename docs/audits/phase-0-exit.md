@@ -74,3 +74,21 @@ and ADR-105 to ADR-124). Changes:
 
 No other Phase 0 decision adds a capability, an adapter, a channel, a provider, or an input from
 outside, so none needs a row (`DEVELOPMENT.md`, Threat model).
+
+## Reopened items, checked on 2026-11-21
+The owner reopened the gate on 2026-11-20 (0.19, 0.20) and moved it to Docker on 2026-11-21: Docker
+Compose is the main install on every host, and bare metal waits (ADR-128); 0.19 is On request.
+
+| # | Criterion (short) | Evidence |
+|---|---|---|
+| 20 | `scripts/check-update.mjs --docker` updates the image with `up --wait` and goes back with the data from before, on the owner's local Docker | Run on Docker Desktop for macOS on 2026-11-21: every check passes. The image update comes up healthy; after `down`, the latest snapshot is by the new version (ADR-129), `admin rollback --yes` restores it, and the old image comes back healthy. `apps/daemon/src/smoke.test.ts` covers the copy at a version change, and fails when that check is turned off (tried and undone) |
+| 21 | On Linux, macOS, and Windows, the `compose.yaml` that `jaari init` writes comes up, `jaari doctor` passes, and the chat works with `docker compose exec` | `scripts/check-release.sh` runs `jaari init` inside the image, `up --wait`, `admin doctor`, and (**new**) a chat with `pause` and `resume` through `docker compose exec`, which code answers with no model call. **Linux:** CI runs it on every pull request. **macOS:** passed on Docker Desktop on 2026-11-21, with the data in the named volume that `jaari init` chose (ADR-130), and an install with a key file passed `admin doctor`. **Windows:** not run |
+
+### Threat model review for these items
+Rows read against ADR-125 to ADR-130. Changes since the first review:
+- **New row:** the one-off `data` step, which runs as root with only `CHOWN` and `FOWNER` where the
+  data is in a volume (ADR-130).
+- **Windows named pipe** (ADR-125): the row stays unproven; 0.19 is On request.
+- ADR-126 (a test script that never ships), ADR-127 (a health check that runs `jaari doctor`),
+  ADR-128 (a plan), and ADR-129 (`last-version` in the owner-only data folder) add no capability,
+  channel, provider, or input from outside.

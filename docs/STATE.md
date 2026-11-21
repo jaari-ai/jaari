@@ -213,7 +213,7 @@ criterion: an install and `jaari update` under systemd, and `jaari rollback` aft
 owner added: 0.19, Windows as a host (ADR-125), and 0.20, testing `jaari update` from local builds
 instead of releases (ADR-126). On 2026-11-21 the owner made Docker the main install and test target (ADR-128): 0.21
 (Docker Compose on every host) joined the gate, and 0.19 is On request, with each host's tasks in [HOSTS.md](HOSTS.md).
-0.20 and 0.21 are Implemented: the daemon copies the data when a new version starts (ADR-129), and Docker Compose runs on every host, with the data in a named volume where the host's folder cannot hold the chat socket (ADR-130). Docker covers every host; bare metal is kept as notes for later in [HOSTS.md](HOSTS.md), with the open Docker runs (Windows, a chat with a real model). Next: the Phase 0 gate review; then Phase 1 (Memory), from item 1.1. Per-item status, needs, and exit criteria are in
+0.20 is Verified and 0.21 is Implemented (2026-11-21, [audits/phase-0-exit.md](audits/phase-0-exit.md); 0.21 passes on Linux and macOS, and its Windows run is the one step the gate waits for): the daemon copies the data when a new version starts (ADR-129), and Docker Compose runs on every host, with the data in a named volume where the host's folder cannot hold the chat socket (ADR-130). Docker covers every host; bare metal is kept as notes for later in [HOSTS.md](HOSTS.md), with the open Docker runs (Windows, a chat with a real model). Next: the Windows run of 0.21, or the owner's call on the gate; then Phase 1 (Memory), from item 1.1. Per-item status, needs, and exit criteria are in
 [ROADMAP.md](ROADMAP.md); the ordered next steps are in [ACTION_PLAN.md](ACTION_PLAN.md).
 No open question blocks Phase 0 or Phase 1.
 
