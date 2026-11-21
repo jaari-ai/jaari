@@ -5,7 +5,7 @@ left over. The controls are designed in [SECURITY_MODEL.md](SECURITY_MODEL.md) a
 this file maps them to threats (ADR-069). It is kept current by the rule in
 [DEVELOPMENT.md](DEVELOPMENT.md) (Threat model) and reviewed at each phase exit.
 
-Last review: 2026-11-20, at the Phase 0 exit ([audit](audits/phase-0-exit.md)).
+Last review: 2026-11-21, for the reopened Phase 0 items ([audit](audits/phase-0-exit.md)).
 
 ## What we protect
 - **Secrets:** vault items, OAuth tokens, device keys, the backup recovery key.

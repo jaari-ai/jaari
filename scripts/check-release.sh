@@ -40,6 +40,11 @@ compose=(docker compose --project-directory "$work/home" --file "$work/home/comp
 trap '"${compose[@]}" down --volumes >/dev/null 2>&1 || true; docker rmi --force jaari:check "ghcr.io/jaari-ai/jaari:$version" >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
 "${compose[@]}" up --wait --wait-timeout 180 --quiet-pull || { "${compose[@]}" logs; exit 1; }
 "${compose[@]}" run --rm admin doctor || { "${compose[@]}" logs; exit 1; }
+# The chat through `docker compose exec`, as the guide has it: "pause" and "resume" are read by code and answered with
+# no model call (ADR-116); the pauses keep the input open until each answer is back.
+said=$( { echo pause; sleep 3; echo resume; sleep 3; } | "${compose[@]}" exec -T jaari jaari chat)
+printf '%s\n' "$said"
+grep -q '^\[2\] jaari: ' <<<"$said" && grep -q '^\[4\] jaari: ' <<<"$said" || { echo "the chat did not answer pause and resume"; exit 1; }
 # The image installs every tarball in the folder, so a second pack must leave exactly one.
 node scripts/pack-release.mjs 0.0.0-check.2 >/dev/null
 test "$(ls dist/npm)" = jaari-0.0.0-check.2.tgz

@@ -11,7 +11,7 @@ date and the evidence (ADR-128, point 4).
 
 | Host | Engine with Compose | Notes | Shown |
 |---|---|---|---|
-| Linux | Docker Engine 25 or later with Compose | The data in `./data` in the Jaari folder | `check-release.sh` in CI on every pull request; the Phase 0 exit ([audits/phase-0-exit.md](audits/phase-0-exit.md)) |
+| Linux | Docker Engine 25 or later with Compose | The data in `./data` in the Jaari folder | `check-release.sh` in CI on every pull request, with the chat; the Phase 0 exit ([audits/phase-0-exit.md](audits/phase-0-exit.md)) |
 | macOS | An engine that runs Linux in a virtual machine (Docker Desktop tested) | The data in a named volume (ADR-130) | 2026-11-21: `check-release.sh`, `check-update.mjs --docker` with the way back (ADR-129), and an install with a key file |
 | Windows | An engine with WSL 2 (Docker Desktop, or Docker Engine inside WSL), commands in a WSL 2 shell | In the WSL file system the data stays in `./data`; in a folder shared from Windows, `jaari init` picks the volume | Not run yet |
 
@@ -29,7 +29,8 @@ Found on Docker, and handled:
 
 Open:
 - [ ] Run `check-release.sh` and `check-update.mjs --docker` on Windows.
-- [ ] A chat with a real model key under Compose (`docker compose exec jaari jaari chat`).
+- [ ] A chat with a real model key under Compose. The chat itself through `docker compose exec` is
+      shown by `check-release.sh` (`pause` and `resume`, answered by code).
 
 ## Bare metal: for later
 
