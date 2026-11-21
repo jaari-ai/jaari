@@ -38,11 +38,13 @@ Shown:
 - Linux Docker Engine: the `compose.yaml` that `jaari init` writes comes up and `jaari doctor` passes
   beside it (Phase 0 exit, [audits/phase-0-exit.md](audits/phase-0-exit.md)).
 - Docker Desktop on macOS: `scripts/check-update.mjs --docker` passed on 2026-11-20, with the data in
-  a named volume; the way back has no snapshot to restore when no store migrated (OQ-96).
+  a named volume. On 2026-11-21 it passed again with the way back: the latest snapshot was by the new
+  version, and `admin rollback --yes` restored it (ADR-129).
 
 Tasks:
-- [ ] 0.20: the way back under Compose ([OQ-96](OPEN_QUESTIONS.md)); `check-update.mjs --docker`
-      passes with no gap on Docker Desktop and on Linux Docker Engine.
+- [x] 0.20: the way back under Compose (ADR-129); `check-update.mjs --docker` passes on Docker
+      Desktop (2026-11-21).
+- [ ] `check-update.mjs --docker` passes on Linux Docker Engine.
 - [ ] 0.21: the data folder in a named volume on Docker Desktop, `jaari init` writes `compose.yaml`
       there, and the guide puts Compose first.
 - [ ] 0.21: `scripts/check-release.sh` and `check-update.mjs --docker` pass on Docker Desktop on

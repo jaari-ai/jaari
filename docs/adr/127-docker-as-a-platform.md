@@ -1,7 +1,7 @@
 # ADR-127: Docker as a platform: a health check, `up --wait` instead of a pause, a local image check, and Compose on Linux hosts only
 
 - **Status:** Accepted
-- **Extended by:** [ADR-128](128-docker-first.md)
+- **Extended by:** [ADR-128](128-docker-first.md), [ADR-129](129-snapshot-on-version-change.md)
 - **Date:** 2026-11-20
 
 ## Context
@@ -54,10 +54,7 @@ mode of a socket in a folder shared from the host, so the data folder cannot be 
 
 ## Amendments
 - **ADR-128:** Compose on Docker Desktop, with the data folder in a named volume, is a supported install on macOS and Windows (roadmap 0.21); point 3 no longer holds.
-
-## Flagged conflicts
-- [OQ-96](../OPEN_QUESTIONS.md): under Compose, the way back has a snapshot only when the new image
-  migrated a store; the guide skips `admin rollback` when there is none.
+- **ADR-129:** the way back under Compose restores the latest snapshot when `admin rollback --list` shows it by the new version (OQ-96 resolved).
 
 ## Consequences
 - Roadmap 0.20 builds the health check, the guide change, and the Docker mode of the local check.

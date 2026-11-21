@@ -80,4 +80,7 @@ it("refuses while the daemon runs, without a snapshot, and without a person or -
   expect(await rollback(empty.home, ["--yes"])).toMatchObject({ code: 1, shown: expect.stringContaining("no snapshot") as string });
   expect((await rollback(empty.home, ["--list"])).shown).toContain("No snapshot yet");
   expect((await rollback(home, ["--list"])).shown.trim().split("\n")).toHaveLength(2);
+  // A snapshot the daemon took names its version, so the way back can tell it is this update's (OQ-96).
+  await takeSnapshot({ dataDir: empty.data, reason: "version-change", version: "0.2.0" });
+  expect((await rollback(empty.home, ["--list"])).shown).toMatch(/version-change .* {2}by 0\.2\.0$/m);
 });

@@ -49,10 +49,10 @@ async function setup() {
   await mkdir(credentialsDir, { mode: 0o700 });
   await writeFile(join(credentialsDir, "llm.faux"), "scripted-key\n", { mode: 0o600 });
   const faux = fauxProvider({ provider: "faux", models: [{ id: "a", contextWindow: 100_000 }] });
-  const boot = () => {
+  const boot = (version?: string) => {
     const models = createModels();
     models.setProvider(faux.provider);
-    return startDaemon({ config, dataDir: join(root, "data"), credentialsDir, models });
+    return startDaemon({ config, dataDir: join(root, "data"), credentialsDir, models, ...(version ? { version } : {}) });
   };
   return { root, credentialsDir, faux, boot };
 }
@@ -157,6 +157,21 @@ describe("tier-1 smoke", () => {
     const fresh = await setup();
     await (await fresh.boot()).close(); // a new install has nothing to protect
     expect(await listSnapshots(join(fresh.root, "data"))).toEqual([]);
+  });
+
+  it("copies the data once when a new version starts, so the way back after an image update has it (OQ-96)", async () => {
+    const { root, boot } = await setup();
+    const data = join(root, "data");
+    await (await boot("1.0.0")).close(); // a new install has nothing to protect
+    expect(await listSnapshots(data)).toEqual([]);
+    await (await boot("1.0.0")).close();
+    expect(await listSnapshots(data)).toEqual([]);
+    await (await boot("1.1.0")).close();
+    expect(await listSnapshots(data)).toMatchObject([{ reason: "version-change", version: "1.1.0", stores: { "session.db": 2 } }]);
+    await (await boot("1.1.0")).close(); // the same version again: no second copy
+    await (await boot("1.0.0")).close(); // and back: one more, so the data of 1.1.0 can be had again
+    expect((await listSnapshots(data)).map((snapshot) => snapshot.version)).toEqual(["1.1.0", "1.0.0"]);
+    expect((await readFile(join(data, "last-version"), "utf8")).trim()).toBe("1.0.0");
   });
 
   it("keeps the copy of the original data across starts that fail after a migration, and waits for an unfinished rollback (ADR-122)", async () => {

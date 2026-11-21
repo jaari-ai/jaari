@@ -6,8 +6,9 @@ import { join } from "node:path";
 import { backup, DatabaseSync } from "node:sqlite";
 import { storeVersion } from "./database.js";
 
-// `target`: the store versions the Jaari that took a pre-migration snapshot migrates to.
-export type Snapshot = { name: string; dir: string; seq: number; at: string; reason: string; stores: Record<string, number>; config: boolean; target?: Record<string, number> };
+// `target`: the store versions the Jaari that took a pre-migration snapshot migrates to. `version`: the Jaari version
+// that took it, when the daemon did (OQ-96), so the way back can tell a snapshot of this update from an older one.
+export type Snapshot = { name: string; dir: string; seq: number; at: string; reason: string; stores: Record<string, number>; config: boolean; target?: Record<string, number>; version?: string };
 export type SnapshotPlace = { dataDir: string; configPath?: string };
 
 const KEEP = 2;
@@ -25,13 +26,14 @@ export async function listSnapshots(dataDir: string): Promise<Snapshot[]> {
     const manifest = await readFile(join(dir, MANIFEST), "utf8").then((text) => JSON.parse(text) as Record<string, unknown>).catch(() => undefined);
     if (!manifest || typeof manifest.at !== "string" || typeof manifest.reason !== "string" || typeof manifest.config !== "boolean" || !versions(manifest.stores)) continue;
     if (manifest.target !== undefined && !versions(manifest.target)) continue;
+    if (manifest.version !== undefined && typeof manifest.version !== "string") continue;
     found.push({ ...(manifest as Omit<Snapshot, "name" | "dir" | "seq">), name, dir, seq: Number(NAME.exec(name)![1]) });
   }
   return found;
 }
 
 // `reason` names why it was taken ("pre-migration", "before-rollback"); it is part of the folder name.
-export async function takeSnapshot(place: SnapshotPlace & { reason: string; now?: Date; target?: Record<string, number> }): Promise<Snapshot> {
+export async function takeSnapshot(place: SnapshotPlace & { reason: string; now?: Date; target?: Record<string, number>; version?: string }): Promise<Snapshot> {
   if (!/^[a-z][a-z-]*$/.test(place.reason)) throw new Error(`a snapshot reason is a short lowercase name, not ${JSON.stringify(place.reason)}`);
   const at = (place.now ?? new Date()).toISOString();
   // One more than any folder there, complete or not, so a new snapshot is always the latest.
@@ -55,7 +57,7 @@ export async function takeSnapshot(place: SnapshotPlace & { reason: string; now?
   const config = place.configPath !== undefined && (await copyFile(place.configPath, join(dir, "config.jsonc")).then(() => true, () => false));
   if (config) await chmod(join(dir, "config.jsonc"), 0o600);
   // Last, and whole or not at all, so a snapshot that was cut short has no manifest.
-  const manifest = { at, reason: place.reason, stores, config, ...(place.target ? { target: place.target } : {}) };
+  const manifest = { at, reason: place.reason, stores, config, ...(place.target ? { target: place.target } : {}), ...(place.version !== undefined ? { version: place.version } : {}) };
   await writeFile(join(dir, `${MANIFEST}.tmp`), JSON.stringify(manifest, null, 2) + "\n", { mode: 0o600 });
   await rename(join(dir, `${MANIFEST}.tmp`), join(dir, MANIFEST));
   // Only folders this code names are removed; the one a rollback is restoring from is always kept.

@@ -252,13 +252,13 @@ async function checkDocker(tarballs) {
   check((await version()) === VERSIONS[1], `the daemon runs ${VERSIONS[1]}`);
   check((await compose(["run", "--rm", "admin", "doctor"])).code === 0, "`admin doctor` passes after the update");
 
-  // The way back, as the guide has it: down, the old tag, the latest snapshot, up again.
+  // The way back, as the guide has it: down, the latest snapshot is the new image's, the old tag, rollback, up again.
   check((await compose(["down"])).code === 0, "`docker compose down` stops it");
+  // Only the snapshot lines, which start with a date: Compose writes its own lines into the same output.
+  const list = (await compose(["run", "--rm", "admin", "rollback", "--list"])).output.split("\n").filter((line) => /^\d{4}-/.test(line));
+  check(list.at(-1)?.endsWith(`by ${VERSIONS[1]}`) === true, `the latest snapshot was taken by ${VERSIONS[1]} when it started (OQ-96)`);
   await tag(VERSIONS[1], VERSIONS[0]);
-  const list = await compose(["run", "--rm", "admin", "rollback", "--list"]);
-  // The guide's rule until OQ-96 is decided: no snapshot means no store migrated, so the data is the old image's.
-  if (list.output.includes("No snapshot yet")) console.log("gap   no snapshot to restore: the guide skips `admin rollback` (OQ-96)");
-  else check((await compose(["run", "--rm", "admin", "rollback", "--yes"])).code === 0, "`admin rollback --yes` restores the latest snapshot");
+  check((await compose(["run", "--rm", "admin", "rollback", "--yes"])).code === 0, "`admin rollback --yes` restores the data from before the update");
   check(await up(), `${VERSIONS[0]} comes back up healthy`);
   check((await version()) === VERSIONS[0], `the daemon runs ${VERSIONS[0]} again`);
 }

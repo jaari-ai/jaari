@@ -97,15 +97,23 @@ cosign verify ghcr.io/jaari-ai/jaari:NEW \
   --certificate-identity https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/tags/vNEW \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 sed -i.bak 's#jaari-ai/jaari:OLD#jaari-ai/jaari:NEW#' compose.yaml
-docker compose up --wait --wait-timeout 180   # the new daemon snapshots the data before it migrates a store
+docker compose up --wait --wait-timeout 180   # the new daemon copies the data before it changes anything
 docker compose run --rm admin doctor
 ~~~
 
-If `up --wait` or `doctor` fails, go back: `docker compose down`, `mv compose.yaml.bak compose.yaml`,
-then `docker compose run --rm admin rollback --list`. When it shows a snapshot, the new image
-migrated a store before it failed: run `docker compose run --rm admin rollback --yes`. When it says
-"No snapshot yet", the data is in the form the old image reads, so skip that step. Then
-`docker compose up --wait --wait-timeout 180`.
+If `up --wait` or `doctor` fails, or you want the old version back later:
+
+~~~bash
+docker compose down
+docker compose run --rm admin rollback --list   # still with the new tag
+mv compose.yaml.bak compose.yaml
+docker compose run --rm admin rollback --yes    # only when the last line of --list ends with "by NEW"
+docker compose up --wait --wait-timeout 180
+~~~
+
+The new daemon copies the data when it first starts, and the copy says `by NEW` (ADR-129). When the
+last line of `--list` names another version, the new daemon never started, so the data is still the
+old image's: skip `rollback --yes`, because it would restore an older copy.
 On a slow host, raise `--wait-timeout`, and `start_period` in `compose.yaml` (`jaari init` keeps an edited file).
 
 ## Removing Jaari
