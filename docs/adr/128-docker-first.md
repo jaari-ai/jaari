@@ -1,7 +1,7 @@
 # ADR-128: Docker is the main way to run and test Jaari; a real host is optional until the owner confirms it
 
 - **Status:** Accepted
-- **Extended by:** [ADR-130](130-compose-on-every-host.md)
+- **Extended by:** [ADR-130](130-compose-on-every-host.md), [ADR-131](131-gates-are-docker-only.md)
 - **Date:** 2026-11-21
 
 ## Context
@@ -50,6 +50,7 @@ when the owner asks for it; a host joins the supported installs once the owner c
 
 ## Amendments
 - **ADR-130:** point 1 as built: any Docker engine with Compose on each host, not only Docker Desktop; the socket probe, the `nocopy` volume, and the `data` step.
+- **ADR-131:** host items are not in the roadmap (no "On request" items), and an exit criterion names only Docker checks.
 
 ## Consequences
 - Phase 0 waits for 0.20 (Docker mode of the local check) and 0.21 (Compose on Docker Desktop), not

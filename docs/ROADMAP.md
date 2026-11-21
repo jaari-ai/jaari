@@ -24,7 +24,6 @@ never "closed" by a calendar. This file carries the per-item status;
   | Verified | The exit criteria that cover it pass, with the evidence linked |
   | Blocked | Cannot ship as placed until the named open question is decided |
   | Delivered | A document deliverable that exists |
-  | On request | A real-host item that waits until the owner asks for it; it is not part of a phase gate until then (ADR-128, [HOSTS.md](HOSTS.md)) |
 
   A written design is never "Implemented", and "Verified" needs a passing check.
 - **Exit criteria** are the pass conditions that the ADRs already state for the phase's items.
@@ -34,7 +33,7 @@ never "closed" by a calendar. This file carries the per-item status;
 - **Placement** marks an item whose ADR states no phase; it is placed where its dependencies
   put it.
 
-Current position: **Phase 0, gate reopened.** Items 0.1 to 0.18 passed the gate on 2026-11-20; 0.20 and 0.21 remain, and 0.19 is On request.
+Current position: **Phase 0, gate passed** (items 0.1 to 0.18 on 2026-11-20; 0.20 and 0.21 on 2026-11-21). Next: Phase 1, from item 1.1.
 
 **Docker first (ADR-128).** Docker is the main install on every system, and the checks of the install, the update, and the way back run against the image on local Docker. A real host (macOS with launchd, Linux with systemd, Windows) is optional until the owner asks for it and confirms it. Its requirements, tasks, and evidence are in [HOSTS.md](HOSTS.md).
 
@@ -63,9 +62,10 @@ effect. Entry: none.
 | 0.16 | Prompt-injection floor: the locked safety section, `fence()` and `defuse`, the reply marker filter, and canary and fence-id scanning in the `@jaari/http` core (model calls excepted, ADR-120) and channel send paths | 042, 104, 120 | 0.5, 0.8, 0.15 | Verified (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md); delivered 2026-11-17) |
 | 0.17 | Release: one public npm package `jaari` (daemon and command), a multi-arch image on the GitHub container registry, both signed without a stored key (npm provenance, cosign); staged npm approval; the `compose.yaml` that `jaari init` writes; in `jaari doctor`, a TPM and Linux disk encryption | 010, 056, 079, 094, 122, 123 | 0.12 | Verified (2026-11-19, `v0.1.0-beta.1`: npm `next` with provenance, signed GHCR image for amd64 and arm64, installed and started from npm) |
 | 0.18 | `jaari update`: registry signature and provenance checked offline, a snapshot, versions kept side by side with a `current` link and a launcher, `jaari-daemon --check` and `jaari doctor` after the swap, automatic rollback of data and version; `update.channel`; `jaari uninstall`; release notes from the GitHub release (ADR-124) | 043, 056, 082, 122, 123, 124 | 0.17 | Verified (2026-11-20, `v0.1.0-beta.2` to `v0.1.0-beta.3` on macOS under launchd: verified signature and provenance, snapshot, `current` link switched, daemon running, `jaari doctor` healthy; the undo on a failed check shown with a packed build; systemd not shown yet) |
-| 0.19 | Windows host: `os-keychain` on Credential Manager, the named-pipe chat channel, a per-user scheduled task with explicit settings, the folder ACL, the PowerShell power hold, `node <script>` instead of shims and System32 tools by full path, the npm layout and a junction for `current`, the doctor checks; the tests and `scripts/check-update.mjs` on a Windows machine of the owner's, not in CI (ADR-125; tasks in [HOSTS.md](HOSTS.md)) | 057, 112, 121, 122, 124, 125, 128 | 0.12, 0.18, 0.20, the owner's request | On request |
 | 0.20 | Local update check: `scripts/check-update.mjs` runs the real `jaari update` between three local builds and its undo; `--service-name`; the `--docker` mode on two local images; the copy of the data when a new version starts, so the way back under Compose has it (ADR-129); the Compose health check and `up --wait` in the file and the guide. The gate run is `--docker` on the owner's local Docker; the npm and `--service` modes are tools for the optional hosts ([HOSTS.md](HOSTS.md)) (ADR-126, ADR-127, ADR-128) | 123, 124, 126, 127, 128, 129 | 0.18 | Verified (2026-11-21, [Phase 0 exit audit](audits/phase-0-exit.md), criterion 20: `check-update.mjs --docker` on Docker Desktop for macOS, with the way back) |
-| 0.21 | Docker Compose as the main install on every host (Linux, macOS, Windows): the data folder in a named volume where the host's folder cannot hold the chat socket, `jaari init` writes `compose.yaml` on each, the guide puts Compose first; `scripts/check-release.sh` and `check-update.mjs --docker` pass on Linux, macOS, and Windows (ADR-128, ADR-130) | 123, 127, 128, 130 | 0.20 | Implemented (2026-11-21, [Phase 0 exit audit](audits/phase-0-exit.md), criterion 21: shown on Linux in CI and on macOS, with the chat through `docker compose exec`; Windows not run) |
+| 0.21 | Docker Compose as the main install: the data folder in a named volume where the host's folder cannot hold the chat socket, `jaari init` writes `compose.yaml` and finds which; the guide puts Compose first; `scripts/check-release.sh` (with the chat) and `check-update.mjs --docker` pass (ADR-128, ADR-130, ADR-131) | 123, 127, 128, 130, 131 | 0.20 | Verified (2026-11-21, [Phase 0 exit audit](audits/phase-0-exit.md), criterion 21: `check-release.sh` in CI on every pull request and on the owner's local Docker) |
+
+Item 0.19 (Windows on bare metal) moved to [HOSTS.md](HOSTS.md) on 2026-11-21 (ADR-131); its ID is not reused.
 
 Exit criteria:
 - The tier-1 smoke test boots the daemon on the scripted engine in CI on every pull request,
@@ -109,16 +109,17 @@ Exit criteria:
 - `scripts/check-update.mjs --docker` updates the image with `docker compose up --wait` and goes
   back with the data from before, on the owner's local Docker (Linux Docker Engine or Docker Desktop),
   not in CI (ADR-126, ADR-127, ADR-128).
-- On Linux, macOS, and Windows, the `compose.yaml` that `jaari init` writes comes up,
-  `jaari doctor` passes, and the chat works with `docker compose exec` (ADR-128).
-- The real-host checks (Windows, launchd, systemd) are tasks in [HOSTS.md](HOSTS.md), not exit
-  criteria, until the owner asks for a host (ADR-128).
+- Under Docker Compose, the `compose.yaml` that `jaari init` writes comes up, `jaari doctor` passes,
+  and the chat works with `docker compose exec`, in CI on every pull request and on the owner's local
+  Docker (ADR-128, ADR-130).
+- No exit criterion names a host or an operating system: host-specific checks are a checklist in
+  [HOSTS.md](HOSTS.md) (ADR-131).
 
 Gate status: passed for 0.1 to 0.18 (2026-11-20, [Phase 0 exit audit](audits/phase-0-exit.md)); reopened for 0.19
 and 0.20, which the owner added on 2026-11-20 (ADR-125, ADR-126, ADR-127). On 2026-11-21 the owner made Docker
-the main install and moved the real-host checks to [HOSTS.md](HOSTS.md) (ADR-128): the gate now waits for 0.20 and 0.21, and
-0.19 is On request. 2026-11-21: 0.20 is Verified; 0.21 passes on Linux and macOS, and the gate waits for its run on Windows
-([audit](audits/phase-0-exit.md)).
+the main install and moved the real-host checks to [HOSTS.md](HOSTS.md) (ADR-128): the gate waited for 0.20 and 0.21.
+**Passed again on 2026-11-21:** 0.20 and 0.21 are Verified, and every exit criterion passes ([audit](audits/phase-0-exit.md)).
+Gates check Docker only; 0.19 moved to [HOSTS.md](HOSTS.md) (ADR-131).
 
 ## Phase 1: Memory
 

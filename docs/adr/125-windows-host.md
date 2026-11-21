@@ -1,7 +1,7 @@
 # ADR-125: Windows is a host from Phase 0: Credential Manager, a named pipe, a per-user scheduled task, ACLs, and no shell
 
 - **Status:** Accepted
-- **Extended by:** [ADR-128](128-docker-first.md)
+- **Extended by:** [ADR-128](128-docker-first.md), [ADR-131](131-gates-are-docker-only.md)
 - **Date:** 2026-11-20
 
 ## Context
@@ -90,6 +90,7 @@ modes, ADR-028, ADR-079), the version link and the npm layout of `jaari update` 
 
 ## Amendments
 - **ADR-128:** Windows is On request: it is not part of the Phase 0 gate, and its tasks are kept in `docs/HOSTS.md` until the owner asks for it.
+- **ADR-131:** 0.19 leaves the roadmap; the Windows work is a checklist in `docs/HOSTS.md`, outside the phases.
 
 ## Consequences
 - Roadmap 0.19 builds this. Phase 0 is not finished until it is Verified.
