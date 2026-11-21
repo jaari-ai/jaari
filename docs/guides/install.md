@@ -1,10 +1,54 @@
 # Installing Jaari
 
-Jaari needs Node 26 or later for the npm install, or Docker with Compose on a Linux server
-(ADR-056, ADR-122, ADR-123). It is early software: Phase 0 gives you the daemon and a chat in the
-terminal.
+Jaari runs in Docker with Compose on Linux, macOS, and Windows: that is the main install, and every
+check runs there (ADR-128). Installing it from npm on the host, under launchd or systemd, is optional
+until it is confirmed for that system ([HOSTS.md](../HOSTS.md)). It is early software: Phase 0 gives
+you the daemon and a chat in the terminal.
 
-## On a laptop: npm
+## With Docker Compose (Linux, macOS, Windows)
+
+You need a Docker engine with Compose, Engine 25 or later: Docker Engine on Linux; on macOS and
+Windows an engine that runs Linux in a virtual machine, such as Docker Desktop (the one tested). On
+Windows, run the commands in a WSL 2 shell, with Docker Desktop's WSL integration or Docker Engine
+inside WSL (not tested yet). Run them as the account that will own Jaari, not as root. Replace `VERSION`. When `jaari init`
+asks where Jaari runs, answer `server` or `home`: the laptop features (keeping the computer awake for
+a turn, the battery) do not work in a container.
+
+~~~bash
+mkdir -m 700 ~/.jaari
+jaari() { docker run --rm -it --user "$(id -u):$(id -g)" --env HOME=/home/jaari \
+  --volume "$HOME/.jaari:/home/jaari/.jaari" ghcr.io/jaari-ai/jaari:VERSION jaari "$@"; }
+jaari init                       # writes ~/.jaari/compose.yaml
+jaari secret set llm.anthropic   # the line `jaari init` prints, if your model needs a key
+cd ~/.jaari
+docker compose up --wait --wait-timeout 180
+docker compose run --rm admin doctor
+docker compose exec jaari jaari chat
+~~~
+
+Check the image signature first if you have `cosign`:
+
+~~~bash
+cosign verify ghcr.io/jaari-ai/jaari:VERSION \
+  --certificate-identity https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/tags/vVERSION \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+~~~
+
+On macOS, and in a folder shared from Windows, `jaari init` puts the data folder in a Docker volume,
+because such a folder cannot keep the chat socket private (ADR-130). You don't see the data in Finder or
+Explorer; `docker compose run --rm admin …` reaches it. `docker compose down --volumes` deletes that
+volume, and with it the data: use it only to remove Jaari.
+
+After you edit `config.jsonc`, restart with `docker compose up --wait --force-recreate`: Compose
+mounts the file on its own, and some editors replace it with a new file that a running container does
+not see.
+
+To roll the data back: `docker compose down`, then `docker compose run --rm admin rollback`.
+
+## On a real host: npm (optional)
+
+This needs Node 26 or later. It runs Jaari under launchd on macOS or systemd on Linux, and is not
+yet confirmed on either ([HOSTS.md](../HOSTS.md)).
 
 ~~~bash
 npm install --global --ignore-scripts jaari@next
@@ -28,32 +72,6 @@ npm view jaari@next dist.attestations.provenance.predicateType   # https://slsa.
 The npm page of the version shows the same under "Provenance". `npm audit signatures` does not
 work for Jaari: it also looks up the `@jaari/*` packages inside the tarball, which are not
 published on their own (ADR-123), and stops at the first 404.
-
-## On a Linux server: Compose
-
-Run these as the account that will own Jaari, not as root. Replace `VERSION`.
-
-~~~bash
-mkdir -m 700 ~/.jaari
-jaari() { docker run --rm -it --user "$(id -u):$(id -g)" --env HOME=/home/jaari \
-  --volume "$HOME/.jaari:/home/jaari/.jaari" ghcr.io/jaari-ai/jaari:VERSION jaari "$@"; }
-jaari init                       # writes ~/.jaari/compose.yaml
-jaari secret set llm.anthropic   # the line `jaari init` prints, if your model needs a key
-cd ~/.jaari
-docker compose up --wait --wait-timeout 180
-docker compose run --rm admin doctor
-docker compose exec jaari jaari chat
-~~~
-
-Check the image signature first if you have `cosign`:
-
-~~~bash
-cosign verify ghcr.io/jaari-ai/jaari:VERSION \
-  --certificate-identity https://github.com/jaari-ai/jaari/.github/workflows/release.yml@refs/tags/vVERSION \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com
-~~~
-
-To roll the data back: `docker compose down`, then `docker compose run --rm admin rollback`.
 
 ## Updating
 
@@ -123,6 +141,10 @@ jaari uninstall          # the service and the installed versions; the config an
 jaari uninstall --purge  # also the data, after you type "delete"
 npm uninstall --global jaari
 ~~~
+
+Under Compose, in the Jaari folder: `docker compose down` stops Jaari and keeps the data. To delete
+the data too: `docker compose down --volumes`, then remove the Jaari folder (`~/.jaari`). This cannot
+be undone.
 
 ## Cutting a release (the owner)
 

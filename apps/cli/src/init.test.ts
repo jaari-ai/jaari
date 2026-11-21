@@ -7,7 +7,7 @@ import { checkLlmConfig } from "@jaari/llm";
 import { afterEach, beforeEach, expect, it } from "vitest";
 import { run as configCommand } from "./config-command.js";
 import { composeFile } from "./compose.js";
-import { init } from "./init.js";
+import { init, type Host } from "./init.js";
 
 let root: string;
 let home: string;
@@ -195,7 +195,7 @@ it("jaari config revisits one step and leaves the rest of the file as it was", a
   expect(await revisit("nope", [])).toMatchObject({ code: 2, shown: expect.stringContaining("usage: jaari config") as string });
 });
 
-const composeRun = async (lines: string[], host = { version: "1.2.3", uid: 1000, gid: 1001 }, platform: NodeJS.Platform = "linux") => {
+const composeRun = async (lines: string[], host: Host = { version: "1.2.3", uid: 1000, gid: 1001 }, platform: NodeJS.Platform = "linux") => {
   const input = new PassThrough();
   const output = new PassThrough();
   let shown = "";
@@ -224,6 +224,19 @@ it("writes compose.yaml on a server: pinned image, the owner's account, the cont
   expect(shown).toContain("without Docker: jaari service install"); // a server may run it under systemd
   expect(shown).not.toContain("  jaari-daemon");
   expect(shown).not.toContain("cd /"); // this may run inside the container, whose paths mean nothing on the host
+});
+
+it("keeps the data in a named volume where a socket's mode cannot be set, as in a folder shared from macOS or Windows (ADR-130)", async () => {
+  expect((await composeRun(["", "", "", "", "", "claude-test"], { version: "1.2.3", uid: 501, gid: 20, dataVolume: true })).code).toBe(0);
+  const text = await readFile(join(home, "compose.yaml"), "utf8");
+  expect(text).not.toContain("./data:");
+  expect(await readdir(home)).not.toContain("data"); // Docker's volume, not a folder here
+  const volume = "      - type: volume\n        source: data\n        target: /home/jaari/.jaari/data\n        volume:\n          nocopy: true\n";
+  expect(text.split(volume)).toHaveLength(4); // the daemon, admin, and the step that gives the volume to the owner
+  expect(text.split("condition: service_completed_successfully")).toHaveLength(3);
+  const step = text.slice(text.indexOf("\n  data:\n"));
+  for (const line of ['user: "0:0"', '"chown 501:20 /home/jaari/.jaari/data && chmod 700 /home/jaari/.jaari/data"', "network_mode: none", "- ALL\n    cap_add:\n      - CHOWN\n      - FOWNER\n", "- no-new-privileges:true"]) expect(step).toContain(line);
+  expect(text).toContain("\nvolumes:\n  data: {}\n");
 });
 
 it("keeps an edited compose.yaml, and writes none for a laptop, the keychain, root, or a checkout", async () => {

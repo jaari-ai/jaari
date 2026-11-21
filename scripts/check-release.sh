@@ -29,15 +29,17 @@ run=(docker run --rm --user "$(id -u):$(id -g)" --read-only --tmpfs /tmp --cap-d
 test "$("${run[@]}" jaari:check jaari --version)" = "$version"
 "${run[@]}" jaari:check jaari-daemon --check
 
-# The file an owner gets, run as an owner runs it: `jaari init`, `docker compose up`, then `doctor` beside the daemon.
-if [ "$(uname)" = Linux ]; then
-  docker tag jaari:check "ghcr.io/jaari-ai/jaari:$version"
-  printf '%s\n' server host-credential "" local "" smoke http://192.0.2.1:11434/v1 | "$work/prefix/bin/jaari" init --home "$work/home" >/dev/null
-  compose=(docker compose --project-directory "$work/home" --file "$work/home/compose.yaml" --project-name jaari-check)
-  trap '"${compose[@]}" down --volumes >/dev/null 2>&1 || true; docker rmi --force jaari:check "ghcr.io/jaari-ai/jaari:$version" >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
-  "${compose[@]}" up --wait --wait-timeout 180 --quiet-pull || { "${compose[@]}" logs; exit 1; }
-  "${compose[@]}" run --rm admin doctor || { "${compose[@]}" logs; exit 1; }
-fi
+# The file an owner gets, run as an owner runs it: `jaari init` inside the image, `docker compose up`, then `doctor`
+# beside the daemon. Where the host folder is shared into Docker's Linux machine (macOS, Windows), init puts the data
+# in a named volume (ADR-130).
+docker tag jaari:check "ghcr.io/jaari-ai/jaari:$version"
+mkdir -m 700 "$work/home"
+printf '%s\n' server host-credential "" local "" smoke http://192.0.2.1:11434/v1 | docker run --rm -i --user "$(id -u):$(id -g)" \
+  --env HOME=/home/jaari --volume "$work/home:/home/jaari/.jaari" "ghcr.io/jaari-ai/jaari:$version" jaari init >/dev/null
+compose=(docker compose --project-directory "$work/home" --file "$work/home/compose.yaml" --project-name jaari-check)
+trap '"${compose[@]}" down --volumes >/dev/null 2>&1 || true; docker rmi --force jaari:check "ghcr.io/jaari-ai/jaari:$version" >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
+"${compose[@]}" up --wait --wait-timeout 180 --quiet-pull || { "${compose[@]}" logs; exit 1; }
+"${compose[@]}" run --rm admin doctor || { "${compose[@]}" logs; exit 1; }
 # The image installs every tarball in the folder, so a second pack must leave exactly one.
 node scripts/pack-release.mjs 0.0.0-check.2 >/dev/null
 test "$(ls dist/npm)" = jaari-0.0.0-check.2.tgz

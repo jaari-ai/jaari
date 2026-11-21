@@ -11,8 +11,8 @@
 //      with the data from before.
 // --service (macOS): the same through a real launchd agent under the test name `jaari-check`, never the owner's own;
 //   the first update also sees a start that answers only after 20 s, past the old 15 s wait.
-// --docker: two local images and the image update as the guide has it, then the way back. On Docker Desktop the data
-//   folder is a volume inside Docker's Linux machine (ADR-127, point 3).
+// --docker: two local images and the image update as the guide has it, then the way back. On macOS and Windows the
+//   data folder is a volume inside Docker's Linux machine (ADR-130).
 import { execFile, spawn } from "node:child_process";
 import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -33,10 +33,7 @@ if (mode === "service" && process.platform !== "darwin") refuse("--service runs 
 const VERSIONS = ["0.0.0-check.1", "0.0.0-check.2", "0.0.0-check.3"];
 const NAME = "jaari-check"; // the test service: its own launchd label and log, never the owner's
 const OWNER = "00000000-0000-4000-8000-00000000c4ec";
-const DATA = "/home/jaari/.jaari/data"; // where the image keeps the data folder
 const PROJECT = "jaari-update-check";
-const VOLUME = `${PROJECT}-data`;
-const desktop = process.platform !== "linux"; // Docker Desktop: host folders cannot hold the chat socket's mode
 
 const run = (command, argv, options = {}) =>
   promisify(execFile)(command, argv, { maxBuffer: 50_000_000, ...options }).then(
@@ -63,8 +60,7 @@ const installed = (root) => join(root, "lib", "node_modules", "jaari"); // npm's
 const launcher = (program) => join(installed(prefix), "bin", `${program}.js`); // follows home/current, as an owner's
 const jaari = (argv) => run(process.execPath, [launcher("jaari"), ...argv]);
 const compose = async (argv) => {
-  const files = ["--file", join(home, "compose.yaml"), ...(desktop ? ["--file", join(work, "desktop.json")] : [])];
-  const done = await run("docker", ["compose", "--project-directory", home, ...files, "--project-name", PROJECT, ...argv]);
+  const done = await run("docker", ["compose", "--project-directory", home, "--file", join(home, "compose.yaml"), "--project-name", PROJECT, ...argv]);
   if (done.code !== 0) process.stdout.write(indent(done.output));
   return done;
 };
@@ -86,7 +82,6 @@ const cleanUp = () =>
     if (mode === "docker") {
       await compose(["down", "--volumes"]);
       await run("docker", ["rmi", "--force", image(VERSIONS[0]), image(VERSIONS[1])]);
-      if (desktop) await run("docker", ["volume", "rm", "--force", VOLUME]);
     }
     await rm(work, { recursive: true, force: true });
   })());
@@ -223,22 +218,16 @@ async function checkDocker(tarballs) {
     await writeFile(join(context, "dist", "npm", `jaari-${version}.tgz`), await readFile(tarballs[version]));
     await must("docker", ["build", "--quiet", "--file", join(ROOT, "docker", "Dockerfile"), "--tag", image(version), context]);
   }
+  // As the guide runs it: inside the image, as the owner's account, on the Jaari folder of the host. There it finds
+  // whether that folder can hold the chat socket (a folder shared from macOS or Windows cannot), and writes the data volume if not (ADR-128).
   // The answers check-release.sh gives: a server, host-credential, a local model with no key.
-  const init = spawn(process.execPath, [launcher("jaari"), "init", "--home", home], { stdio: ["pipe", "ignore", "inherit"] });
+  await mkdir(home, { recursive: true, mode: 0o700 });
+  const init = spawn("docker", ["run", "--rm", "-i", "--user", `${process.getuid()}:${process.getgid()}`, "--env", "HOME=/home/jaari", "--volume", `${home}:/home/jaari/.jaari`, image(VERSIONS[0]), "jaari", "init"], { stdio: ["pipe", "ignore", "inherit"] });
   init.stdin.end(["server", "host-credential", "", "local", "", "check", "http://192.0.2.1:11434/v1", ""].join("\n"));
   check((await new Promise((done) => init.once("exit", done))) === 0, "`jaari init` writes compose.yaml");
-
-  if (desktop) {
-    // A new volume belongs to root, and the daemon, which runs as the owner's account, must make its data folder
-    // private. `nocopy` everywhere: Docker copies the image folder's owner and mode into a volume each time it is
-    // mounted empty, which would undo this chown.
-    const nocopy = `type=volume,src=${VOLUME},dst=${DATA},volume-nocopy`;
-    await must("docker", ["run", "--rm", "--user", "0", "--mount", nocopy, "--entrypoint", "chown", image(VERSIONS[0]), `${process.getuid()}:${process.getgid()}`, DATA]);
-    await must("docker", ["run", "--rm", "--user", "0", "--mount", nocopy, "--entrypoint", "chmod", image(VERSIONS[0]), "700", DATA]);
-    const mount = { volumes: [{ type: "volume", source: VOLUME, target: DATA, volume: { nocopy: true } }] };
-    // JSON is YAML, so Compose reads it; it replaces only the data mount of the file `jaari init` wrote.
-    await writeFile(join(work, "desktop.json"), JSON.stringify({ services: { jaari: mount, admin: mount }, volumes: { [VOLUME]: { external: true } } }));
-  }
+  // On macOS and Windows the engine shares the host's folder into its Linux machine; on Linux it is the host's own.
+  const volume = (await readFile(join(home, "compose.yaml"), "utf8").catch(() => "")).includes("        source: data\n");
+  check(volume === (process.platform !== "linux"), volume ? "the data is in a named volume, as a shared host folder needs" : "the data is in the host folder, as on Linux");
 
   const file = join(home, "compose.yaml");
   const tag = async (from, to) => writeFile(file, (await readFile(file, "utf8")).replace(image(from), image(to)));
